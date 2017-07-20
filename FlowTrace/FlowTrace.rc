@@ -1,0 +1,546 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "atlres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""atlres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR 16, 15
+BEGIN
+    BUTTON      ID_SEARCH_COMBO
+    BUTTON      ID_SEARCH_CLEAR
+    BUTTON      ID_SEARCH_REFRESH
+    BUTTON      ID_SEARCH_NEXT
+    BUTTON      ID_SEARCH_PREV
+    BUTTON      ID_SEARCH_LAST
+    BUTTON      ID_SEARCH_FIRST
+    BUTTON      ID_SEARCH_MATCH_CASE
+    BUTTON      ID_SEARCH_MATCH_WHOLE_WORD
+    SEPARATOR
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_SYNC_VIEWES
+    SEPARATOR
+    BUTTON      ID_VIEW_SHOW_HIDE_TREE
+    BUTTON      ID_VIEW_SHOW_HIDE_INFO
+    BUTTON      ID_VIEW_SHOW_HIDE_FLOW_TRACES
+    SEPARATOR
+    BUTTON      ID_VIEW_STARTRECORDIG
+    BUTTON      ID_VIEW_PAUSERECORDING
+    SEPARATOR
+    BUTTON      ID_VIEW_TAKESNAPSHOT
+    SEPARATOR
+    BUTTON      ID_VIEW_CLEARLOG
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+
+IDB_TTF_BMP             BITMAP                  "res\\ttf_glyph.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Export",                      ID_FILE_EXPORT
+        MENUITEM "Import",                      ID_FILE_IMPORT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "Select All\tCtrl+A",          ID_EDIT_SELECTALL
+        MENUITEM SEPARATOR
+        MENUITEM "Find\tCtrl+F",                ID_EDIT_FIND32798
+        MENUITEM "Refresh Search\tF5",          ID_SEARCH_REFRESH
+        MENUITEM "Find Next\tF3",               ID_SEARCH_NEXT
+        MENUITEM "Finnd Previous\tShift+F3",    ID_SEARCH_PREV
+        MENUITEM "Find Last\tCtrl+F3",          ID_SEARCH_LAST
+        MENUITEM "Find First\tSift_Ctrl+F3",    ID_SEARCH_FIRST
+        MENUITEM "Clear Search",                ID_SEARCH_CLEAR
+        MENUITEM "Match case",                  ID_SEARCH_MATCH_CASE
+        MENUITEM "nMatch whole word",           ID_SEARCH_MATCH_WHOLE_WORD
+        MENUITEM SEPARATOR
+        POPUP "Bookmarks"
+        BEGIN
+            MENUITEM "Toggle Bookmark\tCtrl+F2",    ID_BOOKMARKS_TOGGLE
+            MENUITEM "Next Bookmark\tF2",           ID_BOOKMARKS_NEXTBOOKMARK
+            MENUITEM "Previous Bookmark\tShift+F2", ID_BOOKMARKS_PREVIOUSBOOKMARK
+            MENUITEM "Clear Bookmarks\tCtrl+Shift+F2", ID_BOOKMARKS_CLEARBOOKMARKS
+        END
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "Synchronize views\tTab",      ID_SYNC_VIEWES
+        MENUITEM "Show Tree View",              ID_VIEW_SHOW_HIDE_TREE
+        MENUITEM "Show Path View",              ID_VIEW_SHOW_HIDE_INFO
+        MENUITEM "Show Flow Traces",            ID_VIEW_SHOW_HIDE_FLOW_TRACES
+        MENUITEM "Snapshots ...",               ID_VIEW_TAKESNAPSHOT
+        MENUITEM "Start New Snapshot\tCtrl+N",  ID_VIEW_STARTNEWSNAPSHOT
+        MENUITEM SEPARATOR
+        MENUITEM "Start Recordig",              ID_VIEW_STARTRECORDIG
+        MENUITEM "Pause Recording",             ID_VIEW_PAUSERECORDING
+        MENUITEM "Clear Log\tCtrl+K",           ID_VIEW_CLEARLOG
+        MENUITEM SEPARATOR
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Columns...",                  ID_VIEW_COLUMNS
+        MENUITEM "Settings...",                 ID_VIEW_SETTINGS
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About FlowTrace",            ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\FlowTrace.ico"
+
+IDI_ICON_TREE_ROOT      ICON                    "res\\ICON_TREE_ROOT.ico"
+
+IDI_ICON_TREE_APP       ICON                    "res\\ICON_TREE_APP.ico"
+
+IDI_ICON_TREE_PROC      ICON                    "res\\ICON_TREE_PROC.ico"
+
+IDI_ICON_TREE_PAIRED    ICON                    "res\\ICON_TREE_PAIRED.ico"
+
+IDI_ICON_TREE_ENTER     ICON                    "res\\ICON_TREE_ENTER.ico"
+
+IDI_ICON_TREE_EXIT      ICON                    "res\\ICON_TREE_EXIT.ico"
+
+IDI_ICON_LIST_ENTER     ICON                    "res\\ICON_LIST_ENTER.ico"
+
+IDI_ICON_LIST_EXIT      ICON                    "res\\ICON_LIST_EXIT.ico"
+
+IDI_ICON_LIST_TRACE     ICON                    "res\\ICON_LIST_TRACE.ico"
+
+IDI_ICON_LIST_ENTER_SEL ICON                    "res\\ICON_LIST_ENTER_SEL.ico"
+
+IDI_ICON_LIST_EXIT_SEL  ICON                    "res\\ICON_LIST_EXIT_SEL.ico"
+
+IDI_ICON_LIST_TRACE_SEL ICON                    "res\\ICON_LIST_TRACE_SEL.ico"
+
+IDI_ICON_EMPTY          ICON                    "res\\icon1.ico"
+
+IDI_ICON_NODE_COLAPSED  ICON                    "res\\tree_node_colapsed.ico"
+
+IDI_ICON_NODE_EXPANDED  ICON                    "res\\tree_node_expanded.ico"
+
+IDI_ICON_NODE_CHECKED   ICON                    "res\\tree_node_checked.ico"
+
+IDI_ICON_NODE_UNCHECKE  ICON                    "res\\tree_node_unchecked.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 187, 102
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,130,81,50,14
+    CTEXT           "FlowTrace Application v1.0\n\n(c) Copyright 2016",IDC_STATIC,25,57,78,32
+    ICON            IDR_MAINFRAME,IDC_STATIC,55,26,20,20
+    GROUPBOX        "",IDC_STATIC,7,7,115,88
+END
+
+IDD_SETTINGS DIALOGEX 0, 0, 303, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,83,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,169,155,50,14
+    RTEXT           "Static",IDC_FONT_NAME,7,70,230,8
+    PUSHBUTTON      "Change...",IDC_BTN_FONT,246,65,50,14
+    EDITTEXT        IDC_EDIT_PORT,256,25,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "UDP Listen Port:",IDC_STATIC,193,28,53,8
+    CONTROL         "Compact View",IDC_CHECK_COMPACT_VIEW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,235,116,61,10
+    COMBOBOX        IDC_COMBO_FONTS,18,75,118,171,CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_SORT | CBS_HASSTRINGS | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_FONT_SIZE,142,75,34,78,CBS_DROPDOWN | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,77,29,10
+    CONTROL         "Use PC Time",IDC_CHECK_USE_PC_TIME,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,241,103,55,10
+    PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,74,81,14,NOT WS_VISIBLE
+    CONTROL         "Show termianl address",IDC_CHECK_SHOW_APP_IP,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,208,130,88,10
+END
+
+IDD_COLUMNS DIALOGEX 0, 0, 119, 226
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Colomns"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,205,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,61,205,50,14
+    CONTROL         "Log Number",IDC_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,36,54,10
+    CONTROL         "Application",IDC_APP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,57,51,10
+    CONTROL         "Thread ID",IDC_PID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,78,48,10
+    CONTROL         "Log Time",IDC_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,100,44,10
+    CONTROL         "Call Address",IDC_CALL_ADDR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,121,55,10
+    CONTROL         "Log Line in Source file",IDC_CALL_LINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,27,161,85,10
+    CONTROL         "Function Name",IDC_FUNC_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,141,63,10
+    CONTROL         "Line Number",IDC_LINE_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,18,55,10
+END
+
+IDD_PROGRESS DIALOGEX 0, 0, 309, 88
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Task progress"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,131,67,50,14
+    CONTROL         "",IDC_PROGRESS,"msctls_progress32",WS_BORDER,25,36,261,14
+    LTEXT           "...",IDC_STATIC_INFO,27,17,262,8
+END
+
+IDD_SNAPSHOTS DIALOGEX 0, 0, 229, 178
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Snapshots"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,172,90,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,172,110,50,14
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD,172,32,50,14
+    LISTBOX         IDC_LIST_SNAPSHOTS,7,55,152,122,WS_HSCROLL | WS_TABSTOP
+    LTEXT           "New snapshot comment:",IDC_STATIC,17,18,80,8
+    EDITTEXT        IDC_EDIT_COMMENT,7,33,151,13,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+
+    IDD_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_COLUMNS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 112
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 219
+    END
+
+    IDD_PROGRESS, DIALOG
+    BEGIN
+    END
+
+    IDD_SNAPSHOTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 171
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS
+BEGIN
+    VK_F2,          ID_BOOKMARKS_CLEARBOOKMARKS, VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F2,          ID_BOOKMARKS_NEXTBOOKMARK, VIRTKEY, NOINVERT
+    VK_F2,          ID_BOOKMARKS_PREVIOUSBOOKMARK, VIRTKEY, SHIFT, NOINVERT
+    VK_F2,          ID_BOOKMARKS_TOGGLE,    VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_EDIT_FIND32798,      VIRTKEY, CONTROL, NOINVERT
+    "A",            ID_EDIT_SELECTALL,      VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SEARCH_FIRST,        VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F3,          ID_SEARCH_LAST,         VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_SEARCH_NEXT,         VIRTKEY, NOINVERT
+    VK_F3,          ID_SEARCH_PREV,         VIRTKEY, SHIFT, NOINVERT
+    VK_F5,          ID_SEARCH_REFRESH_ON_EMTER, VIRTKEY, NOINVERT
+    VK_TAB,         ID_SYNC_VIEWES,         VIRTKEY, NOINVERT
+    "K",            ID_VIEW_CLEARLOG,       VIRTKEY, CONTROL, NOINVERT
+    "K",            ID_VIEW_CLEARLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "N",            ID_VIEW_STARTNEWSNAPSHOT, VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "FlowTrace Module"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "FlowTrace"
+            VALUE "LegalCopyright", "Copyright 2016"
+            VALUE "OriginalFilename", "FlowTrace.exe"
+            VALUE "ProductName", "FlowTrace Module"
+            VALUE "ProductVersion", "1, 0, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// FONTS
+//
+
+IDR_FONT1               FONTS                   "res\\font1.bin"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_SETTINGS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_COLUMNS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDR_MAINFRAME           "FlowTrace"
+END
+
+STRINGTABLE
+BEGIN
+    ID_SEARCH_FIRST         "Find First\nFind First  (Sift_Ctrl+F3)"
+    ID_SEARCH_MATCH_CASE    "Match case\nMatch case"
+    ID_SEARCH_MATCH_WHOLE_WORD "Match whole word\nMatch whole word"
+    ID_FILE_EXPORT          "Export File\nExport File"
+    ID_FILE_IMPORT          "Import File\nImport File"
+    ID_VIEW_COLUMNS         "Select columns\nSelect columns"
+    ID_VIEW_SETTINGS        "Application settings\nApplication settings"
+    ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"
+    ID_SYNC_VIEWES          "Synchronize views\nSynchronize views  (Tab)"
+    ID_EDIT_SELECTALL       "Select all traces\nSelect all traces"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_SHOW_HIDE_INFO  "Show Path View\nShow Path View"
+    ID_VIEW_SHOW_HIDE_TREE  "Show Tree View\nShow Tree View"
+    ID_VIEW_STARTRECORDIG   "Start Recordig\nStart Recordig"
+    ID_VIEW_PAUSERECORDING  "Pause Recording\nPause Recording"
+    ID_SEARCH_CLEAR         "Clear Search\nClear Search"
+    ID_SEARCH_REFRESH       "Refresh Search\nRefresh Search  (F5)"
+    ID_SEARCH_NEXT          "Find Next\nFind Next  (F3)"
+    ID_SEARCH_PREV          "Find Previous\nFind Previous  (Shift+F3)"
+    ID_SEARCH_LAST          "Find Last\nFind Last  (Ctrl+F3)"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_SHOW_HIDE_FLOW_TRACES "Show Flow Traces\nShow Flow Traces"
+END
+
+STRINGTABLE
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE
+BEGIN
+    ATL_IDS_SCSIZE          "Change the window size"
+    ATL_IDS_SCMOVE          "Change the window position"
+    ATL_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    ATL_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    ATL_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    ATL_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    ATL_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE
+BEGIN
+    ATL_IDS_SCRESTORE       "Restore the window to normal size"
+    ATL_IDS_SCTASKLIST      "Activate Task List"
+    ATL_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE
+BEGIN
+    ATL_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE
+BEGIN
+    ATL_IDS_MRU_FILE        "Open this document"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TAKESNAPSHOT    "Snapshots\nSnapshots"
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
