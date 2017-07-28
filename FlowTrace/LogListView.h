@@ -106,7 +106,7 @@ public:
   int getSelectionItem() { return m_ListSelection.GetItem(); }
   void Redraw(int nFirst, int nLast);
   void EnsureTextVisible(int iItem, int startChar, int endChar);
-  void ShowItem(DWORD i, bool scrollToMiddle);
+  void ShowItem(DWORD i, bool scrollToMiddle, bool scrollToLeft);
   void ShowNode(LOG_NODE* pNode, bool scrollToMiddle);
   void ShowFirstSyncronised(bool scrollToMiddle);
   void MoveSelectionEx(int iItem, int iChar = 0, bool extend = false, bool ensureVisible = true);

@@ -331,7 +331,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
         m_ListSelection.SetItem(iItem);
         Redraw(iItem, iItem);
         if (ensureVisible)
-            ShowItem(iItem, false);
+            ShowItem(iItem, false, false);
     }
     Redraw(oldItem, oldItem);
     UpdateCaret();
@@ -367,7 +367,7 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
     startChar = max(0, min(startChar, logLen));
     endChar = max(0, min(endChar, logLen));
 
-    ShowItem(iItem, false);
+    ShowItem(iItem, false, false);
 
     SIZE size1, size2;
     GetTextExtentPoint32(m_hdc, log, startChar, &size1);
@@ -401,7 +401,7 @@ void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
     {
         if (listNodes->getNode(i)->isSynchronized(pSyncNode))
         {
-            ShowItem(i, scrollToMiddle);
+            ShowItem(i, scrollToMiddle, true);
             break;
         }
     }
@@ -414,16 +414,16 @@ void CLogListView::ShowNode(LOG_NODE* pNode, bool scrollToMiddle)
     {
         if (pNode == listNodes->getNode(i))
         {
-            ShowItem(i, scrollToMiddle);
+            ShowItem(i, scrollToMiddle, true);
             break;
         }
     }
 }
 
-void CLogListView::ShowItem(DWORD i, bool scrollToMiddle)
+void CLogListView::ShowItem(DWORD i, bool scrollToMiddle, bool scrollToLeft)
 {
     EnsureVisible(i, FALSE);
-    if (scrollToMiddle)
+    if (scrollToMiddle || scrollToLeft)
     {
         SIZE size = { 0, 0 };
         RECT rect = { 0 };
@@ -431,12 +431,16 @@ void CLogListView::ShowItem(DWORD i, bool scrollToMiddle)
         size.cy = rect.bottom;
         POINT pt;
         GetItemPosition(i, &pt);
-        //if (pt.y > rect.bottom / 2)
+				if (scrollToMiddle)
         {
             size.cy = pt.y - rect.bottom / 2;
-            Scroll(size);
         }
-    }
+				if (scrollToLeft)
+				{
+					size.cx = pt.x;
+				}
+				Scroll(size);
+		}
 }
 
 void CLogListView::UpdateCaret()
@@ -819,7 +823,7 @@ void CLogListView::OnBookmarks(WORD wID)
         {
             m_curBookmark = bookmark;
             MoveSelectionEx(bookmark, 0, false, false);
-            ShowItem(bookmark, true);
+            ShowItem(bookmark, true, true);
         }
     }
     break;

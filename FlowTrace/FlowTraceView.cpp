@@ -350,7 +350,8 @@ void CFlowTraceView::SyncViews()
         {
           m_selectedNode = pNode;
           m_wndTreeView.EnsureNodeVisible(pNode, false);
-        }
+					m_wndListView.ShowFirstSyncronised(true);
+				}
       }
     }
   m_wndListView.Invalidate();
