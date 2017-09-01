@@ -9,7 +9,7 @@ LPCTSTR STR_APP_REG_KEY				=_T("Software\\TermianlTools\\FlowTrace");
 LPCTSTR STR_APP_REG_VAL_WINDOWPOS	=_T("WindowPos");
 LPCTSTR STR_APP_REG_VAL_SPLITTER_POS = _T("SplitterPos");
 
-LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName");
+LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName_1");
 LPCTSTR STR_APP_REG_VAL_FONTWIDTH =_T("FontWeight");
 LPCTSTR STR_APP_REG_VAL_FONTSIZE =_T("FontSize");
 LPCTSTR STR_APP_REG_VAL_BK_COLOR = _T("BkColor");
@@ -54,10 +54,10 @@ LPCTSTR STR_APP_REG_VAL_SHOW_APP_IP = _T("ShowAppIp");
 #define DefFontSize 11
 
 #ifdef USE_FONT_RES
-#define RES_FONT_NAME  _T("Inconsolata")
+#define RES_FONT_NAME  _T("Consolas1")
 static char* DEF_FONT_NAME = RES_FONT_NAME; //Courier New //Consolas //Inconsolata
 #else
-static char* DEF_FONT_NAME = _T("Courier New"); //Courier New //Consolas //Inconsolata
+static char* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsolata
 #endif
 
 CSettings::CSettings() : 
@@ -101,22 +101,22 @@ CRegKeyExt(STR_APP_REG_KEY)
 	InitFont();
 }
 
-//bool CSettings::CheckUIFont(HDC hdc)
-//{
-//  bool ok = true;
-//#ifndef USE_FONT_RES
-//  HFONT hFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
-//  LOGFONT lf;
-//  GetObject(hFont, sizeof(LOGFONT), &lf);
-//  ok = (0 == _tcsicmp(m_FontName, lf.lfFaceName));
-//  if (!ok)
-//  {
-//    DEF_FONT_NAME = _T("Courier New");
-//    InitFont();
-//  }
-//#endif
-//  return ok;
-//}
+bool CSettings::CheckUIFont(HDC hdc)
+{
+  bool ok = true;
+#ifndef USE_FONT_RES
+  //HFONT hFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+  //LOGFONT lf;
+  //GetObject(hFont, sizeof(LOGFONT), &lf);
+  //ok = (0 == _tcsicmp(m_FontName, lf.lfFaceName));
+  //if (!ok)
+  //{
+  //  DEF_FONT_NAME = _T("Courier New");
+  //  InitFont();
+  //}
+#endif
+  return ok;
+}
 
 CSettings::~CSettings()
 {

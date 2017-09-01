@@ -948,11 +948,11 @@ void CLogListView::ApplySettings(bool fontChanged)
     {
         SelectObject(m_hdc, gSettings.GetFont());
         SetFont(gSettings.GetFont());
-        //if (!gSettings.CheckUIFont(m_hdc))
-        //{
-        //  SelectObject(m_hdc, gSettings.GetFont());
-        //  SetFont(gSettings.GetFont());
-        //}
+        if (!gSettings.CheckUIFont(m_hdc))
+        {
+          SelectObject(m_hdc, gSettings.GetFont());
+          SetFont(gSettings.GetFont());
+        }
     }
     SetBkColor(gSettings.GetBkColor());
     //SetTextBkColor(gSettings.GetBkColor());

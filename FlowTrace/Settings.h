@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_FONT_RES
+//#define USE_FONT_RES
 
 #include "RegKeyExt.h"
 
@@ -18,7 +18,7 @@ public:
     void SaveWindPos(HWND hWnd);
     void SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkColor);
     void SetUIFont(TCHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
-    //bool CheckUIFont(HDC hdc);
+    bool CheckUIFont(HDC hdc);
 
     void SetSearchList(TCHAR* szList);
     TCHAR* GetSearchList();

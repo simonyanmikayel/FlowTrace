@@ -137,8 +137,10 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 
 LRESULT CSettingsDlg::OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  m_cmbFontSize.SelectString(0, _T("12"));
+#ifdef USE_FONT_RES
+	m_cmbFontSize.SelectString(0, _T("12"));
   m_FontPreviewCombol.SelectString(0, gSettings.GetResFontName());
   m_FontBold.SetCheck(BST_UNCHECKED);
+#endif
   return 0;
 }
