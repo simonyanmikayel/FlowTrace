@@ -42,6 +42,7 @@ public:
     DECL_PROP(DWORD, UsePcTime);
     DECL_PROP(DWORD, CompactView);
     DECL_PROP(DWORD, ShowAppIp);
+	DECL_PROP(DWORD, ShowElapsedTime);
 
     DECL_PROP(int, ColLineNN);
     DECL_PROP(int, ColNN);

@@ -141,7 +141,7 @@ BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
-        MENUITEM "Columns...",                  ID_VIEW_COLUMNS
+        MENUITEM "View Detailes...",            ID_VIEW_DETAILES
         MENUITEM "Settings...",                 ID_VIEW_SETTINGS
     END
     POPUP "&Help"
@@ -228,24 +228,27 @@ BEGIN
     CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,77,29,10
     CONTROL         "Use PC Time",IDC_CHECK_USE_PC_TIME,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,241,103,55,10
     PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,74,81,14,NOT WS_VISIBLE
-    CONTROL         "Show termianl address",IDC_CHECK_SHOW_APP_IP,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,208,130,88,10
 END
 
-IDD_COLUMNS DIALOGEX 0, 0, 119, 226
+IDD_DETAILES DIALOGEX 0, 0, 129, 224
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Colomns"
+CAPTION "View Detailes"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,7,205,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,61,205,50,14
-    CONTROL         "Log Number",IDC_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,36,54,10
-    CONTROL         "Application",IDC_APP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,57,51,10
-    CONTROL         "Thread ID",IDC_PID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,78,48,10
-    CONTROL         "Log Time",IDC_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,100,44,10
-    CONTROL         "Call Address",IDC_CALL_ADDR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,121,55,10
-    CONTROL         "Log Line in Source file",IDC_CALL_LINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,27,161,85,10
-    CONTROL         "Function Name",IDC_FUNC_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,141,63,10
-    CONTROL         "Line Number",IDC_LINE_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,18,55,10
+    DEFPUSHBUTTON   "OK",IDOK,7,203,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,61,203,50,14
+    CONTROL         "Log Number",IDC_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,39,54,10
+    CONTROL         "Application",IDC_APP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,51,51,10
+    CONTROL         "Thread ID",IDC_PID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,64,48,10
+    CONTROL         "Log Time",IDC_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,77,44,10
+    CONTROL         "Call Address",IDC_CALL_ADDR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,90,55,10
+    CONTROL         "Log Line in Source file",IDC_CALL_LINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,117,85,10
+    CONTROL         "Function Name",IDC_FUNC_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,104,63,10
+    CONTROL         "Line Number",IDC_LINE_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,26,55,10
+    GROUPBOX        "List View",IDC_STATIC,16,11,96,122
+    GROUPBOX        "Tree View",IDC_STATIC,16,137,96,52
+    CONTROL         "Termianl IP",IDC_CHECK_SHOW_APP_IP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,155,51,10
+    CONTROL         "Elapsed time",IDC_CHECK_SHOW_ELAPSED_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,168,56,10
 END
 
 IDD_PROGRESS DIALOGEX 0, 0, 309, 88
@@ -296,12 +299,12 @@ BEGIN
         BOTTOMMARGIN, 169
     END
 
-    IDD_COLUMNS, DIALOG
+    IDD_DETAILES, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 112
+        RIGHTMARGIN, 122
         TOPMARGIN, 7
-        BOTTOMMARGIN, 219
+        BOTTOMMARGIN, 217
     END
 
     IDD_PROGRESS, DIALOG
@@ -403,7 +406,7 @@ BEGIN
     0
 END
 
-IDD_COLUMNS AFX_DIALOG_LAYOUT
+IDD_DETAILES AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -426,7 +429,7 @@ BEGIN
     ID_SEARCH_MATCH_WHOLE_WORD "Match whole word\nMatch whole word"
     ID_FILE_EXPORT          "Export File\nExport File"
     ID_FILE_IMPORT          "Import File\nImport File"
-    ID_VIEW_COLUMNS         "Select columns\nSelect columns"
+    ID_VIEW_DETAILES        "Set view detailes\nSet view detailes"
     ID_VIEW_SETTINGS        "Application settings\nApplication settings"
     ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"
     ID_SYNC_VIEWES          "Synchronize views\nSynchronize views  (Tab)"

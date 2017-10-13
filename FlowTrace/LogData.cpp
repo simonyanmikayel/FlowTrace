@@ -224,20 +224,21 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     else if (isFlow())
     {
         FLOW_NODE* This = (FLOW_NODE*)this;
-        int cb_fn_name = ((FLOW_DATA*)data)->cb_fn_name;
-        memcpy(pBuf + cb, ((FLOW_DATA*)data)->fnName(), cb_fn_name);
+		FLOW_DATA* ThisData = (FLOW_DATA*)data;
+        int cb_fn_name = ThisData->cb_fn_name;
+        memcpy(pBuf + cb, ThisData->fnName(), cb_fn_name);
         cb += cb_fn_name;
         if (extened)
         {
             if (gSettings.GetColNN() && NN)
-                cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("   [%d]"), NN); //gArchive.index(this) NN
-            if (0 && gSettings.GetColTime() && This->getPeer())
-            {
+                cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), NN); //gArchive.index(this) NN
+			if (gSettings.GetShowElapsedTime() && This->getPeer())
+			{
                 _int64 sec1 = This->getTimeSec();
                 _int64 msec1 = This->getTimeMSec();
                 _int64 sec2 = (This->getPeer())->getTimeSec();
                 _int64 msec2 = (This->getPeer())->getTimeMSec();
-                cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" [%lldms] "), (sec2 - sec1) * 1000000 + (msec2 - msec1));
+                cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%lldms) "), (sec2 - sec1) * 1000 + (msec2 - msec1));
             }
         }
         pBuf[cb] = 0;

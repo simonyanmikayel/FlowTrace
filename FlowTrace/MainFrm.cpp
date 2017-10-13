@@ -12,7 +12,7 @@
 #include "Archive.h"
 #include "ServerThread.h"
 #include "SettingsDlg.h"
-#include "ColumnsDlg.h"
+#include "DetailesDlg.h"
 #include "ProgressDlg.h"
 #include "SearchInfo.h"
 #include "SnapshotsDlg.h"
@@ -294,7 +294,7 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
     return 0;
 }
 
-LRESULT CMainFrame::OnViewColumns(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     CColumnsDlg dlg;
     if (IDOK == dlg.DoModal())

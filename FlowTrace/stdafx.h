@@ -6,10 +6,10 @@
 #pragma once
 
 // Change these values to use different versions
-/*
-#define WINVER        0x0602
-#define _WIN32_WINNT  0x0602
-*/
+
+#define WINVER        0x0601
+#define _WIN32_WINNT  0x0601 // Windows 7
+
 #define _WIN32_IE     0x0501
 #define _RICHEDIT_VER 0x0100
 
@@ -72,7 +72,7 @@ extern CAppModule _Module;
 #include <Psapi.h>
 #include <winuser.h>
 #include <Muiload.h>
-#include <WS2tcpip.h>
+//#include <WS2tcpip.h>
 
 #if _MSC_VER >= 1900
 /*

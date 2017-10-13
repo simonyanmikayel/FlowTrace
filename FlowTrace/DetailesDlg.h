@@ -3,7 +3,7 @@
 class CColumnsDlg : public CDialogImpl<CColumnsDlg>
 {
 public:
-  enum { IDD = IDD_COLUMNS };
+  enum { IDD = IDD_DETAILES };
 
   BEGIN_MSG_MAP(CColumnsDlg)
     MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
@@ -19,6 +19,8 @@ public:
   CButton m_chkCallAddr;
   CButton m_chkFuncName;
   CButton m_chkCallLine;
+  CButton m_ShowAppIp;
+  CButton m_ShowElapsedTime;
 
   // Handler prototypes (uncomment arguments if needed):
   //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)

@@ -115,7 +115,7 @@
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="Archive.cpp" />
-    <ClCompile Include="ColumnsDlg.cpp" />
+    <ClCompile Include="DetailesDlg.cpp" />
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
     <ClCompile Include="FontPreviewCombo.cpp">
@@ -143,7 +143,7 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="Archive.h" />
-    <ClInclude Include="ColumnsDlg.h" />
+    <ClInclude Include="DetailesDlg.h" />
     <ClInclude Include="FlowTrace.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />

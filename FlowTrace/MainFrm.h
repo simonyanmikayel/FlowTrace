@@ -58,7 +58,7 @@ public:
     COMMAND_ID_HANDLER(ID_VIEW_TOOLBAR, OnViewToolBar)
     COMMAND_ID_HANDLER(ID_VIEW_STATUS_BAR, OnViewStatusBar)
     COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
-    COMMAND_ID_HANDLER(ID_VIEW_COLUMNS, OnViewColumns)
+    COMMAND_ID_HANDLER(ID_VIEW_DETAILES, OnViewDetailes)
     COMMAND_ID_HANDLER(ID_VIEW_SETTINGS, OnViewSettings)
     COMMAND_ID_HANDLER(ID_FILE_SAVE, OnFileSave)
     COMMAND_ID_HANDLER(ID_FILE_EXPORT, OnFileSave)
@@ -112,7 +112,7 @@ public:
 	LRESULT OnViewToolBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnViewColumns(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

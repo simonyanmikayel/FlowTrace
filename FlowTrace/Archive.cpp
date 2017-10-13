@@ -69,7 +69,12 @@ APP_NODE* Archive::addApp(char* app_name, int cb_app_name, DWORD app_sec, DWORD 
 
     if (p_si_other)
     {
-        inet_ntop(p_si_other->sin_family, &p_si_other->sin_addr, pAppData->ip_address, sizeof(pAppData->ip_address) - 1);
+		char* str_ip = inet_ntoa(p_si_other->sin_addr);
+		if (str_ip)
+		{
+			strncpy(pAppData->ip_address, str_ip, sizeof(pAppData->ip_address) - 1);
+			pAppData->ip_address[sizeof(pAppData->ip_address) - 1] = 0;
+		}
     }
 
     rootNode->add_child(pNode);
@@ -122,7 +127,6 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
             return curApp;
     }
 
-    curApp = NULL;
     curApp = (APP_NODE*)rootNode->lastChild;
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)

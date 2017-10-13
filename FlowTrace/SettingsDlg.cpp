@@ -11,7 +11,6 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
   m_UsePcTime.Attach(GetDlgItem(IDC_CHECK_USE_PC_TIME));
   m_CompactView.Attach(GetDlgItem(IDC_CHECK_COMPACT_VIEW));
-  m_ShowAppIp.Attach(GetDlgItem(IDC_CHECK_SHOW_APP_IP));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
 
@@ -51,7 +50,6 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_UsePcTime.SetCheck(gSettings.GetUsePcTime() ? BST_CHECKED : BST_UNCHECKED);
   m_CompactView.SetCheck(gSettings.GetCompactView() ? BST_CHECKED : BST_UNCHECKED);
-  m_ShowAppIp.SetCheck(gSettings.GetShowAppIp() ? BST_CHECKED : BST_UNCHECKED);
 
   CenterWindow(GetParent());
   return TRUE;
@@ -128,7 +126,6 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
     gSettings.SetUdpPort(GetDlgItemInt(IDC_EDIT_PORT));
     gSettings.SetUsePcTime(m_UsePcTime.GetCheck());
     gSettings.SetCompactView(m_CompactView.GetCheck());
-    gSettings.SetShowAppIp(m_ShowAppIp.GetCheck());
     
   }
   EndDialog(wID);

@@ -34,7 +34,6 @@ public:
   CButton m_btnReset;
   CButton m_UsePcTime;
   CButton m_CompactView;
-  CButton m_ShowAppIp;
 
 #ifdef USE_FONT_RES
   CFontPreviewCombo m_FontPreviewCombol;

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "ColumnsDlg.h"
+#include "DetailesDlg.h"
 #include "Settings.h"
 
 LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -15,6 +15,8 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     m_chkCallAddr.Attach(GetDlgItem(IDC_CALL_ADDR));
     m_chkFuncName.Attach(GetDlgItem(IDC_FUNC_NAME));
     m_chkCallLine.Attach(GetDlgItem(IDC_CALL_LINE));
+	m_ShowAppIp.Attach(GetDlgItem(IDC_CHECK_SHOW_APP_IP));
+	m_ShowElapsedTime.Attach(GetDlgItem(IDC_CHECK_SHOW_ELAPSED_TIME));
 
     m_chkLineNN.SetCheck(gSettings.GetColLineNN());
     m_chkNN.SetCheck(gSettings.GetColNN());
@@ -24,6 +26,8 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     m_chkCallAddr.SetCheck(gSettings.GetColCallAddr());
     m_chkFuncName.SetCheck(gSettings.GetColFunc());
     m_chkCallLine.SetCheck(gSettings.GetColLine());
+	m_ShowAppIp.SetCheck(gSettings.GetShowAppIp());
+	m_ShowElapsedTime.SetCheck(gSettings.GetShowElapsedTime());
 
     return TRUE;
 }
@@ -40,7 +44,10 @@ LRESULT CColumnsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
         gSettings.SetColCallAddr(m_chkCallAddr.GetCheck());
         gSettings.SetColFunc(m_chkFuncName.GetCheck());
         gSettings.SetColLine(m_chkCallLine.GetCheck());
-    }
+		gSettings.SetShowAppIp(m_ShowAppIp.GetCheck());
+		gSettings.SetShowElapsedTime(m_ShowElapsedTime.GetCheck());
+		
+	}
     EndDialog(wID);
     return 0;
 }
