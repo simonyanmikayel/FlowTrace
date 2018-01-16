@@ -44,23 +44,26 @@ public:
 
   void SyncViews();
   void ShowTreeView(bool show);
-  void ShowHideInfo(bool show);
+  void ShowStackView(bool show);
   void ClearLog();
   void ApplySettings(bool fontChanged);
-  void SetChildPos(int cx, int cy, bool fontChanged);
+  void SetChildPos(int cx, int cy);
   LOG_NODE* selectedNode() { return m_selectedNode; }
   CLogListView& list() { return m_wndListView; }
   CLogTreeView& tree() { return m_wndTreeView; }
-  int GetSplitterPosPct() { return m_wndSplitter.GetSplitterPosPct(); }
+  int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
+  int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
   void ShowInfo(TCHAR* szText);
 
 private:
 #ifdef NATIVE_TREE
   LOG_NODE* getTreeNode(HTREEITEM hItem);
 #endif
-  CSplitterWindow m_wndSplitter;
+  CSplitterWindow m_wndVertSplitter;
+  CSplitterWindow m_wndHorzSplitter;
   CLogTreeView    m_wndTreeView;
   CLogListView    m_wndListView;
+  //CStatic         m_wndLog;
   CEdit           m_wndInfo;
-  LOG_NODE*     m_selectedNode;  
+  LOG_NODE*       m_selectedNode;
 };

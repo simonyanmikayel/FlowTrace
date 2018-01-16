@@ -65,7 +65,7 @@ BEGIN
     BUTTON      ID_SYNC_VIEWES
     SEPARATOR
     BUTTON      ID_VIEW_SHOW_HIDE_TREE
-    BUTTON      ID_VIEW_SHOW_HIDE_INFO
+    BUTTON      ID_VIEW_SHOW_HIDE_STACK
     BUTTON      ID_VIEW_SHOW_HIDE_FLOW_TRACES
     SEPARATOR
     BUTTON      ID_VIEW_STARTRECORDIG
@@ -129,7 +129,7 @@ BEGIN
     BEGIN
         MENUITEM "Synchronize views\tTab",      ID_SYNC_VIEWES
         MENUITEM "Show Tree View",              ID_VIEW_SHOW_HIDE_TREE
-        MENUITEM "Show Path View",              ID_VIEW_SHOW_HIDE_INFO
+        MENUITEM "Show Stack View",             ID_VIEW_SHOW_HIDE_STACK
         MENUITEM "Show Flow Traces",            ID_VIEW_SHOW_HIDE_FLOW_TRACES
         MENUITEM "Snapshots ...",               ID_VIEW_TAKESNAPSHOT
         MENUITEM "Start New Snapshot\tCtrl+N",  ID_VIEW_STARTNEWSNAPSHOT
@@ -241,14 +241,14 @@ BEGIN
     CONTROL         "Application",IDC_APP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,51,51,10
     CONTROL         "Thread ID",IDC_PID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,64,48,10
     CONTROL         "Log Time",IDC_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,77,44,10
-    CONTROL         "Call Address",IDC_CALL_ADDR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,90,55,10
-    CONTROL         "Log Line in Source file",IDC_CALL_LINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,117,85,10
-    CONTROL         "Function Name",IDC_FUNC_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,104,63,10
+    CONTROL         "Call Address",IDC_CALL_ADDR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,169,55,10
+    CONTROL         "Log Line in Source file",IDC_CALL_LINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,102,85,10
+    CONTROL         "Function Name",IDC_FUNC_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,89,63,10
     CONTROL         "Line Number",IDC_LINE_NN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,26,55,10
-    GROUPBOX        "List View",IDC_STATIC,16,11,96,122
-    GROUPBOX        "Tree View",IDC_STATIC,16,137,96,52
-    CONTROL         "Termianl IP",IDC_CHECK_SHOW_APP_IP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,155,51,10
-    CONTROL         "Elapsed time",IDC_CHECK_SHOW_ELAPSED_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,168,56,10
+    GROUPBOX        "List View",IDC_STATIC,16,11,96,111
+    GROUPBOX        "Tree View",IDC_STATIC,16,128,96,61
+    CONTROL         "Termianl IP",IDC_CHECK_SHOW_APP_IP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,143,51,10
+    CONTROL         "Elapsed time",IDC_CHECK_SHOW_ELAPSED_TIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,156,56,10
 END
 
 IDD_PROGRESS DIALOGEX 0, 0, 309, 88
@@ -438,7 +438,7 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_VIEW_SHOW_HIDE_INFO  "Show Path View\nShow Path View"
+    ID_VIEW_SHOW_HIDE_STACK "Show Stack View\nShow Stck View"
     ID_VIEW_SHOW_HIDE_TREE  "Show Tree View\nShow Tree View"
     ID_VIEW_STARTRECORDIG   "Start Recordig\nStart Recordig"
     ID_VIEW_PAUSERECORDING  "Pause Recording\nPause Recording"

@@ -16,14 +16,12 @@ extern ROOT_NODE* rootNode;
 extern LIST_NODES* listNodes;
 extern Archive  gArchive;
 
-#define MAX_APP_NAME_LEN 15
-
 typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 
 #pragma pack(push,1)
 enum PROCESS_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
 enum LOG_DATA_TYPE { APP_DATA_TYPE, PROC_DATA_TYPE, FLOW_DATA_TYPE, TRACE_DATA_TYPE };
-enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, PROC_COL, TIME_COL, CALL_COL, FUNC_COL, CALL_LINE_COL, LOG_COL, MAX_COL };
+enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, PROC_COL, TIME_COL, FUNC_COL, CALL_LINE_COL, LOG_COL, MAX_COL };
 
 struct LOG_DATA
 {
@@ -37,6 +35,13 @@ struct LOG_DATA
   bool isInfo() { return isFlow() || isTrace(); }
 };
 
+struct ADDR_INFO
+{
+  DWORD addr;
+  DWORD line;
+  char* src;
+};
+
 struct APP_DATA : LOG_DATA
 {
   DWORD app_sec;
@@ -47,8 +52,12 @@ struct APP_DATA : LOG_DATA
   DWORD NN;
   DWORD lost;
   char ip_address[66];
+  int cb_app_path;
   int cb_app_name;
-  char* appName() { return ((char*)(this)) + sizeof(APP_DATA); }
+  ADDR_INFO *p_addr_info;
+  DWORD cb_addr_info;
+  char* appPath() { return ((char*)(this)) + sizeof(APP_DATA); }
+  char* appName() { return appPath() + (cb_app_path - cb_app_name); }
   void Log() { stdlog("name: %s sec: %d msec: %d\n", "appName()", app_sec, app_msec); }
 };
 

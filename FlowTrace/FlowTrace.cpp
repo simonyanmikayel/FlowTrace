@@ -41,13 +41,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
   HRESULT hRes = ::CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
   ATLASSERT(SUCCEEDED(hRes));
 
-  WSADATA wsaData;
-  int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if (iResult != 0) {
-    Helpers::SysErrMessageBox(TEXT("WSAStartup failed"));
-    return 1;
-  }
-
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
 	::DefWindowProc(NULL, 0, 0, 0L);
 

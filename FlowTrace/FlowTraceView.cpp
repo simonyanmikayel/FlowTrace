@@ -28,33 +28,40 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   ModifyStyle(0, WS_CLIPCHILDREN);
   ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_TRANSPARENT);
 
-  m_wndSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
+  //m_wndLog.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_TOOLWINDOW);
+
+  m_wndHorzSplitter.m_bVertical = false;
+  m_wndHorzSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
+  m_wndVertSplitter.Create(m_wndHorzSplitter, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
 
   dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL;
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
-  m_wndInfo.Create(m_hWnd, rcDefault, NULL, dwStyle, 0);
+  m_wndInfo.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
 
-  m_wndListView.Create(m_wndSplitter, rcDefault, NULL,
+  m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
     LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA | LVS_NOCOLUMNHEADER,
     0);
 
 #ifdef NATIVE_TREE
-  m_wndTreeView.Create(m_wndSplitter, rcDefault, NULL,
+  m_wndTreeView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
     TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS | TVS_CHECKBOXES, //TVS_SINGLEEXPAND
     WS_EX_CLIENTEDGE);
   m_wndTreeView.SetImageList(m_wndTreeView.m_hTypeImageList);
 #else
-  m_wndTreeView.Create(m_wndSplitter, rcDefault, NULL,
+  m_wndTreeView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
     LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA | LVS_NOCOLUMNHEADER,
     LVS_EX_FULLROWSELECT);
 #endif
 
-  m_wndSplitter.SetSplitterPanes(m_wndTreeView, m_wndListView);
-  m_wndSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetSplitterPos())), false);
+  m_wndHorzSplitter.SetSplitterPanes(m_wndVertSplitter, m_wndInfo);
+  m_wndHorzSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetHorzSplitterPos())), false);
+
+  m_wndVertSplitter.SetSplitterPanes(m_wndTreeView, m_wndListView);
+  m_wndVertSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetVertSplitterPos())), false);
 
   ApplySettings(true);
 
@@ -68,10 +75,6 @@ LRESULT CFlowTraceView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /
 
 void CFlowTraceView::ApplySettings(bool fontChanged)
 {
-  if (fontChanged)
-  {
-    SetChildPos(0, 0, true);
-  }
   m_wndTreeView.ApplySettings(fontChanged);
   m_wndListView.ApplySettings(fontChanged);
 }
@@ -87,16 +90,8 @@ void CFlowTraceView::ShowInfo(TCHAR* szText)
   m_wndInfo.SetWindowText(szText);
 }
 
-void CFlowTraceView::SetChildPos(int cx, int cy, bool fontChanged)
-{
-  static int infoHeight = 20;
-  if (fontChanged)
-  {
-    infoHeight = gSettings.GetFontHeight() + 10;
-    m_wndInfo.SetFont(gSettings.GetFont());
-  }
-
-  
+void CFlowTraceView::SetChildPos(int cx, int cy)
+{ 
   if (cx == 0 || cy == 0)
   {
     WINDOWPLACEMENT wndpl;
@@ -106,10 +101,11 @@ void CFlowTraceView::SetChildPos(int cx, int cy, bool fontChanged)
   }
   if (cx && cy)
   {
-    //stdlog("%d %d\n", cx, cy);
-    int y = m_wndInfo.IsWindowVisible() ? infoHeight : 0;
-    m_wndSplitter.MoveWindow(0, 0, cx, cy - y, TRUE);
-    m_wndInfo.MoveWindow(0, cy - y, cx, y, TRUE);
+    m_wndHorzSplitter.MoveWindow(0, 0, cx, cy, TRUE);
+    //RECT rc;
+    //m_wndHorzSplitter.GetClientRect(&rc);
+    //m_wndVertSplitter.MoveWindow(0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+    //stdlog("cx: %d cy: %d rc1: %d %d\n", cx, cy, rc.right - rc.left, rc.bottom - rc.top);
   }
 }
 
@@ -118,7 +114,7 @@ LRESULT CFlowTraceView::OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM 
   WINDOWPOS*	pWinPos = reinterpret_cast<WINDOWPOS*>(lParam);
   if (!(pWinPos->flags & SWP_NOSIZE))
   {
-    SetChildPos(pWinPos->cx, pWinPos->cy, false);
+    SetChildPos(pWinPos->cx, pWinPos->cy);
   }
   return 1;
 }
@@ -359,20 +355,28 @@ void CFlowTraceView::SyncViews()
 #endif
 }
 
-void CFlowTraceView::ShowHideInfo(bool show)
+void CFlowTraceView::ShowStackView(bool show)
 {
-  m_wndInfo.ShowWindow(show ? SW_SHOW : SW_HIDE);
-  SetChildPos(0, 0, false);
+  //m_wndInfo.ShowWindow(show ? SW_SHOW : SW_HIDE);
+  //SetChildPos(0, 0, false);
+  if (show)
+  {
+    m_wndHorzSplitter.SetSinglePaneMode(SPLIT_PANE_NONE);
+  }
+  else
+  {
+    m_wndHorzSplitter.SetSinglePaneMode(SPLIT_PANE_TOP);
+  }
 }
 
 void CFlowTraceView::ShowTreeView(bool show)
 {
   if (show)
   {
-    m_wndSplitter.SetSinglePaneMode(SPLIT_PANE_NONE);
+    m_wndVertSplitter.SetSinglePaneMode(SPLIT_PANE_NONE);
   }
   else
   {
-    m_wndSplitter.SetSinglePaneMode(SPLIT_PANE_RIGHT);
+    m_wndVertSplitter.SetSinglePaneMode(SPLIT_PANE_RIGHT);
   }
 }

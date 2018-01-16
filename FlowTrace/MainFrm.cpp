@@ -51,7 +51,7 @@ BOOL CMainFrame::OnIdle()
     UIEnable(ID_EDIT_FIND32798, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_COPY, m_list.HasSelection() || ::GetFocus() == m_tree.m_hWnd);
     UISetCheck(ID_VIEW_SHOW_HIDE_TREE, gSettings.GetTreeViewHiden() == 0);
-    UISetCheck(ID_VIEW_SHOW_HIDE_INFO, gSettings.GetInfoHiden() == 0);
+    UISetCheck(ID_VIEW_SHOW_HIDE_STACK, gSettings.GetInfoHiden() == 0);
     UISetCheck(ID_VIEW_SHOW_HIDE_FLOW_TRACES, gSettings.GetFlowTracesHiden() == 0);
     UIUpdateToolBar();
     return FALSE;
@@ -181,6 +181,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     //CProgressDlg dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
     //CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
 
+    m_view.ShowStackView(!gSettings.GetInfoHiden());
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
     return 0;
 }
@@ -188,7 +189,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
     StopLogging(true);
-    gSettings.SetSplitterPos(m_view.GetSplitterPosPct());
+    gSettings.SetVertSplitterPos(m_view.GetVertSplitterPosPct());
+    gSettings.SetHorzSplitterPos(m_view.GetHorzSplitterPosPct());
     gSettings.SaveWindPos(m_hWnd);
     bHandled = FALSE;
 
@@ -339,10 +341,10 @@ LRESULT CMainFrame::OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
     return 0;
 }
 
-LRESULT CMainFrame::OnShowHideInfo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     gSettings.SetInfoHiden(!gSettings.GetInfoHiden());
-    m_view.ShowHideInfo(!gSettings.GetInfoHiden());
+    m_view.ShowStackView(!gSettings.GetInfoHiden());
     return 0;
 }
 
@@ -428,7 +430,7 @@ LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
 LRESULT CMainFrame::OnImportTask(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     if (wParam == 0)
-        ClearLog(true, false);
+        ClearLog(false);
     else
     {
         RefreshLog(true);
@@ -473,15 +475,13 @@ LRESULT CMainFrame::OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    ClearLog(false, true);
+    ClearLog(true);
     return 0;
 }
 
-void CMainFrame::ClearLog(bool bClearArcive, bool bRestart)
+void CMainFrame::ClearLog(bool bRestart)
 {
     StopLogging(true);
-    if (bClearArcive)
-        gArchive.clear();
     m_view.ClearLog();
     searchInfo.ClearSearchResults();
     if (bRestart)

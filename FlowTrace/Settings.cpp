@@ -7,7 +7,8 @@ CSettings gSettings;
 // registry keys and values
 LPCTSTR STR_APP_REG_KEY				=_T("Software\\TermianlTools\\FlowTrace");
 LPCTSTR STR_APP_REG_VAL_WINDOWPOS	=_T("WindowPos");
-LPCTSTR STR_APP_REG_VAL_SPLITTER_POS = _T("SplitterPos");
+LPCTSTR STR_APP_REG_VAL_VERT_SPLITTER_POS = _T("VertSplitterPos");
+LPCTSTR STR_APP_REG_VAL_HORZ_SPLITTER_POS = _T("HorzSplitterPos");
 
 LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName_1");
 LPCTSTR STR_APP_REG_VAL_FONTWIDTH =_T("FontWeight");
@@ -66,7 +67,8 @@ CSettings::CSettings() :
 CRegKeyExt(STR_APP_REG_KEY)
 , m_Font(NULL)
 {
-  Read(STR_APP_REG_VAL_SPLITTER_POS, m_SplitterPos, 50);
+  Read(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos, 50);
+  Read(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos, 50);
   Read(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden, TRUE);
   Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
   Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
@@ -310,7 +312,8 @@ TCHAR* CSettings::GetSearchList()
   return searchList;
 }
 
-void CSettings::SetSplitterPos(int i){ m_SplitterPos = i;  Write(STR_APP_REG_VAL_SPLITTER_POS, m_SplitterPos); }
+void CSettings::SetVertSplitterPos(int i) { m_VertSplitterPos = i;  Write(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos); }
+void CSettings::SetHorzSplitterPos(int i) { m_HorzSplitterPos = i;  Write(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos); }
 
 void CSettings::SetColLineNN(int i){ m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }

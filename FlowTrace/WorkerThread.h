@@ -3,7 +3,6 @@ class WorkerThread
 {
 public:
     WorkerThread(void);
-    virtual ~WorkerThread(void);
 
     DWORD getTID(){ return m_dwTID; }
     bool IsWorking(){ return m_bWorking; }

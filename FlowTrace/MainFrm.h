@@ -42,7 +42,7 @@ public:
     UPDATE_ELEMENT(ID_EDIT_COPY, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
     UPDATE_ELEMENT(ID_EDIT_SELECTALL, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
     UPDATE_ELEMENT(ID_VIEW_SHOW_HIDE_TREE, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
-    UPDATE_ELEMENT(ID_VIEW_SHOW_HIDE_INFO, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
+    UPDATE_ELEMENT(ID_VIEW_SHOW_HIDE_STACK, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
     UPDATE_ELEMENT(ID_VIEW_SHOW_HIDE_FLOW_TRACES, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
     UPDATE_ELEMENT(ID_VIEW_PAUSERECORDING, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
     UPDATE_ELEMENT(ID_VIEW_STARTRECORDIG, UPDUI_MENUPOPUP | UPDUI_TOOLBAR)
@@ -64,7 +64,7 @@ public:
     COMMAND_ID_HANDLER(ID_FILE_EXPORT, OnFileSave)
     COMMAND_ID_HANDLER(ID_FILE_IMPORT, OnFileImport)
     COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_TREE, OnShowHideTreeView)
-    COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_INFO, OnShowHideInfo)
+    COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_STACK, OnShowHideStack)
     COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_FLOW_TRACES, OnShowHideFlowTraces)
     COMMAND_ID_HANDLER(ID_VIEW_PAUSERECORDING, OnPauseRecording)
     COMMAND_ID_HANDLER(ID_VIEW_STARTRECORDIG, OnStartRecording)
@@ -117,7 +117,7 @@ public:
   LRESULT OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnShowHideInfo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnShowHideFlowTraces(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -152,7 +152,7 @@ private:
   CEdit               m_searchedit;
 
   void StartLogging();
-  void ClearLog(bool bClearArcive, bool bRestart);
+  void ClearLog(bool bRestart);
   void StopLogging(bool bClearArcive);
   void SearchRefresh(WORD wID);
   void RefreshLog(bool showAll);

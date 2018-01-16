@@ -58,7 +58,7 @@
 #define IDC_CHECK_FONT_WEIGHT           1044
 #define IDC_BUTTON1                     1045
 #define IDC_BUTTON_RESET                1200
-#define ID_VIEW_SHOW_HIDE_INFO          32774
+#define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
 #define ID_VIEW_PAUSERECORDING          32777

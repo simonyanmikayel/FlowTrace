@@ -8,10 +8,6 @@ WorkerThread::WorkerThread(void)
     m_hThread = 0;
 }
 
-WorkerThread::~WorkerThread(void)
-{
-}
-
 void WorkerThread::StopWork()
 {
   if (m_bWorking) {

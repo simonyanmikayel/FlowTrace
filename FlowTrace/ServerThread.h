@@ -1,9 +1,6 @@
 #pragma once
 #include "WorkerThread.h"
 
-class DataThread;
-
-
 class ServerThread :
   public WorkerThread
 {
