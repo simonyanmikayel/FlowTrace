@@ -34,7 +34,7 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   m_wndHorzSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
   m_wndVertSplitter.Create(m_wndHorzSplitter, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
 
-  dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL;
+  dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL | ES_MULTILINE | ES_WANTRETURN;
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
   m_wndInfo.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
@@ -77,6 +77,8 @@ void CFlowTraceView::ApplySettings(bool fontChanged)
 {
   m_wndTreeView.ApplySettings(fontChanged);
   m_wndListView.ApplySettings(fontChanged);
+  if (fontChanged)
+    m_wndInfo.SetFont(gSettings.GetFont());
 }
 
 LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/)
@@ -85,9 +87,66 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-void CFlowTraceView::ShowInfo(TCHAR* szText)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
 {
-  m_wndInfo.SetWindowText(szText);
+  if (pSelectedNode == 0 || !pSelectedNode->isFlow())
+  {
+    m_wndInfo.SetWindowText(TEXT(""));
+    return;
+  }
+
+  const int cMaxBuf = 1204 * 8;
+  static TCHAR pBuf[cMaxBuf + 1];
+  int cb = 0;
+
+  ADDR_INFO *p_addr_info = pSelectedNode->p_addr_info;
+  APP_NODE* appNode = pSelectedNode->getApp();
+  APP_DATA* appData = NULL;
+  if (appNode)
+    appData = appNode->getData();
+
+  if (appData)
+  {
+    if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
+    {
+      gArchive.resolveAddr(pSelectedNode);
+      cb += _sntprintf(pBuf + cb, cMaxBuf -cb, TEXT("Line info not yet resolved. Back trace will be updated soon\r\n"));
+    }
+    else if (appData->cb_addr_info == 0)
+    {
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Failed to resolve line info\r\n"));
+    }
+  }
+
+  LOG_NODE* pNode = pSelectedNode;
+  while (pNode && pNode->isFlow() && cb < cMaxBuf - 100)
+  {
+    FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+
+    DWORD cb_fn_name = min(cMaxBuf - cb, flowData->cb_fn_name);
+    memcpy(pBuf + cb, flowData->fnName(), cb_fn_name);
+    cb += cb_fn_name;
+    pBuf[cb] = 0;
+
+    if (p_addr_info)// && pSelectedNode != pNode
+    {
+      DWORD addr = (DWORD)flowData->call_site;
+      DWORD nearest_pc = p_addr_info->addr;
+      DWORD line = p_addr_info->line;
+      char* src = p_addr_info->src;
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("addr: (%X+%X) line: %d src: %s"), nearest_pc, addr - nearest_pc, line, src);
+    }
+
+    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
+    pNode = pNode->parent;
+    p_addr_info = pNode->p_addr_info;
+  }
+
+  pBuf[cb] = 0;
+  pBuf[cMaxBuf] = 0;
+
+  m_wndInfo.SetWindowText(pBuf);
+
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)

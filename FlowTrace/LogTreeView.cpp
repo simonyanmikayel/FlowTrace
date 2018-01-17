@@ -134,7 +134,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     dwFlags = MF_BYPOSITION | MF_STRING;
     //if (!pNode->isFlow())
     //  dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call path"));
+    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY, _T("Copy"));
     dwFlags = MF_BYPOSITION | MF_STRING;
@@ -161,10 +161,6 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       ::SendMessage(hwndMain, WM_COMMAND, ID_EDIT_COPY, 0);
     }
-    else if (nRet == ID_TREE_COPY_CALL_PATH)
-    {
-      CopySelection(true);
-    }    
     //stdlog("%u\n", GetTickCount());
   }
   return 0;
@@ -190,7 +186,7 @@ void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
 }
 #endif
 
-void CLogTreeView::CopySelection(bool bCopyPath)
+void CLogTreeView::CopySelection()
 {
   if (!m_pSelectedNode)
     return;
@@ -198,11 +194,8 @@ void CLogTreeView::CopySelection(bool bCopyPath)
   int cbText;
   char* szText;
   char *lock = 0;
-  if (bCopyPath)
-    szText = m_pSelectedNode->getPathText(&cbText);
-  else
-    szText = m_pSelectedNode->getTreeText(&cbText, false);
-  
+  szText = m_pSelectedNode->getTreeText(&cbText, false);
+
   HGLOBAL clipdata = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, (cbText + 1)* sizeof(char));
   if (!clipdata)
     return;
@@ -555,10 +548,7 @@ void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapse
 void CLogTreeView::SetSelectedNode(LOG_NODE* pNode)
 {
   m_pSelectedNode = pNode;
-  if (pNode)
-    m_pView->ShowInfo(pNode->getPathText());
-  else
-    m_pView->ShowInfo(_TEXT(""));
+  m_pView->ShowBackTrace(pNode);
 }
 
 LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)

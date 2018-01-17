@@ -53,7 +53,7 @@ public:
   CLogTreeView& tree() { return m_wndTreeView; }
   int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
-  void ShowInfo(TCHAR* szText);
+  void ShowBackTrace(LOG_NODE* pNode);
 
 private:
 #ifdef NATIVE_TREE

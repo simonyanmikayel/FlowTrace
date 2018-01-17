@@ -151,39 +151,6 @@ LOG_NODE* LOG_NODE::getSyncNode()
   return pNode;
 }
 
-TCHAR* LOG_NODE::getPathText(int* cBuf)
-{
-  const int cMaxBuf = 1023;
-  static TCHAR pBuf[cMaxBuf + 1];
-  TCHAR* ret = pBuf;
-  int cb = 0;
-
-  LOG_NODE* pNode = this;
-  while (pNode)
-  {
-    int cbText;
-    TCHAR* szText = pNode->getTreeText(&cbText, false);
-    if (cb)
-    {
-      if (cb + 3 >= cMaxBuf)
-        break;
-      cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" - "));
-    }
-
-    if (cb + cbText >= cMaxBuf)
-      break;
-    cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("%s"), szText);
-
-    pNode = pNode->parent;
-  }
-
-  pBuf[cb] = 0;
-  pBuf[cMaxBuf] = 0;
-  if (cBuf)
-    *cBuf = cb;
-  return ret;
-}
-
 TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 {
   const int cMaxBuf = 255;

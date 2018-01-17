@@ -47,7 +47,7 @@ public:
   void ShowItem(DWORD i, bool scrollToMiddle);
   void GetNodetPos(HDC hdc, BOOL hasCheckBox, int offset, char* szText, int cbText, int &cxText, int &xStart, int &xEnd);
   LOG_NODE* GetSelectedNode() { return m_pSelectedNode; }
-  void CopySelection(bool bCopyPath);
+  void CopySelection();
   int ItemByPos(int yPos);
   void SetSelectedNode(LOG_NODE* pNode);
 

@@ -100,7 +100,7 @@ public:
   void UpdateCaret();
   bool HasSelection();
   LOG_NODE* GetSynkNode();
-  void CopySelection(bool bCopyPath);
+  void CopySelection();
   TCHAR* getText(int iItem, int* cBuf = NULL, LIST_COL col = LOG_COL, int* cInfo = NULL);
   void SelectAll();
   int getSelectionItem() { return m_ListSelection.GetItem(); }

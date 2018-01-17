@@ -197,11 +197,11 @@ struct LOG_NODE
   void* getCallAddr();
   int   getCallLine();
   TCHAR* getTreeText(int* cBuf = NULL, bool extened = true);
-  TCHAR* getPathText(int* cBuf = NULL);
   TCHAR* getListText(int* cBuf, LIST_COL col, int iItem = 0);
   int getTreeImage();
   int getListImage(bool selected);
   LOG_NODE* getSyncNode();
+  APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
 };
 
 struct ROOT_NODE : LOG_NODE

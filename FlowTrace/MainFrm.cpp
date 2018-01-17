@@ -354,6 +354,12 @@ LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     return 0;
 }
 
+LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+{
+  LOG_NODE* pNode = (LOG_NODE*)lParam;
+  m_view.ShowBackTrace(pNode);
+  return 0;
+}
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
     bool filterChanged = false;
@@ -421,9 +427,9 @@ LRESULT CMainFrame::OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     if (::GetFocus() == m_tree.m_hWnd)
-        m_tree.CopySelection(false);
+        m_tree.CopySelection();
     else
-        m_list.CopySelection(false);
+        m_list.CopySelection();
     return 0;
 }
 

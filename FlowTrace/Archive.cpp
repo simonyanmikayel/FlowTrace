@@ -70,6 +70,12 @@ bool Archive::haveDataBuf(DWORD cb)
   return (rec_end + cb + maxReserveSize) < (char*)(node_array - c_rec - 1) && (c_rec < c_max_rec);
 }
 
+void Archive::resolveAddr(LOG_NODE* pNode)
+{
+  if (m_pAddr2LineThread)
+    m_pAddr2LineThread->Resolve(pNode);
+}
+
 char* Archive::reservDataBuf(DWORD cb)
 {
   char* buf = NULL;

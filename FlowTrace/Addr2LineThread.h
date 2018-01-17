@@ -9,7 +9,7 @@ public:
   Addr2LineThread();
   virtual void Terminate();
   void Work(LPVOID pWorkParam);
-  void Resolve();
+  void Resolve(LOG_NODE* pNode = NULL);
 
 private:
   bool connectToServer(char *szServerName, WORD portNum);
@@ -17,5 +17,7 @@ private:
   void CloseSocket();
   ADDR_INFO* last_info;
   SOCKET conn;
-  HANDLE m_hWorkEvent;
+  LOG_NODE* m_pNode;
+  HANDLE m_hParseEvent;
+  HANDLE m_hResolveEvent;
 };

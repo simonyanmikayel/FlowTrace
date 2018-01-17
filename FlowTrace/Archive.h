@@ -61,6 +61,7 @@ public:
   bool IsEmpty() { return c_rec == 0; }
   DWORD index(LOG_NODE* pNode) { return node_array - pNode; }
   bool haveDataBuf(DWORD cb);
+  void resolveAddr(LOG_NODE* pNode);
 
 private:
   inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);

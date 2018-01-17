@@ -125,9 +125,9 @@ LOG_NODE* CLogListView::GetSynkNode()
     return pNode;
 }
 
-void CLogListView::CopySelection(bool bCopyPath)
+void CLogListView::CopySelection()
 {
-    if (m_ListSelection.IsEmpty() && !bCopyPath)
+    if (m_ListSelection.IsEmpty())
         return;
 
     HGLOBAL clipdata = 0;
@@ -153,24 +153,7 @@ void CLogListView::CopySelection(bool bCopyPath)
                 return;
         }
         len = 0;
-        if (bCopyPath)
-        {
-            LOG_NODE* pNode = GetSynkNode();
-            if (pNode)
-            {
-                int cbText;
-                char* szText = pNode->getPathText(&cbText);
-                l = cbText;
-                if (l)
-                {
-                    if (copy) memcpy(lock + len, szText, l);
-                    len += l;
-                    if (copy) memcpy(lock + len, "", 1);
-                    len += 1;
-                }
-            }
-        }
-        else if (IsLogSelection())
+        if (IsLogSelection())
         {
             l = 0;
             for (int i = logSelection().StartItem(); i <= logSelection().EndItem(); i++)
@@ -340,10 +323,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
     _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.GetItem() + 1));
     ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
     LOG_NODE* pNode = GetSynkNode();
-    if (pNode)
-        m_pView->ShowInfo(pNode->getPathText());
-    else
-        m_pView->ShowInfo(_TEXT(""));
+    //m_pView->ShowBackTrace(pNode);
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -683,7 +663,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (GetItemCount() == 0 || !GetSynkNode())
         dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call path"));
+    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (m_ListSelection.IsEmpty())
         dwFlags |= MF_DISABLED;
@@ -693,11 +673,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 
     if (nRet == ID_EDIT_COPY)
     {
-        CopySelection(false);
-    }
-    else if (nRet == ID_TREE_COPY_CALL_PATH)
-    {
-        CopySelection(true);
+        CopySelection();
     }
     return 0;
 }
