@@ -56,9 +56,11 @@ public:
   DWORD getCount();
   LOG_NODE* getNode(DWORD i)  { return (i < c_rec) ? node_array - i : 0; }
   LOG_DATA* getData(DWORD i)  { return (i < c_rec) ? (node_array - i)->data : 0; }
+  char* reservDataBuf(DWORD cb);
   bool append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in *p_si_other = NULL);
   bool IsEmpty() { return c_rec == 0; }
   DWORD index(LOG_NODE* pNode) { return node_array - pNode; }
+  bool haveDataBuf(DWORD cb);
 
 private:
   inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);
@@ -68,7 +70,7 @@ private:
   inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
   inline PROC_NODE*   getProc(APP_NODE* pAppNode, ROW_LOG_REC* p);
 
-  //CRITICAL_SECTION cs;
+  CRITICAL_SECTION cs;
   DWORD c_alloc;
   DWORD c_rec;
   DWORD c_max_rec;

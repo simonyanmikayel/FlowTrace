@@ -19,7 +19,7 @@ Archive::Archive()
     Helpers::SysErrMessageBox(TEXT("WSAStartup failed"));
   }
 
-  //InitializeCriticalSectionAndSpinCount(&cs, 0x00000400);
+  InitializeCriticalSectionAndSpinCount(&cs, 0x00000400);
   c_alloc = ONE_GIGABYTE;
   while (c_alloc && 0 == (buf = (char*)malloc(c_alloc)))
   {
@@ -62,6 +62,25 @@ void Archive::clear()
   snapshot.clear();
   m_pAddr2LineThread = new Addr2LineThread();
   m_pAddr2LineThread->StartWork();
+}
+
+bool Archive::haveDataBuf(DWORD cb)
+{
+  const int maxReserveSize = 4 * sizeof(LOG_NODE) + sizeof(APP_DATA) + sizeof(PROC_DATA) + sizeof(FLOW_DATA) + sizeof(TRACE_DATA);
+  return (rec_end + cb + maxReserveSize) < (char*)(node_array - c_rec - 1) && (c_rec < c_max_rec);
+}
+
+char* Archive::reservDataBuf(DWORD cb)
+{
+  char* buf = NULL;
+  EnterCriticalSection(&cs);
+  if (haveDataBuf(cb))
+  {
+    buf = rec_end;
+    rec_end = rec_end + cb;
+  }
+  LeaveCriticalSection(&cs);
+  return buf;
 }
 
 APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other)
@@ -544,11 +563,10 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
 {
   bool ret = false;
 
-  //EnterCriticalSection(&cs);
-  const int maxReserveSize = 4 * sizeof(LOG_NODE) + sizeof(APP_DATA) + sizeof(PROC_DATA) + sizeof(FLOW_DATA) + sizeof(TRACE_DATA);
+  EnterCriticalSection(&cs);
   if (rec->isValid())
   {
-    if ((rec_end + rec->len + maxReserveSize) < (char*)(node_array - c_rec - 1) && (c_rec < c_max_rec))
+    if (haveDataBuf(rec->len))
     {
       APP_NODE* pAppNode = getApp(rec, p_si_other);
       DWORD& NN = ((APP_DATA*)(pAppNode->data))->NN;
@@ -581,11 +599,10 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
         }
       }
 
-
       ret = true;
     }
   }
-  //LeaveCriticalSection(&cs);
+  LeaveCriticalSection(&cs);
 
   return ret;
 }

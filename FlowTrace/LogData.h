@@ -23,6 +23,14 @@ enum PROCESS_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
 enum LOG_DATA_TYPE { APP_DATA_TYPE, PROC_DATA_TYPE, FLOW_DATA_TYPE, TRACE_DATA_TYPE };
 enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, PROC_COL, TIME_COL, FUNC_COL, CALL_LINE_COL, LOG_COL, MAX_COL };
 
+struct ADDR_INFO
+{
+  DWORD addr;
+  DWORD line;
+  char* src;
+  ADDR_INFO* pPrev;
+};
+
 struct LOG_DATA
 {
   LOG_DATA_TYPE data_type;
@@ -33,13 +41,6 @@ struct LOG_DATA
   bool isFlow() { return data_type == FLOW_DATA_TYPE; }
   bool isTrace() { return data_type == TRACE_DATA_TYPE; }
   bool isInfo() { return isFlow() || isTrace(); }
-};
-
-struct ADDR_INFO
-{
-  DWORD addr;
-  DWORD line;
-  char* src;
 };
 
 struct APP_DATA : LOG_DATA
@@ -121,6 +122,7 @@ struct LOG_NODE
   LOG_NODE* parent;
   LOG_NODE* lastChild;
   LOG_NODE* prevSibling;
+  ADDR_INFO *p_addr_info;
   union {
     struct {
       BYTE hasNewLine : 1;

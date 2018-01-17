@@ -13,8 +13,9 @@ public:
 
 private:
   bool connectToServer(char *szServerName, WORD portNum);
-  char *readUrl2(char *szfilepath);
+  DWORD readUrl2(APP_DATA* appData);
+  void CloseSocket();
+  ADDR_INFO* last_info;
   SOCKET conn;
   HANDLE m_hWorkEvent;
-  string server;
 };
