@@ -72,8 +72,11 @@ bool Archive::haveDataBuf(DWORD cb)
 
 void Archive::resolveAddr(LOG_NODE* pNode)
 {
-  if (m_pAddr2LineThread)
-    m_pAddr2LineThread->Resolve(pNode);
+  if (gSettings.GetResolveAddr())
+  {
+    if (m_pAddr2LineThread)
+      m_pAddr2LineThread->Resolve(pNode);
+  }
 }
 
 char* Archive::reservDataBuf(DWORD cb)
@@ -147,8 +150,7 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD 
   pNode->checked = 1;
 #endif
   c_rec++;
-  if (gSettings.GetResolveAddr())
-    m_pAddr2LineThread->Resolve();
+  resolveAddr(NULL);
   return pNode;
 }
 
