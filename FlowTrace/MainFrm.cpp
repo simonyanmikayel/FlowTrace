@@ -307,6 +307,7 @@ LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DWORD udpPort = gSettings.GetUdpPort();
+    DWORD resolveAddr = gSettings.GetResolveAddr();
     CSettingsDlg dlg;
     if (IDOK == dlg.DoModal())
     {
@@ -315,6 +316,8 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
             StopLogging(false);
             StartLogging();
         }
+        if (gSettings.GetResolveAddr() && !resolveAddr)
+          gArchive.resolveAddr(NULL);
         m_view.ApplySettings(true);
     }
     return 0;

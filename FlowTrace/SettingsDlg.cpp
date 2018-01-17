@@ -13,6 +13,8 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_CompactView.Attach(GetDlgItem(IDC_CHECK_COMPACT_VIEW));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
+  m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
+  m_FullSrcPath.Attach(GetDlgItem(IDC_CHECK_FULL_SRC_PATH));
 
   m_FontSize = gSettings.GetFontSize();
   strncpy(m_FaceName, gSettings.GetFontName(), sizeof(m_FaceName) - 1);
@@ -50,6 +52,8 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_UsePcTime.SetCheck(gSettings.GetUsePcTime() ? BST_CHECKED : BST_UNCHECKED);
   m_CompactView.SetCheck(gSettings.GetCompactView() ? BST_CHECKED : BST_UNCHECKED);
+  m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
+  m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
 
   CenterWindow(GetParent());
   return TRUE;
@@ -126,7 +130,8 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
     gSettings.SetUdpPort(GetDlgItemInt(IDC_EDIT_PORT));
     gSettings.SetUsePcTime(m_UsePcTime.GetCheck());
     gSettings.SetCompactView(m_CompactView.GetCheck());
-    
+    gSettings.SetResolveAddr(m_ResolveAddr.GetCheck());
+    gSettings.SetFullSrcPath(m_FullSrcPath.GetCheck());
   }
   EndDialog(wID);
   return 0;
