@@ -442,7 +442,7 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_VIEW_SHOW_HIDE_STACK "Show Stack View\nShow Stck View"
+    ID_VIEW_SHOW_HIDE_STACK "Show Stack View\nShow Stack View"
     ID_VIEW_SHOW_HIDE_TREE  "Show Tree View\nShow Tree View"
     ID_VIEW_STARTRECORDIG   "Start Recordig\nStart Recordig"
     ID_VIEW_PAUSERECORDING  "Pause Recording\nPause Recording"
