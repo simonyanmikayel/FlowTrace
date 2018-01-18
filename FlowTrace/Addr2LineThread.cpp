@@ -235,35 +235,24 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
 
 bool Addr2LineThread::connectToServer(char *szServerName, WORD portNum)
 {
-  struct hostent *hp;
-  unsigned int addr;
-  struct sockaddr_in server_sockaddr;
-
   CloseSocket();
-  conn = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if (conn == INVALID_SOCKET)
-    return false;
 
-  if (inet_addr(szServerName) == INADDR_NONE)
+  if ((conn = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
   {
-    hp = gethostbyname(szServerName);
-  }
-  else
-  {
-    addr = inet_addr(szServerName);
-    hp = gethostbyaddr((char*)&addr, sizeof(addr), AF_INET);
-  }
-
-  if (hp == NULL)
-  {
+    //printf("Could not create socket : %d", WSAGetLastError());
     return false;
   }
+ 
+  struct sockaddr_in server;
+  server.sin_addr.s_addr = inet_addr(szServerName);
+  server.sin_family = AF_INET;
+  server.sin_port = htons(portNum);
 
-  server_sockaddr.sin_addr.s_addr = *((unsigned long*)hp->h_addr);
-  server_sockaddr.sin_family = AF_INET;
-  server_sockaddr.sin_port = htons(portNum);
-  if (connect(conn, (struct sockaddr*)&server_sockaddr, sizeof(server_sockaddr)))
+  //Connect to remote server
+  if (connect(conn, (struct sockaddr *)&server, sizeof(server)) < 0)
   {
+    //puts("connect error");
+    CloseSocket();
     return false;
   }
 
