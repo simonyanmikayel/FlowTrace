@@ -43,7 +43,10 @@
 #define IDC_CHECK_USE_PC_TIME2          1021
 #define IDC_CHECK_COMPACT_VIEW          1022
 #define IDC_LIST_SNAPSHOTS              1023
+#define IDC_CHECK_RESOLVE_ADDR          1023
 #define IDC_FUNC_NAME                   1024
+#define IDC_CHECK_COMPACT_VIEW3         1024
+#define IDC_CHECK_FULL_SRC_PATH         1024
 #define IDC_BUTTON_ADD                  1025
 #define IDC_CHECK_SHOW_APP_IP           1026
 #define IDC_NN2                         1027

@@ -7,6 +7,7 @@
 #include "Archive.h"
 #include "LogListView.h"
 #include "LogTreeView.h"
+#include "BackTraceView.h"
 
 extern HWND hWndStatusBar;
 
@@ -51,6 +52,7 @@ public:
   LOG_NODE* selectedNode() { return m_selectedNode; }
   CLogListView& list() { return m_wndListView; }
   CLogTreeView& tree() { return m_wndTreeView; }
+  CBackTraceView& backTrace() { return m_wndBackTraceView; }
   int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
   void ShowBackTrace(LOG_NODE* pNode);
@@ -64,6 +66,6 @@ private:
   CLogTreeView    m_wndTreeView;
   CLogListView    m_wndListView;
   //CStatic         m_wndLog;
-  CEdit           m_wndInfo;
+  CBackTraceView  m_wndBackTraceView;
   LOG_NODE*       m_selectedNode;
 };

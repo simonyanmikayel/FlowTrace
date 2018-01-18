@@ -26,7 +26,6 @@ public:
   LRESULT OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-  
   void SetFontLabel();
   CStatic m_lblFont;
   CEdit m_UdpPort;
@@ -34,6 +33,8 @@ public:
   CButton m_btnReset;
   CButton m_UsePcTime;
   CButton m_CompactView;
+  CButton m_ResolveAddr;
+  CButton m_FullSrcPath;
 
 #ifdef USE_FONT_RES
   CFontPreviewCombo m_FontPreviewCombol;

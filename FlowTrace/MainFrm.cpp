@@ -26,6 +26,7 @@ CMainFrame::CMainFrame()
     : m_pServerThread(NULL)
     , m_list(m_view.list())
     , m_tree(m_view.tree())
+    , m_backTrace(m_view.backTrace())
 {
 }
 
@@ -307,6 +308,7 @@ LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DWORD udpPort = gSettings.GetUdpPort();
+    DWORD resolveAddr = gSettings.GetResolveAddr();
     CSettingsDlg dlg;
     if (IDOK == dlg.DoModal())
     {
@@ -315,6 +317,8 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
             StopLogging(false);
             StartLogging();
         }
+        if (gSettings.GetResolveAddr() && !resolveAddr)
+          gArchive.resolveAddr(NULL);
         m_view.ApplySettings(true);
     }
     return 0;
@@ -428,8 +432,13 @@ LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
 {
     if (::GetFocus() == m_tree.m_hWnd)
         m_tree.CopySelection();
-    else
+    else if (::GetFocus() == m_list.m_hWnd)
         m_list.CopySelection();
+    else if (::GetFocus() == m_backTrace.m_hWnd)
+      m_backTrace.Copy();
+    else if (::GetFocus() == m_searchedit.m_hWnd)
+      m_searchedit.Copy();
+    
     return 0;
 }
 

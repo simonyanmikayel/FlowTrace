@@ -25,6 +25,7 @@ public:
 	CFlowTraceView m_view;
   CLogListView& m_list;
   CLogTreeView& m_tree;
+  CBackTraceView& m_backTrace;
 	CCommandBarCtrl m_CmdBar;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
