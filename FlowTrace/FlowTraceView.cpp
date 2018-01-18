@@ -112,7 +112,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
     {
       gArchive.resolveAddr(pSelectedNode);
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a secund\r\n"));
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a seconds\r\n"));
     }
     else if (appData->cb_addr_info == 0)
     {
