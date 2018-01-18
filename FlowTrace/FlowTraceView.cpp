@@ -11,6 +11,7 @@
 CFlowTraceView::CFlowTraceView()
   : m_wndListView(this)
   , m_wndTreeView(this)
+  , m_wndBackTraceView(this)
   , m_selectedNode(NULL)
 {
 
@@ -37,7 +38,7 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL | ES_MULTILINE | ES_WANTRETURN;
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
-  m_wndInfo.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
+  m_wndBackTraceView.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
 
   m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
@@ -57,7 +58,7 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
     LVS_EX_FULLROWSELECT);
 #endif
 
-  m_wndHorzSplitter.SetSplitterPanes(m_wndVertSplitter, m_wndInfo);
+  m_wndHorzSplitter.SetSplitterPanes(m_wndVertSplitter, m_wndBackTraceView);
   m_wndHorzSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetHorzSplitterPos())), false);
 
   m_wndVertSplitter.SetSplitterPanes(m_wndTreeView, m_wndListView);
@@ -78,7 +79,7 @@ void CFlowTraceView::ApplySettings(bool fontChanged)
   m_wndTreeView.ApplySettings(fontChanged);
   m_wndListView.ApplySettings(fontChanged);
   if (fontChanged)
-    m_wndInfo.SetFont(gSettings.GetFont());
+    m_wndBackTraceView.SetFont(gSettings.GetFont());
 }
 
 LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/)
@@ -91,7 +92,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
 {
   if (pSelectedNode == 0 || !pSelectedNode->isFlow())
   {
-    m_wndInfo.SetWindowText(TEXT(""));
+    m_wndBackTraceView.SetWindowText(TEXT(""));
     return;
   }
 
@@ -151,7 +152,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
   pBuf[cb] = 0;
   pBuf[cMaxBuf] = 0;
 
-  m_wndInfo.SetWindowText(pBuf);
+  m_wndBackTraceView.SetWindowText(pBuf);
 
 }
 
@@ -422,7 +423,7 @@ void CFlowTraceView::SyncViews()
 
 void CFlowTraceView::ShowStackView(bool show)
 {
-  //m_wndInfo.ShowWindow(show ? SW_SHOW : SW_HIDE);
+  //m_wndBackTraceView.ShowWindow(show ? SW_SHOW : SW_HIDE);
   //SetChildPos(0, 0, false);
   if (show)
   {

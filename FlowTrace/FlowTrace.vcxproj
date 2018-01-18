@@ -116,6 +116,7 @@
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="Addr2LineThread.cpp" />
     <ClCompile Include="Archive.cpp" />
+    <ClCompile Include="BackTraceView.cpp" />
     <ClCompile Include="DetailesDlg.cpp" />
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="Addr2LineThread.h" />
     <ClInclude Include="Archive.h" />
+    <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="DetailesDlg.h" />
     <ClInclude Include="FlowTrace.h" />
     <ClInclude Include="FlowTraceView.h" />
