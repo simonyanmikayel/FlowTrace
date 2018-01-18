@@ -100,6 +100,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
   static TCHAR pBuf[cMaxBuf + 1];
   int cb = 0;
 
+  LOG_NODE* pNode;
   ADDR_INFO *p_addr_info = pSelectedNode->p_addr_info;
   APP_NODE* appNode = pSelectedNode->getApp();
   APP_DATA* appData = NULL;
@@ -119,7 +120,26 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     }
   }
 
-  LOG_NODE* pNode = pSelectedNode;
+  int max_fn_name = 0;
+  pNode = pSelectedNode;
+  while (pNode && pNode->isFlow())
+  {
+    FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+    max_fn_name = max(max_fn_name, flowData->cb_fn_name);
+    pNode = pNode->parent;
+  }
+  /* PADDING EXAMPLE
+  int targetStrLen = 10;           // Target output length
+  const char *myString="Monkey";   // String for output
+  const char *padding="#####################################################";
+
+  int padLen = targetStrLen - strlen(myString); // Calc Padding length
+  if(padLen < 0) padLen = 0;    // Avoid negative length
+
+  printf("[%*.*s%s]", padLen, padLen, padding, myString);  // LEFT Padding
+  printf("[%s%*.*s]", myString, padLen, padLen, padding);  // RIGHT Padding
+  */
+  pNode = pSelectedNode;
   while (pNode && pNode->isFlow() && cb < cMaxBuf - 100)
   {
     FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
@@ -127,6 +147,12 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     DWORD cb_fn_name = min(cMaxBuf - cb, flowData->cb_fn_name);
     memcpy(pBuf + cb, flowData->fnName(), cb_fn_name);
     cb += cb_fn_name;
+    int peaading = max_fn_name - cb_fn_name;
+    if (peaading > 0 && cb + peaading + 10 < cMaxBuf)
+    {
+      memset(pBuf + cb, ' ', peaading);
+      cb += peaading;
+    }
     pBuf[cb] = 0;
 
     if (p_addr_info)// && pSelectedNode != pNode
@@ -141,7 +167,10 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
         if (name)
           src = name + 1;
       }
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("addr: (%X+%X) line: %d src: %s"), nearest_pc, addr - nearest_pc, line, src);
+      if (line == INFINITE)
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  from addr: (%X)"), addr);
+      else
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  from addr: (%X+%X) line: %d src: %s"), nearest_pc, addr - nearest_pc, line, src);
     }
 
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));

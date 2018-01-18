@@ -15,9 +15,9 @@ private:
   bool connectToServer(char *szServerName, WORD portNum);
   DWORD readUrl2(APP_DATA* appData);
   void CloseSocket();
-  ADDR_INFO* last_info;
   SOCKET conn;
   LOG_NODE* m_pNode;
   HANDLE m_hParseEvent;
   HANDLE m_hResolveEvent;
+  ADDR_INFO *m_pFakeInfo;
 };

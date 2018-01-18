@@ -8,7 +8,6 @@ extern HWND       hwndMain;
 Addr2LineThread::Addr2LineThread()
 {
   conn = INVALID_SOCKET;
-  last_info = NULL;
   m_pNode = NULL;
   m_hParseEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
   m_hResolveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -126,8 +125,9 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
   char readBuffer[bufSize + 1], sendBuffer[256];
   char* leinEnd;
   long thisReadSize, readSize;
-  DWORD addr;
+  DWORD addr, maxAddr = 0;
   DWORD line;
+  ADDR_INFO* last_info = 0;
   char src[bufSize + 1];
   int total = 0;
 
@@ -192,6 +192,7 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
         if (p_addr_info == NULL)
           break;
 
+        maxAddr = max(maxAddr, addr);
         p_addr_info->addr = addr;
         p_addr_info->line = line;
         p_addr_info->pPrev = last_info;
@@ -212,6 +213,23 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
      
     //stdlog("readBuffer\n%s:\n:\n", readBuffer);
   }
+
+  // add a fake info for unknown
+  if (appData->p_addr_info)
+  {
+    ADDR_INFO *p = (ADDR_INFO*)gArchive.reservDataBuf(sizeof(ADDR_INFO));
+    if (p)
+    {
+      p->addr = maxAddr + 1000;
+      p->line = INFINITE;
+      p->src = "??";
+      p->pPrev = NULL;
+      p->pPrev = appData->p_addr_info;
+      appData->p_addr_info = p;
+      total++;
+    }
+  }
+
   return total;
 }
 
