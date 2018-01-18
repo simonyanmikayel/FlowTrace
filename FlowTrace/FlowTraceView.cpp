@@ -110,7 +110,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
     {
       gArchive.resolveAddr(pSelectedNode);
-      cb += _sntprintf(pBuf + cb, cMaxBuf -cb, TEXT("Line info not yet resolved. Back trace will be updated soon\r\n"));
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a secund\r\n"));
     }
     else if (appData->cb_addr_info == 0)
     {
@@ -134,7 +134,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
       DWORD nearest_pc = p_addr_info->addr;
       DWORD line = p_addr_info->line;
       char* src = p_addr_info->src;
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("addr: (%X+%X) line: %d src: %s"), nearest_pc, addr - nearest_pc, line, src);
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\taddr: (%X+%X) line: %d src: %s"), nearest_pc, addr - nearest_pc, line, src);
     }
 
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
