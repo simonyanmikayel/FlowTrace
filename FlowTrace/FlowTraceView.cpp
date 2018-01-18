@@ -168,9 +168,9 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
           src = name + 1;
       }
       if (line == INFINITE)
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: (%X)"), addr);
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: %X"), addr);
       else
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: (%X+%X) \tline: %d \tsrc: %s"), nearest_pc, addr - nearest_pc, line, src);
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: %-6X+%-3X line: %-6d src: %s"), nearest_pc, addr - nearest_pc, line, src);
     }
 
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
