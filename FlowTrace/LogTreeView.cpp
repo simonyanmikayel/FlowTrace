@@ -132,9 +132,9 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
     dwFlags = MF_BYPOSITION | MF_STRING;
-    //if (!pNode->isFlow())
-    //  dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
+    if (!pNode->isFlow())
+      dwFlags |= MF_DISABLED;
+    //InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY, _T("Copy"));
     dwFlags = MF_BYPOSITION | MF_STRING;

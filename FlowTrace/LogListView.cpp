@@ -663,7 +663,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (GetItemCount() == 0 || !GetSynkNode())
         dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
+    //InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (m_ListSelection.IsEmpty())
         dwFlags |= MF_DISABLED;
