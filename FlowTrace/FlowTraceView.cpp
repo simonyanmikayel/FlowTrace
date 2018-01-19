@@ -109,14 +109,17 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
 
   if (appData)
   {
-    if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
+    if (gSettings.GetResolveAddr())
     {
-      gArchive.resolveAddr(pSelectedNode);
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a seconds\r\n"));
-    }
-    else if (appData->cb_addr_info == 0)
-    {
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Failed to resolve line info\r\n"));
+      if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
+      {
+        gArchive.resolveAddr(pSelectedNode);
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a seconds\r\n"));
+      }
+      else if (appData->cb_addr_info == 0)
+      {
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Failed to resolve line info\r\n"));
+      }
     }
   }
 
@@ -155,7 +158,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     }
     pBuf[cb] = 0;
 
-    if (p_addr_info)// && pSelectedNode != pNode
+    if (gSettings.GetResolveAddr() && p_addr_info)// && pSelectedNode != pNode
     {
       DWORD addr = (DWORD)flowData->call_site;
       DWORD nearest_pc = p_addr_info->addr;
@@ -170,7 +173,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
       if (line == INFINITE)
         cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: %X"), addr);
       else
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: %-6X+%-3X line: %-6d src: %s"), nearest_pc, addr - nearest_pc, line, src);
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  - from addr: %-8X+%-3X line: %-6d src: %s"), nearest_pc, addr - nearest_pc, line, src);
     }
 
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));

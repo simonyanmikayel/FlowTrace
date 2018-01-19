@@ -77,7 +77,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView, TRUE);
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
-  Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, TRUE);
+  Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
   Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
 
   Read(STR_APP_REG_VAL_ColLineNN, m_ColLineNN);
