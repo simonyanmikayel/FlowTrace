@@ -54,7 +54,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
     if (obj == WAIT_OBJECT_0)
     {
       APP_NODE* appNode = (APP_NODE*)rootNode->lastChild;
-      while (appNode)
+      while (appNode && IsWorking())
       {
         APP_DATA* appData = appNode->getData();
         if (appData->cb_addr_info == INFINITE)
@@ -86,7 +86,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
           continue;
 
-        while (pNode && pNode->isFlow() && pNode->p_addr_info == 0)
+        while (pNode && pNode->isFlow() && pNode->p_addr_info == 0 && IsWorking())
         {
           FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
           
@@ -95,7 +95,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
           ADDR_INFO *p_addr_info = appData->p_addr_info;
           pNode->p_addr_info = p_addr_info; //initial bad value
           char* fn = flowData->fnName();
-          while(p_addr_info)
+          while(p_addr_info && IsWorking())
           {
             if (addr >= p_addr_info->addr && p_addr_info->addr >= nearest_pc)
             {
@@ -108,7 +108,8 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
 
           pNode = pNode->parent;
         }
-        ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, 0, (LPARAM)pSelectedNode);
+        if (IsWorking())
+          ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, 0, (LPARAM)pSelectedNode);
       }
     }
     else
@@ -154,7 +155,7 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
 
   // Receive until the peer closes the connection
   readSize = 0;
-  while (1)
+  while (IsWorking())
   {
     thisReadSize = recv(conn, readBuffer + readSize, bufSize - readSize, 0);
 

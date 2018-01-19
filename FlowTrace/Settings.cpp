@@ -40,6 +40,7 @@ LPCTSTR STR_APP_REG_VAL_INFO_HIDEN = _T("InfoHiden");
 LPCTSTR STR_APP_REG_VAL_USE_PC_TIME = _T("UsePcTime");
 LPCTSTR STR_APP_REG_VAL_COMAPCT_VIEW = _T("CompactView");
 LPCTSTR STR_APP_REG_VAL_SHOW_APP_IP = _T("ShowAppIp");
+LPCTSTR STR_APP_REG_VAL_SHOW_APP_TIME = _T("ShowAppTIME");
 LPCTSTR STR_APP_REG_VAL_SHOW_ELAPSED_TIME = _T("ShowElapsedTime");
 LPCTSTR STR_APP_REG_VAL_RESOLVE_ADDR = _T("ResolveAddr");
 LPCTSTR STR_APP_REG_VAL_FULL_SRC_PATH = _T("FullSrcPath");
@@ -76,6 +77,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime, FALSE);
   Read(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView, TRUE);
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
+  Read(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
   Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
   Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
@@ -340,6 +342,7 @@ void CSettings::SetInfoHiden(DWORD i) { m_InfoHiden = i; Write(STR_APP_REG_VAL_I
 void CSettings::SetUsePcTime(DWORD i){ m_UsePcTime = i; Write(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime); }
 void CSettings::SetCompactView(DWORD i){ m_CompactView = i; Write(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView); }
 void CSettings::SetShowAppIp(DWORD i) { m_ShowAppIp = i; Write(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp); }
+void CSettings::SetShowAppTime(DWORD i) { m_ShowAppTime = i; Write(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime); }
 void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime); }
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }

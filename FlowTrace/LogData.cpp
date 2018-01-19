@@ -153,8 +153,8 @@ LOG_NODE* LOG_NODE::getSyncNode()
 
 TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 {
-  const int cMaxBuf = 255;
-  static TCHAR pBuf[cMaxBuf + 1];
+  const int MAX_BUF_LEN = 255;
+  static TCHAR pBuf[MAX_BUF_LEN + 1];
   int cb = 0;
   TCHAR* ret = pBuf;
 #ifdef  NATIVE_TREE
@@ -162,12 +162,12 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 #else
   int NN = getNN();
 #ifdef _DEBUG
-  //cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("[%d %d %d]"), GetExpandCount(), line, lastChild ? lastChild->index : 0);
+  //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("[%d %d %d]"), GetExpandCount(), line, lastChild ? lastChild->index : 0);
 #endif
 #endif
   if (this == rootNode)
   {
-    cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("..."));
+    cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("..."));
   }
   else if (isApp())
   {
@@ -177,16 +177,29 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     pBuf[cb] = 0;
     if (pAppData->lost)
     {
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" (Lost: %d)"), pAppData->lost);
+      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" (Lost: %d)"), pAppData->lost);
     }
     if (gSettings.GetShowAppIp() && pAppData->ip_address[0])
     {
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" - %s"), pAppData->ip_address);
+      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" (%s)"), pAppData->ip_address);
+    }
+    if (gSettings.GetShowAppTime())
+    {
+      struct tm * timeinfo;
+      DWORD sec = pAppData->app_sec;
+      DWORD msec = pAppData->app_msec;
+
+      time_t rawtime = sec;
+      timeinfo = localtime(&rawtime);
+      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" ("));
+      if (timeinfo)
+        cb += strftime(pBuf + cb, MAX_BUF_LEN - cb, "%H:%M:%S", timeinfo);
+      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(".%03d)"), msec);
     }
   }
   else if (isProc())
   {
-    cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("[%d]"), getPid());
+    cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("[%d]"), getPid());
   }
   else if (isFlow())
   {
@@ -198,22 +211,22 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     if (extened)
     {
       if (gSettings.GetColNN() && NN)
-        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), NN); //gArchive.index(this) NN
+        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%d)"), NN); //gArchive.index(this) NN
       if (gSettings.GetShowElapsedTime() && This->getPeer())
       {
         _int64 sec1 = This->getTimeSec();
         _int64 msec1 = This->getTimeMSec();
         _int64 sec2 = (This->getPeer())->getTimeSec();
         _int64 msec2 = (This->getPeer())->getTimeMSec();
-        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
+        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
       }
     }
     if (gSettings.GetColCallAddr())
     {
       void* p = ThisData->call_site;
       //void* p = This->getCallAddr();
-      //cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%lluX)"), (DWORD64)p);
-      cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%p)"), p);
+      //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%lluX)"), (DWORD64)p);
+      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%p)"), p);
     }
     pBuf[cb] = 0;
   }
@@ -221,7 +234,7 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
   {
     ATLASSERT(FALSE);
   }
-  pBuf[cMaxBuf] = 0;
+  pBuf[MAX_BUF_LEN] = 0;
   if (cBuf)
     *cBuf = cb;
   return ret;
@@ -240,23 +253,23 @@ TCHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
 
   if (col == LINE_NN_COL)
   {
-    cb = _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), iItem);
+    cb += _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), iItem);
   }
   else if (col == NN_COL)
   {
     int NN = getNN(); // gArchive.index(this); // getNN();
     if (NN)
-      cb = _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), NN);
+      cb += _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), NN);
   }
   else if (col == APP_COLL)
   {
-    cb = proc->getData()->pAppNode->getData()->cb_app_name;
+    cb += proc->getData()->pAppNode->getData()->cb_app_name;
     memcpy(pBuf, proc->getData()->pAppNode->getData()->appName(), cb);
     pBuf[cb] = 0;
   }
   else if (col == PROC_COL)
   {
-    cb = _sntprintf(pBuf, MAX_BUF_LEN, TEXT("[%d]"), getPid());
+    cb += _sntprintf(pBuf, MAX_BUF_LEN, TEXT("[%d]"), getPid());
   }
   else if (col == TIME_COL)
   {
@@ -269,7 +282,7 @@ TCHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
       time_t rawtime = sec;
       timeinfo = localtime(&rawtime);
       if (timeinfo)
-        cb = strftime(pBuf, MAX_BUF_LEN, "%H:%M:%S", timeinfo);
+        cb += strftime(pBuf, MAX_BUF_LEN, "%H:%M:%S", timeinfo);
 
       //struct tm * timeinfo2;
       //time_t rawtime2 = _time32(NULL);
@@ -284,13 +297,13 @@ TCHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
   {
     if (isTrace())
     {
-      cb = ((TRACE_DATA*)data)->cb_fn_name;
+      cb += ((TRACE_DATA*)data)->cb_fn_name;
       memcpy(pBuf, ((TRACE_DATA*)data)->fnName(), cb);
       pBuf[cb] = 0;
     }
     else
     {
-      cb = ((FLOW_DATA*)data)->cb_fn_name;
+      cb += ((FLOW_DATA*)data)->cb_fn_name;
       memcpy(pBuf, ((FLOW_DATA*)data)->fnName(), cb);
       pBuf[cb] = 0;
     }
@@ -299,13 +312,13 @@ TCHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
   {
     int n = getCallLine();
     if (n)
-      cb = _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), n);
+      cb += _sntprintf(pBuf, MAX_BUF_LEN, TEXT("%d"), n);
   }
   else if (col == LOG_COL)
   {
     if (isFlow())
     {
-      cb = ((FLOW_DATA*)data)->cb_fn_name;
+      cb += ((FLOW_DATA*)data)->cb_fn_name;
       memcpy(pBuf, ((FLOW_DATA*)data)->fnName(), cb);
       pBuf[cb] = 0;
     }

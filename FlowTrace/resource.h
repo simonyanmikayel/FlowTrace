@@ -38,6 +38,8 @@
 #define IDC_EDIT_PORT                   1006
 #define IDC_CALL_ADDR                   1007
 #define IDC_CHECK1                      1008
+#define IDC_CALL_ADDR2                  1008
+#define IDC_CHECK_SHOW_APP_TIME         1008
 #define IDC_CHECK_USE_PC_TIME           1009
 #define IDC_CALL_LINE                   1020
 #define IDC_CHECK_USE_PC_TIME2          1021
