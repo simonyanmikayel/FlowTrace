@@ -8,7 +8,7 @@ Archive    gArchive;
 ROOT_NODE* rootNode;
 LIST_NODES* listNodes;
 SNAPSHOT snapshot;
-
+DWORD Archive::archiveNumber = 0;
 #define ONE_GIGABYTE (1024 * 1024 * 1024)
 
 Archive::Archive()
@@ -32,7 +32,7 @@ Archive::Archive()
   rootNode = (ROOT_NODE*)(((char*)listNodes) - sizeof(ROOT_NODE) - 1);
   node_array = rootNode - 1;
   m_pAddr2LineThread = NULL;
-  clear();
+  clearArchive();
 }
 
 Archive::~Archive()
@@ -44,8 +44,9 @@ Archive::~Archive()
   //DeleteCriticalSection(&cs);
 }
 
-void Archive::clear()
+void Archive::clearArchive()
 {
+  archiveNumber++;
   if (m_pAddr2LineThread)
   {
     m_pAddr2LineThread->StopWork();

@@ -88,8 +88,14 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, DWORD archiveNumber)
 {
+  static DWORD curArchiveNumber = 0;
+  if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
+  {
+    return;
+  }
+
   if (pSelectedNode == 0 || !pSelectedNode->isFlow())
   {
     m_wndBackTraceView.SetWindowText(TEXT(""));
@@ -113,6 +119,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
     {
       if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
       {
+        curArchiveNumber = gArchive.getArchiveNumber();
         gArchive.resolveAddr(pSelectedNode);
         cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a seconds\r\n"));
       }

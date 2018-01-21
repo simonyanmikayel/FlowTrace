@@ -123,20 +123,17 @@ struct LOG_NODE
   LOG_NODE* lastChild;
   LOG_NODE* prevSibling;
   ADDR_INFO *p_addr_info;
-  union {
-    struct {
-      BYTE hasNewLine : 1;
-      BYTE hasSearchResult : 1;
-      BYTE hiden : 1;
-      BYTE hasCheckBox : 1;
-      BYTE checked : 1;
-      BYTE selected : 1;
-      BYTE expanded : 1;
-      BYTE hasNodeBox : 1;
-      BYTE pathExpanded : 1;
-      BYTE bookmark : 1;
-    };
-    BYTE flag;
+  struct {
+    WORD hasNewLine : 1;
+    WORD hasSearchResult : 1;
+    WORD hiden : 1;
+    WORD hasCheckBox : 1;
+    WORD checked : 1;
+    WORD selected : 1;
+    WORD expanded : 1;
+    WORD hasNodeBox : 1;
+    WORD pathExpanded : 1;
+    WORD bookmark : 1;
   };
 #ifdef NATIVE_TREE
   HTREEITEM htreeitem;
@@ -166,7 +163,7 @@ struct LOG_NODE
       lastChild->nextSibling = pNode;
 
     nextChankCounter++;
-    if (nextChankCounter == 255)
+    if (nextChankCounter == 255) // 255 is max number of nextChankCounter. then it will start from 0 
     {
       if (!nextChankMarker)
         firstChild->nextChank = pNode;
