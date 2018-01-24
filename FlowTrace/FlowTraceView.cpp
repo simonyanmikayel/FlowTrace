@@ -92,6 +92,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
 {
   static DWORD curArchiveNumber = 0;
   static LOG_NODE* pCurNode = 0;
+  LOG_NODE* pNode;
   if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
   {
     return;
@@ -111,14 +112,18 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
   }
 
   bool pendingToResolveAddr = false;
-  LOG_NODE* pNode= pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
-  APP_NODE* appNode = pNode ? pNode->getApp() : NULL;
-  if (gSettings.GetResolveAddr() && appNode)
+  if (pUpdatedNode == NULL)
   {
-    APP_DATA* appData = appNode->getData();
-    if (appData && appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
+    pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+    APP_NODE* appNode = pNode ? pNode->getApp() : NULL;
+    if (gSettings.GetResolveAddr() && appNode)
     {
-      pendingToResolveAddr = true;
+      APP_DATA* appData = appNode->getData();
+      if (appData && appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
+      {
+        pendingToResolveAddr = true;
+        gArchive.resolveAddr(pSelectedNode);
+      }
     }
   }
 
@@ -215,8 +220,6 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
   pBuf[cMaxBuf] = 0;
 
   m_wndBackTraceView.SetWindowText(pBuf);
-  if (pendingToResolveAddr)
-    gArchive.resolveAddr(pSelectedNode);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)
