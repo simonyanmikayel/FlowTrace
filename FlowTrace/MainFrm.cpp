@@ -361,7 +361,7 @@ LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
   LOG_NODE* pNode = (LOG_NODE*)lParam;
-  m_view.ShowBackTrace(pNode, gArchive.getArchiveNumber());
+  m_view.ShowBackTrace(NULL, pNode, gArchive.getArchiveNumber());
   return 0;
 }
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)

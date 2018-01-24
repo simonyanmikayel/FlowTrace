@@ -88,19 +88,27 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, DWORD archiveNumber)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   static DWORD curArchiveNumber = 0;
+  LOG_NODE* pCurNode = 0;
   if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
   {
     return;
   }
+  if (pUpdatedNode != NULL && pCurNode != pUpdatedNode)
+  {
+    return;
+  }
 
+  pSelectedNode = pSelectedNode ? pSelectedNode : pUpdatedNode;
+  pCurNode = pSelectedNode;
   if (pSelectedNode == 0 || !pSelectedNode->isFlow())
   {
     m_wndBackTraceView.SetWindowText(TEXT(""));
     return;
   }
+  //LOG_NODE* pNode = pSelectedNode->getSyncNode();
 
   const int cMaxBuf = 1204 * 8;
   static TCHAR pBuf[cMaxBuf + 1];
