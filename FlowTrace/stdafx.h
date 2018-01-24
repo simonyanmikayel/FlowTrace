@@ -11,7 +11,7 @@
 #define _WIN32_WINNT  0x0601 // Windows 7
 
 #define _WIN32_IE     0x0501
-#define _RICHEDIT_VER 0x0200
+#define _RICHEDIT_VER 0x0210
 
 #define _HAS_EXCEPTIONS 0 //Better than compiling your code with /EHsc if you don't plan on adding exception handling.
 //////////////////////////////////////////////////////////////////////////////
@@ -144,5 +144,5 @@ typedef std::string tstring;
 #pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
-
+//#define _USE_RICH_EDIT
 //#define NATIVE_TREE

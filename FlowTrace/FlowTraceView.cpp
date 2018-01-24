@@ -39,6 +39,11 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
   m_wndBackTraceView.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
+#ifdef _USE_RICH_EDIT
+  m_wndBackTraceView.SetEventMask(m_wndBackTraceView.GetEventMask() | ENM_SELCHANGE | ENM_LINK);
+  m_wndBackTraceView.SetAutoURLDetect(TRUE);
+  //m_wndBackTraceView.SetReadOnly();
+#endif
 
   m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |

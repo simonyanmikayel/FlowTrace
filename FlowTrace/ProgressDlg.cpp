@@ -295,6 +295,7 @@ void TaskThread::FileImport()
   {
     m_count = 3;// 50000000;
     int cRecursion = 3;//10
+    int ii = 0;
     bool ss = true;
     char sz1[] = { "86 0 0 7 18 1 3171 1466073590 349287000 1466073590 349287000 1466073590 350294000 00023230 001699F8 0-CTAPapp^thread_init_slave\n" };
     char sz2[] = { "90 2 2 7 18 5 3171 1466073590 349287000 1466073590 349287000 1466073590 350752000 00023230 001699F8 0-CTAPapp^thread_init_slavetest " };
@@ -303,11 +304,11 @@ void TaskThread::FileImport()
     ROW_LOG_REC* rec1 = (ROW_LOG_REC*)buf1;
     ROW_LOG_REC* rec2 = (ROW_LOG_REC*)buf2;
     ROW_LOG_REC* rec3 = (ROW_LOG_REC*)buf3;
-    ss = (15 == sscanf(sz1, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
-      &rec1->len, &rec1->log_type, &rec1->nn, &rec1->cb_app_path, &rec1->cb_fn_name, &rec1->cb_trace, &rec1->tid, &pc_sec, &pc_msec, &rec1->app_sec, &rec1->app_msec, &rec1->sec, &rec1->msec, &rec1->this_fn, &rec1->call_site, &rec1->call_line, &rec1->data));
-    ss = (15 == sscanf(sz2, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
+    ss = (17 == (ii = sscanf(sz1, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
+      &rec1->len, &rec1->log_type, &rec1->nn, &rec1->cb_app_path, &rec1->cb_fn_name, &rec1->cb_trace, &rec1->tid, &pc_sec, &pc_msec, &rec1->app_sec, &rec1->app_msec, &rec1->sec, &rec1->msec, &rec1->this_fn, &rec1->call_site, &rec1->call_line, &rec1->data)));
+    ss = (17 == sscanf(sz2, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
       &rec2->len, &rec2->log_type, &rec2->nn, &rec2->cb_app_path, &rec2->cb_fn_name, &rec2->cb_trace, &rec2->tid, &pc_sec, &pc_msec, &rec2->app_sec, &rec2->app_msec, &rec2->sec, &rec2->msec, &rec2->this_fn, &rec2->call_site, &rec2->call_line, &rec2->data));
-    ss = (15 == sscanf(sz3, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
+    ss = (17 == sscanf(sz3, TEXT("%d %d %d %d %d %d %d %d %d %u %u %u %u %p %p %d-%s"),
       &rec3->len, &rec3->log_type, &rec3->nn, &rec3->cb_app_path, &rec3->cb_fn_name, &rec3->cb_trace, &rec3->tid, &pc_sec, &pc_msec, &rec3->app_sec, &rec3->app_msec, &rec3->sec, &rec3->msec, &rec3->this_fn, &rec3->call_site, &rec3->call_line, &rec3->data));
     rec1->len = rec1->size();
     rec2->len = rec2->size(); rec2->trace()[rec2->cb_trace - 1] = '\n';

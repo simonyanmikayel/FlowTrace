@@ -5,7 +5,11 @@
 
 class CFlowTraceView;
 
+#ifdef _USE_RICH_EDIT
+class CBackTraceView : public CWindowImpl< CBackTraceView, CRichEditCtrl>
+#else
 class CBackTraceView : public CWindowImpl< CBackTraceView, CEdit>
+#endif
 {
 public:
   CBackTraceView(CFlowTraceView* pView);
@@ -48,7 +52,7 @@ private:
 int targetStrLen = 10;           // Target output length
 const char *myString="Monkey";   // String for output
 const char *padding="#####################################################";
-
+ 
 int padLen = targetStrLen - strlen(myString); // Calc Padding length
 if(padLen < 0) padLen = 0;    // Avoid negative length
 
