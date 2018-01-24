@@ -322,9 +322,11 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
     static TCHAR pBuf[128];
     _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.GetItem() + 1));
     ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
-    //LOG_NODE* pNode = GetSynkNode();
-    //if (!extend)
-    //  m_pView->ShowBackTrace(pNode);
+    if (!extend)
+    {
+      LOG_NODE* pNode = listNodes->getNode(m_ListSelection.GetItem());// GetSynkNode();
+      m_pView->ShowBackTrace(pNode);
+    }
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)

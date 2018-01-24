@@ -72,6 +72,12 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         LOG_NODE* pNode = m_pNode;
         LOG_NODE* pSelectedNode = m_pNode;
         m_pNode = 0;
+        if (!pNode)
+          continue;
+        if (pNode->isTrace())
+          pNode = pNode->getSyncNode();
+        if (pNode && pNode->parent == NULL)
+          pNode = pNode->getPeer();
         if (!pNode || !pNode->isFlow())
           continue;
         ADDR_INFO *p_addr_info = pNode->p_addr_info;
@@ -86,26 +92,28 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
           continue;
 
-        while (pNode && pNode->isFlow() && pNode->p_addr_info == 0 && IsWorking())
+        while (pNode && pNode->isFlow() && IsWorking())
         {
-          FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
-          
-          DWORD addr = (DWORD)flowData->call_site;
-          DWORD nearest_pc = 0;
-          ADDR_INFO *p_addr_info = appData->p_addr_info;
-          pNode->p_addr_info = p_addr_info; //initial bad value
-          char* fn = flowData->fnName();
-          while(p_addr_info && IsWorking())
+          if (pNode->p_addr_info == 0)
           {
-            if (addr >= p_addr_info->addr && p_addr_info->addr >= nearest_pc)
+            FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+
+            DWORD addr = (DWORD)flowData->call_site;
+            DWORD nearest_pc = 0;
+            ADDR_INFO *p_addr_info = appData->p_addr_info;
+            pNode->p_addr_info = p_addr_info; //initial bad value
+            char* fn = flowData->fnName();
+            while (p_addr_info && IsWorking())
             {
-              nearest_pc = p_addr_info->addr;
-              pNode->p_addr_info = p_addr_info;
+              if (addr >= p_addr_info->addr && p_addr_info->addr >= nearest_pc)
+              {
+                nearest_pc = p_addr_info->addr;
+                pNode->p_addr_info = p_addr_info;
+              }
+
+              p_addr_info = p_addr_info->pPrev;
             }
-
-            p_addr_info = p_addr_info->pPrev;
           }
-
           pNode = pNode->parent;
         }
         if (IsWorking())

@@ -8,6 +8,38 @@ bool LOG_NODE::isSynchronized(LOG_NODE* pSyncNode)
   return pSyncNode && (this == pSyncNode || pPeer == pSyncNode || isParent(pSyncNode) || (pPeer && pPeer->isParent(pSyncNode)));
 }
 
+char* LOG_NODE::getFnName() 
+{ 
+  if (isFlow()) 
+  { 
+    return  ((FLOW_NODE*)this)->getData()->fnName(); 
+  } 
+  else if (isTrace()) 
+  { 
+    return  ((TRACE_NODE*)this)->getData()->fnName(); 
+  } 
+  else 
+  { 
+    return ""; 
+  } 
+}
+
+int LOG_NODE::getFnNameSize()
+{
+  if (isFlow())
+  {
+    return  ((FLOW_NODE*)this)->getData()->cb_fn_name;
+  }
+  else if (isTrace())
+  {
+    return  ((TRACE_NODE*)this)->getData()->cb_fn_name;
+  }
+  else
+  {
+    return 0;
+  }
+
+}
 void FLOW_NODE::addToTree()
 {
   PROC_DATA* pProcData = proc->getData();

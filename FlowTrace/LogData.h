@@ -199,6 +199,8 @@ struct LOG_NODE
   int getListImage(bool selected);
   LOG_NODE* getSyncNode();
   APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
+  char* getFnName();
+  int getFnNameSize();
 };
 
 struct ROOT_NODE : LOG_NODE

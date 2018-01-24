@@ -11,7 +11,7 @@
 #define _WIN32_WINNT  0x0601 // Windows 7
 
 #define _WIN32_IE     0x0501
-#define _RICHEDIT_VER 0x0100
+#define _RICHEDIT_VER 0x0200
 
 #define _HAS_EXCEPTIONS 0 //Better than compiling your code with /EHsc if you don't plan on adding exception handling.
 //////////////////////////////////////////////////////////////////////////////
@@ -109,6 +109,7 @@ an alternative solution is to add an additional library to your linker input, le
 #include <regex>
 #include <chrono>
 #include <memory>
+#include <list>
 using namespace std;
 #pragma warning(pop)
 

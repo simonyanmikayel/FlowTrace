@@ -91,7 +91,7 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
 void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   static DWORD curArchiveNumber = 0;
-  LOG_NODE* pCurNode = 0;
+  static LOG_NODE* pCurNode = 0;
   if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
   {
     return;
@@ -101,106 +101,122 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
     return;
   }
 
-  pSelectedNode = pSelectedNode ? pSelectedNode : pUpdatedNode;
+  pSelectedNode = pSelectedNode ? pSelectedNode : pUpdatedNode;  
   pCurNode = pSelectedNode;
-  if (pSelectedNode == 0 || !pSelectedNode->isFlow())
+  curArchiveNumber = gArchive.getArchiveNumber();
+  if (pSelectedNode == 0)
   {
     m_wndBackTraceView.SetWindowText(TEXT(""));
     return;
   }
-  //LOG_NODE* pNode = pSelectedNode->getSyncNode();
+
+  bool pendingToResolveAddr = false;
+  LOG_NODE* pNode= pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+  APP_NODE* appNode = pNode ? pNode->getApp() : NULL;
+  if (gSettings.GetResolveAddr() && appNode)
+  {
+    APP_DATA* appData = appNode->getData();
+    if (appData && appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
+    {
+      pendingToResolveAddr = true;
+    }
+  }
+
+  int max_fn_name = 0;
+  pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+  while (pNode && (pNode->isFlow() || pNode->isTrace()))
+  {
+    max_fn_name = max(max_fn_name, pNode->getFnNameSize());
+    pNode = pNode->parent;
+  }
 
   const int cMaxBuf = 1204 * 8;
   static TCHAR pBuf[cMaxBuf + 1];
   int cb = 0;
 
-  LOG_NODE* pNode;
-  ADDR_INFO *p_addr_info = pSelectedNode->p_addr_info;
-  APP_NODE* appNode = pSelectedNode->getApp();
-  APP_DATA* appData = NULL;
-  if (appNode)
-    appData = appNode->getData();
-
-  if (appData)
+  pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+  while (pNode && (pNode->isFlow() || pNode->isTrace()) && cb < cMaxBuf - 300)
   {
-    if (gSettings.GetResolveAddr())
-    {
-      if (appData->cb_addr_info == INFINITE || p_addr_info == NULL)
-      {
-        curArchiveNumber = gArchive.getArchiveNumber();
-        gArchive.resolveAddr(pSelectedNode);
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Back trace will be updated with line info in a seconds\r\n"));
-      }
-      else if (appData->cb_addr_info == 0)
-      {
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("Failed to resolve line info\r\n"));
-      }
-    }
-  }
-
-  int max_fn_name = 0;
-  pNode = pSelectedNode;
-  while (pNode && pNode->isFlow())
-  {
-    FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
-    max_fn_name = max(max_fn_name, flowData->cb_fn_name);
-    pNode = pNode->parent;
-  }
-  /* PADDING EXAMPLE
-  int targetStrLen = 10;           // Target output length
-  const char *myString="Monkey";   // String for output
-  const char *padding="#####################################################";
-
-  int padLen = targetStrLen - strlen(myString); // Calc Padding length
-  if(padLen < 0) padLen = 0;    // Avoid negative length
-
-  printf("[%*.*s%s]", padLen, padLen, padding, myString);  // LEFT Padding
-  printf("[%s%*.*s]", myString, padLen, padLen, padding);  // RIGHT Padding
-  */
-  pNode = pSelectedNode;
-  while (pNode && pNode->isFlow() && cb < cMaxBuf - 100)
-  {
-    FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
-
-    DWORD cb_fn_name = min(cMaxBuf - cb, flowData->cb_fn_name);
-    memcpy(pBuf + cb, flowData->fnName(), cb_fn_name);
+    DWORD cb_fn_name = min(cMaxBuf - cb, pNode->getFnNameSize());
+    memcpy(pBuf + cb, pNode->getFnName(), cb_fn_name);
     cb += cb_fn_name;
-    int peaading = max_fn_name - cb_fn_name;
-    if (peaading > 0 && cb + peaading + 10 < cMaxBuf)
+    int padding = max_fn_name - cb_fn_name;
+    if (padding > 0 && cb + padding + 10 < cMaxBuf)
     {
-      memset(pBuf + cb, ' ', peaading);
-      cb += peaading;
+      memset(pBuf + cb, ' ', padding);
+      cb += padding;
     }
     pBuf[cb] = 0;
 
-    if (gSettings.GetResolveAddr() && p_addr_info)// && pSelectedNode != pNode
+    if (pNode->isFlow())
     {
+      FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+
       DWORD addr = (DWORD)flowData->call_site;
-      DWORD nearest_pc = p_addr_info->addr;
-      DWORD line = p_addr_info->line;
-      char* src = p_addr_info->src;
-      if (!gSettings.GetFullSrcPath())
+      if (gSettings.GetResolveAddr())
       {
-        char* name = strrchr(src, '/');
-        if (name)
-          src = name + 1;
+        ADDR_INFO *p_addr_info = pNode->p_addr_info;
+        if (p_addr_info)
+        {
+          DWORD line = p_addr_info->line;
+          if (line != INFINITE)
+          {
+            DWORD nearest_pc = p_addr_info->addr;
+            char* src = p_addr_info->src;
+            if (!gSettings.GetFullSrcPath())
+            {
+              char* name = strrchr(src, '/');
+              if (name)
+                src = name + 1;
+            }
+            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X+%-3X| line: %-6d| src: %s"), nearest_pc, addr - nearest_pc, line, src);
+          }
+          else
+          {
+            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X"), addr);
+          }
+        }
       }
-      if (line == INFINITE)
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %X"), addr);
       else
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X+%-3X| line: %-6d| src: %s"), nearest_pc, addr - nearest_pc, line, src);
+      {
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X"), addr);
+        if (pendingToResolveAddr)
+          cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" | pending to resolve call line") );
+      }
+    }
+    else if (pNode->isTrace())
+    {
+      TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | line: %-6d | "), traceData->call_line);
+      TRACE_CHANK* chank = traceData->getFirestChank();
+      int cb_trace = 0;
+      const int max_cb_trace = 150;
+      while (chank && chank->len && cb_trace <= max_cb_trace)
+      {
+        int cb_chank_trace = min(max_cb_trace, chank->len);
+        memcpy(pBuf + cb, chank->trace, cb_chank_trace);
+        cb += cb_chank_trace;
+        cb_trace += cb_chank_trace;
+        pBuf[cb] = 0;
+        chank = chank->next_chank;
+      }
+      if (cb_trace >= max_cb_trace)
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" ..."));
     }
 
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
-    pNode = pNode->parent;
-    p_addr_info = pNode->p_addr_info;
+    if (pNode->isFlow())
+      pNode = pNode->parent;
+    else
+      pNode = pNode->getSyncNode();
   }
 
   pBuf[cb] = 0;
   pBuf[cMaxBuf] = 0;
 
   m_wndBackTraceView.SetWindowText(pBuf);
-
+  if (pendingToResolveAddr)
+    gArchive.resolveAddr(pSelectedNode);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)
