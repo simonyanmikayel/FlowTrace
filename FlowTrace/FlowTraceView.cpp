@@ -42,7 +42,8 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
 #ifdef _USE_RICH_EDIT
   m_wndBackTraceView.SetEventMask(m_wndBackTraceView.GetEventMask() | ENM_SELCHANGE | ENM_LINK);
   m_wndBackTraceView.SetAutoURLDetect(TRUE);
-  //m_wndBackTraceView.SetReadOnly();
+  m_wndBackTraceView.SetUndoLimit(0);
+  m_wndBackTraceView.SetReadOnly();
 #endif
 
   m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
@@ -93,6 +94,20 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
+#ifdef _USE_RICH_EDIT
+struct StreamInCallbackCookie { char* buf; int cb; int pos; };
+static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
+{
+  StreamInCallbackCookie* pCookie = (StreamInCallbackCookie*)dwCookie;
+  char* pTxt = pCookie->buf + pCookie->pos;
+  int c = min(pCookie->cb - pCookie->pos, cb);
+  memcpy(pbBuff, pTxt, c);
+  pCookie->pos += c;
+  *pcb = c;
+  return 0;
+}
+#endif
+
 void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   static DWORD curArchiveNumber = 0;
@@ -108,14 +123,13 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
   }
 
   pSelectedNode = pSelectedNode ? pSelectedNode : pUpdatedNode;  
-  pCurNode = pSelectedNode;
-  curArchiveNumber = gArchive.getArchiveNumber();
   if (pSelectedNode == 0)
   {
-    m_wndBackTraceView.SetWindowText(TEXT(""));
     return;
   }
 
+  pCurNode = pSelectedNode;
+  curArchiveNumber = gArchive.getArchiveNumber();
   bool pendingToResolveAddr = false;
   if (pUpdatedNode == NULL)
   {
@@ -141,9 +155,11 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
   }
 
   const int cMaxBuf = 1204 * 8;
-  static TCHAR pBuf[cMaxBuf + 1];
+  static char pBuf[cMaxBuf + 1];
   int cb = 0;
-
+#ifdef _USE_RICH_EDIT
+  cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\rtf1)"); 
+#endif
   pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
   while (pNode && (pNode->isFlow() || pNode->isTrace()) && cb < cMaxBuf - 300)
   {
@@ -157,6 +173,9 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
       cb += padding;
     }
     pBuf[cb] = 0;
+#ifdef _USE_RICH_EDIT
+    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\field{\*\fldinst{ HYPERLINK http://example.com  }}{\fldrslt{ DisplayText}}})");
+#endif
 
     if (pNode->isFlow())
     {
@@ -179,25 +198,27 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
               if (name)
                 src = name + 1;
             }
-            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X+%-3X| line: %-6d| src: %s"), nearest_pc, addr - nearest_pc, line, src);
+            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X+%-3X| line: %-6d| src: %s", nearest_pc, addr - nearest_pc, line, src);
           }
           else
           {
-            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X"), addr);
+            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X", addr);
           }
+        }
+        else if (pendingToResolveAddr)
+        {
+          cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X    | pending to resolve call line", addr);
         }
       }
       else
       {
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | from addr: %-8X"), addr);
-        if (pendingToResolveAddr)
-          cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" | pending to resolve call line") );
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X", addr);
       }
     }
     else if (pNode->isTrace())
     {
       TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("  | line: %-6d | "), traceData->call_line);
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | line: %-6d | ", traceData->call_line);
       TRACE_CHANK* chank = traceData->getFirestChank();
       int cb_trace = 0;
       const int max_cb_trace = 150;
@@ -211,9 +232,12 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
         chank = chank->next_chank;
       }
       if (cb_trace >= max_cb_trace)
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" ..."));
+        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, " ...");
     }
 
+#ifdef _USE_RICH_EDIT
+    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\par)");
+#endif
     cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
     if (pNode->isFlow())
       pNode = pNode->parent;
@@ -221,10 +245,21 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
       pNode = pNode->getSyncNode();
   }
 
+#ifdef _USE_RICH_EDIT
+  cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "}");
+#endif
   pBuf[cb] = 0;
   pBuf[cMaxBuf] = 0;
 
-  m_wndBackTraceView.SetWindowText(pBuf);
+#ifdef _USE_RICH_EDIT
+  StreamInCallbackCookie cookie = { pBuf, cb, 0 };
+  EDITSTREAM es;
+  es.dwCookie = (DWORD)(&cookie);
+  es.pfnCallback = MyStreamInCallback;
+  m_wndBackTraceView.StreamIn(SF_RTF, es);
+#else
+  ::SetWindowTextA(m_wndBackTraceView.m_hWnd, pBuf);
+#endif
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)

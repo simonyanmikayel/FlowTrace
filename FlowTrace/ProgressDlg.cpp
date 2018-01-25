@@ -79,7 +79,7 @@ void CProgressDlg::End(int wID)
   m_pTaskThread->StopWork();
   if (m_cmd == ID_FILE_IMPORT)
   {
-    ::SendMessage(hwndMain, WM_INPORT_TASK, 1, 0);
+    ::PostMessage(hwndMain, WM_INPORT_TASK, 1, 0);
   }
   EndDialog(wID);
 
