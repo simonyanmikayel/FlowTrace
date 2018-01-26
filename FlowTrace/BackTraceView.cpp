@@ -16,11 +16,13 @@ CBackTraceView::~CBackTraceView()
 
 void CBackTraceView::OnSize(UINT nType, CSize size)
 {
-  int ss;
   if (!m_Initialised)
   {
     m_Initialised = true;
-    InsertColumn(0, "aaaaaaaaaaa");
+    int cColumns = 0;
+    InsertColumn(0, "aaaaaa", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
+    InsertColumn(0, "bbbbbb", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
+    InsertColumn(0, "cccccc", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
   }
 }
 
@@ -40,7 +42,11 @@ void CBackTraceView::CopySelection()
 
 void CBackTraceView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 {
-  TextOut(hdc, rcItem.left, rcItem.top, TEXT("111111111111111"), 15);
+  POINT  textPoint = { 0, rcItem.top };
+  if (rcItem.left > 0)
+    textPoint.x += rcItem.left;
+
+  TextOut(hdc, textPoint.x, textPoint.y, TEXT("123"), 3);
 }
 
 void CBackTraceView::ItemPrePaint(int iItem, HDC hdc, RECT rc)

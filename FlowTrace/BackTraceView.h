@@ -29,7 +29,6 @@ public:
   void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
   void ItemPrePaint(int iItem, HDC hdc, RECT rc);
   void OnSize(UINT nType, CSize size);
-  bool m_Initialised;
 #else
   BEGIN_MSG_MAP(CBackTraceView)
   END_MSG_MAP()
@@ -37,6 +36,7 @@ public:
 
 
 private:
+  bool m_Initialised;
   CFlowTraceView* m_pView;
 };
 
