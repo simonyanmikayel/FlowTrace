@@ -144,5 +144,7 @@ typedef std::string tstring;
 #pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
-//#define _USE_RICH_EDIT
+//#define _AUTO_TEST
+//#define _USE_LIST_VIEW_FOR_BACK_TRACE
+//#define _USE_RICH_EDIT_FOR_BACK_TRACE
 //#define NATIVE_TREE

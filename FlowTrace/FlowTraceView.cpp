@@ -35,11 +35,16 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   m_wndHorzSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
   m_wndVertSplitter.Create(m_wndHorzSplitter, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
 
+#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
+  dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
+    LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA;
+#else
   dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL | ES_MULTILINE | ES_WANTRETURN;
+#endif
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
   m_wndBackTraceView.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
-#ifdef _USE_RICH_EDIT
+#ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
   m_wndBackTraceView.SetEventMask(m_wndBackTraceView.GetEventMask() | ENM_SELCHANGE | ENM_LINK);
   m_wndBackTraceView.SetAutoURLDetect(TRUE);
   m_wndBackTraceView.SetUndoLimit(0);
@@ -94,25 +99,12 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-#ifdef _USE_RICH_EDIT
-struct StreamInCallbackCookie { char* buf; int cb; int pos; };
-static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
-{
-  StreamInCallbackCookie* pCookie = (StreamInCallbackCookie*)dwCookie;
-  char* pTxt = pCookie->buf + pCookie->pos;
-  int c = min(pCookie->cb - pCookie->pos, cb);
-  memcpy(pbBuff, pTxt, c);
-  pCookie->pos += c;
-  *pcb = c;
-  return 0;
-}
-#endif
-
 void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   static DWORD curArchiveNumber = 0;
   static LOG_NODE* pCurNode = 0;
   LOG_NODE* pNode;
+
   if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
   {
     return;
@@ -130,6 +122,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
 
   pCurNode = pSelectedNode;
   curArchiveNumber = gArchive.getArchiveNumber();
+
   bool pendingToResolveAddr = false;
   if (pUpdatedNode == NULL)
   {
@@ -146,120 +139,7 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
     }
   }
 
-  int max_fn_name = 0;
-  pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
-  while (pNode && (pNode->isFlow() || pNode->isTrace()))
-  {
-    max_fn_name = max(max_fn_name, pNode->getFnNameSize());
-    pNode = pNode->parent;
-  }
-
-  const int cMaxBuf = 1204 * 8;
-  static char pBuf[cMaxBuf + 1];
-  int cb = 0;
-#ifdef _USE_RICH_EDIT
-  cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\rtf1)"); 
-#endif
-  pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
-  while (pNode && (pNode->isFlow() || pNode->isTrace()) && cb < cMaxBuf - 300)
-  {
-    DWORD cb_fn_name = min(cMaxBuf - cb, pNode->getFnNameSize());
-    memcpy(pBuf + cb, pNode->getFnName(), cb_fn_name);
-    cb += cb_fn_name;
-    int padding = max_fn_name - cb_fn_name;
-    if (padding > 0 && cb + padding + 10 < cMaxBuf)
-    {
-      memset(pBuf + cb, ' ', padding);
-      cb += padding;
-    }
-    pBuf[cb] = 0;
-#ifdef _USE_RICH_EDIT
-    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\field{\*\fldinst{ HYPERLINK http://example.com  }}{\fldrslt{ DisplayText}}})");
-#endif
-
-    if (pNode->isFlow())
-    {
-      FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
-
-      DWORD addr = (DWORD)flowData->call_site;
-      if (gSettings.GetResolveAddr())
-      {
-        ADDR_INFO *p_addr_info = pNode->p_addr_info;
-        if (p_addr_info)
-        {
-          DWORD line = p_addr_info->line;
-          if (line != INFINITE)
-          {
-            DWORD nearest_pc = p_addr_info->addr;
-            char* src = p_addr_info->src;
-            if (!gSettings.GetFullSrcPath())
-            {
-              char* name = strrchr(src, '/');
-              if (name)
-                src = name + 1;
-            }
-            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X+%-3X| line: %-6d| src: %s", nearest_pc, addr - nearest_pc, line, src);
-          }
-          else
-          {
-            cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X", addr);
-          }
-        }
-        else if (pendingToResolveAddr)
-        {
-          cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X    | pending to resolve call line", addr);
-        }
-      }
-      else
-      {
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X", addr);
-      }
-    }
-    else if (pNode->isTrace())
-    {
-      TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
-      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | line: %-6d | ", traceData->call_line);
-      TRACE_CHANK* chank = traceData->getFirestChank();
-      int cb_trace = 0;
-      const int max_cb_trace = 150;
-      while (chank && chank->len && cb_trace <= max_cb_trace)
-      {
-        int cb_chank_trace = min(max_cb_trace, chank->len);
-        memcpy(pBuf + cb, chank->trace, cb_chank_trace);
-        cb += cb_chank_trace;
-        cb_trace += cb_chank_trace;
-        pBuf[cb] = 0;
-        chank = chank->next_chank;
-      }
-      if (cb_trace >= max_cb_trace)
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, " ...");
-    }
-
-#ifdef _USE_RICH_EDIT
-    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\par)");
-#endif
-    cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT("\r\n"));
-    if (pNode->isFlow())
-      pNode = pNode->parent;
-    else
-      pNode = pNode->getSyncNode();
-  }
-
-#ifdef _USE_RICH_EDIT
-  cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "}");
-#endif
-  pBuf[cb] = 0;
-  pBuf[cMaxBuf] = 0;
-
-#ifdef _USE_RICH_EDIT
-  StreamInCallbackCookie cookie = { pBuf, cb, 0 };
-  EDITSTREAM es;
-  es.dwCookie = (DWORD)(&cookie);
-  es.pfnCallback = MyStreamInCallback;
-  m_wndBackTraceView.StreamIn(SF_RTF, es);
-#else
-  ::SetWindowTextA(m_wndBackTraceView.m_hWnd, pBuf);
-#endif
+  m_wndBackTraceView.UpdateTrace(pSelectedNode, pendingToResolveAddr);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)
@@ -295,6 +175,7 @@ void CFlowTraceView::ClearLog()
 {
   m_wndListView.Clear();
   m_wndTreeView.Clear();
+  m_wndBackTraceView.ClearTrace();
   m_selectedNode = NULL;
 }
 
@@ -423,7 +304,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     case CDDS_PREPAINT:
       return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
     case CDDS_ITEMPREPAINT:
-      //m_wndTreeView.DrawItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_NOTIFYSUBITEMDRAW;
     case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
     {                                    // response to CDDS_ITEMPREPAINT.
@@ -443,7 +323,7 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     case CDDS_PREPAINT:
       return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
     case CDDS_ITEMPREPAINT:
-      m_wndListView.DrawItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      m_wndListView.ItemPrePaint(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_NOTIFYSUBITEMDRAW;
     case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
     {                                    // response to CDDS_ITEMPREPAINT.
@@ -452,7 +332,29 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     }
     break;
     }
+    return CDRF_DODEFAULT;
   }
+#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
+  else if (pnmh->hwndFrom == m_wndBackTraceView)
+  {
+    LPNMLVCUSTOMDRAW pNMLVCD = (LPNMLVCUSTOMDRAW)pnmh;
+    switch (pNMLVCD->nmcd.dwDrawStage)
+    {
+    case CDDS_PREPAINT:
+      return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
+    case CDDS_ITEMPREPAINT:
+      m_wndBackTraceView.ItemPrePaint(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      return CDRF_NOTIFYSUBITEMDRAW;
+    case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
+    {                                    // response to CDDS_ITEMPREPAINT.
+      m_wndBackTraceView.DrawSubItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      return CDRF_SKIPDEFAULT;
+    }
+    break;
+  }
+    return CDRF_DODEFAULT;
+  }
+#endif
   return CDRF_DODEFAULT;
 }
 #ifdef NATIVE_TREE

@@ -56,7 +56,6 @@ public:
   int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
   void ShowBackTrace(LOG_NODE* pNode, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
-
 private:
 #ifdef NATIVE_TREE
   LOG_NODE* getTreeNode(HTREEITEM hItem);

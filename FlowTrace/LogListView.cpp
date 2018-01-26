@@ -1076,7 +1076,7 @@ LRESULT CLogListView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*l
     return 1; // handled
 }
 
-void CLogListView::DrawItem(int iItem, HDC hdc, RECT rcItem)
+void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 {
     LOG_NODE* pNode = listNodes->getNode(iItem);
     if (!pNode)

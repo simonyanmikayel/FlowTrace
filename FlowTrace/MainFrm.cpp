@@ -180,8 +180,9 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     StartLogging();
 
     //CProgressDlg dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
-    //CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
-
+#ifdef _AUTO_TEST
+    CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+#endif
     m_view.ShowStackView(!gSettings.GetInfoHiden());
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
     return 0;
@@ -435,7 +436,7 @@ LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
     else if (::GetFocus() == m_list.m_hWnd)
         m_list.CopySelection();
     else if (::GetFocus() == m_backTrace.m_hWnd)
-      m_backTrace.Copy();
+      m_backTrace.CopySelection();
     else if (::GetFocus() == m_searchedit.m_hWnd)
       m_searchedit.Copy();
     

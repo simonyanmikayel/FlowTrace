@@ -81,7 +81,6 @@ public:
   LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
-  LRESULT OnScroll(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnLButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnLButtonUp(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
@@ -94,7 +93,7 @@ public:
   void Clear();
   void RefreshList(bool redraw);
   void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
-  void DrawItem(int iItem, HDC hdc, RECT rc);
+  void ItemPrePaint(int iItem, HDC hdc, RECT rc);
   LIST_COL getGolumn(int iSubItem) { return (LIST_COL)m_ColType[iSubItem]; }
   int getSubItem(LIST_COL col) { return m_ColSubItem[col]; }
   void UpdateCaret();

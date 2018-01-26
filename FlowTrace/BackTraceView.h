@@ -4,19 +4,36 @@
 #include "Helpers.h"
 
 class CFlowTraceView;
-
-#ifdef _USE_RICH_EDIT
+#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
+class CBackTraceView : public CWindowImpl< CBackTraceView, CListViewCtrl>
+#else
+#ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
 class CBackTraceView : public CWindowImpl< CBackTraceView, CRichEditCtrl>
 #else
 class CBackTraceView : public CWindowImpl< CBackTraceView, CEdit>
+#endif
 #endif
 {
 public:
   CBackTraceView(CFlowTraceView* pView);
   ~CBackTraceView();
 
+  void ClearTrace();
+  void UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveAddr);
+  void CopySelection();
+
+#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
+  BEGIN_MSG_MAP(CBackTraceView)
+    MSG_WM_SIZE(OnSize)
+  END_MSG_MAP()
+  void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
+  void ItemPrePaint(int iItem, HDC hdc, RECT rc);
+  void OnSize(UINT nType, CSize size);
+  bool m_Initialised;
+#else
   BEGIN_MSG_MAP(CBackTraceView)
   END_MSG_MAP()
+#endif
 
 
 private:
