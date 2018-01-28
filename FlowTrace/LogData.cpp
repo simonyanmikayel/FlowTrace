@@ -8,22 +8,77 @@ bool LOG_NODE::isSynchronized(LOG_NODE* pSyncNode)
   return pSyncNode && (this == pSyncNode || pPeer == pSyncNode || isParent(pSyncNode) || (pPeer && pPeer->isParent(pSyncNode)));
 }
 
-char* LOG_NODE::getFnName() 
-{ 
-  if (isFlow()) 
-  { 
-    return  ((FLOW_NODE*)this)->getData()->fnName(); 
-  } 
-  else if (isTrace()) 
-  { 
-    return  ((TRACE_NODE*)this)->getData()->fnName(); 
-  } 
-  else 
-  { 
-    return ""; 
-  } 
+char* LOG_NODE::getFnName()
+{
+  if (isFlow())
+  {
+    return  ((FLOW_NODE*)this)->getData()->fnName();
+  }
+  else if (isTrace())
+  {
+    return  ((TRACE_NODE*)this)->getData()->fnName();
+  }
+  else
+  {
+    return "";
+  }
 }
-
+char* LOG_NODE::getSrcName(bool fullPath)
+{
+  char* src = "";
+  if (p_addr_info)
+  {
+    char* src = p_addr_info->src;
+    if (!fullPath)
+    {
+      char* name = strrchr(src, '/');
+      if (name)
+        src = name + 1;
+    }
+  }
+  return src;
+}
+int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
+{
+  int cb = 0;
+  max_cb_trace -= 5; //space for elipces and zero terminator
+  if (isTrace())
+  {
+    TRACE_DATA* traceData = ((TRACE_NODE*)this)->getData();
+    TRACE_CHANK* chank = traceData->getFirestChank();
+    bool truncated = false;
+    while (chank && cb < max_cb_trace && !truncated)
+    {
+      int cb_chank_trace = chank->len;
+      if (max_cb_trace - cb < chank->len)
+      {
+        truncated = true;
+        cb_chank_trace = max_cb_trace - cb;
+      }
+      memcpy(pBuf + cb, chank->trace, cb_chank_trace);
+      cb += cb_chank_trace;
+      pBuf[cb] = 0;
+      chank = chank->next_chank;
+    }
+    if (truncated)
+      cb += _sntprintf(pBuf + cb, max_cb_trace - cb, "...");
+  }
+  return cb;
+}
+bool LOG_NODE::PendingToResolveAddr()
+{
+  bool pendingToResolveAddr = false;
+  APP_NODE* appNode = getApp();
+  if (isFlow() && gSettings.GetResolveAddr() && appNode)
+  {
+    APP_DATA* appData = appNode->getData();
+    if ((appData && appData->cb_addr_info == INFINITE) && p_addr_info == NULL)
+    {
+      pendingToResolveAddr = true;
+    }
+  }
+  return pendingToResolveAddr;
+}
 int LOG_NODE::getFnNameSize()
 {
   if (isFlow())
@@ -110,38 +165,6 @@ int LOG_NODE::getTreeImage()
   }
 }
 
-int LOG_NODE::getListImage(bool selected)
-{
-  if (isRoot())
-  {
-    return 6;//IDI_ICON_EMPTY
-  }
-  else if (isApp())
-  {
-    return 6;//IDI_ICON_EMPTY
-  }
-  else if (isProc())
-  {
-    return 6;//IDI_ICON_EMPTY
-  }
-  else
-  {
-    if (isFlow())
-    {
-      FLOW_NODE* This = (FLOW_NODE*)this;
-      FLOW_DATA* pData = This->getData();
-      if (selected)
-        return (pData->isEnter()) ? 3 : 4;//IDI_ICON_LIST_ENTER_SEL, IDI_ICON_LIST_EXIT_SEL
-      else
-        return (pData->isEnter()) ? 0 : 1;//IDI_ICON_LIST_ENTER, IDI_ICON_LIST_EXIT
-    }
-    else
-    {
-      return selected ? 5 : 2;//IDI_ICON_LIST_TRACE_SEL, IDI_ICON_LIST_TRACE
-    }
-  }
-}
-
 LOG_NODE* LOG_NODE::getSyncNode()
 {
   LOG_NODE* pNode = this;
@@ -181,7 +204,7 @@ LOG_NODE* LOG_NODE::getSyncNode()
   }
 #endif
   return pNode;
-}
+    }
 
 TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 {

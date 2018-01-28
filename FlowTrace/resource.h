@@ -12,21 +12,20 @@
 #define IDI_ICON_TREE_EXIT              507
 #define IDI_ICON_LIST_ENTER             508
 #define IDI_ICON_LIST_EXIT              509
-#define IDI_ICON_LIST_TRACE             510
-#define IDI_ICON_LIST_ENTER_SEL         511
-#define IDI_ICON_LIST_EXIT_SEL          512
 #define IDI_ICON_LIST_TRACE_SEL         513
 #define IDC_STATIC_INFO                 517
 #define IDC_PROGRESS                    518
 #define IDD_PROGRESS                    519
 #define IDD_SETTINGS                    520
 #define IDD_DETAILES                    521
-#define IDI_ICON_EMPTY                  523
 #define IDI_ICON_NODE_COLAPSED          524
 #define IDI_ICON_NODE_EXPANDED          525
 #define IDI_ICON_NODE_CHECKED           526
 #define IDI_ICON_NODE_UNCHECKE          527
+#define IDI_ICON_EMPTY1                 528
+#define IDI_ICON_BOOKMARK               528
 #define IDD_SNAPSHOTS                   529
+#define IDI_ICON_SYNC                   529
 #define IDR_FONT1                       530
 #define IDB_TTF_BMP                     531
 #define IDC_NN                          1000
@@ -50,7 +49,9 @@
 #define IDC_CHECK_COMPACT_VIEW3         1024
 #define IDC_CHECK_FULL_SRC_PATH         1024
 #define IDC_BUTTON_ADD                  1025
+#define IDC_CHECK_UDATE_STACK_VIEW      1025
 #define IDC_CHECK_SHOW_APP_IP           1026
+#define IDC_CHECK_ECLIPSE_ON_WIN        1026
 #define IDC_NN2                         1027
 #define IDC_CHECK_SHOW_APP_IP2          1027
 #define IDC_CHECK_SHOW_ELAPSED_TIME     1027
@@ -63,6 +64,9 @@
 #define IDC_CHECK_FONT_WEIGHT           1044
 #define IDC_BUTTON1                     1045
 #define IDC_BUTTON_RESET                1200
+#define IDC_EDIT_LINUX_HOME             1201
+#define IDC_EDIT2                       1202
+#define IDC_EDIT_MAP_ON_WIN             1202
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
@@ -110,7 +114,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        535
 #define _APS_NEXT_COMMAND_VALUE         32831
-#define _APS_NEXT_CONTROL_VALUE         1200
+#define _APS_NEXT_CONTROL_VALUE         1202
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

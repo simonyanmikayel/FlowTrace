@@ -175,6 +175,8 @@
     <Image Include="res\FlowTrace.ico" />
     <Image Include="res\ico00001.ico" />
     <Image Include="res\icon1.ico" />
+    <Image Include="res\icon_boo.ico" />
+    <Image Include="res\icon_emp.ico" />
     <Image Include="res\ICON_LIST_ENTER.ico" />
     <Image Include="res\ICON_LIST_ENTER_SEL.ico" />
     <Image Include="res\ICON_LIST_EXIT.ico" />

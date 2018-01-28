@@ -190,31 +190,10 @@ void CLogTreeView::CopySelection()
 {
   if (!m_pSelectedNode)
     return;
-
   int cbText;
   char* szText;
-  char *lock = 0;
   szText = m_pSelectedNode->getTreeText(&cbText, false);
-
-  HGLOBAL clipdata = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, (cbText + 1)* sizeof(char));
-  if (!clipdata)
-    return;
-  if (!(lock = (char*)GlobalLock(clipdata))) {
-    GlobalFree(clipdata);
-    return;
-  }
-
-  memcpy(lock, szText, cbText + 1);
-
-  GlobalUnlock(clipdata);
-  if (::OpenClipboard(m_hWnd)) {
-    EmptyClipboard();
-    SetClipboardData(CF_TEXT, clipdata);
-    CloseClipboard();
-  }
-  else {
-    GlobalFree(clipdata);
-  }
+  Helpers::CopyToClipboard(m_hWnd, szText, cbText);
 }
 
 void CLogTreeView::RefreshTree(bool showAll)
@@ -838,8 +817,9 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
     if (m_pSelectedNode == pNode)
     {
       CBrush brush2;
-      brush2.CreateSolidBrush(gSettings.GetBkSelColor());
+      brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
       FrameRect(hdc, &rc, brush2);
+      ::SetTextColor(hdc, gSettings.SelectionTxtColor());
     }
 
     ::SetBkMode(hdc, TRANSPARENT);
@@ -849,7 +829,8 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
     ::SetBkMode(hdc, OPAQUE);
     if (m_pSelectedNode == pNode)
     {
-      ::SetBkColor(hdc, gSettings.GetBkSelColor());
+      ::SetBkColor(hdc, gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+      ::SetTextColor(hdc, gSettings.SelectionTxtColor());
     }
   }
 

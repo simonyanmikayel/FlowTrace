@@ -225,6 +225,12 @@
     <Image Include="res\ttf_glyph.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\icon_emp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\icon_boo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />

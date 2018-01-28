@@ -7,6 +7,7 @@
 #define DECL_GET(type, name) public: type Get##name () { return m_##name ;} private: type m_##name
 #define DECL_SET(type, name) public: void Set##name ( type ); private: type m_##name
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
+#define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( type* ); private: type m_##name[cb];
 
 class CSettings : public CRegKeyExt
 {
@@ -22,20 +23,27 @@ public:
 
     void SetSearchList(TCHAR* szList);
     TCHAR* GetSearchList();
+    DWORD SelectionBkColor(bool haveFocus);
+    DWORD SelectionTxtColor();
+    DWORD LogListBkColor();
+    DWORD LogListTxtColor();
+    DWORD SerachColor();
+    DWORD CurSerachColor();
+    DWORD InfoTextColor();
 
     DECL_PROP(int, VertSplitterPos);
     DECL_PROP(int, HorzSplitterPos);
     DECL_PROP(HFONT, Font);
     DECL_PROP(int, FontHeight);
     DECL_PROP(int, FontWidth);
-    DECL_PROP(DWORD, TextColor);
-    DECL_PROP(DWORD, InfoTextColor);
-    DECL_PROP(DWORD, BkColor);
-    DECL_PROP(DWORD, SelColor);
-    DECL_PROP(DWORD, BkSelColor);
-    DECL_PROP(DWORD, SerachColor);
-    DECL_PROP(DWORD, CurSerachColor);
-    DECL_PROP(DWORD, SyncColor);
+    //DECL_PROP(DWORD, TextColor);
+    //DECL_PROP(DWORD, InfoTextColor);
+    //DECL_PROP(DWORD, BkColor);
+    //DECL_PROP(DWORD, SelColor);
+    //DECL_PROP(DWORD, BkSelColor);
+    //DECL_PROP(DWORD, SerachColor);
+    //DECL_PROP(DWORD, CurSerachColor);
+    //DECL_PROP(DWORD, SyncColor);
 
     DECL_PROP(DWORD, FlowTracesHiden);
     DECL_PROP(DWORD, TreeViewHiden);
@@ -63,6 +71,11 @@ public:
     DECL_GET(TCHAR*, FontName);
     DECL_GET(DWORD, FontWeight);
     DECL_GET(TCHAR*, ResFontName);
+
+    DECL_PROP(DWORD, UpdateStack);
+    DECL_PROP(DWORD, EclipseOnWin);
+    DECL_STR_PROP(TCHAR, LinuxHome, MAX_PATH);
+    DECL_STR_PROP(TCHAR, MapOnWin, MAX_PATH);
 
 private:
     LOGFONT   m_logFont;

@@ -176,15 +176,7 @@ IDI_ICON_LIST_ENTER     ICON                    "res\\ICON_LIST_ENTER.ico"
 
 IDI_ICON_LIST_EXIT      ICON                    "res\\ICON_LIST_EXIT.ico"
 
-IDI_ICON_LIST_TRACE     ICON                    "res\\ICON_LIST_TRACE.ico"
-
-IDI_ICON_LIST_ENTER_SEL ICON                    "res\\ICON_LIST_ENTER_SEL.ico"
-
-IDI_ICON_LIST_EXIT_SEL  ICON                    "res\\ICON_LIST_EXIT_SEL.ico"
-
 IDI_ICON_LIST_TRACE_SEL ICON                    "res\\ICON_LIST_TRACE_SEL.ico"
-
-IDI_ICON_EMPTY          ICON                    "res\\icon1.ico"
 
 IDI_ICON_NODE_COLAPSED  ICON                    "res\\tree_node_colapsed.ico"
 
@@ -193,6 +185,10 @@ IDI_ICON_NODE_EXPANDED  ICON                    "res\\tree_node_expanded.ico"
 IDI_ICON_NODE_CHECKED   ICON                    "res\\tree_node_checked.ico"
 
 IDI_ICON_NODE_UNCHECKE  ICON                    "res\\tree_node_unchecked.ico"
+
+IDI_ICON_BOOKMARK       ICON                    "res\\icon_emp.ico"
+
+IDI_ICON_SYNC           ICON                    "res\\icon_boo.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -216,22 +212,31 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Settings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,83,155,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,169,155,50,14
-    RTEXT           "Static",IDC_FONT_NAME,7,46,230,8
-    PUSHBUTTON      "Change...",IDC_BTN_FONT,246,41,50,14
-    EDITTEXT        IDC_EDIT_PORT,256,17,40,14,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "UDP Listen Port:",IDC_STATIC,193,20,53,8
+    DEFPUSHBUTTON   "OK",IDOK,90,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,176,155,50,14
+    RTEXT           "Static",IDC_FONT_NAME,7,13,230,8
+    PUSHBUTTON      "Change...",IDC_BTN_FONT,246,8,50,14
+    EDITTEXT        IDC_EDIT_PORT,256,42,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "UDP Listen Port:",IDC_STATIC,198,45,53,8
     CONTROL         "Compact View",IDC_CHECK_COMPACT_VIEW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,235,92,61,10
-    COMBOBOX        IDC_COMBO_FONTS,18,51,118,171,CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_SORT | CBS_HASSTRINGS | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_FONT_SIZE,142,51,34,78,CBS_DROPDOWN | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,53,29,10
+    COMBOBOX        IDC_COMBO_FONTS,18,18,118,171,CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_SORT | CBS_HASSTRINGS | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_FONT_SIZE,142,18,34,78,CBS_DROPDOWN | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,20,29,10
     CONTROL         "Use PC Time",IDC_CHECK_USE_PC_TIME,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,241,79,55,10
-    PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,50,81,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,17,81,14,NOT WS_VISIBLE
     CONTROL         "Resolve lines of functions calls",IDC_CHECK_RESOLVE_ADDR,
-                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,183,105,113,10
-    CONTROL         "Full source path in back trace",IDC_CHECK_FULL_SRC_PATH,
-                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,187,120,109,10
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,61,56,113,10
+    CONTROL         "Show full source path in call stack",IDC_CHECK_FULL_SRC_PATH,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,51,71,123,10
+    GROUPBOX        "Call Stack Options",IDC_STATIC,16,41,167,109
+    CONTROL         "Update call stack automatically",IDC_CHECK_UDATE_STACK_VIEW,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,60,85,114,10
+    CONTROL         "Using Eclipse on Windows",IDC_CHECK_ECLIPSE_ON_WIN,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,77,104,97,8
+    LTEXT           "Linux home path",IDC_STATIC,23,116,54,8
+    LTEXT           "Map on windows",IDC_STATIC,116,116,54,8
+    EDITTEXT        IDC_EDIT_LINUX_HOME,21,129,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAP_ON_WIN,112,129,64,14,ES_AUTOHSCROLL
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 224

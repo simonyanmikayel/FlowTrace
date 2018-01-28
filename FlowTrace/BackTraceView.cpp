@@ -2,9 +2,16 @@
 #include "BackTraceView.h"
 #include "Settings.h"
 
+const int cMaxBuf = 1204 * 64;
+const int max_trace_text = 150;
+static char pBuf[cMaxBuf + 1];
+
 CBackTraceView::CBackTraceView(CFlowTraceView* pView)
   : m_pView(pView)
   , m_Initialised(false)
+  , c_nodes(0)
+  , selItem(-1)
+  , selSubItem(-1)
 {
 }
 
@@ -13,6 +20,8 @@ CBackTraceView::~CBackTraceView()
 }
 
 #ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
+static const int TEXT_MARGIN = 16;
+static const char* szPending = "pending to resolve call line";
 
 void CBackTraceView::OnSize(UINT nType, CSize size)
 {
@@ -20,37 +29,347 @@ void CBackTraceView::OnSize(UINT nType, CSize size)
   {
     m_Initialised = true;
     int cColumns = 0;
-    InsertColumn(0, "aaaaaa", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
-    InsertColumn(0, "bbbbbb", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
-    InsertColumn(0, "cccccc", LVCFMT_LEFT, cColumns, 50, -1, -1); cColumns++;
+    InsertColumn(cColumns++, "func", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_FN
+    InsertColumn(cColumns++, "line", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_LINE
+    InsertColumn(cColumns++, "source", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_SRC
+  }
+
+  if (c_nodes)
+  {
+    //stdlog("OnSize c_nodes %d\n", c_nodes);
+    for (int i = 0; i < c_nodes; i++)
+    {
+      ResetColWidth(i);
+    }
+    Invalidate(FALSE);
   }
 }
 
-void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveAddr)
+int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf)
 {
-  SetItemCountEx(1, LVSICF_NOSCROLL);
+  LOG_NODE* pNode = nodes[iItem].pNode;
+  int cb = 0;
+  if (iSubItem == BACK_TRACE_FN)
+  {
+    cb = min(pNode->getFnNameSize(), cbBuf);
+    if (cb != 0)
+    {
+      memcpy(buf, pNode->getFnName(), cb);
+    }
+    else
+    {
+      cb = 2;
+      memcpy(buf, "??", cb);
+    }
+  }
+  else if (iSubItem == BACK_TRACE_SRC)
+  {
+    if (pNode->isTrace())
+    {
+      cb = pNode->getTraceText(buf, min(max_trace_text, cbBuf));
+    }
+    else
+    {
+      const char* txt;
+      if (pNode->PendingToResolveAddr())
+      {
+        txt = szPending;
+      }
+      else
+      {
+        txt = pNode->getSrcName(gSettings.GetFullSrcPath());
+      }
+      cb = min((int)strlen(txt), cbBuf);
+      memcpy(buf, txt, cb);
+    }
+  }
+  else if (iSubItem == BACK_TRACE_LINE)
+  {
+    int line = 0;
+    if (pNode->isTrace())
+    {
+      TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
+      line = traceData->call_line;
+    }
+    else if (pNode->p_addr_info)
+    {
+      line = pNode->p_addr_info->line;
+    }
+    if (line)
+      cb = _snprintf(buf, cbBuf, "%d", line);
+    else
+      cb = _snprintf(buf, cbBuf, "??");
+  }
+  buf[cb] = 0;
+  return cb;
+}
+
+void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode)
+{
+  LOG_NODE* pNode;
+  c_nodes = 0;
+  selItem = -1;
+  selSubItem = -1;
+
+  pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+  while (pNode && (pNode->isFlow() || pNode->isTrace()) && c_nodes < MAX_BACK_TRACE)
+  {
+    ResetColWidth(c_nodes);
+    nodes[c_nodes].pNode = pNode;
+    c_nodes++;
+    pNode = pNode->parent;
+  }
+
+  SetItemCountEx(c_nodes, LVSICF_NOSCROLL);
+  if (c_nodes == 0)
+    DeleteAllItems();
+}
+
+void CBackTraceView::ResetColWidth(int iItem)
+{
+  for (int i = 0; i < BACK_TRACE_LAST_COL; i++)
+  {
+    nodes[iItem].subItemColWidth[i] = -1;
+    nodes[iItem].subItemWidth[i] = -1;
+  }
+  nodes[iItem].widthCalculated = false;
 }
 
 void CBackTraceView::ClearTrace()
 {
   SetItemCountEx(0, 0);
+  DeleteAllItems();
+  c_nodes = 0;
 }
 
 void CBackTraceView::CopySelection()
 {
+  CopySelection(true);
 }
 
-void CBackTraceView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
+void CBackTraceView::CopySelection(bool all)
 {
-  POINT  textPoint = { 0, rcItem.top };
-  if (rcItem.left > 0)
-    textPoint.x += rcItem.left;
-
-  TextOut(hdc, textPoint.x, textPoint.y, TEXT("123"), 3);
+  int cb = 0;
+  if (all)
+  {
+    for (int iItem = 0; iItem < c_nodes && (cb < cMaxBuf - 300); iItem++)
+    {
+      for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL && (cb < cMaxBuf - 300); iSubItem++)
+      {
+        cb += getSubItemText(iItem, iSubItem, pBuf + cb, cMaxBuf - cb);
+        pBuf[cb++] = '\t';
+      }
+      pBuf[cb++] = '\r';
+      pBuf[cb++] = '\n';
+    }
+  }
+  else
+  {
+    if (selItem >= 0 && selSubItem >= 0)
+      cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+  }
+  Helpers::CopyToClipboard(m_hWnd, pBuf, cb);
 }
 
 void CBackTraceView::ItemPrePaint(int iItem, HDC hdc, RECT rc)
 {
+  if (!nodes[iItem].widthCalculated)
+  {
+    SIZE size;
+    for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
+    {
+      size.cx = 0;
+      int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
+      if (cb)
+      {
+        GetTextExtentPoint32(hdc, pBuf, cb, &size);
+      }
+      nodes[iItem].subItemWidth[iSubItem] = size.cx;
+
+      if (nodes[iItem].subItemColWidth[iSubItem] < size.cx)
+      {
+        nodes[iItem].subItemColWidth[iSubItem] = size.cx;
+        if (iSubItem == BACK_TRACE_SRC)
+        {
+          RECT rcClient;
+          GetClientRect(&rcClient);
+          size.cx = max(rcClient.right - rcClient.left, size.cx + TEXT_MARGIN);
+          //stdlog("iItem: %d rc: %d %d (%d)\n", iItem, rc.left, rc.right, rcClient.right - rcClient.left);
+        }
+        SetColumnWidth(iSubItem, size.cx + TEXT_MARGIN);
+      }
+    }
+    nodes[iItem].widthCalculated = true;
+  }
+}
+
+void CBackTraceView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
+{
+  POINT  pt = { rcItem.left, rcItem.top };
+  COLORREF old_textColor = ::GetTextColor(hdc);
+  COLORREF old_bkColor = ::GetBkColor(hdc);
+  int old_bkMode = ::GetBkMode(hdc);
+
+  ::SetBkMode(hdc, OPAQUE);
+  bool selected = (iItem == selItem && iSubItem == selSubItem);
+  if (selected)
+  {
+    ::SetTextColor(hdc, gSettings.SelectionTxtColor());
+    ::SetBkColor(hdc, gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+  }
+
+  int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
+  if (cb)
+  {
+    //if (!selected) { pBuf[0] = '1'; pBuf[1] = '2'; pBuf[2] = '3'; pBuf[3] = '4'; pBuf[4] = '5';}//memset(pBuf, 'W', cb);
+    //stdlog("iItem %d, iSubItem %d, cb %d, pt.x %d, w=%d, %s\n", iItem, iSubItem, cb, pt.x, nodes[iItem].subItemColWidth[iSubItem], pBuf);
+    TextOut(hdc, pt.x, pt.y, pBuf, cb);
+  }
+
+  ::SetTextColor(hdc, old_textColor);
+  ::SetBkColor(hdc, old_bkColor);
+  ::SetBkMode(hdc, old_bkMode);
+}
+
+LRESULT CBackTraceView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+  SetSelectionOnMouseEven(uMsg, wParam, lParam);
+  return 0;
+}
+
+LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+  SetSelectionOnMouseEven(uMsg, wParam, lParam);
+
+  bHandled = TRUE;
+
+  int xPos = GET_X_LPARAM(lParam);
+  int yPos = GET_Y_LPARAM(lParam);
+
+  DWORD dwFlags;
+  POINT pt = { xPos, yPos };
+  ClientToScreen(&pt);
+  HMENU hMenu = CreatePopupMenu();
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  if (selItem < 0 || selSubItem < 0)
+    dwFlags |= MF_DISABLED;
+  InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("Copy"));
+  UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
+  DestroyMenu(hMenu);
+
+  if (nRet == ID_EDIT_COPY)
+  {
+    CopySelection();
+  }
+  return 0;
+}
+
+LRESULT CBackTraceView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+  bHandled = TRUE;
+  if (selItem < 0 || selSubItem < 0)
+    return 0;
+  int curSelItem = selItem;
+  int curSelSubItem = selSubItem;
+
+  switch (wParam)
+  {
+  case VK_HOME:       // Home 
+    selSubItem = 0;
+    break;
+  case VK_RETURN:        // End 
+    selItem++;
+    break;
+  case VK_END:        // End 
+    selSubItem = BACK_TRACE_LAST_COL - 1;
+    break;
+  case VK_PRIOR:      // Page Up 
+  case VK_NEXT:       // Page Down 
+  {
+    CClientDC dc(m_hWnd);
+    RECT rcItem, rcClient;
+    GetClientRect(&rcClient);
+    GetItemRect(0, &rcItem, LVIR_BOUNDS);
+    int count = (rcClient.bottom - rcClient.top) / (rcItem.bottom - rcItem.top);
+    if (wParam == VK_PRIOR)
+      selItem -= count;
+    else
+      selItem += count;
+  }
+  break;
+  case VK_LEFT:       // Left arrow 
+    selSubItem--;
+    break;
+  case VK_RIGHT:      // Right arrow 
+    selSubItem++;
+    break;
+  case VK_UP:         // Up arrow 
+    selItem--;
+    break;
+  case VK_DOWN:       // Down arrow 
+    selItem++;
+    break;
+  }
+  if (selItem < 0)
+    selItem = 0;
+  if (selSubItem < 0)
+    selSubItem = 0;
+  if (selItem >= c_nodes)
+    selItem = c_nodes - 1;
+  if (selSubItem >= BACK_TRACE_LAST_COL)
+    selSubItem = BACK_TRACE_LAST_COL -1;
+
+  int cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+  while (cb == 0 && selSubItem < BACK_TRACE_LAST_COL - 1)
+  {
+    selSubItem++;
+    cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+  }
+  while (cb == 0 && selSubItem > 0)
+  {
+    selSubItem--;
+    cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+  }
+  if (curSelItem != selItem || curSelSubItem != selSubItem)
+  {
+    RedrawItems(curSelItem, curSelItem);
+    RedrawItems(selItem, selItem);
+  }
+
+  return 0;
+}
+
+void CBackTraceView::SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  if (GetFocus() != *this)
+    SetFocus();
+
+  int xPos = GET_X_LPARAM(lParam);
+  int yPos = GET_Y_LPARAM(lParam);
+
+  LVHITTESTINFO ht = { 0 };
+  ht.iItem = -1;
+  ht.pt.x = xPos;
+  ht.pt.y = yPos;
+  SubItemHitTest(&ht);
+  //stdlog("xPos = %d yPos = %d flags = %d ht.iItem = %d\n", xPos, yPos, ht.flags, ht.iItem);
+  if ((ht.iItem >= 0))
+  {
+    if (selItem != ht.iItem || selSubItem != ht.iSubItem)
+    {
+      int cb = getSubItemText(ht.iItem, ht.iSubItem, pBuf, cMaxBuf);
+      if (cb > 0)
+      {
+        if (selItem >= 0)
+        {
+          RedrawItems(selItem, selItem);
+        }
+        selItem = ht.iItem;
+        selSubItem = ht.iSubItem;
+        RedrawItems(selItem, selItem);
+      }
+    }
+  }
 }
 
 #else
@@ -69,7 +388,7 @@ static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb,
 }
 #endif
 
-void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveAddr)
+void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode)
 {
   LOG_NODE* pNode;
 
@@ -81,8 +400,6 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveA
     pNode = pNode->parent;
   }
 
-  const int cMaxBuf = 1204 * 32;
-  static char pBuf[cMaxBuf + 1];
   int cb = 0;
 #ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
   cb += _sntprintf(pBuf + cb, cMaxBuf - cb, R"({\rtf1)");
@@ -118,13 +435,7 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveA
           DWORD nearest_pc = p_addr_info->addr;
           if (line != INFINITE && addr - nearest_pc < 128)
           {
-            char* src = p_addr_info->src;
-            if (!gSettings.GetFullSrcPath())
-            {
-              char* name = strrchr(src, '/');
-              if (name)
-                src = name + 1;
-            }
+            char* src = pNode->getSrcName(gSettings.GetFullSrcPath());
             cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X+%-2X| line: %-6d| src: %s", nearest_pc, addr - nearest_pc, line, src);
           }
           else
@@ -132,7 +443,7 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveA
             cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X", addr);
           }
         }
-        else if (pendingToResolveAddr)
+        else if (pNode->PendingToResolveAddr())
         {
           cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | from addr: %-8X   | pending to resolve call line", addr);
         }
@@ -146,20 +457,7 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool pendingToResolveA
     {
       TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
       cb += _sntprintf(pBuf + cb, cMaxBuf - cb, "  | line: %-6d | ", traceData->call_line);
-      TRACE_CHANK* chank = traceData->getFirestChank();
-      int cb_trace = 0;
-      const int max_cb_trace = 150;
-      while (chank && chank->len && cb_trace <= max_cb_trace)
-      {
-        int cb_chank_trace = min(max_cb_trace, chank->len);
-        memcpy(pBuf + cb, chank->trace, cb_chank_trace);
-        cb += cb_chank_trace;
-        cb_trace += cb_chank_trace;
-        pBuf[cb] = 0;
-        chank = chank->next_chank;
-      }
-      if (cb_trace >= max_cb_trace)
-        cb += _sntprintf(pBuf + cb, cMaxBuf - cb, " ...");
+      cb += pNode->getTraceText(pBuf + cb, max_trace_text);
     }
 
 #ifdef _USE_RICH_EDIT_FOR_BACK_TRACE

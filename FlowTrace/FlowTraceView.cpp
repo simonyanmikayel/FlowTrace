@@ -123,23 +123,16 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
   pCurNode = pSelectedNode;
   curArchiveNumber = gArchive.getArchiveNumber();
 
-  bool pendingToResolveAddr = false;
   if (pUpdatedNode == NULL)
   {
     pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
-    APP_NODE* appNode = pNode ? pNode->getApp() : NULL;
-    if (gSettings.GetResolveAddr() && appNode)
+    if (pNode && pNode->PendingToResolveAddr())
     {
-      APP_DATA* appData = appNode->getData();
-      if (appData && appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
-      {
-        pendingToResolveAddr = true;
-        gArchive.resolveAddr(pSelectedNode);
-      }
+      gArchive.resolveAddr(pSelectedNode);
     }
   }
 
-  m_wndBackTraceView.UpdateTrace(pSelectedNode, pendingToResolveAddr);
+  m_wndBackTraceView.UpdateTrace(pSelectedNode);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)

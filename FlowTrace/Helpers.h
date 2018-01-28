@@ -11,6 +11,7 @@ static const int ICON_OFFSET = 16 + 4;
 
 namespace Helpers
 {
+  void CopyToClipboard(HWND hWnd, char* szText, int cbText);
   void SysErrMessageBox(TCHAR* lpFormat, ...);
   void ErrMessageBox(TCHAR* lpFormat, ...);
   TCHAR* find_str(const TCHAR *phaystack, const TCHAR *pneedle, int bMatchCase);  

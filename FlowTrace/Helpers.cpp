@@ -3,6 +3,33 @@
 
 namespace Helpers
 {
+  void CopyToClipboard(HWND hWnd, char* szText, int cbText)
+  {
+    if (!szText || !cbText)
+      return;
+
+    char *lock = 0;
+    HGLOBAL clipdata = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, (cbText + 1) * sizeof(char));
+    if (!clipdata)
+      return;
+    if (!(lock = (char*)GlobalLock(clipdata))) {
+      GlobalFree(clipdata);
+      return;
+    }
+
+    memcpy(lock, szText, cbText);
+    memcpy(lock + cbText, "", 1);
+
+    GlobalUnlock(clipdata);
+    if (::OpenClipboard(hWnd)) {
+      EmptyClipboard();
+      SetClipboardData(CF_TEXT, clipdata);
+      CloseClipboard();
+    }
+    else {
+      GlobalFree(clipdata);
+    }
+  }
   void ErrMessageBox(TCHAR* lpFormat, ...)
   {
     va_list vl;

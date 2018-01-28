@@ -13,15 +13,15 @@ LPCTSTR STR_APP_REG_VAL_HORZ_SPLITTER_POS = _T("HorzSplitterPos");
 LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName_1");
 LPCTSTR STR_APP_REG_VAL_FONTWIDTH =_T("FontWeight");
 LPCTSTR STR_APP_REG_VAL_FONTSIZE =_T("FontSize");
-LPCTSTR STR_APP_REG_VAL_BK_COLOR = _T("BkColor");
-LPCTSTR STR_APP_REG_VAL_TEXT_COLOR = _T("TextColor");
-LPCTSTR STR_APP_REG_VAL_INFO_TEXT_COLOR = _T("InfoTextColor");
-LPCTSTR STR_APP_REG_VAL_SEL_COLOR = _T("SelColor");
-LPCTSTR STR_APP_REG_VAL_BK_SEL_COLOR = _T("BkSelColor");
-LPCTSTR STR_APP_REG_VAL_SEARCH_COLOR = _T("SearchColor");
-LPCTSTR STR_APP_REG_VAL_CUR_SEARCH_COLOR = _T("CurSearchColor");
+//LPCTSTR STR_APP_REG_VAL_BK_COLOR = _T("BkColor");
+//LPCTSTR STR_APP_REG_VAL_TEXT_COLOR = _T("TextColor");
+//LPCTSTR STR_APP_REG_VAL_INFO_TEXT_COLOR = _T("InfoTextColor");
+//LPCTSTR STR_APP_REG_VAL_SEL_COLOR = _T("SelColor");
+//LPCTSTR STR_APP_REG_VAL_BK_SEL_COLOR = _T("BkSelColor");
+//LPCTSTR STR_APP_REG_VAL_SEARCH_COLOR = _T("SearchColor");
+//LPCTSTR STR_APP_REG_VAL_CUR_SEARCH_COLOR = _T("CurSearchColor");
+//LPCTSTR STR_APP_REG_VAL_SYNC_COLOR = _T("SyncColor");
 LPCTSTR STR_APP_REG_VAL_SEARCH_LIST = _T("SearchList");
-LPCTSTR STR_APP_REG_VAL_SYNC_COLOR = _T("SyncColor"); 
 
 LPCTSTR STR_APP_REG_VAL_UDP_PORT = _T("UdpPort");
 
@@ -45,15 +45,19 @@ LPCTSTR STR_APP_REG_VAL_SHOW_ELAPSED_TIME = _T("ShowElapsedTime");
 LPCTSTR STR_APP_REG_VAL_RESOLVE_ADDR = _T("ResolveAddr");
 LPCTSTR STR_APP_REG_VAL_FULL_SRC_PATH = _T("FullSrcPath");
 
+LPCTSTR STR_APP_REG_VAL_UpdateStack = _T("UpdateStack");
+LPCTSTR STR_APP_REG_VAL_EclipseOnWin = _T("EclipseOnWin");
+LPCTSTR STR_APP_REG_VAL_LinuxHome = _T("LinuxHome");
+LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 
-#define DefBkColor RGB(0,0,0)
-#define DefTextColor RGB(176,176,176)
-#define DefInfoTextColor RGB(128,128,128)
-#define DefSelColor  RGB(192,192,192)
-#define DefBkSelColor  RGB(64, 122, 255) //RGB(232,232,255) //RGB(64, 122, 255) //RGB(0xEC,0xEC,0xEC)
-#define DefSyncColor  RGB(0,255,0)
-#define DefSerachColor  RGB(0xA0,0xA9,0x3d)
-#define DefCurSerachColor  RGB(64,128,64)
+//#define DefBkColor RGB(0,0,0)
+//#define DefTextColor RGB(176,176,176)
+//#define DefInfoTextColor RGB(128,128,128)
+//#define DefSelColor  RGB(192,192,192)
+//#define DefBkSelColor  RGB(64, 122, 255) //RGB(232,232,255) //RGB(64, 122, 255) //RGB(0xEC,0xEC,0xEC)
+//#define DefSyncColor  RGB(0,255,0)
+//#define DefSerachColor  RGB(0xA0,0xA9,0x3d)
+//#define DefCurSerachColor  RGB(64,128,64)
 
 #define DefUdpPort  8888
 #define DefFontSize 11
@@ -91,15 +95,20 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_ColTime, m_ColTime);
   Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 
-  Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
-  Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
-  Read(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor, DefInfoTextColor);
-  Read(STR_APP_REG_VAL_SEL_COLOR, m_SelColor, DefSelColor);
-  Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefSyncColor);
-  Read(STR_APP_REG_VAL_SYNC_COLOR, m_BkSelColor, DefSyncColor);
-  Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefBkSelColor);
-  Read(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor, DefSerachColor);
-  Read(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor, DefCurSerachColor);
+  Read(STR_APP_REG_VAL_UpdateStack, m_UpdateStack, FALSE);
+  Read(STR_APP_REG_VAL_EclipseOnWin, m_EclipseOnWin, FALSE);
+  Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
+  Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
+
+  //Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
+  //Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
+  //Read(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor, DefInfoTextColor);
+  //Read(STR_APP_REG_VAL_SEL_COLOR, m_SelColor, DefSelColor);
+  //Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefSyncColor);
+  //Read(STR_APP_REG_VAL_SYNC_COLOR, m_BkSelColor, DefSyncColor);
+  //Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefBkSelColor);
+  //Read(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor, DefSerachColor);
+  //Read(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor, DefCurSerachColor);
 
   Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
 
@@ -308,6 +317,34 @@ void CSettings::SetSearchList(TCHAR* szList)
   searchList[n] = 0;
   Write(STR_APP_REG_VAL_SEARCH_LIST, searchList);
 }
+DWORD CSettings::InfoTextColor()
+{
+  return RGB(128, 128, 128);
+}
+DWORD CSettings::SerachColor()
+{
+  return RGB(0xA0, 0xA9, 0x3d);
+}
+DWORD CSettings::CurSerachColor()
+{
+  return RGB(64, 128, 64);
+}
+DWORD CSettings::LogListTxtColor()
+{
+  return RGB(176, 176, 176);
+}
+DWORD CSettings::LogListBkColor()
+{
+  return RGB(0, 0, 0);
+}
+DWORD CSettings::SelectionTxtColor()
+{
+  return RGB(255, 255, 255);
+}
+DWORD CSettings::SelectionBkColor(bool haveFocus)
+{
+  return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
+}
 TCHAR* CSettings::GetSearchList()
 {
   if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
@@ -329,12 +366,12 @@ void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine,
 void CSettings::SetColTime(int i){ m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
 void CSettings::SetColCallAddr(int i){ m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 
-void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }
-void CSettings::SetTextColor(DWORD i){ m_TextColor = i; Write(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor); }
-void CSettings::SetInfoTextColor(DWORD i){ m_InfoTextColor = i; Write(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor); }
-void CSettings::SetSelColor(DWORD i){ m_SelColor = i; Write(STR_APP_REG_VAL_SEL_COLOR, m_SelColor); }
-void CSettings::SetSerachColor(DWORD i){ m_SerachColor = i; Write(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor); }
-void CSettings::SetCurSerachColor(DWORD i){ m_CurSerachColor = i; Write(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor); }
+//void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }
+//void CSettings::SetTextColor(DWORD i){ m_TextColor = i; Write(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor); }
+//void CSettings::SetInfoTextColor(DWORD i){ m_InfoTextColor = i; Write(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor); }
+//void CSettings::SetSelColor(DWORD i){ m_SelColor = i; Write(STR_APP_REG_VAL_SEL_COLOR, m_SelColor); }
+//void CSettings::SetSerachColor(DWORD i){ m_SerachColor = i; Write(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor); }
+//void CSettings::SetCurSerachColor(DWORD i){ m_CurSerachColor = i; Write(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor); }
 
 void CSettings::SetFlowTracesHiden(DWORD i){ m_FlowTracesHiden = i; Write(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden); }
 void CSettings::SetTreeViewHiden(DWORD i){ m_TreeViewHiden = i; Write(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden); }
@@ -347,6 +384,10 @@ void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_A
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
+void CSettings::SetUpdateStack(DWORD i) { m_UpdateStack = i; Write(STR_APP_REG_VAL_UpdateStack, m_UpdateStack); }
+void CSettings::SetEclipseOnWin(DWORD i) { m_EclipseOnWin = i; Write(STR_APP_REG_VAL_EclipseOnWin, m_EclipseOnWin); }
+void CSettings::SetLinuxHome(TCHAR* LinuxHome) { int c = sizeof(m_LinuxHome) / sizeof(m_LinuxHome[0]) - 1; _tcsncpy(m_LinuxHome, LinuxHome, c); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
+void CSettings::SetMapOnWin(TCHAR* MapOnWin) { int c = sizeof(m_MapOnWin) / sizeof(m_MapOnWin[0]) - 1; _tcsncpy(m_MapOnWin, MapOnWin, c); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 
 void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 
