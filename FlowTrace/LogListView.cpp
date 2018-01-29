@@ -326,10 +326,12 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
   static TCHAR pBuf[128];
   _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.GetItem() + 1));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
-  if (!extend)
+  int newItem = m_ListSelection.GetItem();
+  if (!extend && newItem != oldItem)
   {
-    LOG_NODE* pNode = listNodes->getNode(m_ListSelection.GetItem());// GetSynkNode();
-    m_pView->ShowBackTrace(pNode);
+    LOG_NODE* pNode = listNodes->getNode(newItem);// GetSynkNode();
+    if (gSettings.GetUpdateStack())
+      m_pView->ShowBackTrace(pNode);
   }
 }
 
@@ -671,10 +673,15 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
+  //dwFlags = MF_BYPOSITION | MF_STRING;
+  //if (*gSettings.GetEclipsePath() == 0)
+  //  dwFlags |= MF_DISABLED;
+  //InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
   dwFlags = MF_BYPOSITION | MF_STRING;
-  if (GetItemCount() == 0 || !GetSynkNode())
-    dwFlags |= MF_DISABLED;
-  //InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree"));
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack"));
+  InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_ListSelection.IsEmpty())
     dwFlags |= MF_DISABLED;
@@ -686,6 +693,23 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   {
     CopySelection();
   }
+  else if (nRet == ID_SYNC_VIEWES)
+  {
+    m_pView->SyncViews();
+  }
+  else if (nRet == ID_CALL_STACK)
+  {
+    m_pView->ShowCallStack();
+  }
+  //else if (nRet == ID_SHOW_IN_ECLIPSE)
+  //{
+  //  int iItem = getSelectionItem();
+  //  LOG_NODE* pNode = listNodes->getNode(iItem);
+  //  if (pNode)
+  //  {
+  //    m_pView->ShowInEclipse(pNode);
+  //  }
+  //}  
   return 0;
 }
 

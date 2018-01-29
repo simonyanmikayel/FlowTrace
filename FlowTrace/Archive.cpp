@@ -146,10 +146,8 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD 
 #ifdef _DEBUG
   pNode->index = gArchive.index(pNode);
 #endif
-#ifndef NATIVE_TREE
   pNode->hasCheckBox = 1;
   pNode->checked = 1;
-#endif
   c_rec++;
   resolveAddr(NULL);
   return pNode;
@@ -176,10 +174,8 @@ PROC_NODE* Archive::addProc(APP_NODE* pAppNode, int tid)
 #ifdef _DEBUG
   pNode->index = gArchive.index(pNode);
 #endif
-#ifndef NATIVE_TREE
   pNode->hasCheckBox = 1;
   pNode->checked = 1;
-#endif
   c_rec++;
   return pNode;
 }

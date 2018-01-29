@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "BackTraceView.h"
 #include "Settings.h"
+#include "Resource.h"
+#include "FlowTraceView.h"
 
 const int cMaxBuf = 1204 * 64;
 const int max_trace_text = 150;
@@ -20,7 +22,6 @@ CBackTraceView::~CBackTraceView()
 }
 
 #ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
-static const int TEXT_MARGIN = 16;
 static const char* szPending = "pending to resolve call line";
 
 void CBackTraceView::OnSize(UINT nType, CSize size)
@@ -29,25 +30,15 @@ void CBackTraceView::OnSize(UINT nType, CSize size)
   {
     m_Initialised = true;
     int cColumns = 0;
-    InsertColumn(cColumns++, "func", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_FN
-    InsertColumn(cColumns++, "line", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_LINE
-    InsertColumn(cColumns++, "source", LVCFMT_LEFT, TEXT_MARGIN, 0, -1, -1); //BACK_TRACE_SRC
-  }
-
-  if (c_nodes)
-  {
-    //stdlog("OnSize c_nodes %d\n", c_nodes);
-    for (int i = 0; i < c_nodes; i++)
-    {
-      ResetColWidth(i);
-    }
-    Invalidate(FALSE);
+    InsertColumn(cColumns++, "func", LVCFMT_LEFT, 16, 0, -1, -1); //BACK_TRACE_FN
+    InsertColumn(cColumns++, "line", LVCFMT_RIGHT, 16, 0, -1, -1); //BACK_TRACE_LINE
+    InsertColumn(cColumns++, "source", LVCFMT_LEFT, 16, 0, -1, -1); //BACK_TRACE_SRC
   }
 }
 
 int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf)
 {
-  LOG_NODE* pNode = nodes[iItem].pNode;
+  LOG_NODE* pNode = nodes[iItem];
   int cb = 0;
   if (iSubItem == BACK_TRACE_FN)
   {
@@ -106,33 +97,58 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
 
 void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode)
 {
-  LOG_NODE* pNode;
-  c_nodes = 0;
-  selItem = -1;
-  selSubItem = -1;
+  if (!m_Initialised)
+    return;
 
+  LOG_NODE* pNode;
+  ClearTrace();
   pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
   while (pNode && (pNode->isFlow() || pNode->isTrace()) && c_nodes < MAX_BACK_TRACE)
   {
-    ResetColWidth(c_nodes);
-    nodes[c_nodes].pNode = pNode;
+    nodes[c_nodes] = pNode;
     c_nodes++;
     pNode = pNode->parent;
   }
 
-  SetItemCountEx(c_nodes, LVSICF_NOSCROLL);
   if (c_nodes == 0)
-    DeleteAllItems();
-}
-
-void CBackTraceView::ResetColWidth(int iItem)
-{
-  for (int i = 0; i < BACK_TRACE_LAST_COL; i++)
   {
-    nodes[iItem].subItemColWidth[i] = -1;
-    nodes[iItem].subItemWidth[i] = -1;
+    ClearTrace();
+    return;
   }
-  nodes[iItem].widthCalculated = false;
+
+  HDC hdc = ::CreateCompatibleDC(NULL);
+  SelectObject(hdc, gSettings.GetFont());
+
+  SIZE size;
+  GetTextExtentPoint32(hdc, "   ", 3, &size);
+  int min_col_width = size.cx;
+  for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
+  {
+    subItemColWidth[iSubItem] = 0;
+  }
+  for (int iItem = 0; iItem < c_nodes; iItem++)
+  {
+    for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
+    {
+      size.cx = 0;
+      int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
+      if (cb)
+      {
+        GetTextExtentPoint32(hdc, pBuf, cb, &size);
+      }
+      if (subItemColWidth[iSubItem] < size.cx)
+      {
+        subItemColWidth[iSubItem] = size.cx;
+      }
+    }
+  }
+  for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
+  {
+    SetColumnWidth(iSubItem, subItemColWidth[iSubItem] + min_col_width);
+  }
+  DeleteDC(hdc);
+
+  SetItemCountEx(c_nodes, LVSICF_NOSCROLL);
 }
 
 void CBackTraceView::ClearTrace()
@@ -140,6 +156,8 @@ void CBackTraceView::ClearTrace()
   SetItemCountEx(0, 0);
   DeleteAllItems();
   c_nodes = 0;
+  selItem = -1;
+  selSubItem = -1;
 }
 
 void CBackTraceView::CopySelection()
@@ -173,34 +191,6 @@ void CBackTraceView::CopySelection(bool all)
 
 void CBackTraceView::ItemPrePaint(int iItem, HDC hdc, RECT rc)
 {
-  if (!nodes[iItem].widthCalculated)
-  {
-    SIZE size;
-    for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
-    {
-      size.cx = 0;
-      int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
-      if (cb)
-      {
-        GetTextExtentPoint32(hdc, pBuf, cb, &size);
-      }
-      nodes[iItem].subItemWidth[iSubItem] = size.cx;
-
-      if (nodes[iItem].subItemColWidth[iSubItem] < size.cx)
-      {
-        nodes[iItem].subItemColWidth[iSubItem] = size.cx;
-        if (iSubItem == BACK_TRACE_SRC)
-        {
-          RECT rcClient;
-          GetClientRect(&rcClient);
-          size.cx = max(rcClient.right - rcClient.left, size.cx + TEXT_MARGIN);
-          //stdlog("iItem: %d rc: %d %d (%d)\n", iItem, rc.left, rc.right, rcClient.right - rcClient.left);
-        }
-        SetColumnWidth(iSubItem, size.cx + TEXT_MARGIN);
-      }
-    }
-    nodes[iItem].widthCalculated = true;
-  }
 }
 
 void CBackTraceView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
@@ -251,6 +241,17 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
   dwFlags = MF_BYPOSITION | MF_STRING;
+  if (*gSettings.GetEclipsePath() == 0)
+    dwFlags |= MF_DISABLED;
+  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  if (selItem < 0 || selSubItem < 0)
+    dwFlags |= MF_DISABLED;
+  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree"));
+  InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
+  dwFlags = MF_BYPOSITION | MF_STRING;
   if (selItem < 0 || selSubItem < 0)
     dwFlags |= MF_DISABLED;
   InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("Copy"));
@@ -261,6 +262,23 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
   {
     CopySelection();
   }
+  else if (nRet == ID_EDIT_COPY_ALL)
+  {
+    CopySelection(true);
+  }
+  else if (nRet == ID_SYNC_VIEWES)
+  {
+    if (selItem >= 0)
+      m_pView->SyncTree(nodes[selItem]);
+  }
+  else if (nRet == ID_SHOW_IN_ECLIPSE)
+  {
+    if (selItem >= 0)
+    {
+      m_pView->ShowInEclipse(nodes[selItem]);
+    }
+  }
+
   return 0;
 }
 

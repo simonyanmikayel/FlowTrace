@@ -27,9 +27,6 @@ public:
     MESSAGE_HANDLER(WM_WINDOWPOSCHANGING, OnPositionChanging)
 
     NOTIFY_CODE_HANDLER(LVN_ENDSCROLL, OnLvnEndScroll)
-#ifdef NATIVE_TREE
-    NOTIFY_CODE_HANDLER(TVN_GETDISPINFO, OnTvnGetDispInfo)
-#endif
     NOTIFY_CODE_HANDLER(NM_CUSTOMDRAW, OnCustomDraw)
   END_MSG_MAP()
 
@@ -38,12 +35,12 @@ public:
   LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
-#ifdef NATIVE_TREE
-  LRESULT OnTvnGetDispInfo(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
-#endif
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
   void SyncViews();
+  void SyncTree(LOG_NODE* pNode);
+  void ShowInEclipse(LOG_NODE* pNode);
+  void ShowCallStack();
   void ShowTreeView(bool show);
   void ShowStackView(bool show);
   void ClearLog();
@@ -57,14 +54,10 @@ public:
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
   void ShowBackTrace(LOG_NODE* pNode, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
 private:
-#ifdef NATIVE_TREE
-  LOG_NODE* getTreeNode(HTREEITEM hItem);
-#endif
   CSplitterWindow m_wndVertSplitter;
   CSplitterWindow m_wndHorzSplitter;
   CLogTreeView    m_wndTreeView;
   CLogListView    m_wndListView;
-  //CStatic         m_wndLog;
   CBackTraceView  m_wndBackTraceView;
   LOG_NODE*       m_selectedNode;
 };

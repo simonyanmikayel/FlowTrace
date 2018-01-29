@@ -63,6 +63,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_SYNC_VIEWES
+    BUTTON      ID_CALL_STACK
     SEPARATOR
     BUTTON      ID_VIEW_SHOW_HIDE_TREE
     BUTTON      ID_VIEW_SHOW_HIDE_STACK
@@ -130,6 +131,7 @@ BEGIN
         MENUITEM "Synchronize views\tTab",      ID_SYNC_VIEWES
         MENUITEM "Show Tree View",              ID_VIEW_SHOW_HIDE_TREE
         MENUITEM "Show Stack View",             ID_VIEW_SHOW_HIDE_STACK
+        MENUITEM "Show Call Stack\tCtrl+L",     ID_CALL_STACK
         MENUITEM "Show Flow Traces",            ID_VIEW_SHOW_HIDE_FLOW_TRACES
         MENUITEM "Snapshots ...",               ID_VIEW_TAKESNAPSHOT
         MENUITEM "Start New Snapshot\tCtrl+N",  ID_VIEW_STARTNEWSNAPSHOT
@@ -224,19 +226,19 @@ BEGIN
     CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,20,29,10
     CONTROL         "Use PC Time",IDC_CHECK_USE_PC_TIME,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,241,79,55,10
     PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,17,81,14,NOT WS_VISIBLE
-    CONTROL         "Resolve lines of functions calls",IDC_CHECK_RESOLVE_ADDR,
-                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,61,56,113,10
+    CONTROL         "Resolve function call line via HTML board",IDC_CHECK_RESOLVE_ADDR,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,29,56,145,10
     CONTROL         "Show full source path in call stack",IDC_CHECK_FULL_SRC_PATH,
                     "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,51,71,123,10
-    GROUPBOX        "Call Stack Options",IDC_STATIC,16,41,167,109
+    GROUPBOX        "Call Stack Options",IDC_STATIC,16,36,167,114
     CONTROL         "Update call stack automatically",IDC_CHECK_UDATE_STACK_VIEW,
                     "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,60,85,114,10
-    CONTROL         "Using Eclipse on Windows",IDC_CHECK_ECLIPSE_ON_WIN,
-                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,77,104,97,8
-    LTEXT           "Linux home path",IDC_STATIC,23,116,54,8
-    LTEXT           "Map on windows",IDC_STATIC,116,116,54,8
-    EDITTEXT        IDC_EDIT_LINUX_HOME,21,129,81,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT_MAP_ON_WIN,112,129,64,14,ES_AUTOHSCROLL
+    LTEXT           "Linux home path",IDC_STATIC,23,123,54,8
+    LTEXT           "Map on windows",IDC_STATIC,116,123,54,8
+    EDITTEXT        IDC_EDIT_LINUX_HOME,21,132,81,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAP_ON_WIN,112,132,64,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ECLIPSE_ON_WIN,21,107,156,14,ES_AUTOHSCROLL
+    LTEXT           "Eclipse path on windows",IDC_STATIC,26,98,78,8
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 224
@@ -357,6 +359,7 @@ BEGIN
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, CONTROL, NOINVERT
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
     "N",            ID_VIEW_STARTNEWSNAPSHOT, VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_CALL_STACK,          VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -444,6 +447,12 @@ BEGIN
     ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"
     ID_SYNC_VIEWES          "Synchronize views\nSynchronize views  (Tab)"
     ID_EDIT_SELECTALL       "Select all traces\nSelect all traces"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TAKESNAPSHOT    "Snapshots\nSnapshots"
+    ID_CALL_STACK           "Show Call Stack\nShow Call Stack  (Ctrl+K)"
 END
 
 STRINGTABLE
@@ -546,11 +555,6 @@ END
 STRINGTABLE
 BEGIN
     ATL_IDS_MRU_FILE        "Open this document"
-END
-
-STRINGTABLE
-BEGIN
-    ID_VIEW_TAKESNAPSHOT    "Snapshots\nSnapshots"
 END
 
 #endif    // English (United States) resources

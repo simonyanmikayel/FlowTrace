@@ -28,7 +28,7 @@ char* LOG_NODE::getSrcName(bool fullPath)
   char* src = "";
   if (p_addr_info)
   {
-    char* src = p_addr_info->src;
+    src = p_addr_info->src;
     if (!fullPath)
     {
       char* name = strrchr(src, '/');
@@ -68,13 +68,20 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
 bool LOG_NODE::PendingToResolveAddr()
 {
   bool pendingToResolveAddr = false;
-  APP_NODE* appNode = getApp();
-  if (isFlow() && gSettings.GetResolveAddr() && appNode)
+  LOG_NODE* pNode = getSyncNode();
+  if (pNode)
   {
-    APP_DATA* appData = appNode->getData();
-    if ((appData && appData->cb_addr_info == INFINITE) && p_addr_info == NULL)
+    APP_NODE* appNode = pNode->getApp();
+    if (pNode->isFlow() && gSettings.GetResolveAddr() && appNode)
     {
-      pendingToResolveAddr = true;
+      APP_DATA* appData = appNode->getData();
+      if (appData)
+      {
+        if (appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
+        {
+          pendingToResolveAddr = true;
+        }
+      }
     }
   }
   return pendingToResolveAddr;
@@ -168,24 +175,6 @@ int LOG_NODE::getTreeImage()
 LOG_NODE* LOG_NODE::getSyncNode()
 {
   LOG_NODE* pNode = this;
-#ifdef NATIVE_TREE
-  while (pNode && pNode->htreeitem == 0 && (pNode->getPeer() || pNode->parent))
-  {
-    if (pNode->getPeer())
-    {
-      pNode = pNode->getPeer();
-      break; //peer should have htreeitem
-    }
-    else
-    {
-      pNode = pNode->parent;
-    }
-  }
-  if (pNode && !pNode->htreeitem)
-  {
-    pNode = NULL;
-  }
-#else
   while (pNode && !pNode->isTreeNode() && (pNode->getPeer() || pNode->parent))
   {
     if (pNode->getPeer())
@@ -202,9 +191,8 @@ LOG_NODE* LOG_NODE::getSyncNode()
   {
     pNode = NULL;
   }
-#endif
   return pNode;
-    }
+}
 
 TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 {
@@ -212,13 +200,9 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
   static TCHAR pBuf[MAX_BUF_LEN + 1];
   int cb = 0;
   TCHAR* ret = pBuf;
-#ifdef  NATIVE_TREE
-  int NN = getNN();
-#else
   int NN = getNN();
 #ifdef _DEBUG
   //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("[%d %d %d]"), GetExpandCount(), line, lastChild ? lastChild->index : 0);
-#endif
 #endif
   if (this == rootNode)
   {
@@ -437,8 +421,6 @@ int LOG_NODE::getCallLine()
   return isInfo() ? ((INFO_DATA*)data)->call_line : 0;
 }
 
-#ifndef NATIVE_TREE
-
 void LOG_NODE::CollapseExpand(BOOL expand)
 {
   expanded = expand;
@@ -527,5 +509,4 @@ void LOG_NODE::CollapseExpandAll(bool expand)
   CalcLines();
 }
 
-#endif
 

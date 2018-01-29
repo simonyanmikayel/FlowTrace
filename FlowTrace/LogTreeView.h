@@ -5,22 +5,16 @@
 
 class CFlowTraceView;
 
-#ifdef NATIVE_TREE
-class CLogTreeView : public CWindowImpl< CLogTreeView, CTreeViewCtrlEx>
-#else
 class CLogTreeView : public CWindowImpl< CLogTreeView, CListViewCtrl>
-#endif
 {
 public:
   CLogTreeView(CFlowTraceView* pView);
   ~CLogTreeView();
 
   BEGIN_MSG_MAP(CLogTreeView)
-#ifndef NATIVE_TREE
     MSG_WM_SIZE(OnSize)
     MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
     MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown); 
-#endif
     MESSAGE_HANDLER(WM_RBUTTONDOWN, OnRButtonDown)
   END_MSG_MAP()
 
@@ -32,7 +26,6 @@ public:
   void CollapseExpandAll(LOG_NODE* pNode, bool expand);
 
   LRESULT OnRButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
-#ifndef NATIVE_TREE
   HIMAGELIST m_hStateImageList;
 
   void OnSize(UINT nType, CSize size);
@@ -57,7 +50,6 @@ public:
   HPEN hDotPen;
   HDC m_hdc;
   CSize m_size;
-#endif
 
 private:
   void SetColumnLen(int len);

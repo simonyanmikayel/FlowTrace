@@ -91,6 +91,7 @@ public:
     COMMAND_ID_HANDLER(ID_SEARCH_MATCH_CASE, OnSearchSettings)
     COMMAND_ID_HANDLER(ID_SEARCH_MATCH_WHOLE_WORD, OnSearchSettings)
     COMMAND_ID_HANDLER(ID_SYNC_VIEWES, OnSyncViews)
+    COMMAND_ID_HANDLER(ID_CALL_STACK, OnCallStack)
     COMMAND_ID_HANDLER(ID_EDIT_FIND32798, OnEditFind)
     COMMAND_ID_HANDLER(ID_VIEW_TAKESNAPSHOT, OnTakeSnamshot);
     COMMAND_ID_HANDLER(ID_VIEW_STARTNEWSNAPSHOT, OnStartNewSnamshot);
@@ -130,6 +131,7 @@ public:
   LRESULT onUpdateFilter(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT onUpdateBackTrace(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnTakeSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

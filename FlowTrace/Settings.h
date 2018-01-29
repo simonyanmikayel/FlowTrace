@@ -7,7 +7,7 @@
 #define DECL_GET(type, name) public: type Get##name () { return m_##name ;} private: type m_##name
 #define DECL_SET(type, name) public: void Set##name ( type ); private: type m_##name
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
-#define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( type* ); private: type m_##name[cb];
+#define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
 
 class CSettings : public CRegKeyExt
 {
@@ -73,7 +73,7 @@ public:
     DECL_GET(TCHAR*, ResFontName);
 
     DECL_PROP(DWORD, UpdateStack);
-    DECL_PROP(DWORD, EclipseOnWin);
+    DECL_STR_PROP(TCHAR, EclipsePath, MAX_PATH);
     DECL_STR_PROP(TCHAR, LinuxHome, MAX_PATH);
     DECL_STR_PROP(TCHAR, MapOnWin, MAX_PATH);
 

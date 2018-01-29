@@ -145,6 +145,5 @@ typedef std::string tstring;
 
 //////////////////////////////////////////////////////////////////////////////
 //#define _AUTO_TEST
-//#define _USE_LIST_VIEW_FOR_BACK_TRACE
+#define _USE_LIST_VIEW_FOR_BACK_TRACE
 //#define _USE_RICH_EDIT_FOR_BACK_TRACE
-//#define NATIVE_TREE

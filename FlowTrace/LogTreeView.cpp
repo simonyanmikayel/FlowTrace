@@ -11,10 +11,8 @@ static const int min_colWidth = 16;
 CLogTreeView::CLogTreeView(CFlowTraceView* pView)
   : m_pView(pView)
   , m_recCount(0)
-#ifndef NATIVE_TREE
   , m_pSelectedNode(0)
   , m_rowHeight(1)
-#endif
 {
   m_hTypeImageList = ImageList_Create(16, 16, ILC_MASK, 1, 0);
   ImageList_AddIcon(m_hTypeImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_TREE_ROOT))); //0
@@ -24,7 +22,6 @@ CLogTreeView::CLogTreeView(CFlowTraceView* pView)
   ImageList_AddIcon(m_hTypeImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_TREE_ENTER))); //4
   ImageList_AddIcon(m_hTypeImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_TREE_EXIT))); //5  
 
-#ifndef NATIVE_TREE
   m_colWidth = min_colWidth;
   m_Initialised = false;
   m_hdc = CreateCompatibleDC(NULL);// CreateIC(TEXT("DISPLAY"), NULL, NULL, NULL);
@@ -39,15 +36,12 @@ CLogTreeView::CLogTreeView(CFlowTraceView* pView)
   ImageList_AddIcon(m_hStateImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_NODE_EXPANDED))); //1 STATE_IMAGE_EXPANDED
   ImageList_AddIcon(m_hStateImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_NODE_CHECKED))); //2 STATE_IMAGE_CHECKED
   ImageList_AddIcon(m_hStateImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_NODE_UNCHECKE))); //3 STATE_IMAGE_UNCHECKE
-#endif
 }
 
 
 CLogTreeView::~CLogTreeView()
 {
-#ifndef NATIVE_TREE
   DeleteDC(m_hdc); 
-#endif
 }
 
 void CLogTreeView::ApplySettings(bool fontChanged)
@@ -55,9 +49,7 @@ void CLogTreeView::ApplySettings(bool fontChanged)
   if (fontChanged)
   {
     SetFont(gSettings.GetFont());
-#ifndef NATIVE_TREE
     SelectObject(m_hdc, gSettings.GetFont());
-#endif
   }
   Invalidate();
 }
@@ -65,13 +57,9 @@ void CLogTreeView::ApplySettings(bool fontChanged)
 void CLogTreeView::Clear()
 {
   m_recCount = 0;
-#ifndef NATIVE_TREE
   SetItemCountEx(0, 0);
   m_colWidth = min_colWidth;
   SetColumnWidth(0, m_colWidth);
-#else
-  DeleteAllItems();
-#endif
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 0, (LPARAM)"");
 }
 
@@ -86,33 +74,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   int yPos = GET_Y_LPARAM(lParam);
 
   LOG_NODE* pNode = NULL;
-#ifdef NATIVE_TREE
-  DWORD dwpos = GetMessagePos();
-  TVHITTESTINFO ht = { 0 };
-  ht.pt.x = GET_X_LPARAM(dwpos);
-  ht.pt.y = GET_Y_LPARAM(dwpos);
-  ::MapWindowPoints(HWND_DESKTOP, m_hWnd, &ht.pt, 1);
-  HitTest(&ht);
-  if (TVHT_ONITEM & ht.flags)
-  {
-    TVITEM tvItem;
-    tvItem.mask = TVIF_HANDLE | TVIF_STATE;
-    tvItem.hItem = ht.hItem;
-    if (GetItem(&tvItem))
-    {
-      TVITEM tvi = { 0 };
-      tvi.hItem = tvItem.hItem;
-      GetItem(&tvi);
-      pNode = (LOG_NODE*)tvi.lParam;
-    }
-}
-#else
   int iItem = ItemByPos(yPos);
   if (iItem >= 0)
   {
     pNode = getTreeNode(iItem);
   }
-#endif
 
   if (pNode)
   {
@@ -131,12 +97,19 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     POINT pt = { xPos, yPos };
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
+    //dwFlags = MF_BYPOSITION | MF_STRING;
+    //if (*gSettings.GetEclipsePath() == 0 || !pNode->isFlow())
+    //  dwFlags |= MF_DISABLED;
+    //InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
-    //InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY_CALL_PATH, _T("Copy call stack"));
+    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with traces"));
     dwFlags = MF_BYPOSITION | MF_STRING;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COPY, _T("Copy"));
+    if (!pNode->isFlow())
+      dwFlags |= MF_DISABLED;
+    InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack"));
+    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
@@ -145,7 +118,9 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
     InsertMenu(hMenu, 0, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
-    dwFlags = MF_BYPOSITION | MF_STRING;
+    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_STRING, ID_TREE_COPY, _T("Copy"));
+
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
     DestroyMenu(hMenu);
     //stdlog("%u\n", GetTickCount());
@@ -161,30 +136,33 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       ::SendMessage(hwndMain, WM_COMMAND, ID_EDIT_COPY, 0);
     }
+    else if (nRet == ID_SYNC_VIEWES)
+    {
+      m_pView->SyncViews();
+    }
+    else if (nRet == ID_CALL_STACK)
+    {
+      m_pView->ShowCallStack();
+    }
+    //else if (nRet == ID_SHOW_IN_ECLIPSE)
+    //{
+    //  LOG_NODE* pNode = GetSelectedNode();
+    //  if (pNode)
+    //  {
+    //    m_pView->ShowInEclipse(pNode);
+    //  }
+    //}
     //stdlog("%u\n", GetTickCount());
   }
   return 0;
 }
-#ifdef NATIVE_TREE
-void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
-{
-  Expand(pNode->htreeitem, expand ? TVE_EXPAND : TVE_COLLAPSE);
-  pNode = pNode->lastChild;
-  while (pNode)
-  {
-    Expand(pNode->htreeitem, expand ? TVE_EXPAND : TVE_COLLAPSE);
-    CollapseExpandAll(pNode, expand);
-    pNode = pNode->prevSibling;
-  }
-}
-#else
+
 void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
 {
   pNode->CollapseExpandAll(expand);
   SetItemCount(rootNode->GetExpandCount() + 1);
   RedrawItems(0, rootNode->GetExpandCount());
 }
-#endif
 
 void CLogTreeView::CopySelection()
 {
@@ -213,70 +191,6 @@ void CLogTreeView::RefreshTree(bool showAll)
 //      newCount = m_recCount + TREE_UPDATE_CHUNK;
 //  }
 
-#ifdef NATIVE_TREE
-
-  if (rootNode->htreeitem == 0)
-  {
-    TVINSERTSTRUCT tvs = { 0 };
-    tvs.item.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN | TVIF_PARAM;
-    tvs.hInsertAfter = TVI_ROOT;
-    tvs.item.lParam = (LPARAM)rootNode;
-    tvs.item.iImage = tvs.item.iSelectedImage = 0;
-    tvs.item.cChildren = 1;
-    tvs.item.pszText = rootNode->getTreeText();
-    rootNode->htreeitem = InsertItem(&tvs);
-    //remove check box 
-    TVITEM tvi;
-    tvi.hItem = rootNode->htreeitem;
-    tvi.mask = TVIF_STATE;
-    tvi.stateMask = TVIS_STATEIMAGEMASK;
-    tvi.state = 0;
-    SetItem(&tvi);
-  }
-  else
-  {
-    TVITEM tvi = { 0 };
-    tvi.mask = TVIF_TEXT;
-    tvi.hItem = rootNode->htreeitem;
-    tvi.pszText = rootNode->getTreeText();
-    SetItem(&tvi);
-  }
-
-  //add new logs
-  for (DWORD i = m_recCount; i < newCount; i++)
-  {
-    LOG_NODE* pNode = gArchive.getNode(i);
-    LOG_DATA*  pData = pNode->data;
-
-    TVINSERTSTRUCT tvs = { 0 };
-    tvs.item.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
-    if (!pData->isTrace() && pNode->parent)
-    {
-      tvs.item.pszText = LPSTR_TEXTCALLBACK;
-      tvs.item.iSelectedImage = tvs.item.iImage = I_IMAGECALLBACK;
-      tvs.item.lParam = (LPARAM)pNode;
-
-      tvs.hParent = pNode->parent->htreeitem;
-      tvs.hInsertAfter = TVI_LAST;
-      pNode->htreeitem = InsertItem(&tvs);
-
-      if ((pNode->isApp() || pNode->isProc()))
-      {
-        SetCheckState(pNode->htreeitem, TRUE);
-      }
-      else
-      {
-        //remove check box if itis flow node
-        TVITEM tvi;
-        tvi.hItem = pNode->htreeitem;
-        tvi.mask = TVIF_STATE;
-        tvi.stateMask = TVIS_STATEIMAGEMASK;
-        tvi.state = 0;
-        SetItem(&tvi);
-      }
-    }
-  }
-#else
   if (!m_Initialised)
     return;
 
@@ -324,7 +238,6 @@ void CLogTreeView::RefreshTree(bool showAll)
     }
   }
 
-#endif
   if (m_recCount == 0)
     SetItemCountEx(1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
 
@@ -334,8 +247,6 @@ void CLogTreeView::RefreshTree(bool showAll)
   _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_recCount));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
 }
-
-#ifndef NATIVE_TREE
 
 LOG_NODE* CLogTreeView::getTreeNode(int iItem, int* pOffset)
 {
@@ -527,7 +438,8 @@ void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapse
 void CLogTreeView::SetSelectedNode(LOG_NODE* pNode)
 {
   m_pSelectedNode = pNode;
-  m_pView->ShowBackTrace(pNode);
+  if (gSettings.GetUpdateStack())
+    m_pView->ShowBackTrace(pNode);
 }
 
 LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
@@ -632,7 +544,6 @@ LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
   return 0;
 }
 
-#ifndef NATIVE_TREE
 int CLogTreeView::ItemByPos(int yPos)
 {
   CRect rcItem = { 0 };
@@ -647,7 +558,6 @@ int CLogTreeView::ItemByPos(int yPos)
   //stdlog("yPos = %d x = %d left = %d flags = %d ht.iItem = %d\n", yPos, ht.pt.x, rcItem.left, ht.flags, ht.iItem);
   return ht.iItem;
  }
-#endif
 
 LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
@@ -864,4 +774,3 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   ::SetBkColor(hdc, old_bkColor);
   ::SetBkMode(hdc, old_bkMode);
 }
-#endif

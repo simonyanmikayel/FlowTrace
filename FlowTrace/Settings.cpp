@@ -46,7 +46,7 @@ LPCTSTR STR_APP_REG_VAL_RESOLVE_ADDR = _T("ResolveAddr");
 LPCTSTR STR_APP_REG_VAL_FULL_SRC_PATH = _T("FullSrcPath");
 
 LPCTSTR STR_APP_REG_VAL_UpdateStack = _T("UpdateStack");
-LPCTSTR STR_APP_REG_VAL_EclipseOnWin = _T("EclipseOnWin");
+LPCTSTR STR_APP_REG_VAL_EclipsePath = _T("EclipsePath");
 LPCTSTR STR_APP_REG_VAL_LinuxHome = _T("LinuxHome");
 LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 
@@ -96,7 +96,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 
   Read(STR_APP_REG_VAL_UpdateStack, m_UpdateStack, FALSE);
-  Read(STR_APP_REG_VAL_EclipseOnWin, m_EclipseOnWin, FALSE);
+  Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
   Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
   Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
 
@@ -385,9 +385,9 @@ void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_V
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
 void CSettings::SetUpdateStack(DWORD i) { m_UpdateStack = i; Write(STR_APP_REG_VAL_UpdateStack, m_UpdateStack); }
-void CSettings::SetEclipseOnWin(DWORD i) { m_EclipseOnWin = i; Write(STR_APP_REG_VAL_EclipseOnWin, m_EclipseOnWin); }
-void CSettings::SetLinuxHome(TCHAR* LinuxHome) { int c = sizeof(m_LinuxHome) / sizeof(m_LinuxHome[0]) - 1; _tcsncpy(m_LinuxHome, LinuxHome, c); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
-void CSettings::SetMapOnWin(TCHAR* MapOnWin) { int c = sizeof(m_MapOnWin) / sizeof(m_MapOnWin[0]) - 1; _tcsncpy(m_MapOnWin, MapOnWin, c); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
+void CSettings::SetEclipsePath(const TCHAR* EclipsePath) { int c = sizeof(m_EclipsePath) / sizeof(m_EclipsePath[0]) - 1; _tcsncpy(m_EclipsePath, EclipsePath, c); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
+void CSettings::SetLinuxHome(const TCHAR* LinuxHome) { int c = sizeof(m_LinuxHome) / sizeof(m_LinuxHome[0]) - 1; _tcsncpy(m_LinuxHome, LinuxHome, c); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
+void CSettings::SetMapOnWin(const TCHAR* MapOnWin) { int c = sizeof(m_MapOnWin) / sizeof(m_MapOnWin[0]) - 1; _tcsncpy(m_MapOnWin, MapOnWin, c); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 
 void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 

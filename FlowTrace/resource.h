@@ -67,6 +67,7 @@
 #define IDC_EDIT_LINUX_HOME             1201
 #define IDC_EDIT2                       1202
 #define IDC_EDIT_MAP_ON_WIN             1202
+#define IDC_EDIT_ECLIPSE_ON_WIN         1203
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
@@ -85,6 +86,7 @@
 #define ID_VIEW_DETAILES                32789
 #define ID_VIEW_SETTINGS                32790
 #define ID_VIEW_CLEARLOG                32791
+#define ID_SHOW_IN_ECLIPSE              32792
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_EDIT_FIND32798               32798
@@ -107,13 +109,15 @@
 #define ID_BOOKMARKS_TOGGLE             32823
 #define ID_VIEW_TAKESNAPSHOT            32826
 #define ID_VIEW_STARTNEWSNAPSHOT        32828
+#define ID_EDIT_COPY_ALL                32829
+#define ID_CALL_STACK                   32831
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        535
-#define _APS_NEXT_COMMAND_VALUE         32831
+#define _APS_NEXT_COMMAND_VALUE         32832
 #define _APS_NEXT_CONTROL_VALUE         1202
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

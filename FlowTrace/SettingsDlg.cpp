@@ -15,7 +15,11 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
   m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
   m_FullSrcPath.Attach(GetDlgItem(IDC_CHECK_FULL_SRC_PATH));
-
+  m_btnUpdateStack.Attach(GetDlgItem(IDC_CHECK_UDATE_STACK_VIEW));
+  m_edtEclipsePath.Attach(GetDlgItem(IDC_EDIT_ECLIPSE_ON_WIN));
+  m_edtLinuxHome.Attach(GetDlgItem(IDC_EDIT_LINUX_HOME));
+  m_edtMapOnWin.Attach(GetDlgItem(IDC_EDIT_MAP_ON_WIN));
+  
   m_FontSize = gSettings.GetFontSize();
   strncpy(m_FaceName, gSettings.GetFontName(), sizeof(m_FaceName) - 1);
   m_FaceName[LF_FACESIZE - 1] = 0;
@@ -54,7 +58,10 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_CompactView.SetCheck(gSettings.GetCompactView() ? BST_CHECKED : BST_UNCHECKED);
   m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
-
+  m_btnUpdateStack.SetCheck(gSettings.GetUpdateStack() ? BST_CHECKED : BST_UNCHECKED);
+  m_edtEclipsePath.SetWindowText(gSettings.GetEclipsePath());
+  m_edtLinuxHome.SetWindowText(gSettings.GetLinuxHome());
+  m_edtMapOnWin.SetWindowText(gSettings.GetMapOnWin());
   CenterWindow(GetParent());
   return TRUE;
 }
@@ -132,6 +139,19 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
     gSettings.SetCompactView(m_CompactView.GetCheck());
     gSettings.SetResolveAddr(m_ResolveAddr.GetCheck());
     gSettings.SetFullSrcPath(m_FullSrcPath.GetCheck());
+    gSettings.SetUpdateStack(m_btnUpdateStack.GetCheck());
+
+    CString strEclipsePath;
+    m_edtEclipsePath.GetWindowText(strEclipsePath);
+    gSettings.SetEclipsePath(strEclipsePath.GetString());
+
+    CString strLinuxHome;
+    m_edtLinuxHome.GetWindowText(strLinuxHome);
+    gSettings.SetLinuxHome(strLinuxHome.GetString());
+    CString strMapOnWin;
+    m_edtMapOnWin.GetWindowText(strMapOnWin);
+    gSettings.SetMapOnWin(strMapOnWin.GetString());
+
   }
   EndDialog(wID);
   return 0;

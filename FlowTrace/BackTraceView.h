@@ -5,13 +5,6 @@
 
 #define MAX_BACK_TRACE 512
 enum BACK_TRACE_COL { BACK_TRACE_FN, BACK_TRACE_LINE, BACK_TRACE_SRC, BACK_TRACE_LAST_COL };
-struct BACK_TRACE_NODE
-{
-  LOG_NODE* pNode;
-  int subItemColWidth[BACK_TRACE_LAST_COL];
-  int subItemWidth[BACK_TRACE_LAST_COL];
-  bool widthCalculated;
-};
 
 class CFlowTraceView;
 #ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
@@ -43,13 +36,15 @@ public:
   void ItemPrePaint(int iItem, HDC hdc, RECT rc);
   void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
   void OnSize(UINT nType, CSize size);
-  BACK_TRACE_NODE nodes[MAX_BACK_TRACE];
+  LOG_NODE* nodes[MAX_BACK_TRACE];
+  int subItemColWidth[BACK_TRACE_LAST_COL];
   void SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
   LRESULT OnLButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled);
   LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   int getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf);
-  void ResetColWidth(int iItem);
+  LOG_NODE* GetSelectedNode() { return (selItem >= 0) ? nodes[selItem] : NULL; }
+  //void ResetColWidth(int iItem);
 #else
   BEGIN_MSG_MAP(CBackTraceView)
   END_MSG_MAP()

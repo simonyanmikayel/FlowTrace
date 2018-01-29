@@ -135,9 +135,6 @@ struct LOG_NODE
     WORD pathExpanded : 1;
     WORD bookmark : 1;
   };
-#ifdef NATIVE_TREE
-  HTREEITEM htreeitem;
-#else
   BYTE nextChankCounter;
   int cExpanded;
   int line;
@@ -150,13 +147,10 @@ struct LOG_NODE
   void CollapseExpand(BOOL expand);
   int GetPosInTree() { return line; }
   void CollapseExpandAll(bool expand);
-#endif
-
   void init(LOG_DATA*  p) { ZeroMemory(this, sizeof(LOG_NODE)); data = p; }
 
   void add_child(LOG_NODE* pNode)
   {
-#ifndef NATIVE_TREE
     if (!firstChild)
       firstChild = pNode;
     if (lastChild)
@@ -171,7 +165,6 @@ struct LOG_NODE
         nextChankMarker->nextChank = pNode;
       nextChankMarker = pNode;
     }
-#endif
     pNode->prevSibling = lastChild;
     pNode->parent = this;
     lastChild = pNode;

@@ -52,7 +52,7 @@ BOOL CMainFrame::OnIdle()
     UIEnable(ID_EDIT_FIND32798, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_COPY, m_list.HasSelection() || ::GetFocus() == m_tree.m_hWnd);
     UISetCheck(ID_VIEW_SHOW_HIDE_TREE, gSettings.GetTreeViewHiden() == 0);
-    UISetCheck(ID_VIEW_SHOW_HIDE_STACK, gSettings.GetInfoHiden() == 0);
+    UISetCheck(ID_VIEW_SHOW_HIDE_STACK, !gSettings.GetInfoHiden());
     UISetCheck(ID_VIEW_SHOW_HIDE_FLOW_TRACES, gSettings.GetFlowTracesHiden() == 0);
     UIUpdateToolBar();
     return FALSE;
@@ -348,8 +348,7 @@ LRESULT CMainFrame::OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 
 LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    gSettings.SetInfoHiden(!gSettings.GetInfoHiden());
-    m_view.ShowStackView(!gSettings.GetInfoHiden());
+    m_view.ShowStackView(gSettings.GetInfoHiden());
     return 0;
 }
 
@@ -369,21 +368,6 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
 {
     bool filterChanged = false;
     LOG_NODE* pNode = (LOG_NODE*)lParam;
-#ifdef NATIVE_TREE
-    if (pNode && (pNode->isApp() || pNode->isProc()))
-    {
-        int cheked = m_tree.GetCheckState((HTREEITEM)wParam);
-        if (pNode->hiden != !cheked)
-        {
-            pNode->hiden = !cheked;
-            filterChanged = true;
-        }
-    }
-    else
-    {
-        filterChanged = true;
-    }
-#else
     if (pNode && (pNode->isApp() || pNode->isProc()))
     {
         int cheked = pNode->checked;
@@ -397,7 +381,6 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
     {
         filterChanged = true;
     }
-#endif
 
     if (filterChanged)
     {
@@ -465,6 +448,11 @@ LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 {
     m_view.SyncViews();
     return 0;
+}
+LRESULT CMainFrame::OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+  m_view.ShowCallStack();
+  return 0;
 }
 
 LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
