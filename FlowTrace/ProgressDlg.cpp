@@ -293,8 +293,8 @@ void TaskThread::FileImport()
 
   if (m_isAuto)
   {
-    m_count = 3;// 50000000;
-    int cRecursion = 3;//10
+    m_count = 30;// 50000000;
+    int cRecursion = 30;//10
     int ii = 0;
     bool ss = true;
     char sz1[] = { "86 0 0 7 18 1 3171 1466073590 349287000 1466073590 349287000 1466073590 350294000 00023230 001699F8 0-CTAPapp^thread_init_slave\n" };

@@ -91,6 +91,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
       }
       SetSelectedNode(pNode);
       RedrawItems(iItem, iItem);
+      EnsureItemVisible(iItem);
     }
 
     DWORD dwFlags;
@@ -365,9 +366,10 @@ void CLogTreeView::EnsureItemVisible(int iItem)
 
   ShowItem(iItem, false);
 
-  RECT rcClient, rcItem;
+  RECT rcClient;// , rcItem;
   GetClientRect(&rcClient);
-  ListView_GetSubItemRect(m_hWnd, iItem, 0, LVIR_BOUNDS, &rcItem);
+  //ListView_GetSubItemRect(m_hWnd, iItem, 0, LVIR_BOUNDS, &rcItem);
+  int cxClient = rcClient.right;// -rcItem.left;
   //GetSubItemRect(iItem, 0, LVIR_BOUNDS, &rcItem);
 
   int cbText;
@@ -375,7 +377,6 @@ void CLogTreeView::EnsureItemVisible(int iItem)
 
   int cxText, xStart, xEnd;
   GetNodetPos(m_hdc, pNode->hasCheckBox, offset, szText, cbText, cxText, xStart, xEnd);
-  //stdlog("offset: %d cxText: %d, xStart: %d, xEnd: %d\n", offset, cxText, xStart, xEnd);
 
   SetColumnLen(xEnd);
 
@@ -383,15 +384,19 @@ void CLogTreeView::EnsureItemVisible(int iItem)
   si.cbSize = sizeof(si);
   si.fMask = SIF_RANGE | SIF_POS;
   GetScrollInfo(SB_HORZ, &si);
+  //stdlog("cxClient: %d, xStart: %d, xEnd: %d, si.nPos: %d\n", cxClient, xStart, xEnd, si.nPos);
 
   int cxRight = 0, cxleft = 0;
-  if (xStart + cxRight < si.nPos)
+  if (xEnd > cxClient + si.nPos - 16)
   {
-    cxleft = xStart + cxRight - si.nPos;
+    cxRight = xEnd - (si.nPos + cxClient - 16);
+    xStart -= cxRight;
+    //stdlog("cxRight: %d, xStart: %d\n", cxRight, xStart);
   }
-  if (xEnd + cxleft > rcClient.right - rcItem.left + xStart)
+  if (xStart < si.nPos)
   {
-    cxRight = xEnd + cxleft - (rcClient.right - rcItem.left + xStart);
+    cxleft = xStart - si.nPos;
+    //stdlog("cxleft: %d\n", cxleft);
   }
   if (cxRight + cxleft)
   {
@@ -608,7 +613,7 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       SetSelectedNode(pNode);
       RedrawItems(iItem, iItem);
-      //EnsureItemVisible(iItem);
+      EnsureItemVisible(iItem);
     }
   }
   return 0;
