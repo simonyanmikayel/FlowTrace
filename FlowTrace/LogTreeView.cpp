@@ -371,10 +371,11 @@ void CLogTreeView::EnsureItemVisible(int iItem)
   //GetSubItemRect(iItem, 0, LVIR_BOUNDS, &rcItem);
 
   int cbText;
-  char* szText = pNode->getTreeText(&cbText);
+  char* szText = pNode->getTreeText(&cbText, false);
 
   int cxText, xStart, xEnd;
   GetNodetPos(m_hdc, pNode->hasCheckBox, offset, szText, cbText, cxText, xStart, xEnd);
+  //stdlog("offset: %d cxText: %d, xStart: %d, xEnd: %d\n", offset, cxText, xStart, xEnd);
 
   SetColumnLen(xEnd);
 
@@ -383,19 +384,21 @@ void CLogTreeView::EnsureItemVisible(int iItem)
   si.fMask = SIF_RANGE | SIF_POS;
   GetScrollInfo(SB_HORZ, &si);
 
-  SIZE size1 = { 0, 0 };
-  SIZE size2 = { 0, 0 };
-  if (xStart < si.nPos)
+  int cxRight = 0, cxleft = 0;
+  if (xStart + cxRight < si.nPos)
   {
-    size1.cx = xStart - si.nPos - 16;
-    Scroll(size1);
+    cxleft = xStart + cxRight - si.nPos;
   }
-  if (xEnd >= rcClient.right - rcItem.left)
+  if (xEnd + cxleft > rcClient.right - rcItem.left + xStart)
   {
-    size2.cx = xEnd - rcClient.right + rcItem.left + 16;
-    Scroll(size2);
+    cxRight = xEnd + cxleft - (rcClient.right - rcItem.left + xStart);
   }
-  //stdlog("pNode = %p iItem = %d offset = %d size1.cx = %d size2.cx = %d xStart = %d cxText = %d xEnd = %d si.nPos = %d si.nMin = %d si.nMax = %d rcClient.left = %d rcClient.right = %d rcItem.left = %d rcItem.right = %d szText = %s\n", pNode, iItem, offset, size1.cx, size2.cx, xStart, cxText, xEnd, si.nPos, si.nMin, si.nMax, rcClient.left, rcClient.right, rcItem.left, rcItem.right, szText);
+  if (cxRight + cxleft)
+  {
+    SIZE size = { cxRight + cxleft, 0 };
+    Scroll(size);
+  }
+  //stdlog("pNode = %p iItem = %d offset = %d cxleft = %d cxleft = %d xStart = %d cxText = %d xEnd = %d si.nPos = %d si.nMin = %d si.nMax = %d rcClient.left = %d rcClient.right = %d rcItem.left = %d rcItem.right = %d szText = %s\n", pNode, iItem, offset, cxleft, cxleft, xStart, cxText, xEnd, si.nPos, si.nMin, si.nMax, rcClient.left, rcClient.right, rcItem.left, rcItem.right, szText);
 }
 
 void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapseOthers)

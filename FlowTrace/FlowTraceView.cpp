@@ -286,7 +286,7 @@ void CFlowTraceView::SyncTree(LOG_NODE* pNode)
     {
       m_selectedNode = pNode;
       m_wndTreeView.EnsureNodeVisible(pNode, false);
-      m_wndListView.ShowFirstSyncronised(true);
+      m_wndListView.ShowFirstSyncronised(false);
 
       m_wndListView.Invalidate();
       m_wndTreeView.Invalidate();
@@ -302,7 +302,7 @@ void CFlowTraceView::SyncViews()
     if (pNode)
     {
       m_selectedNode = pNode;
-      m_wndListView.ShowFirstSyncronised(true);
+      m_wndListView.ShowFirstSyncronised(false);
     }
   }
   else if (hwnd == m_wndListView)
@@ -316,7 +316,7 @@ void CFlowTraceView::SyncViews()
       {
         m_selectedNode = pNode;
         m_wndTreeView.EnsureNodeVisible(pNode, false);
-        m_wndListView.ShowFirstSyncronised(true);
+        m_wndListView.ShowFirstSyncronised(false);
       }
     }
   }
