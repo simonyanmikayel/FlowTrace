@@ -21,7 +21,6 @@ CBackTraceView::~CBackTraceView()
 {
 }
 
-#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
 static const char* szPending = "pending to resolve call line";
 
 void CBackTraceView::OnSize(UINT nType, CSize size)
@@ -95,7 +94,7 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
   return cb;
 }
 
-void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode)
+void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool bNested)
 {
   if (!m_Initialised)
     return;
@@ -103,11 +102,17 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode)
   LOG_NODE* pNode;
   ClearTrace();
   pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
+  if (bNested)
+    pNode = pNode->firstChild;
   while (pNode && (pNode->isFlow() || pNode->isTrace()) && c_nodes < MAX_BACK_TRACE)
   {
     nodes[c_nodes] = pNode;
     c_nodes++;
-    pNode = pNode->parent;
+
+    if (bNested)
+      pNode = pNode->nextSibling;
+    else
+      pNode = pNode->parent;
   }
 
   if (c_nodes == 0)
@@ -390,8 +395,7 @@ void CBackTraceView::SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lP
   }
 }
 
-#else
-
+#if(0)
 #ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
 struct StreamInCallbackCookie { char* buf; int cb; int pos; };
 static DWORD CALLBACK MyStreamInCallback(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)

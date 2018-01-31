@@ -29,11 +29,12 @@ void Addr2LineThread::Terminate()
   CloseHandle(m_hResolveEvent);
 }
 
-void Addr2LineThread::Resolve(LOG_NODE* pNode)
+void Addr2LineThread::Resolve(LOG_NODE* pNode, bool bNested)
 {
   if (pNode)
   {
     m_pNode = pNode;
+    m_bNested = bNested;
     SetEvent(m_hResolveEvent);
   }
   else
@@ -92,6 +93,9 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
           continue;
 
+        if (m_bNested)
+          pNode = pNode->firstChild;
+
         while (pNode && pNode->isFlow() && IsWorking())
         {
           if (pNode->p_addr_info == 0)
@@ -114,10 +118,13 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
               p_addr_info = p_addr_info->pPrev;
             }
           }
-          pNode = pNode->parent;
+          if (m_bNested)
+            pNode = pNode->nextSibling;
+          else
+            pNode = pNode->parent;
         }
         if (IsWorking())
-          ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, 0, (LPARAM)pSelectedNode);
+          ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, m_bNested, (LPARAM)pSelectedNode);
       }
     }
     else

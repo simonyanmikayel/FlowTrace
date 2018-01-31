@@ -7,26 +7,17 @@
 enum BACK_TRACE_COL { BACK_TRACE_FN, BACK_TRACE_LINE, BACK_TRACE_SRC, BACK_TRACE_LAST_COL };
 
 class CFlowTraceView;
-#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
 class CBackTraceView : public CWindowImpl< CBackTraceView, CListViewCtrl>
-#else
-#ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
-class CBackTraceView : public CWindowImpl< CBackTraceView, CRichEditCtrl>
-#else
-class CBackTraceView : public CWindowImpl< CBackTraceView, CEdit>
-#endif
-#endif
 {
 public:
   CBackTraceView(CFlowTraceView* pView);
   ~CBackTraceView();
 
   void ClearTrace();
-  void UpdateTrace(LOG_NODE* pSelectedNode);
+  void UpdateTrace(LOG_NODE* pSelectedNode, bool bNested);
   void CopySelection();
   void CopySelection(bool all);
 
-#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
   BEGIN_MSG_MAP(CBackTraceView)
     MSG_WM_SIZE(OnSize)
     MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
@@ -44,11 +35,6 @@ public:
   LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   int getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf);
   LOG_NODE* GetSelectedNode() { return (selItem >= 0) ? nodes[selItem] : NULL; }
-  //void ResetColWidth(int iItem);
-#else
-  BEGIN_MSG_MAP(CBackTraceView)
-  END_MSG_MAP()
-#endif
 
 private:
   int selItem;

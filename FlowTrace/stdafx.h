@@ -14,6 +14,9 @@
 #define _RICHEDIT_VER 0x0500
 
 #define _HAS_EXCEPTIONS 0 //Better than compiling your code with /EHsc if you don't plan on adding exception handling.
+
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 //////////////////////////////////////////////////////////////////////////////
 #include <atlbase.h>
 #include <atlcoll.h>
@@ -145,5 +148,4 @@ typedef std::string tstring;
 
 //////////////////////////////////////////////////////////////////////////////
 //#define _AUTO_TEST
-#define _USE_LIST_VIEW_FOR_BACK_TRACE
 //#define _USE_RICH_EDIT_FOR_BACK_TRACE

@@ -267,6 +267,11 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
       //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%lluX)"), (DWORD64)p);
       cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%p)"), p);
     }
+    if (gSettings.GetFnCallLine())
+    {
+      if (p_addr_info)
+        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%d)"), p_addr_info->line);
+    }    
     pBuf[cb] = 0;
   }
   else

@@ -40,6 +40,8 @@
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
 #define IDC_CHECK_USE_PC_TIME           1009
+#define IDC_CALL_ADDR3                  1009
+#define IDC_FN_CALL_LINE                1009
 #define IDC_CALL_LINE                   1020
 #define IDC_CHECK_USE_PC_TIME2          1021
 #define IDC_CHECK_COMPACT_VIEW          1022
@@ -90,6 +92,7 @@
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_EDIT_FIND32798               32798
+#define ID_NESTED_CALLS                 32799
 #define ID_EDIT_FINDNEXT                32801
 #define ID_EDIT_FINNDPREVIOUS           32802
 #define ID_EDIT_FINDLAST                32803

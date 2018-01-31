@@ -35,10 +35,9 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   m_wndHorzSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
   m_wndVertSplitter.Create(m_wndHorzSplitter, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
 
-#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
   dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
     LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA | LVS_NOCOLUMNHEADER;
-#else
+#if(0)
   dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL | ES_MULTILINE | ES_WANTRETURN;
 #endif
   if (!gSettings.GetInfoHiden())
@@ -91,7 +90,7 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, bool bNested, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   static DWORD curArchiveNumber = 0;
   static LOG_NODE* pCurNode = 0;
@@ -105,24 +104,23 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNo
     return;
   }
 
-  pSelectedNode = pSelectedNode ? pSelectedNode : pUpdatedNode;  
-  if (pSelectedNode == 0)
+  if (pSelectedNode == 0 && pUpdatedNode == 0)
   {
     return;
   }
 
-  pCurNode = pSelectedNode;
+  pCurNode = pSelectedNode ? pSelectedNode : pUpdatedNode;
   curArchiveNumber = gArchive.getArchiveNumber();
 
   if (pUpdatedNode == NULL)
   {
     if (pSelectedNode->PendingToResolveAddr())
     {
-      gArchive.resolveAddr(pSelectedNode);
+      gArchive.resolveAddr(pSelectedNode, bNested);
     }
   }
 
-  m_wndBackTraceView.UpdateTrace(pSelectedNode);
+  m_wndBackTraceView.UpdateTrace(pCurNode, bNested);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)
@@ -207,7 +205,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     }
     return CDRF_DODEFAULT;
   }
-#ifdef _USE_LIST_VIEW_FOR_BACK_TRACE
   else if (pnmh->hwndFrom == m_wndBackTraceView)
   {
     LPNMLVCUSTOMDRAW pNMLVCD = (LPNMLVCUSTOMDRAW)pnmh;
@@ -227,7 +224,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
   }
     return CDRF_DODEFAULT;
   }
-#endif
   return CDRF_DODEFAULT;
 }
 

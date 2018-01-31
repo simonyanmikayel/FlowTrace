@@ -64,6 +64,7 @@ public:
     DECL_PROP(int, ColLine);
     DECL_PROP(int, ColTime);
     DECL_PROP(int, ColCallAddr);
+    DECL_PROP(int, FnCallLine);
 
     DECL_PROP(DWORD, UdpPort);
 

@@ -13,6 +13,7 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkPID.Attach(GetDlgItem(IDC_PID));
   m_chkTime.Attach(GetDlgItem(IDC_TIME));
   m_chkCallAddr.Attach(GetDlgItem(IDC_CALL_ADDR));
+  m_chkFnCallLine.Attach(GetDlgItem(IDC_FN_CALL_LINE));
   m_chkFuncName.Attach(GetDlgItem(IDC_FUNC_NAME));
   m_chkCallLine.Attach(GetDlgItem(IDC_CALL_LINE));
   m_ShowAppIp.Attach(GetDlgItem(IDC_CHECK_SHOW_APP_IP));
@@ -25,6 +26,7 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkPID.SetCheck(gSettings.GetColPID());
   m_chkTime.SetCheck(gSettings.GetColTime());
   m_chkCallAddr.SetCheck(gSettings.GetColCallAddr());
+  m_chkFnCallLine.SetCheck(gSettings.GetFnCallLine());
   m_chkFuncName.SetCheck(gSettings.GetColFunc());
   m_chkCallLine.SetCheck(gSettings.GetColLine());
   m_ShowAppIp.SetCheck(gSettings.GetShowAppIp());
@@ -44,12 +46,12 @@ LRESULT CColumnsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     gSettings.SetColPID(m_chkPID.GetCheck());
     gSettings.SetColTime(m_chkTime.GetCheck());
     gSettings.SetColCallAddr(m_chkCallAddr.GetCheck());
+    gSettings.SetFnCallLine(m_chkFnCallLine.GetCheck());
     gSettings.SetColFunc(m_chkFuncName.GetCheck());
     gSettings.SetColLine(m_chkCallLine.GetCheck());
     gSettings.SetShowAppIp(m_ShowAppIp.GetCheck());
     gSettings.SetShowAppTime(m_ShowAppTime.GetCheck());
     gSettings.SetShowElapsedTime(m_ShowElapsedTime.GetCheck());
-
   }
   EndDialog(wID);
   return 0;

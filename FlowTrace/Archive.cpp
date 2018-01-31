@@ -71,12 +71,12 @@ bool Archive::haveDataBuf(DWORD cb)
   return (rec_end + cb + maxReserveSize) < (char*)(node_array - c_rec - 1) && (c_rec < c_max_rec);
 }
 
-void Archive::resolveAddr(LOG_NODE* pNode)
+void Archive::resolveAddr(LOG_NODE* pNode, bool bNested)
 {
   if (gSettings.GetResolveAddr())
   {
     if (m_pAddr2LineThread)
-      m_pAddr2LineThread->Resolve(pNode);
+      m_pAddr2LineThread->Resolve(pNode, bNested);
   }
 }
 
@@ -149,7 +149,7 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD 
   pNode->hasCheckBox = 1;
   pNode->checked = 1;
   c_rec++;
-  resolveAddr(NULL);
+  resolveAddr();
   return pNode;
 }
 

@@ -33,6 +33,7 @@ LPCTSTR STR_APP_REG_VAL_ColFunc = _T("ColFunc");
 LPCTSTR STR_APP_REG_VAL_ColLine = _T("ColLine");
 LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
 LPCTSTR STR_APP_REG_VAL_ColCallAddr = _T("ColCallAddr");
+LPCTSTR STR_APP_REG_VAL_FnCallLine = _T("FnCallLine");
 
 LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
 LPCTSTR STR_APP_REG_VAL_TREE_VIEW_HIDEN = _T("TreeViewHiden");
@@ -94,6 +95,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_ColLine, m_ColLine, 1);
   Read(STR_APP_REG_VAL_ColTime, m_ColTime);
   Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
+  Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
 
   Read(STR_APP_REG_VAL_UpdateStack, m_UpdateStack, FALSE);
   Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
@@ -365,6 +367,7 @@ void CSettings::SetColFunc(int i){ m_ColFunc = i; Write(STR_APP_REG_VAL_ColFunc,
 void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine, m_ColLine); }
 void CSettings::SetColTime(int i){ m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
 void CSettings::SetColCallAddr(int i){ m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
+void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
 
 //void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }
 //void CSettings::SetTextColor(DWORD i){ m_TextColor = i; Write(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor); }

@@ -319,7 +319,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
             StartLogging();
         }
         if (gSettings.GetResolveAddr() && !resolveAddr)
-          gArchive.resolveAddr(NULL);
+          gArchive.resolveAddr();
         m_view.ApplySettings(true);
     }
     return 0;
@@ -361,7 +361,7 @@ LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
   LOG_NODE* pNode = (LOG_NODE*)lParam;
-  m_view.ShowBackTrace(NULL, pNode, gArchive.getArchiveNumber());
+  m_view.ShowBackTrace(NULL, wParam, pNode, gArchive.getArchiveNumber());
   return 0;
 }
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)

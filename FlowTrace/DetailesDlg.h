@@ -17,6 +17,7 @@ public:
   CButton m_chkPID;
   CButton m_chkTime;
   CButton m_chkCallAddr;
+  CButton m_chkFnCallLine;
   CButton m_chkFuncName;
   CButton m_chkCallLine;
   CButton m_ShowAppIp;
