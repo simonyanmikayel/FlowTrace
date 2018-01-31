@@ -678,9 +678,9 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   //  dwFlags |= MF_DISABLED;
   //InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
   dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree (Tab)"));
   dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack"));
+  InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack (Ctrl+L)"));
   InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_ListSelection.IsEmpty())

@@ -247,7 +247,7 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (selItem < 0 || selSubItem < 0)
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree (Tab)"));
   InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));

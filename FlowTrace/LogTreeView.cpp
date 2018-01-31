@@ -105,11 +105,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with traces"));
+    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with traces (Tab)"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack"));
+    InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack (Ctrl+L)"));
     InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)

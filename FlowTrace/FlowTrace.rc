@@ -452,7 +452,7 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_TAKESNAPSHOT    "Snapshots\nSnapshots"
-    ID_CALL_STACK           "Show Call Stack\nShow Call Stack  (Ctrl+K)"
+    ID_CALL_STACK           "Show Call Stack\nShow Call Stack  (Ctrl+L)"
 END
 
 STRINGTABLE
