@@ -65,7 +65,7 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
   }
   return cb;
 }
-bool LOG_NODE::PendingToResolveAddr()
+bool LOG_NODE::PendingToResolveAddr(bool bNested)
 {
   bool pendingToResolveAddr = false;
   LOG_NODE* pNode = getSyncNode();
@@ -77,9 +77,19 @@ bool LOG_NODE::PendingToResolveAddr()
       APP_DATA* appData = appNode->getData();
       if (appData)
       {
-        if (appData->cb_addr_info == INFINITE || pNode->p_addr_info == NULL)
+        pendingToResolveAddr = (appData->cb_addr_info == INFINITE);
+        if (!pendingToResolveAddr)
         {
-          pendingToResolveAddr = true;
+          pendingToResolveAddr = (pNode->p_addr_info == NULL);
+          if (!pendingToResolveAddr && bNested)
+          {
+            pNode = pNode->firstChild;
+            while (!pendingToResolveAddr && pNode)
+            {
+              pendingToResolveAddr = (pNode->p_addr_info == NULL);
+              pNode = pNode->nextSibling;
+            } 
+          }
         }
       }
     }

@@ -82,7 +82,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         if (!pNode || !pNode->isFlow())
           continue;
         ADDR_INFO *p_addr_info = pNode->p_addr_info;
-        if (p_addr_info)
+        if (p_addr_info && !m_bNested)
           continue;
         APP_NODE* appNode = pNode->getApp();
         if (!appNode)
@@ -114,10 +114,10 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
                 nearest_pc = p_addr_info->addr;
                 pNode->p_addr_info = p_addr_info;
               }
-
               p_addr_info = p_addr_info->pPrev;
             }
           }
+
           if (m_bNested)
             pNode = pNode->nextSibling;
           else

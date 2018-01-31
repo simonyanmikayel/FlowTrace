@@ -193,7 +193,7 @@ struct LOG_NODE
   APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
   char* getFnName();
   int getFnNameSize();
-  bool PendingToResolveAddr();
+  bool PendingToResolveAddr(bool bNested = false);
   char* getSrcName(bool fullPath);
   int getTraceText(char* pBuf, int max_cb_trace);
 };

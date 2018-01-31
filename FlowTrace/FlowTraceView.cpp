@@ -114,11 +114,14 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, bool bNested, LOG_NO
 
   if (pUpdatedNode == NULL)
   {
-    if (pSelectedNode->PendingToResolveAddr())
+    if (pSelectedNode->PendingToResolveAddr(bNested))
     {
       gArchive.resolveAddr(pSelectedNode, bNested);
     }
   }
+
+  if (pUpdatedNode && pUpdatedNode == m_wndTreeView.GetSelectedNode() && gSettings.GetFnCallLine())
+    m_wndTreeView.Invalidate();
 
   m_wndBackTraceView.UpdateTrace(pCurNode, bNested);
 }
