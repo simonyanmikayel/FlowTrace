@@ -231,7 +231,7 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
     {
       p->addr = maxAddr + 1000;
       p->line = INFINITE;
-      p->src = "??";
+      p->src = "?";
       p->pPrev = NULL;
       p->pPrev = appData->p_addr_info;
       appData->p_addr_info = p;

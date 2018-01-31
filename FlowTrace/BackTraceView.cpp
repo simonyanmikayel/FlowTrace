@@ -50,7 +50,7 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
     else
     {
       cb = 2;
-      memcpy(buf, "??", cb);
+      memcpy(buf, "?", cb);
     }
   }
   else if (iSubItem == BACK_TRACE_SRC)
@@ -86,10 +86,10 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
     {
       line = pNode->p_addr_info->line;
     }
-    if (line)
+    if (line > 0)
       cb = _snprintf(buf, cbBuf, "%d", line);
     else
-      cb = _snprintf(buf, cbBuf, "??");
+      cb = _snprintf(buf, cbBuf, "?");
   }
   buf[cb] = 0;
   return cb;
