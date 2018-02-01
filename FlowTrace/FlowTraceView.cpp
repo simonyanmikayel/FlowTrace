@@ -92,6 +92,9 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
 
 void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, bool bNested, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
+  if (gSettings.GetInfoHiden())
+    ShowStackView(true);
+
   static DWORD curArchiveNumber = 0;
   static LOG_NODE* pCurNode = 0;
 
@@ -232,9 +235,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
 
 void CFlowTraceView::ShowCallStack()
 {
-  if (gSettings.GetInfoHiden())
-    ShowStackView(true);
-
   LOG_NODE* pNode = NULL;
   HWND hwnd = GetFocus();
   if (hwnd == m_wndTreeView)
