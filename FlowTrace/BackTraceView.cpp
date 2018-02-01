@@ -167,7 +167,7 @@ void CBackTraceView::ClearTrace()
 
 void CBackTraceView::CopySelection()
 {
-  CopySelection(true);
+  CopySelection(false);
 }
 
 void CBackTraceView::CopySelection(bool all)
