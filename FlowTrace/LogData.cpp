@@ -206,17 +206,17 @@ LOG_NODE* LOG_NODE::getSyncNode()
 
 TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 {
-  const int MAX_BUF_LEN = 255;
-  static TCHAR pBuf[MAX_BUF_LEN + 1];
+  const int cMaxBuf = 255;
+  static TCHAR pBuf[cMaxBuf + 1];
   int cb = 0;
   TCHAR* ret = pBuf;
   int NN = getNN();
 #ifdef _DEBUG
-  //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("[%d %d %d]"), GetExpandCount(), line, lastChild ? lastChild->index : 0);
+  //cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("[%d %d %d]"), GetExpandCount(), line, lastChild ? lastChild->index : 0);
 #endif
   if (this == rootNode)
   {
-    cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("..."));
+    cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("..."));
   }
   else if (isApp())
   {
@@ -226,11 +226,11 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     pBuf[cb] = 0;
     if (pAppData->lost)
     {
-      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" (Lost: %d)"), pAppData->lost);
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" (Lost: %d)"), pAppData->lost);
     }
     if (gSettings.GetShowAppIp() && pAppData->ip_address[0])
     {
-      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" (%s)"), pAppData->ip_address);
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" (%s)"), pAppData->ip_address);
     }
     if (gSettings.GetShowAppTime())
     {
@@ -240,15 +240,15 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 
       time_t rawtime = sec;
       timeinfo = localtime(&rawtime);
-      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(" ("));
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(" ("));
       if (timeinfo)
-        cb += strftime(pBuf + cb, MAX_BUF_LEN - cb, "%H:%M:%S", timeinfo);
-      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN - cb, TEXT(".%03d)"), msec);
+        cb += strftime(pBuf + cb, cMaxBuf - cb, "%H:%M:%S", timeinfo);
+      cb += _sntprintf(pBuf + cb, cMaxBuf - cb, TEXT(".%03d)"), msec);
     }
   }
   else if (isProc())
   {
-    cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT("[%d]"), getPid());
+    cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT("[%d]"), getPid());
   }
   else if (isFlow())
   {
@@ -260,27 +260,27 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     if (extened)
     {
       if (gSettings.GetColNN() && NN)
-        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%d)"), NN); //gArchive.index(this) NN
+        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), NN); //gArchive.index(this) NN
       if (gSettings.GetShowElapsedTime() && This->getPeer())
       {
         _int64 sec1 = This->getTimeSec();
         _int64 msec1 = This->getTimeMSec();
         _int64 sec2 = (This->getPeer())->getTimeSec();
         _int64 msec2 = (This->getPeer())->getTimeMSec();
-        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
+        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
       }
     }
     if (gSettings.GetColCallAddr())
     {
       void* p = ThisData->call_site;
       //void* p = This->getCallAddr();
-      //cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%lluX)"), (DWORD64)p);
-      cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%p)"), p);
+      //cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%lluX)"), (DWORD64)p);
+      cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%p)"), p);
     }
     if (gSettings.GetFnCallLine())
     {
       if (p_addr_info)
-        cb += _sntprintf(pBuf + cb, MAX_BUF_LEN, TEXT(" (%d)"), p_addr_info->line);
+        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), p_addr_info->line);
     }    
     pBuf[cb] = 0;
   }
@@ -288,7 +288,7 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
   {
     ATLASSERT(FALSE);
   }
-  pBuf[MAX_BUF_LEN] = 0;
+  pBuf[cMaxBuf] = 0;
   if (cBuf)
     *cBuf = cb;
   return ret;
@@ -297,7 +297,7 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 
 TCHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
 {
-  const int MAX_BUF_LEN = MAX_TRCAE_LEN - 1;
+  const int MAX_BUF_LEN = 2*MAX_TRCAE_LEN - 1;
   static TCHAR pBuf[MAX_BUF_LEN + 1];
   int& cb = *cBuf;
   TCHAR* ret = pBuf;

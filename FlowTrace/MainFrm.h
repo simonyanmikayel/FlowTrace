@@ -74,6 +74,7 @@ public:
     COMMAND_ID_HANDLER(ID_EDIT_SELECTALL, onSelectAll)
     MESSAGE_HANDLER(WM_INPORT_TASK, OnImportTask);
     MESSAGE_HANDLER(WM_UPDATE_FILTER, onUpdateFilter)
+    MESSAGE_HANDLER(WM_SHOW_NGS, onShowMsg)
     MESSAGE_HANDLER(WM_UPDATE_BACK_TRACE, onUpdateBackTrace)
 
     COMMAND_ID_HANDLER(ID_BOOKMARKS_NEXTBOOKMARK, OnBookmarks)
@@ -129,6 +130,7 @@ public:
   LRESULT onSelectAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnImportTask(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT onUpdateFilter(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+  LRESULT onShowMsg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT onUpdateBackTrace(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

@@ -30,16 +30,17 @@ namespace Helpers
       GlobalFree(clipdata);
     }
   }
+
   void ErrMessageBox(TCHAR* lpFormat, ...)
   {
     va_list vl;
     va_start(vl, lpFormat);
 
-    TCHAR buf[1024];
-    _vsntprintf_s(buf, sizeof(buf) / sizeof(buf[0]), lpFormat, vl);
+    TCHAR* buf = new TCHAR[1024];
+    _vsntprintf_s(buf, 1023, 1023, lpFormat, vl);
     va_end(vl);
 
-    MessageBox(hwndMain, buf, TEXT("Flow Trace Error"), MB_OK | MB_ICONEXCLAMATION);
+    ::PostMessage(hwndMain, WM_SHOW_NGS, (WPARAM)buf, (LPARAM)0);
   }
 
   void SysErrMessageBox(TCHAR* lpFormat, ...)

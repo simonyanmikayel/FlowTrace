@@ -58,7 +58,6 @@ void ServerThread::Work(LPVOID pWorkParam)
   int64_t time, pc_time, rec_time, pac_time;
   DWORD pc_sec, pc_msec;
 
-
   if (s == INVALID_SOCKET)
     return;
 

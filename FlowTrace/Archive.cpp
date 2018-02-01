@@ -9,18 +9,12 @@ ROOT_NODE* rootNode;
 LIST_NODES* listNodes;
 SNAPSHOT snapshot;
 DWORD Archive::archiveNumber = 0;
-#define ONE_GIGABYTE (1024 * 1024 * 1024)
+#define BUFFER_SIZE (1024 * 1024 * 1024)
 
 Archive::Archive()
 {
-  WSADATA wsaData;
-  int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if (iResult != 0) {
-    Helpers::SysErrMessageBox(TEXT("WSAStartup failed"));
-  }
-
   InitializeCriticalSectionAndSpinCount(&cs, 0x00000400);
-  c_alloc = ONE_GIGABYTE;
+  c_alloc = BUFFER_SIZE;
   while (c_alloc && 0 == (buf = (char*)malloc(c_alloc)))
   {
     c_alloc = ((c_alloc / 5) * 4) + 1;
