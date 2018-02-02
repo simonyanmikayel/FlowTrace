@@ -12,9 +12,8 @@ CBackTraceView::CBackTraceView(CFlowTraceView* pView)
   : m_pView(pView)
   , m_Initialised(false)
   , c_nodes(0)
-  , selItem(-1)
-  , selSubItem(-1)
 {
+  ClearSelection();
 }
 
 CBackTraceView::~CBackTraceView()
@@ -30,6 +29,8 @@ void CBackTraceView::OnSize(UINT nType, CSize size)
     m_Initialised = true;
     int cColumns = 0;
     InsertColumn(cColumns++, "func", LVCFMT_LEFT, 16, 0, -1, -1); //BACK_TRACE_FN
+    //InsertColumn(cColumns++, "lnk1", LVCFMT_RIGHT, 16, 0, -1, -1); //BACK_TRACE_LNK_CALL
+    //InsertColumn(cColumns++, "lnk2", LVCFMT_RIGHT, 16, 0, -1, -1); //BACK_TRACE_LNK_FUNC
     InsertColumn(cColumns++, "line", LVCFMT_RIGHT, 16, 0, -1, -1); //BACK_TRACE_LINE
     InsertColumn(cColumns++, "source", LVCFMT_LEFT, 16, 0, -1, -1); //BACK_TRACE_SRC
   }
@@ -49,9 +50,14 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
     else
     {
       cb = 2;
-      memcpy(buf, "?", cb);
+      memcpy(buf, " ", cb);
     }
   }
+  //else if (iSubItem == BACK_TRACE_LNK_CALL || iSubItem == BACK_TRACE_LNK_FUNC)
+  //{
+  //  cb = 2;
+  //  memcpy(buf, "?", cb);
+  //}
   else if (iSubItem == BACK_TRACE_SRC)
   {
     if (pNode->isTrace())
@@ -81,9 +87,9 @@ int CBackTraceView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf
       TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
       line = traceData->call_line;
     }
-    else if (pNode->p_addr_info)
+    else if (pNode->p_call_addr)
     {
-      line = pNode->p_addr_info->line;
+      line = pNode->p_call_addr->line;
     }
     if (line > 0)
       cb = _snprintf(buf, cbBuf, "%d", line);
@@ -125,7 +131,7 @@ void CBackTraceView::UpdateTrace(LOG_NODE* pSelectedNode, bool bNested)
   SelectObject(hdc, gSettings.GetFont());
 
   SIZE size;
-  GetTextExtentPoint32(hdc, "   ", 3, &size);
+  GetTextExtentPoint32(hdc, " ", 3, &size);
   int min_col_width = size.cx;
   for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
   {
@@ -161,8 +167,7 @@ void CBackTraceView::ClearTrace()
   SetItemCountEx(0, 0);
   DeleteAllItems();
   c_nodes = 0;
-  selItem = -1;
-  selSubItem = -1;
+  ClearSelection();
 }
 
 void CBackTraceView::CopySelection()
@@ -188,8 +193,8 @@ void CBackTraceView::CopySelection(bool all)
   }
   else
   {
-    if (selItem >= 0 && selSubItem >= 0)
-      cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+    if (m_sel.pNode)
+      cb = getSubItemText(m_sel.iItem, m_sel.iSubItem, pBuf, cMaxBuf);
   }
   Helpers::CopyToClipboard(m_hWnd, pBuf, cb);
 }
@@ -206,7 +211,7 @@ void CBackTraceView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   int old_bkMode = ::GetBkMode(hdc);
 
   ::SetBkMode(hdc, OPAQUE);
-  bool selected = (iItem == selItem && iSubItem == selSubItem);
+  bool selected = (iItem == m_sel.iItem && iSubItem == m_sel.iSubItem);
   if (selected)
   {
     ::SetTextColor(hdc, gSettings.SelectionTxtColor());
@@ -246,18 +251,19 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
   dwFlags = MF_BYPOSITION | MF_STRING;
-  if (*gSettings.GetEclipsePath() == 0)
+  if (m_sel.pNode == NULL || !m_sel.pNode->CanShowInEclipse())
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Open Function in Eclipse"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Open Call Line in Eclipse"));
   dwFlags = MF_BYPOSITION | MF_STRING;
-  if (selItem < 0 || selSubItem < 0)
+  if (m_sel.pNode == NULL)
     dwFlags |= MF_DISABLED;
   InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree (Tab)"));
   InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
   dwFlags = MF_BYPOSITION | MF_STRING;
-  if (selItem < 0 || selSubItem < 0)
+  if (m_sel.pNode == NULL)
     dwFlags |= MF_DISABLED;
   InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("Copy"));
   UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
@@ -273,15 +279,15 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
   }
   else if (nRet == ID_SYNC_VIEWES)
   {
-    if (selItem >= 0)
-      m_pView->SyncTree(nodes[selItem]);
+    m_pView->SyncTree(m_sel.pNode);
   }
-  else if (nRet == ID_SHOW_IN_ECLIPSE)
+  else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
   {
-    if (selItem >= 0)
-    {
-      m_pView->ShowInEclipse(nodes[selItem]);
-    }
+    m_pView->ShowInEclipse(m_sel.pNode, true);
+  }
+  else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
+  {
+    m_pView->ShowInEclipse(m_sel.pNode, false);
   }
 
   return 0;
@@ -290,21 +296,24 @@ LRESULT CBackTraceView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, B
 LRESULT CBackTraceView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
   bHandled = TRUE;
-  if (selItem < 0 || selSubItem < 0)
+  if (!m_sel.pNode)
     return 0;
-  int curSelItem = selItem;
-  int curSelSubItem = selSubItem;
+
+  int curSelItem = m_sel.iItem;
+  int curSelSubItem = m_sel.iSubItem;
+  int newSelItem = m_sel.iItem;
+  int newSelSubItem = m_sel.iSubItem;
 
   switch (wParam)
   {
   case VK_HOME:       // Home 
-    selSubItem = 0;
+    newSelSubItem = 0;
     break;
   case VK_RETURN:        // End 
-    selItem++;
+    newSelItem++;
     break;
   case VK_END:        // End 
-    selSubItem = BACK_TRACE_LAST_COL - 1;
+    newSelSubItem = BACK_TRACE_LAST_COL - 1;
     break;
   case VK_PRIOR:      // Page Up 
   case VK_NEXT:       // Page Down 
@@ -315,51 +324,83 @@ LRESULT CBackTraceView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL 
     GetItemRect(0, &rcItem, LVIR_BOUNDS);
     int count = (rcClient.bottom - rcClient.top) / (rcItem.bottom - rcItem.top);
     if (wParam == VK_PRIOR)
-      selItem -= count;
+      newSelItem -= count;
     else
-      selItem += count;
+      newSelItem += count;
   }
   break;
   case VK_LEFT:       // Left arrow 
-    selSubItem--;
+    newSelSubItem--;
     break;
   case VK_RIGHT:      // Right arrow 
-    selSubItem++;
+    newSelSubItem++;
     break;
   case VK_UP:         // Up arrow 
-    selItem--;
+    newSelItem--;
     break;
   case VK_DOWN:       // Down arrow 
-    selItem++;
+    newSelItem++;
     break;
   }
-  if (selItem < 0)
-    selItem = 0;
-  if (selSubItem < 0)
-    selSubItem = 0;
-  if (selItem >= c_nodes)
-    selItem = c_nodes - 1;
-  if (selSubItem >= BACK_TRACE_LAST_COL)
-    selSubItem = BACK_TRACE_LAST_COL -1;
+  if (newSelItem < 0)
+    newSelItem = 0;
+  if (newSelSubItem < 0)
+    newSelSubItem = 0;
+  if (newSelItem >= c_nodes)
+    newSelItem = c_nodes - 1;
+  if (newSelSubItem >= BACK_TRACE_LAST_COL)
+    newSelSubItem = BACK_TRACE_LAST_COL -1;
 
-  int cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
-  while (cb == 0 && selSubItem < BACK_TRACE_LAST_COL - 1)
+  int cb = getSubItemText(newSelItem, newSelSubItem, pBuf, cMaxBuf);
+  while (cb == 0 && newSelSubItem < BACK_TRACE_LAST_COL - 1)
   {
-    selSubItem++;
-    cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+    newSelSubItem++;
+    cb = getSubItemText(newSelItem, newSelSubItem, pBuf, cMaxBuf);
   }
-  while (cb == 0 && selSubItem > 0)
+  while (cb == 0 && newSelSubItem > 0)
   {
-    selSubItem--;
-    cb = getSubItemText(selItem, selSubItem, pBuf, cMaxBuf);
+    newSelSubItem--;
+    cb = getSubItemText(newSelItem, newSelSubItem, pBuf, cMaxBuf);
   }
-  if (curSelItem != selItem || curSelSubItem != selSubItem)
+  if (curSelItem != newSelItem || curSelSubItem != newSelSubItem)
   {
     RedrawItems(curSelItem, curSelItem);
-    RedrawItems(selItem, selItem);
+    RedrawItems(newSelItem, newSelItem);
   }
+  SetSelection(newSelItem, newSelSubItem);
 
   return 0;
+}
+
+void CBackTraceView::ClearSelection()
+{
+  m_sel.iItem = -1;
+  m_sel.iSubItem = -1;
+  m_sel.pNode = NULL;
+}
+
+void CBackTraceView::SetSelection(int iItem, int iSubItem)
+{
+  int curSelItem = m_sel.iItem;
+  int curSelSubItem = m_sel.iSubItem;
+  if (iItem >= 0 && iSubItem >= 0 && iItem < c_nodes)
+  {
+    m_sel.iItem = iItem;
+    m_sel.iSubItem = iSubItem;
+    m_sel.pNode = nodes[iItem];
+  }
+  int newSelItem = m_sel.iItem;
+  int newSelSubItem = m_sel.iSubItem;
+  if (curSelItem != newSelItem || curSelSubItem != newSelSubItem)
+  {
+    if(curSelItem >= 0)
+      RedrawItems(curSelItem, curSelItem);
+    if (newSelItem >= 0)
+    {
+      RedrawItems(newSelItem, newSelItem);
+      EnsureVisible(newSelItem, FALSE);
+    }
+  }
 }
 
 void CBackTraceView::SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -378,18 +419,16 @@ void CBackTraceView::SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lP
   //stdlog("xPos = %d yPos = %d flags = %d ht.iItem = %d\n", xPos, yPos, ht.flags, ht.iItem);
   if ((ht.iItem >= 0))
   {
-    if (selItem != ht.iItem || selSubItem != ht.iSubItem)
+    if (m_sel.iItem != ht.iItem || m_sel.iSubItem != ht.iSubItem)
     {
       int cb = getSubItemText(ht.iItem, ht.iSubItem, pBuf, cMaxBuf);
       if (cb > 0)
       {
-        if (selItem >= 0)
+        if (m_sel.iItem >= 0)
         {
-          RedrawItems(selItem, selItem);
+          RedrawItems(m_sel.iItem, m_sel.iItem);
         }
-        selItem = ht.iItem;
-        selSubItem = ht.iSubItem;
-        RedrawItems(selItem, selItem);
+        SetSelection(ht.iItem, ht.iSubItem);
       }
     }
   }

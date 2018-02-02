@@ -26,9 +26,9 @@ char* LOG_NODE::getFnName()
 char* LOG_NODE::getSrcName(bool fullPath)
 {
   char* src = "";
-  if (p_addr_info)
+  if (p_call_addr)
   {
-    src = p_addr_info->src;
+    src = p_call_addr->src;
     if (!fullPath)
     {
       char* name = strrchr(src, '/');
@@ -65,6 +65,10 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
   }
   return cb;
 }
+bool LOG_NODE::CanShowInEclipse()
+{
+  return *gSettings.GetEclipsePath() != 0 && gSettings.GetResolveAddr() && !PendingToResolveAddr();
+}
 bool LOG_NODE::PendingToResolveAddr(bool bNested)
 {
   bool pendingToResolveAddr = false;
@@ -80,13 +84,13 @@ bool LOG_NODE::PendingToResolveAddr(bool bNested)
         pendingToResolveAddr = (appData->cb_addr_info == INFINITE);
         if (!pendingToResolveAddr)
         {
-          pendingToResolveAddr = (pNode->p_addr_info == NULL);
+          pendingToResolveAddr = (pNode->p_call_addr == NULL);
           if (!pendingToResolveAddr && bNested)
           {
             pNode = pNode->firstChild;
             while (!pendingToResolveAddr && pNode)
             {
-              pendingToResolveAddr = (pNode->p_addr_info == NULL);
+              pendingToResolveAddr = (pNode->p_call_addr == NULL);
               pNode = pNode->nextSibling;
             } 
           }
@@ -279,8 +283,8 @@ TCHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     }
     if (gSettings.GetFnCallLine())
     {
-      if (p_addr_info)
-        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), p_addr_info->line);
+      if (p_call_addr)
+        cb += _sntprintf(pBuf + cb, cMaxBuf, TEXT(" (%d)"), p_call_addr->line);
     }    
     pBuf[cb] = 0;
   }

@@ -4,9 +4,16 @@
 #include "Helpers.h"
 
 #define MAX_BACK_TRACE 512
-enum BACK_TRACE_COL { BACK_TRACE_FN, BACK_TRACE_LINE, BACK_TRACE_SRC, BACK_TRACE_LAST_COL };
+enum BACK_TRACE_COL { BACK_TRACE_FN, BACK_TRACE_LINE, BACK_TRACE_SRC, BACK_TRACE_LAST_COL };//BACK_TRACE_LNK_CALL, BACK_TRACE_LNK_FUNC, 
 
 class CFlowTraceView;
+struct BackTraceSelection
+{
+  int iItem;
+  int iSubItem;
+  LOG_NODE* pNode;
+};
+
 class CBackTraceView : public CWindowImpl< CBackTraceView, CListViewCtrl>
 {
 public:
@@ -30,15 +37,16 @@ public:
   LOG_NODE* nodes[MAX_BACK_TRACE];
   int subItemColWidth[BACK_TRACE_LAST_COL];
   void SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
+  void SetSelection(int iItem, int iSubItem);
+  void ClearSelection();
   LRESULT OnLButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled);
   LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   int getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf);
-  LOG_NODE* GetSelectedNode() { return (selItem >= 0) ? nodes[selItem] : NULL; }
+  LOG_NODE* GetSelectedNode() { return m_sel.pNode; }
 
 private:
-  int selItem;
-  int selSubItem;
+  BackTraceSelection m_sel;
   int c_nodes;
   bool m_Initialised;
   CFlowTraceView* m_pView;

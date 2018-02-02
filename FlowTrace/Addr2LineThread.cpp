@@ -81,7 +81,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
           pNode = pNode->getPeer();
         if (!pNode || !pNode->isFlow())
           continue;
-        ADDR_INFO *p_addr_info = pNode->p_addr_info;
+        ADDR_INFO *p_addr_info = pNode->p_call_addr;
         if (p_addr_info && !m_bNested)
           continue;
         APP_NODE* appNode = pNode->getApp();
@@ -98,21 +98,28 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
 
         while (pNode && pNode->isFlow() && IsWorking())
         {
-          if (pNode->p_addr_info == 0)
+          if (pNode->p_call_addr == 0)
           {
             FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
 
-            DWORD addr = (DWORD)flowData->call_site;
-            DWORD nearest_pc = 0;
+            DWORD call_addr = (DWORD)flowData->call_site;
+            DWORD nearest_call_pc = 0;
+            DWORD func_addr = (DWORD)flowData->this_fn;
+            DWORD nearest_func_pc = 0;
             ADDR_INFO *p_addr_info = appData->p_addr_info;
-            pNode->p_addr_info = p_addr_info; //initial bad value
+            pNode->p_call_addr = p_addr_info; //initial bad value
             char* fn = flowData->fnName();
             while (p_addr_info && IsWorking())
             {
-              if (addr >= p_addr_info->addr && p_addr_info->addr >= nearest_pc)
+              if (call_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_call_pc)
               {
-                nearest_pc = p_addr_info->addr;
-                pNode->p_addr_info = p_addr_info;
+                nearest_call_pc = p_addr_info->addr;
+                pNode->p_call_addr = p_addr_info;
+              }
+              if (func_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_func_pc)
+              {
+                nearest_func_pc = p_addr_info->addr;
+                pNode->p_func_addr = p_addr_info;
               }
               p_addr_info = p_addr_info->pPrev;
             }

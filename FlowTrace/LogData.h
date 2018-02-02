@@ -122,7 +122,8 @@ struct LOG_NODE
   LOG_NODE* parent;
   LOG_NODE* lastChild;
   LOG_NODE* prevSibling;
-  ADDR_INFO *p_addr_info;
+  ADDR_INFO *p_call_addr;
+  ADDR_INFO *p_func_addr;
   struct {
     WORD hasNewLine : 1;
     WORD hasSearchResult : 1;
@@ -194,6 +195,7 @@ struct LOG_NODE
   char* getFnName();
   int getFnNameSize();
   bool PendingToResolveAddr(bool bNested = false);
+  bool CanShowInEclipse();
   char* getSrcName(bool fullPath);
   int getTraceText(char* pBuf, int max_cb_trace);
 };

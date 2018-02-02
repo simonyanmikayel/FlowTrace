@@ -673,10 +673,6 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
-  //dwFlags = MF_BYPOSITION | MF_STRING;
-  //if (*gSettings.GetEclipsePath() == 0)
-  //  dwFlags |= MF_DISABLED;
-  //InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
   dwFlags = MF_BYPOSITION | MF_STRING;
   InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree (Tab)"));
   dwFlags = MF_BYPOSITION | MF_STRING;
@@ -701,15 +697,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   {
     m_pView->ShowCallStack();
   }
-  //else if (nRet == ID_SHOW_IN_ECLIPSE)
-  //{
-  //  int iItem = getSelectionItem();
-  //  LOG_NODE* pNode = listNodes->getNode(iItem);
-  //  if (pNode)
-  //  {
-  //    m_pView->ShowInEclipse(pNode);
-  //  }
-  //}  
+  
   return 0;
 }
 

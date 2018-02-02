@@ -88,7 +88,8 @@
 #define ID_VIEW_DETAILES                32789
 #define ID_VIEW_SETTINGS                32790
 #define ID_VIEW_CLEARLOG                32791
-#define ID_SHOW_IN_ECLIPSE              32792
+#define ID_SHOW_CALL_IN_ECLIPSE         32792
+#define ID_SHOW_FUNC_IN_ECLIPSE         32793
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_EDIT_FIND32798               32798

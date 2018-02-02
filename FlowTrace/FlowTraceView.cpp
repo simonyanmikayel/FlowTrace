@@ -249,12 +249,13 @@ void CFlowTraceView::ShowCallStack()
   ShowBackTrace(pNode);
 }
 
-void CFlowTraceView::ShowInEclipse(LOG_NODE* pNode)
+void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
 {
-  if (pNode && (*gSettings.GetEclipsePath()))
+  if (pSelectedNode && (*gSettings.GetEclipsePath()))
   {
-    pNode = pNode->getSyncNode();
-    if (pNode && pNode->p_addr_info)
+    LOG_NODE* pNode = pSelectedNode->getSyncNode();
+    ADDR_INFO * p_addr_info = (!bShowCallSite || pSelectedNode->isTrace()) ? pNode->p_func_addr : pNode->p_call_addr;
+    if (pNode && p_addr_info)
     {
       STARTUPINFO si;
       PROCESS_INFORMATION pi;
@@ -263,11 +264,21 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pNode)
       //D:\Programs\eclipse\eclipse-cpp-neon-M4a-win32-x86_64\eclipsec.exe -name Eclipse --launcher.openFile X:\prj\c\c\ctap\kernel\CTAPparameters\src\CTAP_parameters.c:50
       const int max_cmd = 2 * MAX_PATH;
       char cmd[max_cmd + 1];
-      char* src = pNode->p_addr_info->src;
+      char* src = p_addr_info->src;
+      int line = 0;
+      if (pSelectedNode->isTrace())
+      {
+        TRACE_DATA* pData = ((TRACE_NODE*)(pSelectedNode))->getData();
+        line = (bShowCallSite && pData->call_line != 0) ? pData->call_line : p_addr_info->line;
+      }
+      else
+      {
+        line = p_addr_info->line;
+      }
       char* szLinuxHome = gSettings.GetLinuxHome();
       if (strstr(src, szLinuxHome))
         src = strstr(src, szLinuxHome) + strlen(szLinuxHome);
-      _sntprintf(cmd, max_cmd, " -name Eclipse --launcher.openFile %s%s:%d", gSettings.GetMapOnWin(), src, pNode->p_addr_info->line);
+      _sntprintf(cmd, max_cmd, " -name Eclipse --launcher.openFile %s%s:%d", gSettings.GetMapOnWin(), src, line);
       CreateProcess(gSettings.GetEclipsePath(), cmd, NULL, NULL, FALSE,
         NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
       CloseHandle(pi.hProcess);

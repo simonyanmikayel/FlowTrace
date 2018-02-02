@@ -39,7 +39,7 @@ public:
 
   void SyncViews();
   void SyncTree(LOG_NODE* pNode);
-  void ShowInEclipse(LOG_NODE* pNode);
+  void ShowInEclipse(LOG_NODE* pNode, bool bShowCallSite);
   void ShowCallStack();
   void ShowTreeView(bool show);
   void ShowStackView(bool show);

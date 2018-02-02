@@ -98,10 +98,6 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     POINT pt = { xPos, yPos };
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
-    //dwFlags = MF_BYPOSITION | MF_STRING;
-    //if (*gSettings.GetEclipsePath() == 0 || !pNode->isFlow())
-    //  dwFlags |= MF_DISABLED;
-    //InsertMenu(hMenu, 0, dwFlags, ID_SHOW_IN_ECLIPSE, _T("Open in Eclipse"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
@@ -153,14 +149,6 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
       m_pView->ShowBackTrace(pNode, true);
     }
     
-    //else if (nRet == ID_SHOW_IN_ECLIPSE)
-    //{
-    //  LOG_NODE* pNode = GetSelectedNode();
-    //  if (pNode)
-    //  {
-    //    m_pView->ShowInEclipse(pNode);
-    //  }
-    //}
     //stdlog("%u\n", GetTickCount());
   }
   return 0;
