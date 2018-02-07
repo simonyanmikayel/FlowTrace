@@ -70,8 +70,7 @@ void CFlowTraceView::ApplySettings(bool fontChanged)
 {
   m_wndTreeView.ApplySettings(fontChanged);
   m_wndListView.ApplySettings(fontChanged);
-  if (fontChanged)
-    m_wndBackTraceView.SetFont(gSettings.GetFont());
+  m_wndBackTraceView.ApplySettings(fontChanged);
 }
 
 LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/)
@@ -298,7 +297,6 @@ void CFlowTraceView::ShowStackView(bool show)
   if (show)
   {
     m_wndHorzSplitter.SetSinglePaneMode(SPLIT_PANE_NONE);
-    m_wndBackTraceView.SetFont(gSettings.GetFont());
   }
   else
   {

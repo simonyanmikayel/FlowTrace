@@ -195,6 +195,7 @@ LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
     StopLogging(true);
     gSettings.SetVertSplitterPos(m_view.GetVertSplitterPosPct());
     gSettings.SetHorzSplitterPos(m_view.GetHorzSplitterPosPct());
+    gSettings.SetStackSplitterPos(m_backTrace.GetStackSplitterPosPct());
     gSettings.SaveWindPos(m_hWnd);
     bHandled = FALSE;
 

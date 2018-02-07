@@ -19,6 +19,7 @@ public:
   LRESULT OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
   void SetChildPos(int cx, int cy);
+  int GetStackSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
 
   void UpdateBackTrace(LOG_NODE* pSelectedNode) 
   {

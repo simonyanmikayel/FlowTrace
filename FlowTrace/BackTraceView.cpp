@@ -26,7 +26,7 @@ LRESULT CBackTraceView::OnCreate(LPCREATESTRUCT lpcs)
   m_wndCallStackView.Create(m_wndVertSplitter, rcDefault, NULL, dwStyle, 0);
 
   m_wndVertSplitter.SetSplitterPanes(m_wndCallStackView, m_wndCallFuncView);
-  m_wndVertSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetVertSplitterPos())), false);
+  m_wndVertSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetStackSplitterPos())), false);
 
   ApplySettings(true);
 

@@ -99,6 +99,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
     dwFlags = MF_BYPOSITION | MF_STRING;
+    if (pNode == NULL || !gSettings.CanShowInEclipse())
+      dwFlags |= MF_DISABLED;
+    InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+    InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+    dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
     InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
@@ -134,7 +139,15 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       m_pView->SyncViews();
     }
-    
+    else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
+    {
+      m_pView->ShowInEclipse(pNode, true);
+    }
+    else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
+    {
+      m_pView->ShowInEclipse(pNode, false);
+    }
+
     //stdlog("%u\n", GetTickCount());
   }
   return 0;

@@ -131,7 +131,7 @@ private:
   int m_ColLen[MAX_COL];
   int m_cColumns, m_cActualColumns;
   int m_LogCol;
-  bool m_hasCaret;
+  bool m_hasFocus;
   bool m_IsCupture;
   CFlowTraceView* m_pView;
   HDC m_hdc;

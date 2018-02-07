@@ -34,6 +34,7 @@ public:
 
     DECL_PROP(int, VertSplitterPos);
     DECL_PROP(int, HorzSplitterPos);
+    DECL_PROP(int, StackSplitterPos);
     DECL_PROP(HFONT, Font);
     DECL_PROP(int, FontHeight);
     DECL_PROP(int, FontWidth);

@@ -17,7 +17,7 @@ static int ICON_INDEX_SYNC;
 
 CLogListView::CLogListView(CFlowTraceView* pView)
   : m_pView(pView)
-  , m_hasCaret(false)
+  , m_hasFocus(false)
   , m_IsCupture(false)
   , m_cColumns(0)
   , m_cActualColumns(0)
@@ -430,7 +430,7 @@ void CLogListView::UpdateCaret()
 {
   //m_Selection.print();
   //if (ListView_IsItemVisible(m_hWnd, m_Selection.cur.iItem))
-  if (!m_hasCaret)
+  if (!m_hasFocus)
     return;
 
   int x = ICON_MAX * ICON_LEN + TEXT_MARGIN;
@@ -663,10 +663,18 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   int xPos = GET_X_LPARAM(lParam);
   int yPos = GET_Y_LPARAM(lParam);
 
+  int iItem = getSelectionItem();
+  LOG_NODE* pNode = listNodes->getNode(iItem);
+
   DWORD dwFlags;
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  if (pNode == NULL || !gSettings.CanShowInEclipse())
+    dwFlags |= MF_DISABLED;
+  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
   dwFlags = MF_BYPOSITION | MF_STRING;
   InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
   InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
@@ -685,17 +693,25 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   {
     m_pView->SyncViews();
   }
-  
+  else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
+  {
+    m_pView->ShowInEclipse(pNode, true);
+  }
+  else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
+  {
+    m_pView->ShowInEclipse(pNode, false);
+  }
+
   return 0;
 }
 
 LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
 {
   //STDLOG("Focus = %d", m_hWnd == ::GetFocus());
-  if (!m_hasCaret)
+  if (!m_hasFocus)
   {
     CreateSolidCaret(1, gSettings.GetFontHeight());
-    m_hasCaret = true;
+    m_hasFocus = true;
     ShowCaret();
   }
   UpdateCaret();
@@ -706,10 +722,12 @@ LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 LRESULT CLogListView::OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
 {
   //STDLOG("Focus = %d", m_hWnd == ::GetFocus());
-  if (m_hasCaret)
+  if (m_hasFocus)
     DestroyCaret();
-  m_hasCaret = false;
+  m_hasFocus = false;
   bHandled = FALSE;
+  //if (!logSelection().IsEmpty())
+  //  Redraw(logSelection().StartItem(), logSelection().EndItem());
   return 0;
 }
 

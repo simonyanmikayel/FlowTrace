@@ -9,6 +9,7 @@ LPCTSTR STR_APP_REG_KEY				=_T("Software\\TermianlTools\\FlowTrace");
 LPCTSTR STR_APP_REG_VAL_WINDOWPOS	=_T("WindowPos");
 LPCTSTR STR_APP_REG_VAL_VERT_SPLITTER_POS = _T("VertSplitterPos");
 LPCTSTR STR_APP_REG_VAL_HORZ_SPLITTER_POS = _T("HorzSplitterPos");
+LPCTSTR STR_APP_REG_VAL_STACK_SPLITTER_POS = _T("StackSplitterPos");
 
 LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName_1");
 LPCTSTR STR_APP_REG_VAL_FONTWIDTH =_T("FontWeight");
@@ -76,11 +77,12 @@ CRegKeyExt(STR_APP_REG_KEY)
 {
   Read(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos, 50);
   Read(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos, 50);
+  Read(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos, 50);
   Read(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden, TRUE);
   Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
   Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
   Read(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime, FALSE);
-  Read(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView, TRUE);
+  m_CompactView = TRUE;// Read(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView, TRUE);
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
   Read(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
@@ -357,6 +359,7 @@ TCHAR* CSettings::GetSearchList()
 
 void CSettings::SetVertSplitterPos(int i) { m_VertSplitterPos = i;  Write(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos); }
 void CSettings::SetHorzSplitterPos(int i) { m_HorzSplitterPos = i;  Write(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos); }
+void CSettings::SetStackSplitterPos(int i) { m_StackSplitterPos = i;  Write(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos); }
 
 void CSettings::SetColLineNN(int i){ m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }

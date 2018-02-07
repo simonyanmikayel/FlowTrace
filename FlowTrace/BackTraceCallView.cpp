@@ -316,12 +316,12 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
     dwFlags |= MF_DISABLED;
   InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
-  MENUITEMINFO mii;
-  mii.cbSize = sizeof(MENUITEMINFO);
-  mii.fMask = MIIM_BITMAP;
-  GetMenuItemInfo(hMenu, 0, TRUE, &mii);
-  mii.hbmpItem = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_TTF_BMP));
-  SetMenuItemInfo(hMenu, 0, TRUE, &mii);
+  //MENUITEMINFO mii;
+  //mii.cbSize = sizeof(MENUITEMINFO);
+  //mii.fMask = MIIM_BITMAP;
+  //GetMenuItemInfo(hMenu, 0, TRUE, &mii);
+  //mii.hbmpItem = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_TTF_BMP));
+  //SetMenuItemInfo(hMenu, 0, TRUE, &mii);
 
 
 
