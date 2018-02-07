@@ -35,7 +35,6 @@ public:
   CButton m_CompactView;
   CButton m_ResolveAddr;
   CButton m_FullSrcPath;
-  CButton m_btnUpdateStack;
   CEdit   m_edtEclipsePath;
   CEdit   m_edtLinuxHome;
   CEdit   m_edtMapOnWin;

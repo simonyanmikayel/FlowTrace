@@ -30,6 +30,7 @@ public:
     DWORD SerachColor();
     DWORD CurSerachColor();
     DWORD InfoTextColor();
+    bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
 
     DECL_PROP(int, VertSplitterPos);
     DECL_PROP(int, HorzSplitterPos);
@@ -73,7 +74,6 @@ public:
     DECL_GET(DWORD, FontWeight);
     DECL_GET(TCHAR*, ResFontName);
 
-    DECL_PROP(DWORD, UpdateStack);
     DECL_STR_PROP(TCHAR, EclipsePath, MAX_PATH);
     DECL_STR_PROP(TCHAR, LinuxHome, MAX_PATH);
     DECL_STR_PROP(TCHAR, MapOnWin, MAX_PATH);

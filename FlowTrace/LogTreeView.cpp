@@ -101,14 +101,8 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with traces (Tab)"));
+    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
     dwFlags = MF_BYPOSITION | MF_STRING;
-    if (!pNode->isFlow())
-      dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_NESTED_CALLS, _T("Show Nested Calls"));
-    if (!pNode->isFlow())
-      dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack (Ctrl+L)"));
     InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
@@ -139,14 +133,6 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     else if (nRet == ID_SYNC_VIEWES)
     {
       m_pView->SyncViews();
-    }
-    else if (nRet == ID_CALL_STACK)
-    {
-      m_pView->ShowBackTrace(pNode);
-    }
-    else if (nRet == ID_NESTED_CALLS)
-    {
-      m_pView->ShowBackTrace(pNode, true);
     }
     
     //stdlog("%u\n", GetTickCount());
@@ -442,8 +428,6 @@ void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapse
 void CLogTreeView::SetSelectedNode(LOG_NODE* pNode)
 {
   m_pSelectedNode = pNode;
-  if (gSettings.GetUpdateStack())
-    m_pView->ShowBackTrace(pNode);
 }
 
 LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)

@@ -29,17 +29,91 @@ void Addr2LineThread::Terminate()
   CloseHandle(m_hResolveEvent);
 }
 
-void Addr2LineThread::Resolve(LOG_NODE* pNode, bool bNested)
+void Addr2LineThread::ResolveAsync(LOG_NODE* pNode)
 {
   if (pNode)
   {
     m_pNode = pNode;
-    m_bNested = bNested;
     SetEvent(m_hResolveEvent);
   }
   else
   {
     SetEvent(m_hParseEvent);
+  }
+}
+
+void Addr2LineThread::Resolve(LOG_NODE* pSelectedNode, bool loop)
+{
+  _Resolve(pSelectedNode, true, loop);
+  _Resolve(pSelectedNode, false, loop);
+}
+
+void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
+{
+  LOG_NODE* pNode = pSelectedNode;
+  if (!pNode)
+    return;
+  if (pNode->isTrace())
+    pNode = pNode->getSyncNode();
+  if (pNode && pNode->parent == NULL)
+    pNode = pNode->getPeer();
+  if (!pNode || !pNode->isFlow())
+    return;
+  ADDR_INFO *p_addr_info = pNode->p_call_addr;
+  APP_NODE* appNode = pNode->getApp();
+  if (!appNode)
+    return;
+  APP_DATA* appData = appNode->getData();
+  if (!appData)
+    return;
+  if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
+    return;
+
+  bool firstNodeResolved = false;
+  while (pNode && pNode->isFlow() && IsWorking())
+  {
+    if (pNode->p_call_addr == 0)
+    {
+      FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+
+      DWORD call_addr = (DWORD)flowData->call_site;
+      DWORD nearest_call_pc = 0;
+      DWORD func_addr = (DWORD)flowData->this_fn;
+      DWORD nearest_func_pc = 0;
+      ADDR_INFO *p_addr_info = appData->p_addr_info;
+      pNode->p_call_addr = p_addr_info; //initial bad value
+      char* fn = flowData->fnName();
+      while (p_addr_info && IsWorking())
+      {
+        if (call_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_call_pc)
+        {
+          nearest_call_pc = p_addr_info->addr;
+          pNode->p_call_addr = p_addr_info;
+        }
+        if (func_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_func_pc)
+        {
+          nearest_func_pc = p_addr_info->addr;
+          pNode->p_func_addr = p_addr_info;
+        }
+        p_addr_info = p_addr_info->pPrev;
+      }
+    }
+
+    if (!loop)
+      break;
+
+    if (bNested)
+    {
+      if (!firstNodeResolved)
+      {
+        firstNodeResolved = true;
+        pNode = pNode->firstChild;
+      }
+      else
+        pNode = pNode->nextSibling;
+    }
+    else
+      pNode = pNode->parent;
   }
 }
 
@@ -73,65 +147,9 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
         LOG_NODE* pNode = m_pNode;
         LOG_NODE* pSelectedNode = m_pNode;
         m_pNode = 0;
-        if (!pNode)
-          continue;
-        if (pNode->isTrace())
-          pNode = pNode->getSyncNode();
-        if (pNode && pNode->parent == NULL)
-          pNode = pNode->getPeer();
-        if (!pNode || !pNode->isFlow())
-          continue;
-        ADDR_INFO *p_addr_info = pNode->p_call_addr;
-        if (p_addr_info && !m_bNested)
-          continue;
-        APP_NODE* appNode = pNode->getApp();
-        if (!appNode)
-          continue;
-        APP_DATA* appData = appNode->getData();
-        if (!appData)
-          continue;
-        if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
-          continue;
-
-        if (m_bNested)
-          pNode = pNode->firstChild;
-
-        while (pNode && pNode->isFlow() && IsWorking())
-        {
-          if (pNode->p_call_addr == 0)
-          {
-            FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
-
-            DWORD call_addr = (DWORD)flowData->call_site;
-            DWORD nearest_call_pc = 0;
-            DWORD func_addr = (DWORD)flowData->this_fn;
-            DWORD nearest_func_pc = 0;
-            ADDR_INFO *p_addr_info = appData->p_addr_info;
-            pNode->p_call_addr = p_addr_info; //initial bad value
-            char* fn = flowData->fnName();
-            while (p_addr_info && IsWorking())
-            {
-              if (call_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_call_pc)
-              {
-                nearest_call_pc = p_addr_info->addr;
-                pNode->p_call_addr = p_addr_info;
-              }
-              if (func_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_func_pc)
-              {
-                nearest_func_pc = p_addr_info->addr;
-                pNode->p_func_addr = p_addr_info;
-              }
-              p_addr_info = p_addr_info->pPrev;
-            }
-          }
-
-          if (m_bNested)
-            pNode = pNode->nextSibling;
-          else
-            pNode = pNode->parent;
-        }
+        Resolve(pSelectedNode, true);
         if (IsWorking())
-          ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, m_bNested, (LPARAM)pSelectedNode);
+          ::PostMessage(hwndMain, WM_UPDATE_BACK_TRACE, 0, (LPARAM)pSelectedNode);
       }
     }
     else

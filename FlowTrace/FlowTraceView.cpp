@@ -35,20 +35,10 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
   m_wndHorzSplitter.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
   m_wndVertSplitter.Create(m_wndHorzSplitter, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, SPLIT_PROPORTIONAL);
 
-  dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-    LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA | LVS_NOCOLUMNHEADER;
-#if(0)
-  dwStyle = WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | ES_AUTOHSCROLL | ES_MULTILINE | ES_WANTRETURN;
-#endif
+  dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
   if (!gSettings.GetInfoHiden())
     dwStyle |= WS_VISIBLE;
   m_wndBackTraceView.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
-#ifdef _USE_RICH_EDIT_FOR_BACK_TRACE
-  m_wndBackTraceView.SetEventMask(m_wndBackTraceView.GetEventMask() | ENM_SELCHANGE | ENM_LINK);
-  m_wndBackTraceView.SetAutoURLDetect(TRUE);
-  m_wndBackTraceView.SetUndoLimit(0);
-  m_wndBackTraceView.SetReadOnly();
-#endif
 
   m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
     WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
@@ -90,10 +80,10 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
   return 0;
 }
 
-void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, bool bNested, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
 {
   if (gSettings.GetInfoHiden())
-    ShowStackView(true);
+    return;
 
   static DWORD curArchiveNumber = 0;
   static LOG_NODE* pCurNode = 0;
@@ -117,16 +107,16 @@ void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, bool bNested, LOG_NO
 
   if (pUpdatedNode == NULL)
   {
-    if (pSelectedNode->PendingToResolveAddr(bNested))
+    if (pSelectedNode->PendingToResolveAddr(true) || pSelectedNode->PendingToResolveAddr(false))
     {
-      gArchive.resolveAddr(pSelectedNode, bNested);
+      gArchive.resolveAddrAsync(pSelectedNode);
     }
   }
 
   if (pUpdatedNode && pUpdatedNode == m_wndTreeView.GetSelectedNode() && gSettings.GetFnCallLine())
     m_wndTreeView.Invalidate();
 
-  m_wndBackTraceView.UpdateTrace(pCurNode, bNested);
+  m_wndBackTraceView.UpdateBackTrace(pCurNode);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)
@@ -211,50 +201,20 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     }
     return CDRF_DODEFAULT;
   }
-  else if (pnmh->hwndFrom == m_wndBackTraceView)
-  {
-    LPNMLVCUSTOMDRAW pNMLVCD = (LPNMLVCUSTOMDRAW)pnmh;
-    switch (pNMLVCD->nmcd.dwDrawStage)
-    {
-    case CDDS_PREPAINT:
-      return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
-    case CDDS_ITEMPREPAINT:
-      m_wndBackTraceView.ItemPrePaint(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
-      return CDRF_NOTIFYSUBITEMDRAW;
-    case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
-    {                                    // response to CDDS_ITEMPREPAINT.
-      m_wndBackTraceView.DrawSubItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
-      return CDRF_SKIPDEFAULT;
-    }
-    break;
-  }
-    return CDRF_DODEFAULT;
-  }
   return CDRF_DODEFAULT;
-}
-
-void CFlowTraceView::ShowCallStack()
-{
-  LOG_NODE* pNode = NULL;
-  HWND hwnd = GetFocus();
-  if (hwnd == m_wndTreeView)
-  {
-    pNode = m_wndTreeView.GetSelectedNode();
-  }
-  else if (hwnd == m_wndListView)
-  {
-    int iItem = m_wndListView.getSelectionItem();
-    pNode = listNodes->getNode(iItem);
-  }
-  ShowBackTrace(pNode);
 }
 
 void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
 {
-  if (pSelectedNode && (*gSettings.GetEclipsePath()))
+  if (pSelectedNode && gSettings.CanShowInEclipse())
   {
     LOG_NODE* pNode = pSelectedNode->getSyncNode();
     ADDR_INFO * p_addr_info = (!bShowCallSite || pSelectedNode->isTrace()) ? pNode->p_func_addr : pNode->p_call_addr;
+    if (!p_addr_info)
+    {
+      gArchive.resolveAddr(pNode, false);
+      p_addr_info = (!bShowCallSite || pSelectedNode->isTrace()) ? pNode->p_func_addr : pNode->p_call_addr;
+    }
     if (pNode && p_addr_info)
     {
       STARTUPINFO si;
@@ -287,7 +247,7 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
   }
 }
 
-void CFlowTraceView::SyncTree(LOG_NODE* pNode)
+void CFlowTraceView::SyncViews(LOG_NODE* pNode, bool fromList)
 {
   if (pNode)
   {
@@ -296,60 +256,49 @@ void CFlowTraceView::SyncTree(LOG_NODE* pNode)
     {
       m_selectedNode = pNode;
       m_wndTreeView.EnsureNodeVisible(pNode, false);
-      m_wndListView.ShowFirstSyncronised(true);
+      if(!fromList)
+        m_wndListView.ShowFirstSyncronised(true);
+      ShowBackTrace(pNode);
 
       m_wndListView.Invalidate();
       m_wndTreeView.Invalidate();
+      m_wndBackTraceView.m_wndCallFuncView.Invalidate();
+      m_wndBackTraceView.m_wndCallStackView.Invalidate();
     }
   }
 }
 void CFlowTraceView::SyncViews()
 {
   HWND hwnd = GetFocus();
+  LOG_NODE* pNode = NULL;
+  bool fromList = false;
   if (hwnd == m_wndTreeView)
   {
-    LOG_NODE* pNode = m_wndTreeView.GetSelectedNode();
-    if (pNode)
-    {
-      m_selectedNode = pNode;
-      m_wndListView.ShowFirstSyncronised(true);
-    }
+    pNode = m_wndTreeView.GetSelectedNode();
   }
   else if (hwnd == m_wndListView)
   {
     int iItem = m_wndListView.getSelectionItem();
-    LOG_NODE* pNode = listNodes->getNode(iItem);
-    if (pNode)
-    {
-      pNode = pNode->getSyncNode();
-      if (pNode)
-      {
-        m_selectedNode = pNode;
-        m_wndTreeView.EnsureNodeVisible(pNode, false);
-        m_wndListView.ShowFirstSyncronised(true);
-      }
-    }
+    fromList = true;
+    pNode = listNodes->getNode(iItem);
   }
-  else if (hwnd == m_wndBackTraceView)
+  else if (hwnd == m_wndBackTraceView.m_wndCallFuncView)
   {
-    LOG_NODE* pNode = m_wndBackTraceView.GetSelectedNode();
-    if (pNode)
-    {
-      SyncTree(pNode);
-    }
+    pNode = m_wndBackTraceView.m_wndCallFuncView.GetSelectedNode();
   }
-  m_wndListView.Invalidate();
-  m_wndTreeView.Invalidate();
+  else if (hwnd == m_wndBackTraceView.m_wndCallStackView)
+  {
+    pNode = m_wndBackTraceView.m_wndCallStackView.GetSelectedNode();
+  }
+  SyncViews(pNode, fromList);
 }
 
 void CFlowTraceView::ShowStackView(bool show)
 {
-  //m_wndBackTraceView.ShowWindow(show ? SW_SHOW : SW_HIDE);
-  //SetChildPos(0, 0, false);
-  gSettings.SetInfoHiden(!show);
   if (show)
   {
     m_wndHorzSplitter.SetSinglePaneMode(SPLIT_PANE_NONE);
+    m_wndBackTraceView.SetFont(gSettings.GetFont());
   }
   else
   {

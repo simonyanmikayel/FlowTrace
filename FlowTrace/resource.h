@@ -93,7 +93,6 @@
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_EDIT_FIND32798               32798
-#define ID_NESTED_CALLS                 32799
 #define ID_EDIT_FINDNEXT                32801
 #define ID_EDIT_FINNDPREVIOUS           32802
 #define ID_EDIT_FINDLAST                32803

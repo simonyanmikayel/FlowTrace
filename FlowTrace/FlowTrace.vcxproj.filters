@@ -81,6 +81,9 @@
     <ClCompile Include="BackTraceView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BackTraceCallView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -150,6 +153,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BackTraceView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BackTraceCallView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

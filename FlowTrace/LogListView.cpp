@@ -327,12 +327,6 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
   _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.GetItem() + 1));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
   int newItem = m_ListSelection.GetItem();
-  if (!extend && newItem != oldItem)
-  {
-    LOG_NODE* pNode = listNodes->getNode(newItem);// GetSynkNode();
-    if (gSettings.GetUpdateStack())
-      m_pView->ShowBackTrace(pNode);
-  }
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -674,9 +668,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
   dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize with call tree (Tab)"));
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_CALL_STACK, _T("Show Call Stack (Ctrl+L)"));
+  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
   InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_ListSelection.IsEmpty())
@@ -692,10 +684,6 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   else if (nRet == ID_SYNC_VIEWES)
   {
     m_pView->SyncViews();
-  }
-  else if (nRet == ID_CALL_STACK)
-  {
-    m_pView->ShowCallStack();
   }
   
   return 0;

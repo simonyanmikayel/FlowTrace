@@ -61,7 +61,8 @@ public:
   bool IsEmpty() { return c_rec == 0; }
   DWORD index(LOG_NODE* pNode) { return node_array - pNode; }
   bool haveDataBuf(DWORD cb);
-  void resolveAddr(LOG_NODE* pNode = NULL, bool bNested = false);
+  void resolveAddrAsync(LOG_NODE* pNode = NULL);
+  void resolveAddr(LOG_NODE* pSelectedNode, bool loop);
   static DWORD getArchiveNumber() { return archiveNumber; }
 
 private:

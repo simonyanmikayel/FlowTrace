@@ -185,6 +185,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 #endif
     m_view.ShowStackView(!gSettings.GetInfoHiden());
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
+    m_view.ShowStackView(!gSettings.GetInfoHiden());
+
     return 0;
 }
 
@@ -319,7 +321,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
             StartLogging();
         }
         if (gSettings.GetResolveAddr() && !resolveAddr)
-          gArchive.resolveAddr();
+          gArchive.resolveAddrAsync();
         m_view.ApplySettings(true);
     }
     return 0;
@@ -348,8 +350,9 @@ LRESULT CMainFrame::OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 
 LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_view.ShowStackView(gSettings.GetInfoHiden());
-    return 0;
+  gSettings.SetInfoHiden(!gSettings.GetInfoHiden());
+  m_view.ShowStackView(!gSettings.GetInfoHiden());
+  return 0;
 }
 
 LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -369,7 +372,7 @@ LRESULT CMainFrame::onShowMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, B
 LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
   LOG_NODE* pNode = (LOG_NODE*)lParam;
-  m_view.ShowBackTrace(NULL, wParam, pNode, gArchive.getArchiveNumber());
+  m_view.ShowBackTrace(NULL, pNode, gArchive.getArchiveNumber());
   return 0;
 }
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
@@ -426,8 +429,10 @@ LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
         m_tree.CopySelection();
     else if (::GetFocus() == m_list.m_hWnd)
         m_list.CopySelection();
-    else if (::GetFocus() == m_backTrace.m_hWnd)
-      m_backTrace.CopySelection();
+    else if (::GetFocus() == m_backTrace.m_wndCallFuncView.m_hWnd)
+      m_backTrace.m_wndCallFuncView.CopySelection();
+    else if (::GetFocus() == m_backTrace.m_wndCallStackView.m_hWnd)
+      m_backTrace.m_wndCallStackView.CopySelection();
     else if (::GetFocus() == m_searchedit.m_hWnd)
       m_searchedit.Copy();
     
@@ -456,11 +461,6 @@ LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 {
     m_view.SyncViews();
     return 0;
-}
-LRESULT CMainFrame::OnCallStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-  m_view.ShowCallStack();
-  return 0;
 }
 
 LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

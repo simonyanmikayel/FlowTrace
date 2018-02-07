@@ -65,10 +65,7 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
   }
   return cb;
 }
-bool LOG_NODE::CanShowInEclipse()
-{
-  return *gSettings.GetEclipsePath() != 0 && gSettings.GetResolveAddr() && !PendingToResolveAddr();
-}
+
 bool LOG_NODE::PendingToResolveAddr(bool bNested)
 {
   bool pendingToResolveAddr = false;

@@ -195,7 +195,6 @@ struct LOG_NODE
   char* getFnName();
   int getFnNameSize();
   bool PendingToResolveAddr(bool bNested = false);
-  bool CanShowInEclipse();
   char* getSrcName(bool fullPath);
   int getTraceText(char* pBuf, int max_cb_trace);
 };

@@ -38,9 +38,7 @@ public:
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
   void SyncViews();
-  void SyncTree(LOG_NODE* pNode);
   void ShowInEclipse(LOG_NODE* pNode, bool bShowCallSite);
-  void ShowCallStack();
   void ShowTreeView(bool show);
   void ShowStackView(bool show);
   void ClearLog();
@@ -52,8 +50,10 @@ public:
   CBackTraceView& backTrace() { return m_wndBackTraceView; }
   int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
-  void ShowBackTrace(LOG_NODE* pNode, bool bNested = false, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
+  void ShowBackTrace(LOG_NODE* pNode, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
 private:
+  void SyncViews(LOG_NODE* pNode, bool fromList);
+
   CSplitterWindow m_wndVertSplitter;
   CSplitterWindow m_wndHorzSplitter;
   CLogTreeView    m_wndTreeView;
