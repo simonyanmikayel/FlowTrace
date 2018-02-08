@@ -16,6 +16,8 @@ public:
     MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
     MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown); 
     MESSAGE_HANDLER(WM_RBUTTONDOWN, OnRButtonDown)
+    MESSAGE_HANDLER(WM_SETFOCUS, OnSetFocus)
+    MESSAGE_HANDLER(WM_KILLFOCUS, OnKillFocus)
   END_MSG_MAP()
 
   HIMAGELIST m_hTypeImageList;
@@ -25,6 +27,8 @@ public:
   void RefreshTree(bool showAll);
   void CollapseExpandAll(LOG_NODE* pNode, bool expand);
 
+  LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
+  LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnRButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   HIMAGELIST m_hStateImageList;
 

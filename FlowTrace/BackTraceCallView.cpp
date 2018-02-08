@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "Resource.h"
 #include "FlowTraceView.h"
+#include "Helpers.h"
 
 const int cMaxBuf = 1204 * 64;
 const int max_trace_text = 150;
@@ -12,6 +13,7 @@ CBackTraceCallView::CBackTraceCallView(CFlowTraceView* pView)
   : m_pView(pView)
   , m_Initialised(false)
   , c_nodes(0)
+  , min_col_width(0)
 {
   ClearSelection();
 }
@@ -181,7 +183,7 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
 
   SIZE size;
   GetTextExtentPoint32(hdc, " ", 3, &size);
-  int min_col_width = size.cx;
+  min_col_width = size.cx;
   for (int iSubItem = 0; iSubItem < BACK_TRACE_LAST_COL; iSubItem++)
   {
     subItemColWidth[iSubItem] = 0;
@@ -252,6 +254,22 @@ void CBackTraceCallView::ItemPrePaint(int iItem, HDC hdc, RECT rc)
 {
 }
 
+LRESULT CBackTraceCallView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
+{
+  bHandled = FALSE;
+  if (m_sel.pNode)
+    RedrawItems(m_sel.iItem, m_sel.iItem);
+  return 0;
+}
+
+LRESULT CBackTraceCallView::OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
+{
+  bHandled = FALSE;
+  if (m_sel.pNode)
+    RedrawItems(m_sel.iItem, m_sel.iItem);
+  return 0;
+}
+
 void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 {
   POINT  pt = { rcItem.left, rcItem.top };
@@ -260,12 +278,6 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
   int old_bkMode = ::GetBkMode(hdc);
 
   ::SetBkMode(hdc, OPAQUE);
-  bool selected = (iItem == m_sel.iItem && iSubItem == m_sel.iSubItem);
-  if (selected)
-  {
-    ::SetTextColor(hdc, gSettings.SelectionTxtColor());
-    ::SetBkColor(hdc, gSettings.SelectionBkColor(GetFocus() == m_hWnd));
-  }
 
   int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
   if (cb)
@@ -273,6 +285,23 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
     //if (!selected) { pBuf[0] = '1'; pBuf[1] = '2'; pBuf[2] = '3'; pBuf[3] = '4'; pBuf[4] = '5';}//memset(pBuf, 'W', cb);
     //stdlog("iItem %d, iSubItem %d, cb %d, pt.x %d, w=%d, %s\n", iItem, iSubItem, cb, pt.x, nodes[iItem].subItemColWidth[iSubItem], pBuf);
     TextOut(hdc, pt.x, pt.y, pBuf, cb);
+  }
+
+  if (iItem == m_sel.iItem && iSubItem == m_sel.iSubItem)
+  {
+    //::SetTextColor(hdc, gSettings.SelectionTxtColor());
+    //::SetBkColor(hdc, gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+    RECT rcText = { rcItem.left - 2, rcItem.top, rcItem.right - min_col_width + 10, rcItem.bottom };
+    if (GetFocus() == m_hWnd)
+    {
+      CBrush brush2;
+      brush2.CreateSolidBrush(gSettings.SelectionBkColor(true));
+      FrameRect(hdc, &rcText, brush2);
+    }
+    else
+    {
+      DrawFocusRect(hdc, &rcText);
+    }
   }
 
   ::SetTextColor(hdc, old_textColor);
@@ -294,33 +323,36 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
 
   int xPos = GET_X_LPARAM(lParam);
   int yPos = GET_Y_LPARAM(lParam);
-
+  int cMenu = 0;
   DWORD dwFlags;
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
   dwFlags = MF_BYPOSITION | MF_STRING;
+  if (m_sel.pNode == NULL)
+    dwFlags |= MF_DISABLED;
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
+  dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_sel.pNode == NULL || !gSettings.CanShowInEclipse())
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
-  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
+  InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+  dwFlags = MF_BYPOSITION | MF_STRING;
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_sel.pNode == NULL)
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-  InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  if (m_sel.pNode == NULL)
-    dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
   //MENUITEMINFO mii;
   //mii.cbSize = sizeof(MENUITEMINFO);
   //mii.fMask = MIIM_BITMAP;
   //GetMenuItemInfo(hMenu, 0, TRUE, &mii);
-  //mii.hbmpItem = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_TTF_BMP));
+  //mii.hbmpItem = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SYNC));
   //SetMenuItemInfo(hMenu, 0, TRUE, &mii);
 
 

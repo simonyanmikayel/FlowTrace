@@ -10,7 +10,6 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_lblFont.Attach(GetDlgItem(IDC_FONT_NAME));
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
   m_UsePcTime.Attach(GetDlgItem(IDC_CHECK_USE_PC_TIME));
-  m_CompactView.Attach(GetDlgItem(IDC_CHECK_COMPACT_VIEW));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
   m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
@@ -25,36 +24,8 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_lfWeight = gSettings.GetFontWeight();
   SetFontLabel();
 
-#ifdef USE_FONT_RES
-  m_FontPreviewCombol.SubclassWindow(GetDlgItem(IDC_COMBO_FONTS));
-  m_cmbFontSize.Attach(GetDlgItem(IDC_COMBO_FONT_SIZE));
-  m_FontBold.Attach(GetDlgItem(IDC_CHECK_FONT_WEIGHT));
-
-  m_FontPreviewCombol.ShowWindow(SW_SHOW);
-  m_cmbFontSize.ShowWindow(SW_SHOW);
-  m_FontBold.ShowWindow(SW_SHOW);
-  m_btnReset.ShowWindow(SW_SHOW);
-
-  m_lblFont.ShowWindow(SW_HIDE);
-  m_btnFont.ShowWindow(SW_HIDE);
-
-  char* fs[] = { "8","9","10","11","12","13","14","15","16","17","18","20","22","24","26","28","30","32","34","36","48","72" };
-  for (int i = 0; i < sizeof(fs) / sizeof(fs[0]); i++)
-  {
-    m_cmbFontSize.AddString(fs[i]);
-  }
-
-  m_FontPreviewCombol.Init(gSettings.GetResFontName());
-
-  CString str; str.Format(_T("%d"), m_FontSize);
-  m_cmbFontSize.SetWindowText(str);
-  m_FontPreviewCombol.SelectString(0, gSettings.GetFontName());
-  m_FontBold.SetCheck(m_lfWeight >= FW_SEMIBOLD ? BST_CHECKED : BST_UNCHECKED);
-#endif
-
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_UsePcTime.SetCheck(gSettings.GetUsePcTime() ? BST_CHECKED : BST_UNCHECKED);
-  m_CompactView.SetCheck(gSettings.GetCompactView() ? BST_CHECKED : BST_UNCHECKED);
   m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
   m_edtEclipsePath.SetWindowText(gSettings.GetEclipsePath());
@@ -113,28 +84,9 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 {
   if (wID == IDOK)
   {
-#ifdef USE_FONT_RES
-    CString str;      
-    m_cmbFontSize.GetWindowText(str);
-    m_FontSize = atoi(str);
-    if (m_FontSize < 6)
-      m_FontSize = 6;
-    if (m_FontSize <= 0)
-      m_FontSize = 12;
-    if (m_FontSize > 72)
-      m_FontSize = 72;
-
-    m_FontPreviewCombol.GetWindowText(str);
-    strncpy(m_FaceName, str, sizeof(m_FaceName) - 1);
-    m_FaceName[LF_FACESIZE - 1] = 0;
-
-    m_lfWeight = (m_FontBold.GetCheck() == BST_CHECKED) ? FW_BOLD : FW_NORMAL;
-#endif
-
     gSettings.SetUIFont(m_FaceName, m_lfWeight, m_FontSize);
     gSettings.SetUdpPort(GetDlgItemInt(IDC_EDIT_PORT));
     gSettings.SetUsePcTime(m_UsePcTime.GetCheck());
-    gSettings.SetCompactView(m_CompactView.GetCheck());
     gSettings.SetResolveAddr(m_ResolveAddr.GetCheck());
     gSettings.SetFullSrcPath(m_FullSrcPath.GetCheck());
 
@@ -156,10 +108,5 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 
 LRESULT CSettingsDlg::OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-#ifdef USE_FONT_RES
-	m_cmbFontSize.SelectString(0, _T("12"));
-  m_FontPreviewCombol.SelectString(0, gSettings.GetResFontName());
-  m_FontBold.SetCheck(BST_UNCHECKED);
-#endif
   return 0;
 }

@@ -33,29 +33,11 @@ struct LOG_SELECTION
   int EndItem() { return end.iItem; }
   int EndChar() { return end.iChar; }
   void print();
+  void SelLogSelection() { Move(start.iItem, 0, false); };
 private:
   SEL_POINT start, end, cur;
 };
 
-struct LIST_SELECTION
-{
-  LIST_SELECTION(){ Clear(); }
-  void Clear() { logSelection.Clear(); column = ICON_COL; iItem = 0; };
-  void SelLogSelection() { if (!IsLogSelection()) { column = LOG_COL; logSelection.Move(iItem, 0, false); } };
-  bool IsEmpty() { return IsLogSelection() ? logSelection.IsEmpty() : column == ICON_COL; };
-  bool IsLogSelection() { return column == LOG_COL; }
-  LOG_SELECTION& getLogSelection() { ATLASSERT(IsLogSelection()); return logSelection; }
-  int GetItem() { return IsLogSelection() ? logSelection.CurItem() : iItem; }
-  int GetLogSelectionItem() { return logSelection.CurItem(); }
-  int GetInfoSelectionItem() { return iItem; }
-  void SetItem(int i){ ATLASSERT(!IsLogSelection()); iItem = i; }
-  void SetColumn(LIST_COL col){ column = col; }
-  LIST_COL GetColumn(){ return column; }
-private:
-  LOG_SELECTION logSelection;
-  LIST_COL column;
-  int iItem;
-};
 
 class CLogListView : public CWindowImpl< CLogListView, CListViewCtrl>
 {
@@ -102,7 +84,7 @@ public:
   void CopySelection();
   TCHAR* getText(int iItem, int* cBuf = NULL, LIST_COL col = LOG_COL, int* cInfo = NULL);
   void SelectAll();
-  int getSelectionItem() { return m_ListSelection.GetItem(); }
+  int getSelectionItem() { return m_ListSelection.CurItem(); }
   void Redraw(int nFirst, int nLast);
   void EnsureTextVisible(int iItem, int startChar, int endChar);
   void ShowItem(DWORD i, bool scrollToMiddle, bool scrollToLeft);
@@ -110,7 +92,6 @@ public:
   void ShowFirstSyncronised(bool scrollToMiddle);
   void MoveSelectionEx(int iItem, int iChar = 0, bool extend = false, bool ensureVisible = true);
   void SelLogSelection() { m_ListSelection.SelLogSelection(); }
-  bool IsLogSelection() { return m_ListSelection.IsLogSelection(); }
   void OnBookmarks(WORD wID);
 
 private:
@@ -122,7 +103,6 @@ private:
   void AddColumn(TCHAR* szHeader, LIST_COL col);
   bool UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
   bool IsWordChar(char c) { return (0 != isalnum(c)) || c == '_'; }
-  LOG_SELECTION& logSelection() { return m_ListSelection.getLogSelection(); }
   void ToggleBookmark(DWORD item);
 
   LIST_COL m_ColType[MAX_COL];
@@ -131,7 +111,7 @@ private:
   int m_ColLen[MAX_COL];
   int m_cColumns, m_cActualColumns;
   int m_LogCol;
-  bool m_hasFocus;
+  bool m_hasCaret;
   bool m_IsCupture;
   CFlowTraceView* m_pView;
   HDC m_hdc;
@@ -139,7 +119,7 @@ private:
   int m_lengthCalculated;
   DWORD m_recCount;
   int m_curBookmark;
-  LIST_SELECTION m_ListSelection;
+  LOG_SELECTION m_ListSelection;
 };
 
 

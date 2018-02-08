@@ -173,6 +173,7 @@
     <ResourceCompile Include="FlowTrace.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bitmap1.bmp" />
     <Image Include="res\colapsed.ico" />
     <Image Include="res\FlowTrace.ico" />
     <Image Include="res\ico00001.ico" />
@@ -191,6 +192,8 @@
     <Image Include="res\ICON_TREE_PAIRED.ico" />
     <Image Include="res\ICON_TREE_PROC.ico" />
     <Image Include="res\ICON_TREE_ROOT.ico" />
+    <Image Include="res\sync1.bmp" />
+    <Image Include="res\sync2.bmp" />
     <Image Include="res\toolbar.bmp" />
     <Image Include="res\tree_node_checked.ico" />
     <Image Include="res\tree_node_colapsed.ico" />

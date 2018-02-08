@@ -87,6 +87,12 @@ IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 
 IDB_TTF_BMP             BITMAP                  "res\\ttf_glyph.bmp"
 
+IDB_SYNC                BITMAP                  "res\\bitmap1.bmp"
+
+IDB_FUNC_IN_ECLIPSE     BITMAP                  "res\\sync1.bmp"
+
+IDB_CALL_IN_ECLIPSE     BITMAP                  "res\\sync2.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -215,16 +221,9 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,90,155,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,176,155,50,14
-    RTEXT           "Static",IDC_FONT_NAME,7,13,230,8
-    PUSHBUTTON      "Change...",IDC_BTN_FONT,246,8,50,14
     EDITTEXT        IDC_EDIT_PORT,256,42,40,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "UDP Listen Port:",IDC_STATIC,198,45,53,8
-    CONTROL         "Compact View",IDC_CHECK_COMPACT_VIEW,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,235,92,61,10
-    COMBOBOX        IDC_COMBO_FONTS,18,18,118,171,CBS_DROPDOWNLIST | CBS_OWNERDRAWVARIABLE | CBS_SORT | CBS_HASSTRINGS | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_FONT_SIZE,142,18,34,78,CBS_DROPDOWN | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Bold",IDC_CHECK_FONT_WEIGHT,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,184,20,29,10
     CONTROL         "Use PC Time",IDC_CHECK_USE_PC_TIME,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,241,79,55,10
-    PUSHBUTTON      "Reset font to default",IDC_BUTTON_RESET,215,17,81,14,NOT WS_VISIBLE
     CONTROL         "Resolve function call line via HTML board",IDC_CHECK_RESOLVE_ADDR,
                     "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,29,56,145,10
     CONTROL         "Show full source path in call stack",IDC_CHECK_FULL_SRC_PATH,
@@ -236,6 +235,8 @@ BEGIN
     EDITTEXT        IDC_EDIT_MAP_ON_WIN,112,132,64,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_ECLIPSE_ON_WIN,21,107,156,14,ES_AUTOHSCROLL
     LTEXT           "Eclipse path on windows",IDC_STATIC,26,98,78,8
+    PUSHBUTTON      "Change...",IDC_BTN_FONT,246,8,50,14
+    RTEXT           "Static",IDC_FONT_NAME,7,13,230,8
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 244

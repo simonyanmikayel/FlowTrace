@@ -30,6 +30,8 @@ public:
     MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
     MESSAGE_HANDLER(WM_RBUTTONDOWN, OnRButtonDown)
     MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown);
+    MESSAGE_HANDLER(WM_SETFOCUS, OnSetFocus)
+    MESSAGE_HANDLER(WM_KILLFOCUS, OnKillFocus)
   END_MSG_MAP()
   void ItemPrePaint(int iItem, HDC hdc, RECT rc);
   void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
@@ -44,6 +46,8 @@ public:
   LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   int getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf);
   LOG_NODE* GetSelectedNode() { return m_sel.pNode; }
+  LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
+  LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 
 private:
   void AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode);
@@ -52,4 +56,5 @@ private:
   int c_nodes;
   bool m_Initialised;
   CFlowTraceView* m_pView;
+  int min_col_width;
 };

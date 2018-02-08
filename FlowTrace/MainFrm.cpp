@@ -645,7 +645,7 @@ void CMainFrame::SearchNavigate(WORD wID)
 {
     if (wID != ID_SEARCH_REFRESH)
         m_list.SelLogSelection();
-    int item = m_list.IsLogSelection() ? m_list.getSelectionItem() : searchInfo.curLine;
+    int item = m_list.getSelectionItem();
     bool found = false;
     if (searchInfo.total)
     {
@@ -740,11 +740,8 @@ void CMainFrame::SearchNavigate(WORD wID)
 
             if (p)
             {
-                //if (m_list.IsLogSelection())
-                {
-                    m_list.MoveSelectionEx(searchInfo.curLine, (p - log) + searchInfo.cbText, false);
-                }
-                m_list.EnsureTextVisible(searchInfo.curLine, p - log, p - log + searchInfo.cbText);
+              m_list.MoveSelectionEx(searchInfo.curLine, (p - log) + searchInfo.cbText, false);
+              m_list.EnsureTextVisible(searchInfo.curLine, p - log, p - log + searchInfo.cbText);
             }
         }
     }

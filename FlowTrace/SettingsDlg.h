@@ -32,18 +32,12 @@ public:
   CButton m_btnFont;
   CButton m_btnReset;
   CButton m_UsePcTime;
-  CButton m_CompactView;
   CButton m_ResolveAddr;
   CButton m_FullSrcPath;
   CEdit   m_edtEclipsePath;
   CEdit   m_edtLinuxHome;
   CEdit   m_edtMapOnWin;
 
-#ifdef USE_FONT_RES
-  CFontPreviewCombo m_FontPreviewCombol;
-  CComboBox m_cmbFontSize;
-  CButton m_FontBold;
-#endif
   DWORD     m_FontSize;
   CHAR      m_FaceName[LF_FACESIZE];
   DWORD     m_lfWeight;

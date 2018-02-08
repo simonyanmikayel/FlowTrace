@@ -28,6 +28,10 @@
 #define IDI_ICON_SYNC                   529
 #define IDR_FONT1                       530
 #define IDB_TTF_BMP                     531
+#define IDB_SYNC                        535
+#define IDB_FUNC_IN_ECLIPSE             536
+#define IDB_SYNC2                       537
+#define IDB_CALL_IN_ECLIPSE             537
 #define IDC_NN                          1000
 #define IDC_APP                         1001
 #define IDC_FONT_NAME                   1002
@@ -119,7 +123,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        535
+#define _APS_NEXT_RESOURCE_VALUE        536
 #define _APS_NEXT_COMMAND_VALUE         32832
 #define _APS_NEXT_CONTROL_VALUE         1202
 #define _APS_NEXT_SYMED_VALUE           101

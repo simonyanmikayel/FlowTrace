@@ -9,7 +9,7 @@ extern HWND hwndMain;
 
 static const int ICON_LEN = 16;
 static const int ICON_OFFSET = 16 + 4;
-
+enum MENU_ICON { MENU_ICON_SYNC, MENU_ICON_FUNC_IN_ECLIPSE, MENU_ICON_CALL_IN_ECLIPSE, MENU_ICON_MAX};
 namespace Helpers
 {
   void CopyToClipboard(HWND hWnd, char* szText, int cbText);
@@ -18,4 +18,5 @@ namespace Helpers
   TCHAR* find_str(const TCHAR *phaystack, const TCHAR *pneedle, int bMatchCase);  
   TCHAR* str_format_int_grouped(int num);
   void GetTime(DWORD &sec, DWORD& msec);
+  void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 };

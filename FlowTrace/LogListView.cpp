@@ -17,7 +17,7 @@ static int ICON_INDEX_SYNC;
 
 CLogListView::CLogListView(CFlowTraceView* pView)
   : m_pView(pView)
-  , m_hasFocus(false)
+  , m_hasCaret(false)
   , m_IsCupture(false)
   , m_cColumns(0)
   , m_cActualColumns(0)
@@ -56,7 +56,7 @@ void CLogListView::ClearColumnInfo()
 
 void LOG_SELECTION::print()
 {
-  stdlog("start %d %d end %d %d cur %d %d \n", start.iItem, start.iChar, end.iItem, end.iChar, cur.iItem, cur.iChar);
+  //stdlog("start %d %d end %d %d cur %d %d \n", start.iItem, start.iChar, end.iItem, end.iChar, cur.iItem, cur.iChar);
 }
 
 bool LOG_SELECTION::InSelection(int iItem, int iChar) {
@@ -106,6 +106,7 @@ bool LOG_SELECTION::Move(int iItem, int iChar, bool extend)
   {
     start = end = cur = sel;
   }
+  //stdlog("old == *this %d\n", old == *this);
   return !(old == *this);
 
 }
@@ -123,7 +124,7 @@ bool CLogListView::HasSelection()
 
 LOG_NODE* CLogListView::GetSynkNode()
 {
-  LOG_NODE* pNode = listNodes->getNode(m_ListSelection.GetItem());
+  LOG_NODE* pNode = listNodes->getNode(m_ListSelection.CurItem());
   if (pNode)
     pNode = pNode->getSyncNode();
   return pNode;
@@ -157,89 +158,69 @@ void CLogListView::CopySelection()
         return;
     }
     len = 0;
-    if (IsLogSelection())
+    l = 0;
+    for (int i = m_ListSelection.StartItem(); i <= m_ListSelection.EndItem(); i++)
     {
-      l = 0;
-      for (int i = logSelection().StartItem(); i <= logSelection().EndItem(); i++)
+      int logLen;
+      char* log = getText(i, &logLen, LOG_COL);
+      if (logLen)
       {
-        int logLen;
-        char* log = getText(i, &logLen, LOG_COL);
-        if (logLen)
+        if (i == m_ListSelection.StartItem() && i == m_ListSelection.EndItem())
         {
-          if (i == logSelection().StartItem() && i == logSelection().EndItem())
+          if (m_ListSelection.StartChar() < logLen)
           {
-            if (logSelection().StartChar() < logLen)
-            {
-              l = min(logSelection().EndChar(), logLen) - logSelection().StartChar();
-            }
-            if (l)
-            {
-              if (copy) memcpy(lock + len, log + logSelection().StartChar(), l);
-              len += l;
-            }
-          }
-          else if (i == logSelection().StartItem())
-          {
-            if (logSelection().StartChar() < logLen)
-            {
-              l = logLen - logSelection().StartChar();
-            }
-            if (l)
-            {
-              if (copy) memcpy(lock + len, log + logSelection().StartChar(), l);
-              len += l;
-            }
-          }
-          else if (i == logSelection().EndItem())
-          {
-            l = min(logSelection().EndChar(), logLen);
-            if (l)
-            {
-              if (copy) memcpy(lock + len, log, l);
-              len += l;
-            }
-          }
-          else //(i > logSelection().StartItem() && i < logSelection().EndItem())
-          {
-            l = logLen;
-            if (l)
-            {
-              if (copy) memcpy(lock + len, log, l);
-              len += l;
-            }
+            l = min(m_ListSelection.EndChar(), logLen) - m_ListSelection.StartChar();
           }
           if (l)
           {
-            if (i != logSelection().EndItem())
-            {
-              if (copy) memcpy(lock + len, "\r\n", 2);
-              len += 2;
-            }
-            else
-            {
-              if (copy) memcpy(lock + len, "", 1);
-              len += 1;
-            }
+            if (copy) memcpy(lock + len, log + m_ListSelection.StartChar(), l);
+            len += l;
           }
-
         }
-      }
-    }
-    else
-    {
-      int iItem = m_ListSelection.GetInfoSelectionItem();
-      if (iItem >= 0 && iItem < (int)m_recCount)
-      {
-        int cbText;
-        char* szText = getText(iItem, &cbText, m_ListSelection.GetColumn());
-        l = cbText;
+        else if (i == m_ListSelection.StartItem())
+        {
+          if (m_ListSelection.StartChar() < logLen)
+          {
+            l = logLen - m_ListSelection.StartChar();
+          }
+          if (l)
+          {
+            if (copy) memcpy(lock + len, log + m_ListSelection.StartChar(), l);
+            len += l;
+          }
+        }
+        else if (i == m_ListSelection.EndItem())
+        {
+          l = min(m_ListSelection.EndChar(), logLen);
+          if (l)
+          {
+            if (copy) memcpy(lock + len, log, l);
+            len += l;
+          }
+        }
+        else //(i > m_ListSelection.StartItem() && i < m_ListSelection.EndItem())
+        {
+          l = logLen;
+          if (l)
+          {
+            if (copy) memcpy(lock + len, log, l);
+            len += l;
+          }
+        }
         if (l)
         {
-          if (copy) memcpy(lock + len, szText, l);
-          len += l;
-          if (copy) memcpy(lock + len, "", 1);
-          len += 1;
+          if (i != m_ListSelection.EndItem())
+          {
+            if (copy) memcpy(lock + len, "\r\n", 2);
+            len += 2;
+          }
+          else
+          {
+            if (copy) memcpy(lock + len, "", 1);
+            len += 1;
+          }
         }
+
       }
     }
   }
@@ -279,54 +260,43 @@ void CLogListView::Redraw(int nFirst, int nLast)
 
 void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensureVisible)
 {
-  int oldItem = m_ListSelection.GetItem();
-  if (IsLogSelection())
+  int oldItem = m_ListSelection.CurItem();
+  bool movToEnd = iItem >= (int)m_recCount;
+  //stdlog("iItem  %d %d\n", iItem, iChar);
+  iItem = max(0, min(iItem, (int)m_recCount - 1));
+
+  int logLen;
+  char* log = getText(iItem, &logLen, LOG_COL);
+  if (!logLen) { return; }
+
+  if (iChar < 0 || movToEnd)
+    iChar = logLen;
+
+  iChar = max(0, min(iChar, logLen));
+  //bool prevEmpty = m_ListSelection.IsEmpty();
+  int preStart = m_ListSelection.StartItem();
+  int prevEnd = m_ListSelection.EndItem();
+
+  //stdlog("iItem1 %d %d\n", iItem, iChar);
+  if (m_ListSelection.Move(iItem, iChar, extend))
   {
-    bool movToEnd = iItem >= (int)m_recCount;
-    //stdlog("iItem  %d %d\n", iItem, iChar);
-    iItem = max(0, min(iItem, (int)m_recCount - 1));
-
-    int logLen;
-    char* log = getText(iItem, &logLen, LOG_COL);
-    if (!logLen) { return; }
-
-    if (iChar < 0 || movToEnd)
-      iChar = logLen;
-
-    iChar = max(0, min(iChar, logLen));
-    bool prevEmpty = logSelection().IsEmpty();
-    int preStart = logSelection().StartItem();
-    int prevEnd = logSelection().EndItem();
-
-    //stdlog("iItem1 %d %d\n", iItem, iChar);
-    if (logSelection().Move(iItem, iChar, extend))
+    //bool curEmpty = m_ListSelection.IsEmpty();
+    int curStart = m_ListSelection.StartItem();
+    int curEnd = m_ListSelection.EndItem();
+    //if (!prevEmpty || !curEmpty) 
     {
-      bool curEmpty = logSelection().IsEmpty();
-      int curStart = logSelection().StartItem();
-      int curEnd = logSelection().EndItem();
-      if (!prevEmpty || !curEmpty) {
-        Redraw(min(preStart, curStart), max(prevEnd, curEnd));
-      }
+      Redraw(min(preStart, curStart), max(prevEnd, curEnd));
     }
+  }
 
-    if (ensureVisible)
-      EnsureTextVisible(logSelection().CurItem(), logSelection().CurChar(), logSelection().CurChar());
-  }
-  else
-  {
-    iItem = max(0, min(iItem, (int)m_recCount - 1));
-    m_ListSelection.SetItem(iItem);
-    Redraw(iItem, iItem);
-    if (ensureVisible)
-      ShowItem(iItem, false, false);
-  }
-  Redraw(oldItem, oldItem);
+  if (ensureVisible)
+    EnsureTextVisible(m_ListSelection.CurItem(), m_ListSelection.CurChar(), m_ListSelection.CurChar());
+
   UpdateCaret();
 
   static TCHAR pBuf[128];
-  _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.GetItem() + 1));
+  _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.CurItem() + 1));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
-  int newItem = m_ListSelection.GetItem();
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -430,38 +400,37 @@ void CLogListView::UpdateCaret()
 {
   //m_Selection.print();
   //if (ListView_IsItemVisible(m_hWnd, m_Selection.cur.iItem))
-  if (!m_hasFocus)
+  if (!m_hasCaret)
     return;
 
   int x = ICON_MAX * ICON_LEN + TEXT_MARGIN;
   int y = 0;
-  if (IsLogSelection())
+
+  if (GetItemCount())
   {
-    if (GetItemCount())
+    RECT itemRect;
+    int curItem = m_ListSelection.CurItem();
+    if (GetSubItemRect(curItem, m_LogCol, LVIR_LABEL, &itemRect))
     {
-      RECT itemRect;
-      int curItem = logSelection().CurItem();
-      if (GetSubItemRect(curItem, m_LogCol, LVIR_LABEL, &itemRect))
-      {
-        RECT viewRect;
-        GetViewRect(&viewRect);
+      RECT viewRect;
+      GetViewRect(&viewRect);
 
-        int cbText;
-        char* szText = getText(curItem, &cbText, LOG_COL);
-        y = itemRect.top + (itemRect.bottom - itemRect.top) / 2 - gSettings.GetFontHeight() / 2;
-        int cb = logSelection().CurChar();
-        if (cb > cbText)
-          cb = cbText;
-        SIZE  size;
-        GetTextExtentPoint32(m_hdc, szText, cb, &size);
-        x = itemRect.left + size.cx + TEXT_MARGIN;
-        //STDLOG("cb = %d x = %d y = %d iItem = %d itemRect l = %d r = %d t = %d b = %d\n", cb, x, y, curItem, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
+      int cbText;
+      char* szText = getText(curItem, &cbText, LOG_COL);
+      y = itemRect.top + (itemRect.bottom - itemRect.top) / 2 - gSettings.GetFontHeight() / 2;
+      int cb = m_ListSelection.CurChar();
+      if (cb > cbText)
+        cb = cbText;
+      SIZE  size;
+      GetTextExtentPoint32(m_hdc, szText, cb, &size);
+      x = itemRect.left + size.cx + TEXT_MARGIN;
+      //STDLOG("cb = %d x = %d y = %d iItem = %d itemRect l = %d r = %d t = %d b = %d\n", cb, x, y, curItem, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
 
-        //udjust searchInfo.curLine
+      //udjust searchInfo.curLine
 
-      }
     }
   }
+
   SetCaretPos(x, y);
 }
 
@@ -473,23 +442,22 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
 
   if (!GetItemCount())
     return 0;
-  bool isLogSelection = IsLogSelection();
   int cbCurText;
-  char* szText = getText(m_ListSelection.GetItem(), &cbCurText, LOG_COL);
+  char* szText = getText(m_ListSelection.CurItem(), &cbCurText, LOG_COL);
   if (!cbCurText) return 0;
 
-  int curItem = m_ListSelection.GetItem();
-  int curChar = isLogSelection ? logSelection().CurChar() : 0;
-  int startItem = isLogSelection ? logSelection().StartItem() : m_ListSelection.GetItem();
-  int startChar = isLogSelection ? logSelection().StartChar() : 0;
-  int endItem = isLogSelection ? logSelection().EndItem() : m_ListSelection.GetItem();
-  int endChar = isLogSelection ? logSelection().EndChar() : 0;
+  int curItem = m_ListSelection.CurItem();
+  int curChar = m_ListSelection.CurChar();
+  int startItem = m_ListSelection.StartItem();
+  int startChar = m_ListSelection.StartChar();
+  int endItem = m_ListSelection.EndItem();
+  int endChar = m_ListSelection.EndChar();
 
   switch (wParam)
   {
   case VK_HOME:       // Home 
   {
-    if (bCtrlPressed || !isLogSelection)
+    if (bCtrlPressed)
       MoveSelectionEx(0, 0, bShiftPressed);
     else
       MoveSelectionEx(startItem, 0, bShiftPressed);
@@ -502,7 +470,7 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
   break;
   case VK_END:        // End 
   {
-    if (bCtrlPressed || !isLogSelection)
+    if (bCtrlPressed)
       MoveSelectionToEnd(bShiftPressed);
     else
       MoveSelectionEx(endItem, cbCurText, bShiftPressed);
@@ -524,73 +492,59 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
   break;
   case VK_LEFT:       // Left arrow 
   {
-    if (isLogSelection)
+    if (startChar)
     {
-      if (startChar)
+      if (bCtrlPressed)
       {
-        if (bCtrlPressed)
-        {
-          int prevChar = startChar;
-          while (prevChar > 0 && IsWordChar(szText[prevChar - 1]))
-            prevChar--;
-          if (prevChar == startChar)
-            prevChar--;
-          MoveSelectionEx(startItem, prevChar, bShiftPressed);
-        }
-        else
-        {
-          if (bShiftPressed)
-            MoveSelectionEx(curItem, curChar - 1, bShiftPressed);
-          else if (logSelection().IsEmpty())
-            MoveSelectionEx(startItem, startChar - 1, bShiftPressed);
-          else
-            MoveSelectionEx(startItem, startChar, false);
-        }
+        int prevChar = startChar;
+        while (prevChar > 0 && IsWordChar(szText[prevChar - 1]))
+          prevChar--;
+        if (prevChar == startChar)
+          prevChar--;
+        MoveSelectionEx(startItem, prevChar, bShiftPressed);
       }
       else
       {
-        MoveSelectionEx(startItem - 1, -1, bShiftPressed);
+        if (bShiftPressed)
+          MoveSelectionEx(curItem, curChar - 1, bShiftPressed);
+        else if (m_ListSelection.IsEmpty())
+          MoveSelectionEx(startItem, startChar - 1, bShiftPressed);
+        else
+          MoveSelectionEx(startItem, startChar, false);
       }
     }
     else
     {
-      MoveSelectionEx(startItem - 1, 0, 0);
+      MoveSelectionEx(startItem - 1, -1, bShiftPressed);
     }
   }
   break;
   case VK_RIGHT:      // Right arrow 
   {
-    if (isLogSelection)
+    if (endChar < cbCurText - 1)
     {
-      if (endChar < cbCurText - 1)
+      if (bCtrlPressed)
       {
-        if (bCtrlPressed)
-        {
-          int nextChar = endChar;
-          while (nextChar < cbCurText && IsWordChar(szText[nextChar]))
-            nextChar++;
-          if (nextChar == endChar)
-            nextChar++;
-          MoveSelectionEx(endItem, nextChar, bShiftPressed);
-        }
-        else
-        {
-          if (bShiftPressed)
-            MoveSelectionEx(curItem, curChar + 1, bShiftPressed);
-          else if (logSelection().IsEmpty())
-            MoveSelectionEx(endItem, endChar + 1, bShiftPressed);
-          else
-            MoveSelectionEx(endItem, endChar, false);
-        }
+        int nextChar = endChar;
+        while (nextChar < cbCurText && IsWordChar(szText[nextChar]))
+          nextChar++;
+        if (nextChar == endChar)
+          nextChar++;
+        MoveSelectionEx(endItem, nextChar, bShiftPressed);
       }
       else
       {
-        MoveSelectionEx(endItem + 1, 0, bShiftPressed);
+        if (bShiftPressed)
+          MoveSelectionEx(curItem, curChar + 1, bShiftPressed);
+        else if (m_ListSelection.IsEmpty())
+          MoveSelectionEx(endItem, endChar + 1, bShiftPressed);
+        else
+          MoveSelectionEx(endItem, endChar, false);
       }
     }
     else
     {
-      MoveSelectionEx(startItem + 1, 0, 0);
+      MoveSelectionEx(endItem + 1, 0, bShiftPressed);
     }
   }
   break;
@@ -617,9 +571,6 @@ LRESULT CLogListView::OnKeyUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bH
 
 LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL & bHandled)
 {
-  if (!IsLogSelection())
-    return 0;
-
   if (!GetItemCount())
     return 0;
 
@@ -629,11 +580,11 @@ LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM
 
 
   int cbCurText;
-  char* szText = getText(logSelection().CurItem(), &cbCurText, LOG_COL);
+  char* szText = getText(m_ListSelection.CurItem(), &cbCurText, LOG_COL);
   if (!cbCurText)
     return 0;
 
-  int curChar = logSelection().CurChar();
+  int curChar = m_ListSelection.CurChar();
 
   int prevChar = curChar;
   while (prevChar > 0 && IsWordChar(szText[prevChar - 1]))
@@ -641,14 +592,14 @@ LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM
   //if (prevChar == curChar)
   //  prevChar--;
 
-  MoveSelectionEx(logSelection().CurItem(), prevChar, false);
+  MoveSelectionEx(m_ListSelection.CurItem(), prevChar, false);
 
   int nextChar = curChar;
   while (nextChar < cbCurText && IsWordChar(szText[nextChar]))
     nextChar++;
   if (nextChar == curChar)
     nextChar++;
-  MoveSelectionEx(logSelection().CurItem(), nextChar, true);
+  MoveSelectionEx(m_ListSelection.CurItem(), nextChar, true);
 
   bHandled = TRUE;
   return 0;
@@ -667,21 +618,25 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   LOG_NODE* pNode = listNodes->getNode(iItem);
 
   DWORD dwFlags;
+  int cMenu = 0;
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
   dwFlags = MF_BYPOSITION | MF_STRING;
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
+  dwFlags = MF_BYPOSITION | MF_STRING;
   if (pNode == NULL || !gSettings.CanShowInEclipse())
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
-  InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-  InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
+  InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_ListSelection.IsEmpty())
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, 0, dwFlags, ID_EDIT_COPY, _T("Copy"));
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("Copy"));
   UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
   DestroyMenu(hMenu);
 
@@ -708,10 +663,10 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
 {
   //STDLOG("Focus = %d", m_hWnd == ::GetFocus());
-  if (!m_hasFocus)
+  if (!m_hasCaret)
   {
     CreateSolidCaret(1, gSettings.GetFontHeight());
-    m_hasFocus = true;
+    m_hasCaret = true;
     ShowCaret();
   }
   UpdateCaret();
@@ -722,12 +677,12 @@ LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 LRESULT CLogListView::OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
 {
   //STDLOG("Focus = %d", m_hWnd == ::GetFocus());
-  if (m_hasFocus)
+  if (m_hasCaret)
     DestroyCaret();
-  m_hasFocus = false;
+  m_hasCaret = false;
   bHandled = FALSE;
-  //if (!logSelection().IsEmpty())
-  //  Redraw(logSelection().StartItem(), logSelection().EndItem());
+  //stdlog("m_ListSelection.StartItem() %d\n", m_ListSelection.StartItem());
+  Redraw(m_ListSelection.StartItem(), m_ListSelection.StartItem());
   return 0;
 }
 
@@ -843,7 +798,7 @@ void CLogListView::OnBookmarks(WORD wID)
   break;
   case ID_BOOKMARKS_TOGGLE:
   {
-    ToggleBookmark(m_ListSelection.GetItem());
+    ToggleBookmark(m_ListSelection.CurItem());
   }
   break;
   }
@@ -878,71 +833,44 @@ bool CLogListView::UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM l
       return false;
     }
 
-    if (!m_ListSelection.IsEmpty())
+    CRect itemRect;
+    GetSubItemRect(ht.iItem, m_LogCol, LVIR_LABEL, &itemRect);
+    //stdlog("xPos = %d itemRect l = %d r = %d t = %d b = %d\n", xPos, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
+    if (xPos >= itemRect.left)
     {
-      LIST_COL curCol = m_ListSelection.GetColumn();
-      if (IsLogSelection())
+      int logLen;
+      char* log = getText(ht.iItem, &logLen, LOG_COL);
+      int nFit = 0;
+      if (logLen)
       {
-        int curStart = logSelection().StartItem();
-        int curEnd = logSelection().EndItem();
-        Redraw(min(curStart, curEnd), max(curStart, curEnd));
+        int nMaxExtent = xPos - itemRect.left - TEXT_MARGIN;
+        int cb = logLen;
+        SIZE  size;
+        GetTextExtentExPoint(m_hdc, log, cb, nMaxExtent, &nFit, NULL, &size);
+        if (nFit < logLen)
+        {
+          SIZE  size1, size2;
+          GetTextExtentPoint32(m_hdc, log, nFit, &size1);
+          GetTextExtentPoint32(m_hdc, log, nFit + 1, &size2);
+          if (nMaxExtent >(size2.cx + size1.cx) / 2)
+            nFit++;
+        }
+        //stdlog("iChar = %d iCharMax = %d nFit = %d\n", iChar, iCharMax, nFit);
       }
-      else
+
+      if (uMsg == WM_RBUTTONDOWN)
       {
-        Redraw(m_ListSelection.GetItem(), m_ListSelection.GetItem());
+        if (m_ListSelection.InSelection(ht.iItem, nFit))
+          return false;
       }
-    }
 
-    m_ListSelection.SetColumn(col);
-
-    if (col == LOG_COL)
-    {
-      CRect itemRect;
-      GetSubItemRect(ht.iItem, m_LogCol, LVIR_LABEL, &itemRect);
-      //stdlog("xPos = %d itemRect l = %d r = %d t = %d b = %d\n", xPos, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
-      if (xPos >= itemRect.left)
+      MoveSelectionEx(ht.iItem, nFit, (uMsg == WM_MOUSEMOVE) || (0 != (wParam & MK_SHIFT)));
+      if (!m_IsCupture && (wParam & MK_LBUTTON))
       {
-        int logLen;
-        char* log = getText(ht.iItem, &logLen, LOG_COL);
-        int nFit = 0;
-        if (logLen)
-        {
-          int nMaxExtent = xPos - itemRect.left - TEXT_MARGIN;
-          int cb = logLen;
-          SIZE  size;
-          GetTextExtentExPoint(m_hdc, log, cb, nMaxExtent, &nFit, NULL, &size);
-          if (nFit < logLen)
-          {
-            SIZE  size1, size2;
-            GetTextExtentPoint32(m_hdc, log, nFit, &size1);
-            GetTextExtentPoint32(m_hdc, log, nFit + 1, &size2);
-            if (nMaxExtent > (size2.cx + size1.cx) / 2)
-              nFit++;
-          }
-          //stdlog("iChar = %d iCharMax = %d nFit = %d\n", iChar, iCharMax, nFit);
-        }
-
-        if (uMsg == WM_RBUTTONDOWN)
-        {
-          if (IsLogSelection())
-          {
-            if (logSelection().InSelection(ht.iItem, nFit))
-              return false;
-          }
-        }
-
-        MoveSelectionEx(ht.iItem, nFit, (uMsg == WM_MOUSEMOVE) || (0 != (wParam & MK_SHIFT)));
-        if (!m_IsCupture && (wParam & MK_LBUTTON))
-        {
-          m_IsCupture = true;
-          SetCapture();
-        }
-        return true;
+        m_IsCupture = true;
+        SetCapture();
       }
-    }
-    else
-    {
-      MoveSelectionEx(ht.iItem, 0, 0);
+      return true;
     }
   }
   return false;
@@ -1015,7 +943,7 @@ void CLogListView::RefreshList(bool redraw)
     m_recCount = newCount;
     SetItemCountEx(m_recCount, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
     Update(newCount - 1);
-    int curItem = m_ListSelection.GetItem();
+    int curItem = m_ListSelection.CurItem();
     //stdlog("~~~%d %d\n", curItem, (int)m_recCount - 1);
     if (redraw || oldRecCount == 0 || curItem >= ((int)oldRecCount - 1))
       MoveSelectionEx(m_recCount - 1, 0, false, true);
@@ -1032,7 +960,7 @@ void CLogListView::RefreshList(bool redraw)
 
 void CLogListView::AddColumn(TCHAR* szHeader, LIST_COL col)
 {
-  if (!gSettings.GetCompactView() || col == ICON_COL || col == LOG_COL)
+  if (col == ICON_COL || col == LOG_COL)
   {
     InsertColumn(m_cColumns, szHeader, LVCFMT_LEFT, m_ColLen[col], 0, -1, -1);
     m_ColSubItem[col] = m_cColumns;
@@ -1203,6 +1131,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
   int startChar = 0, endChar = 0;
   SIZE  size, textSize;
+  //stdlog("szText [%s] %d %d \n", szText, cbText, strlen(szText));
   GetTextExtentExPoint(hdc, szText, cbText, x, &startChar, NULL, &textSize);
   if (x <= 0)
   {
@@ -1247,7 +1176,6 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   if (rcItem.left > 0)
     textPoint.x += rcItem.left;
 #endif
-  int textStart = textPoint.x;
   COLORREF old_textColor = ::GetTextColor(hdc);
   COLORREF old_bkColor = ::GetBkColor(hdc);
   int old_bkMode = ::GetBkMode(hdc);
@@ -1302,34 +1230,34 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
         }
       }
 
-      if (IsLogSelection() && (iItem >= logSelection().StartItem() && iItem <= logSelection().EndItem()) && !logSelection().IsEmpty())
+      if ((iItem >= m_ListSelection.StartItem() && iItem <= m_ListSelection.EndItem()) && !m_ListSelection.IsEmpty())
       {
-        if (iItem > logSelection().StartItem() && iItem < logSelection().EndItem())
+        if (iItem > m_ListSelection.StartItem() && iItem < m_ListSelection.EndItem())
         {
           //if (iItem == 3)stdlog("0 %d\n", iItem);
           curFlag |= bSelected;
         }
         else
         {
-          if (iItem == logSelection().StartItem() && iItem == logSelection().EndItem())
+          if (iItem == m_ListSelection.StartItem() && iItem == m_ListSelection.EndItem())
           {
-            if (curChar >= logSelection().StartChar() && curChar < logSelection().EndChar())
+            if (curChar >= m_ListSelection.StartChar() && curChar < m_ListSelection.EndChar())
             {
               //if (iItem == 3)stdlog("1 %d\n", iItem);
               curFlag |= bSelected;
             }
           }
-          else if (iItem == logSelection().StartItem())
+          else if (iItem == m_ListSelection.StartItem())
           {
-            if (curChar >= logSelection().StartChar())
+            if (curChar >= m_ListSelection.StartChar())
             {
               //if (iItem == 3)stdlog("2 %d\n", iItem);
               curFlag |= bSelected;
             }
           }
-          else if (iItem == logSelection().EndItem())
+          else if (iItem == m_ListSelection.EndItem())
           {
-            if (curChar < logSelection().EndChar())
+            if (curChar < m_ListSelection.EndChar())
             {
               //if (iItem == 3)stdlog("3 %d\n", iItem);
               curFlag |= bSelected;
@@ -1400,25 +1328,21 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
       curChar++;
     }
 
-    //CBrush brush2;
-    //RECT rcText = { textStart, rcItem.top, textSize.cx + textStart, rcItem.bottom };
-    //brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
-    //FrameRect(hdc, &rcText, brush2);
+    if (iItem == m_ListSelection.CurItem())
+    {
+      RECT rcText = { rcItem.left - 5, rcItem.top, rcItem.right + 5, rcItem.bottom };
+      if (GetFocus() == m_hWnd)
+      {
+        CBrush brush2;
+        brush2.CreateSolidBrush(gSettings.SelectionBkColor(true));
+        FrameRect(hdc, &rcText, brush2);
+      }
+      else
+      {
+        DrawFocusRect(hdc, &rcText);
+      }
+    }
 
-  }
-  else
-  {
-    if (col == m_ListSelection.GetColumn() && m_ListSelection.GetItem() == iItem)
-    {
-      ::SetBkColor(hMemDC, selBkColor);
-      ::SetTextColor(hMemDC, selColor);
-    }
-    else
-    {
-      ::SetBkColor(hMemDC, infoBkColor);
-      ::SetTextColor(hMemDC, infoTextColor);
-    }
-    TextOut(hMemDC, textPoint.x, textPoint.y, szText + startChar, endChar - startChar);
   }
 
 #ifdef _USE_MEMDC
@@ -1450,38 +1374,28 @@ TCHAR* CLogListView::getText(int iItem, int* cBuf, LIST_COL col, int* cInfo)
   if (221 == pNode->getCallLine())
     cb = cb;
 #endif
-  BOOL bCompactView = gSettings.GetCompactView();
-  ATLASSERT(!bCompactView || (col == LOG_COL && m_cColumns == 2));
-  if (!bCompactView)
+  cb = 0;
+  bool funcColFound = false;
+  for (int i = 1; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
   {
-    ret = pNode->getListText(&cb, col, iItem);
-    ci = 0;
-  }
-  else
-  {
-    cb = 0;
-    bool funcColFound = false;
-    for (int i = 1; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
+    if (FUNC_COL == m_ActualColType[i])
+      funcColFound = true;
+    if (funcColFound && pNode->isFlow() && LOG_COL == m_ActualColType[i])
+      break;
+    int c;
+    TCHAR* p = pNode->getListText(&c, m_ActualColType[i], iItem);
+    if (c + cb >= MAX_BUF_LEN)
+      c = MAX_BUF_LEN - cb;
+    memcpy(pBuf + cb, p, c);
+    cb += c;
+    if (i < m_cActualColumns - 1)
     {
-      if (FUNC_COL == m_ActualColType[i])
-        funcColFound = true;
-      if (funcColFound && pNode->isFlow() && LOG_COL == m_ActualColType[i])
-        break;
-      int c;
-      TCHAR* p = pNode->getListText(&c, m_ActualColType[i], iItem);
-      if (c + cb >= MAX_BUF_LEN)
-        c = MAX_BUF_LEN - cb;
-      memcpy(pBuf + cb, p, c);
-      cb += c;
-      if (i < m_cActualColumns - 1)
-      {
-        memcpy(pBuf + cb, " ", 1);
-        cb += 1;
-        ci = cb;
-      }
+      memcpy(pBuf + cb, " ", 1);
+      cb += 1;
+      ci = cb;
     }
-    pBuf[cb] = 0;
   }
+  pBuf[cb] = 0;
 
   return ret;
 }

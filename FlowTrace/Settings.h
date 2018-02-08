@@ -1,7 +1,5 @@
 #pragma once
 
-//#define USE_FONT_RES
-
 #include "RegKeyExt.h"
 
 #define DECL_GET(type, name) public: type Get##name () { return m_##name ;} private: type m_##name
@@ -51,7 +49,6 @@ public:
     DECL_PROP(DWORD, TreeViewHiden);
     DECL_PROP(DWORD, InfoHiden);
     DECL_PROP(DWORD, UsePcTime);
-    DECL_PROP(DWORD, CompactView);
     DECL_PROP(DWORD, ShowAppIp);
     DECL_PROP(DWORD, ShowAppTime);
     DECL_PROP(DWORD, ShowElapsedTime);

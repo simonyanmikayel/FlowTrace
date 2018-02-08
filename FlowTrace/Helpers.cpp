@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Helpers.h"
+#include "Resource.h"
 
 namespace Helpers
 {
@@ -229,5 +230,33 @@ namespace Helpers
 
     sec = (DWORD)(mktime(&local));
   }
+  void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon)
+  {
+    static HBITMAP hbmpItem[MENU_ICON_MAX] = {0};
+
+    if (icon >= MENU_ICON_MAX)
+      return;
+    if (hbmpItem[icon] == 0)
+    {
+      int iRes = -1;
+      if (icon == MENU_ICON_SYNC)
+        iRes = IDB_SYNC;
+      else if (icon == MENU_ICON_FUNC_IN_ECLIPSE)
+        iRes = IDB_FUNC_IN_ECLIPSE;
+      else if (icon == MENU_ICON_CALL_IN_ECLIPSE)
+        iRes = IDB_CALL_IN_ECLIPSE;
+      if (iRes >= 0)
+      {
+        hbmpItem[icon] = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(iRes));
+      }
+    }
+    MENUITEMINFO mii;
+    mii.cbSize = sizeof(MENUITEMINFO);
+    mii.fMask = MIIM_BITMAP;
+    GetMenuItemInfo(hMenu, item, TRUE, &mii);
+    mii.hbmpItem = hbmpItem[icon];
+    SetMenuItemInfo(hMenu, item, TRUE, &mii);
+  }
+
 };
 

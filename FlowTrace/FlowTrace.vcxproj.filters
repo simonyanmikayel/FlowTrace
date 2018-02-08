@@ -237,6 +237,15 @@
     <Image Include="res\icon_boo.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\sync1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\sync2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />

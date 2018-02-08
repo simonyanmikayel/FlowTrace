@@ -40,7 +40,6 @@ LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
 LPCTSTR STR_APP_REG_VAL_TREE_VIEW_HIDEN = _T("TreeViewHiden");
 LPCTSTR STR_APP_REG_VAL_INFO_HIDEN = _T("InfoHiden");
 LPCTSTR STR_APP_REG_VAL_USE_PC_TIME = _T("UsePcTime");
-LPCTSTR STR_APP_REG_VAL_COMAPCT_VIEW = _T("CompactView");
 LPCTSTR STR_APP_REG_VAL_SHOW_APP_IP = _T("ShowAppIp");
 LPCTSTR STR_APP_REG_VAL_SHOW_APP_TIME = _T("ShowAppTIME");
 LPCTSTR STR_APP_REG_VAL_SHOW_ELAPSED_TIME = _T("ShowElapsedTime");
@@ -64,12 +63,7 @@ LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 #define DefUdpPort  8888
 #define DefFontSize 11
 
-#ifdef USE_FONT_RES
-#define RES_FONT_NAME  _T("Consolas1")
-static char* DEF_FONT_NAME = RES_FONT_NAME; //Courier New //Consolas //Inconsolata
-#else
 static char* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsolata
-#endif
 
 CSettings::CSettings() : 
 CRegKeyExt(STR_APP_REG_KEY)
@@ -82,7 +76,6 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
   Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
   Read(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime, FALSE);
-  m_CompactView = TRUE;// Read(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView, TRUE);
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
   Read(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
@@ -115,28 +108,12 @@ CRegKeyExt(STR_APP_REG_KEY)
 
   Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
 
-#ifdef USE_FONT_RES
-  AddDefaultFont();
-  m_ResFontName = RES_FONT_NAME;
-#endif
-
 	InitFont();
 }
 
 bool CSettings::CheckUIFont(HDC hdc)
 {
   bool ok = true;
-#ifndef USE_FONT_RES
-  //HFONT hFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
-  //LOGFONT lf;
-  //GetObject(hFont, sizeof(LOGFONT), &lf);
-  //ok = (0 == _tcsicmp(m_FontName, lf.lfFaceName));
-  //if (!ok)
-  //{
-  //  DEF_FONT_NAME = _T("Courier New");
-  //  InitFont();
-  //}
-#endif
   return ok;
 }
 
@@ -382,7 +359,6 @@ void CSettings::SetFlowTracesHiden(DWORD i){ m_FlowTracesHiden = i; Write(STR_AP
 void CSettings::SetTreeViewHiden(DWORD i){ m_TreeViewHiden = i; Write(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden); }
 void CSettings::SetInfoHiden(DWORD i) { m_InfoHiden = i; Write(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden); }
 void CSettings::SetUsePcTime(DWORD i){ m_UsePcTime = i; Write(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime); }
-void CSettings::SetCompactView(DWORD i){ m_CompactView = i; Write(STR_APP_REG_VAL_COMAPCT_VIEW, m_CompactView); }
 void CSettings::SetShowAppIp(DWORD i) { m_ShowAppIp = i; Write(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp); }
 void CSettings::SetShowAppTime(DWORD i) { m_ShowAppTime = i; Write(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime); }
 void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime); }

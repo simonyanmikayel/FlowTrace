@@ -95,30 +95,34 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     }
 
     DWORD dwFlags;
+    int cMenu = 0;
     POINT pt = { xPos, yPos };
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
     dwFlags = MF_BYPOSITION | MF_STRING;
-    if (pNode == NULL || !gSettings.CanShowInEclipse())
-      dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
-    InsertMenu(hMenu, 0, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
-    dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->isFlow())
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
+    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
     dwFlags = MF_BYPOSITION | MF_STRING;
-    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+    if (pNode == NULL || !gSettings.CanShowInEclipse())
+      dwFlags |= MF_DISABLED;
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
+    dwFlags = MF_BYPOSITION | MF_STRING;
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_COLLAPSE_ALL, _T("Collapse All"));
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_COLLAPSE_ALL, _T("Collapse All"));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, 0, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
-    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
-    InsertMenu(hMenu, 0, MF_BYPOSITION | MF_STRING, ID_TREE_COPY, _T("Copy"));
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_TREE_COPY, _T("Copy"));
 
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
     DestroyMenu(hMenu);
@@ -651,6 +655,28 @@ void CLogTreeView::GetNodetPos(HDC hdc, BOOL hasCheckBox, int offset, char* szTe
   xEnd += size.cx;
 }
 
+LRESULT CLogTreeView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
+{
+  bHandled = FALSE;
+  if (m_pSelectedNode)
+  {
+    int iCurSelected = m_pSelectedNode->GetPosInTree();
+    RedrawItems(iCurSelected, iCurSelected);
+  }
+  return 0;
+}
+
+LRESULT CLogTreeView::OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
+{
+  bHandled = FALSE;
+  if (m_pSelectedNode)
+  {
+    int iCurSelected = m_pSelectedNode->GetPosInTree();
+    RedrawItems(iCurSelected, iCurSelected);
+  }
+  return 0;
+}
+
 void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 {
   if (iSubItem != 0)
@@ -716,36 +742,38 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   int old_bkMode = ::GetBkMode(hdc);
 
 
+  RECT rcFrame = rcItem;
+  rcFrame.left = left - 2;
+  rcFrame.right = rcFrame.left + cxText + 4;
   if (m_pView->selectedNode() == pNode)
   {
-    RECT rc = rcItem;
-    rc.left = left - 2;
-    rc.right = rc.left + cxText + 4;
     CBrush brush1;
     brush1.CreateSolidBrush(RGB(0, 255, 128)); //gSettings.GetSyncColor()
-    FillRect(hdc, &rc, brush1);
-
-    if (m_pSelectedNode == pNode)
-    {
-      CBrush brush2;
-      brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
-      FrameRect(hdc, &rc, brush2);
-      ::SetTextColor(hdc, gSettings.SelectionTxtColor());
-    }
+    FillRect(hdc, &rcFrame, brush1);
 
     ::SetBkMode(hdc, TRANSPARENT);
   }
   else
   {
     ::SetBkMode(hdc, OPAQUE);
-    if (m_pSelectedNode == pNode)
-    {
-      ::SetBkColor(hdc, gSettings.SelectionBkColor(GetFocus() == m_hWnd));
-      ::SetTextColor(hdc, gSettings.SelectionTxtColor());
-    }
   }
 
   TextOut(hdc, left, top, szText, cbText);
+
+  if (m_pSelectedNode == pNode)
+  {
+    if (GetFocus() == m_hWnd)
+    {
+      CBrush brush2;
+      brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+      FrameRect(hdc, &rcFrame, brush2);
+    }
+    else
+    {
+      DrawFocusRect(hdc, &rcFrame);
+    }
+    //::SetTextColor(hdc, gSettings.SelectionTxtColor());
+  }
 
   int i = 0, x = left - ICON_OFFSET - ICON_LEN/2 - 5;
   for (LOG_NODE* p = pNode; p; i++, x = x - ICON_OFFSET)
