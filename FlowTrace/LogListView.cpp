@@ -1198,15 +1198,15 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
   int cbText, cbInfo;
   char* szText = getText(iItem, &cbText, col, &cbInfo);
-  BOOL bCompactView = gSettings.GetCompactView();
 
   //stdlog("iItem %d iSubItem %d col %d %s \n", iItem, iSubItem, col, szText);
 
   int startChar = 0, endChar = 0;
-  SIZE  size;
-  if (x > 0)
+  SIZE  size, textSize;
+  GetTextExtentExPoint(hdc, szText, cbText, x, &startChar, NULL, &textSize);
+  if (x <= 0)
   {
-    GetTextExtentExPoint(hdc, szText, cbText, x, &startChar, NULL, &size);
+    startChar = 0;
   }
   GetTextExtentExPoint(hdc, szText + startChar, cbText - startChar, cx, &endChar, NULL, &size);
   GetTextExtentPoint32(hdc, szText, startChar, &size);
@@ -1247,6 +1247,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   if (rcItem.left > 0)
     textPoint.x += rcItem.left;
 #endif
+  int textStart = textPoint.x;
   COLORREF old_textColor = ::GetTextColor(hdc);
   COLORREF old_bkColor = ::GetBkColor(hdc);
   int old_bkMode = ::GetBkMode(hdc);
@@ -1398,6 +1399,12 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
       }
       curChar++;
     }
+
+    //CBrush brush2;
+    //RECT rcText = { textStart, rcItem.top, textSize.cx + textStart, rcItem.bottom };
+    //brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+    //FrameRect(hdc, &rcText, brush2);
+
   }
   else
   {
