@@ -76,12 +76,13 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
     {
       FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
 
-      DWORD call_addr = (DWORD)flowData->call_site;
+      const DWORD call_addr = (DWORD)flowData->call_site;
       DWORD nearest_call_pc = 0;
       DWORD func_addr = (DWORD)flowData->this_fn;
       DWORD nearest_func_pc = 0;
       ADDR_INFO *p_addr_info = appData->p_addr_info;
       pNode->p_call_addr = p_addr_info; //initial bad value
+      pNode->p_func_addr = p_addr_info;
       char* fn = flowData->fnName();
       while (p_addr_info && IsWorking())
       {
@@ -97,7 +98,13 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
         }
         p_addr_info = p_addr_info->pPrev;
       }
+
+      if (call_addr - pNode->p_call_addr->addr > 128)
+        pNode->p_call_addr = appData->p_addr_info;
+      if (call_addr - pNode->p_func_addr->addr > 128)
+        pNode->p_func_addr = appData->p_addr_info;
     }
+
 
     if (!loop)
       break;

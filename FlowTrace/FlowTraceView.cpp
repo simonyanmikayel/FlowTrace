@@ -214,7 +214,7 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
       gArchive.resolveAddr(pNode, false);
       p_addr_info = (!bShowCallSite || pSelectedNode->isTrace()) ? pNode->p_func_addr : pNode->p_call_addr;
     }
-    if (pNode && p_addr_info)
+    if (pNode && p_addr_info && p_addr_info->line != INFINITE)
     {
       STARTUPINFO si;
       PROCESS_INFORMATION pi;
