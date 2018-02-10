@@ -112,10 +112,10 @@ void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowN
       if (pListedNode != pSelectedNode && pListedNode->isTrace() && pListedNode->parent == pSelectedNode)
       {
         TRACE_DATA* traceData = ((TRACE_NODE*)pListedNode)->getData();
-        DWORD line = traceData->call_line;
+        int line = traceData->call_line;
         //if (!pFlowNode->p_call_addr)
         //  gArchive.resolveAddr(pFlowNode, false, false);
-        if (line && pFlowNode->p_call_addr)
+        if (line > 0 && pFlowNode->p_call_addr)
         {
           if ((beforeFlowNode && line <= pFlowNode->p_call_addr->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr->line))
           {

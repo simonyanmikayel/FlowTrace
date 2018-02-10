@@ -26,7 +26,7 @@ enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, PROC_COL, TIME_COL, FUN
 struct ADDR_INFO
 {
   DWORD addr;
-  DWORD line;
+  int   line;
   char* src;
   ADDR_INFO* pPrev;
 };
