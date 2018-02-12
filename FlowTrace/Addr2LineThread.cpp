@@ -101,7 +101,7 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
 
       if (call_addr - pNode->p_call_addr->addr > 128)
         pNode->p_call_addr = appData->p_addr_info;
-      if (call_addr - pNode->p_func_addr->addr > 128)
+      if (func_addr - pNode->p_func_addr->addr > 128)
         pNode->p_func_addr = appData->p_addr_info;
     }
 
