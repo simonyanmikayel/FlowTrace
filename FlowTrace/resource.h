@@ -117,6 +117,7 @@
 #define ID_VIEW_TAKESNAPSHOT            32826
 #define ID_VIEW_STARTNEWSNAPSHOT        32828
 #define ID_EDIT_COPY_ALL                32829
+#define ID_EDIT_COPY_TRACES             32830
 #define ID_CALL_STACK                   32831
 
 // Next default values for new objects

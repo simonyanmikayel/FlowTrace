@@ -81,8 +81,8 @@ public:
   void UpdateCaret();
   bool HasSelection();
   LOG_NODE* GetSynkNode();
-  void CopySelection();
-  TCHAR* getText(int iItem, int* cBuf = NULL, LIST_COL col = LOG_COL, int* cInfo = NULL);
+  void CopySelection(bool onlyTraces = false);
+  TCHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
   void SelectAll();
   int getSelectionItem() { return m_ListSelection.CurItem(); }
   void Redraw(int nFirst, int nLast);

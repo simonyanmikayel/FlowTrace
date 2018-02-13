@@ -122,7 +122,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
       dwFlags |= MF_DISABLED;
     InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
     InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
-    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_TREE_COPY, _T("Copy"));
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
     DestroyMenu(hMenu);

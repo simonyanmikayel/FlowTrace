@@ -130,9 +130,9 @@ LOG_NODE* CLogListView::GetSynkNode()
   return pNode;
 }
 
-void CLogListView::CopySelection()
+void CLogListView::CopySelection(bool onlyTraces)
 {
-  if (m_ListSelection.IsEmpty())
+  if (m_ListSelection.IsEmpty() && !onlyTraces)
     return;
 
   HGLOBAL clipdata = 0;
@@ -162,10 +162,16 @@ void CLogListView::CopySelection()
     for (int i = m_ListSelection.StartItem(); i <= m_ListSelection.EndItem(); i++)
     {
       int logLen;
-      char* log = getText(i, &logLen, LOG_COL);
+      char* log = getText(i, &logLen, onlyTraces);
       if (logLen)
       {
-        if (i == m_ListSelection.StartItem() && i == m_ListSelection.EndItem())
+        if (onlyTraces)
+        {
+          l = logLen;
+          if (copy) memcpy(lock + len, log, l);
+          len += l;
+        }
+        else if (i == m_ListSelection.StartItem() && i == m_ListSelection.EndItem())
         {
           if (m_ListSelection.StartChar() < logLen)
           {
@@ -266,7 +272,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
   iItem = max(0, min(iItem, (int)m_recCount - 1));
 
   int logLen;
-  char* log = getText(iItem, &logLen, LOG_COL);
+  char* log = getText(iItem, &logLen);
   if (!logLen) { return; }
 
   if (iChar < 0 || movToEnd)
@@ -305,7 +311,7 @@ void CLogListView::MoveSelectionToEnd(bool extend)
   {
     int lastItem = (int)m_recCount - 1;
     int cbLastText;
-    getText(lastItem, &cbLastText, LOG_COL);
+    getText(lastItem, &cbLastText);
     MoveSelectionEx(lastItem, cbLastText, extend);
   }
 }
@@ -315,7 +321,7 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
   iItem = max(0, min(iItem, (int)m_recCount - 1));
 
   int logLen;
-  char* log = getText(iItem, &logLen, LOG_COL);
+  char* log = getText(iItem, &logLen);
   if (!logLen) return;
   startChar = max(0, min(startChar, logLen));
   endChar = max(0, min(endChar, logLen));
@@ -416,7 +422,7 @@ void CLogListView::UpdateCaret()
       GetViewRect(&viewRect);
 
       int cbText;
-      char* szText = getText(curItem, &cbText, LOG_COL);
+      char* szText = getText(curItem, &cbText);
       y = itemRect.top + (itemRect.bottom - itemRect.top) / 2 - gSettings.GetFontHeight() / 2;
       int cb = m_ListSelection.CurChar();
       if (cb > cbText)
@@ -443,7 +449,7 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
   if (!GetItemCount())
     return 0;
   int cbCurText;
-  char* szText = getText(m_ListSelection.CurItem(), &cbCurText, LOG_COL);
+  char* szText = getText(m_ListSelection.CurItem(), &cbCurText);
   if (!cbCurText) return 0;
 
   int curItem = m_ListSelection.CurItem();
@@ -580,7 +586,7 @@ LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM
 
 
   int cbCurText;
-  char* szText = getText(m_ListSelection.CurItem(), &cbCurText, LOG_COL);
+  char* szText = getText(m_ListSelection.CurItem(), &cbCurText);
   if (!cbCurText)
     return 0;
 
@@ -636,13 +642,18 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   dwFlags = MF_BYPOSITION | MF_STRING;
   if (m_ListSelection.IsEmpty())
     dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("Copy"));
+  InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
+  InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
   UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
   DestroyMenu(hMenu);
 
   if (nRet == ID_EDIT_COPY)
   {
     CopySelection();
+  }
+  else if (nRet == ID_EDIT_COPY_TRACES)
+  {
+    CopySelection(true);
   }
   else if (nRet == ID_SYNC_VIEWES)
   {
@@ -839,7 +850,7 @@ bool CLogListView::UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM l
     if (xPos >= itemRect.left)
     {
       int logLen;
-      char* log = getText(ht.iItem, &logLen, LOG_COL);
+      char* log = getText(ht.iItem, &logLen);
       int nFit = 0;
       if (logLen)
       {
@@ -1045,14 +1056,14 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
     //calculate lengths of all columns
     SetColumnLen(m_ColType[0], ICON_MAX * ICON_LEN);
     SIZE size;
-    for (int i = 1; i < m_cColumns; i++)
+    //for (int i = 1; i < m_cColumns; i++)
     {
       size.cx = 0;
       int cbText;
-      char* szText = getText(iItem, &cbText, m_ColType[i]);
+      char* szText = getText(iItem, &cbText);
       if (cbText)
         GetTextExtentPoint32(hdc, szText, cbText, &size);
-      SetColumnLen(m_ColType[i], size.cx + (2 * TEXT_MARGIN));
+      SetColumnLen(LOG_COL, size.cx + (2 * TEXT_MARGIN));
       //stdlog("\t iItem i %d %d size.cx %d %s\n", iItem, i, size.cx, szText1);
     }
   }
@@ -1125,7 +1136,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
     x = -rcItem.left;
 
   int cbText, cbInfo;
-  char* szText = getText(iItem, &cbText, col, &cbInfo);
+  char* szText = getText(iItem, &cbText, false, &cbInfo);
 
   //stdlog("iItem %d iSubItem %d col %d %s \n", iItem, iSubItem, col, szText);
 
@@ -1357,7 +1368,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 #endif
 }
 
-TCHAR* CLogListView::getText(int iItem, int* cBuf, LIST_COL col, int* cInfo)
+TCHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
   const int MAX_BUF_LEN = 2 * MAX_TRCAE_LEN - 10;
   static TCHAR pBuf[MAX_BUF_LEN + 10];
@@ -1368,7 +1379,11 @@ TCHAR* CLogListView::getText(int iItem, int* cBuf, LIST_COL col, int* cInfo)
   cb = 0;
   pBuf[0] = 0;
   LOG_NODE* pNode = listNodes->getNode(iItem);
-  if (!pNode) { ATLASSERT(0); return ret; }
+  if (!pNode) 
+  {
+    //ATLASSERT(0); 
+    return ret; 
+  }
 
 #ifdef _DEBUG
   if (221 == pNode->getCallLine())
@@ -1378,6 +1393,8 @@ TCHAR* CLogListView::getText(int iItem, int* cBuf, LIST_COL col, int* cInfo)
   bool funcColFound = false;
   for (int i = 1; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
   {
+    if (onlyTraces && LOG_COL != m_ActualColType[i])
+      continue;
     if (FUNC_COL == m_ActualColType[i])
       funcColFound = true;
     if (funcColFound && pNode->isFlow() && LOG_COL == m_ActualColType[i])
