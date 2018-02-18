@@ -102,6 +102,8 @@ an alternative solution is to add an additional library to your linker input, le
 
 #pragma warning(push)
 #pragma warning(disable: 4702)
+
+#include <algorithm> 
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -113,6 +115,7 @@ an alternative solution is to add an additional library to your linker input, le
 #include <chrono>
 #include <memory>
 #include <list>
+
 using namespace std;
 #pragma warning(pop)
 
@@ -147,4 +150,4 @@ typedef std::string tstring;
 #pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
-//#define _AUTO_TEST
+#define _AUTO_TEST

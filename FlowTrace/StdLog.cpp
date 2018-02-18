@@ -53,12 +53,12 @@ void GetStdOut()
         COORD c = { 1000, 9999 };
         SetConsoleScreenBufferSize(ghStdOut, c);
 
-        TCHAR ModuleFileName[MAX_PATH + 1]; // name of the application
-        if (0 == GetModuleFileName(NULL, ModuleFileName, sizeof(ModuleFileName)))
+        CHAR ModuleFileName[MAX_PATH + 1]; // name of the application
+        if (0 == GetModuleFileNameA(NULL, ModuleFileName, sizeof(ModuleFileName)))
           SetConsoleTitle(TEXT("Dbg"));
         else
         {
-          TCHAR *pSlash = _tcsrchr(ModuleFileName, TEXT('/'));
+          CHAR *pSlash = _tcsrchr(ModuleFileName, TEXT('/'));
           if (!pSlash)
             pSlash = _tcsrchr(ModuleFileName, TEXT('\\'));
           if (pSlash)

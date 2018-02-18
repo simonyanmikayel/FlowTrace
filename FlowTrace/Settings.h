@@ -16,11 +16,11 @@ public:
     void RestoreWindPos(HWND hWnd);
     void SaveWindPos(HWND hWnd);
     void SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkColor);
-    void SetUIFont(TCHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
+    void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
     bool CheckUIFont(HDC hdc);
 
-    void SetSearchList(TCHAR* szList);
-    TCHAR* GetSearchList();
+    void SetSearchList(CHAR* szList);
+    CHAR* GetSearchList();
     DWORD SelectionBkColor(bool haveFocus);
     DWORD SelectionTxtColor();
     DWORD LogListBkColor();
@@ -68,13 +68,13 @@ public:
     DECL_PROP(DWORD, UdpPort);
 
     DECL_GET(DWORD, FontSize);
-    DECL_GET(TCHAR*, FontName);
+    DECL_GET(CHAR*, FontName);
     DECL_GET(DWORD, FontWeight);
-    DECL_GET(TCHAR*, ResFontName);
+    DECL_GET(CHAR*, ResFontName);
 
-    DECL_STR_PROP(TCHAR, EclipsePath, MAX_PATH);
-    DECL_STR_PROP(TCHAR, LinuxHome, MAX_PATH);
-    DECL_STR_PROP(TCHAR, MapOnWin, MAX_PATH);
+    DECL_STR_PROP(CHAR, EclipsePath, MAX_PATH);
+    DECL_STR_PROP(CHAR, LinuxHome, MAX_PATH);
+    DECL_STR_PROP(CHAR, MapOnWin, MAX_PATH);
 
 private:
     LOGFONT   m_logFont;

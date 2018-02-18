@@ -33,7 +33,7 @@ public:
     MESSAGE_HANDLER(WM_SETFOCUS, OnSetFocus)
     MESSAGE_HANDLER(WM_KILLFOCUS, OnKillFocus)
   END_MSG_MAP()
-  void ItemPrePaint(int iItem, HDC hdc, RECT rc);
+  void ItemPrePaint(DWORD iItem, HDC hdc, RECT rc);
   void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
   void OnSize(UINT nType, CSize size);
   LOG_NODE* nodes[MAX_BACK_TRACE];

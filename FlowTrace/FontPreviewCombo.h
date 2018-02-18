@@ -51,7 +51,7 @@ public:
   int GetFontHeight(void);
   void SetFontHeight(int newHeight, bool reinitialize = true);
   virtual ~CFontPreviewCombo();
-  void	Init(TCHAR* szResFontName);
+  void	Init(CHAR* szResFontName);
   void SetDropWidth();
 
 protected:

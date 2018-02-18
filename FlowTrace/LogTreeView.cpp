@@ -160,8 +160,8 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
 {
   pNode->CollapseExpandAll(expand);
-  SetItemCount(rootNode->GetExpandCount() + 1);
-  RedrawItems(0, rootNode->GetExpandCount());
+  SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
+  RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
 }
 
 void CLogTreeView::CopySelection()
@@ -194,11 +194,11 @@ void CLogTreeView::RefreshTree(bool showAll)
   if (!m_Initialised)
     return;
 
-  int prevExpanded = rootNode->GetExpandCount();
+  int prevExpanded = gArchive.getRootNode()->GetExpandCount();
   int firstAffected = -1;
   //int firstRow = prevExpanded ? 0 : GetTopIndex();
   //int lastRow = m_size.cy / m_rowHeight + 1;
-  rootNode->CalcLines();
+  gArchive.getRootNode()->CalcLines();
 
   //add new logs
   for (DWORD i = m_recCount; i < newCount; i++)
@@ -228,13 +228,13 @@ void CLogTreeView::RefreshTree(bool showAll)
 
   if (m_recCount != 0)
   {
-    if (prevExpanded != rootNode->GetExpandCount())
+    if (prevExpanded != gArchive.getRootNode()->GetExpandCount())
     {
-      SetItemCountEx(rootNode->GetExpandCount() + 1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
+      SetItemCountEx(gArchive.getRootNode()->GetExpandCount() + 1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
     }
     if (firstAffected > -1)
     {
-      RedrawItems(firstAffected, rootNode->GetExpandCount());
+      RedrawItems(firstAffected, gArchive.getRootNode()->GetExpandCount());
     }
   }
 
@@ -243,8 +243,8 @@ void CLogTreeView::RefreshTree(bool showAll)
 
   m_recCount = newCount;
 
-  static TCHAR pBuf[128];
-  _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_recCount));
+  static CHAR pBuf[128];
+  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_recCount));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
 }
 
@@ -262,8 +262,8 @@ LOG_NODE* CLogTreeView::getTreeNode(int iItem, int* pOffset)
 
 again:
   offset = 0;
-  pNode = rootNode;
-  ATLASSERT(rootNode->expanded || iItem == 0);
+  pNode = gArchive.getRootNode();
+  ATLASSERT(gArchive.getRootNode()->expanded || iItem == 0);
 
   while (iItem != pNode->line)
   {
@@ -408,7 +408,7 @@ void CLogTreeView::EnsureItemVisible(int iItem)
 void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapseOthers)
 {
   if (collapseOthers)
-    CollapseExpandAll(rootNode, false);
+    CollapseExpandAll(gArchive.getRootNode(), false);
 
   LOG_NODE* p = pNode->parent;
   //stdlog("%u\n", GetTickCount());
@@ -426,7 +426,7 @@ void CLogTreeView::EnsureNodeVisible(LOG_NODE* pNode, bool select, bool collapse
     ATLASSERT(!p->lastChild || p->expanded);
     p = p->parent;
   }
-  SetItemCount(rootNode->GetExpandCount() + 1);
+  SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
 
   int iItem = pNode->GetPosInTree();
   EnsureItemVisible(iItem);
@@ -500,7 +500,7 @@ LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
     if (pNode && pNode->expanded)
     {
       pNode->CollapseExpand(FALSE);
-      SetItemCount(rootNode->GetExpandCount() + 1);
+      SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
     }
     else if (pNode && pNode->parent && pNode->parent->expanded)
     {
@@ -514,7 +514,7 @@ LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
     if (pNode && !pNode->expanded && pNode->lastChild)
     {
       pNode->CollapseExpand(TRUE);
-      SetItemCount(rootNode->GetExpandCount() + 1);
+      SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
     }
     else
       iNewSelected++;
@@ -588,12 +588,11 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 
     CRect rcItem = { 0 };
     GetSubItemRect(iItem, 0, LVIR_LABEL, &rcItem);
-    LOG_DATA* pLogData = pNode->data;
     xPos -= rcItem.left;
     if (hitTest(pNode, xPos, offset) == TVHT_ONITEMBUTTON)
     {      
       pNode->CollapseExpand(!pNode->expanded);
-      SetItemCount(rootNode->GetExpandCount() + 1);
+      SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
     }
     else if (hitTest(pNode, xPos, offset) == TVHT_ONITEMSTATEICON)
     {

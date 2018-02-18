@@ -39,6 +39,6 @@ public:
   CEdit   m_edtMapOnWin;
 
   DWORD     m_FontSize;
-  CHAR      m_FaceName[LF_FACESIZE];
+  CHAR     m_FaceName[LF_FACESIZE];
   DWORD     m_lfWeight;
 };

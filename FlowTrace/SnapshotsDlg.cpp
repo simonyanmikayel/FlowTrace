@@ -4,7 +4,7 @@
 
 SnapshotsDlg::SnapshotsDlg()
 {
-  m_snapshot = snapshot;
+  m_snapshot = gArchive.getSNAPSHOT();
   m_NodeCount = gArchive.getCount();
 }
 
@@ -51,13 +51,13 @@ void SnapshotsDlg::fillSnapShots()
   while (LB_ERR != m_lstSnapsots.DeleteString(0));
   m_lstSnapsots.AddString(_T("Show all"));
   if (m_snapshot.snapShots.size())
-    m_lstSnapsots.AddString(_T("Show after last snapshot"));
+    m_lstSnapsots.AddString(_T("Show after last gArchive.getSNAPSHOT()"));
 
   CString str;
   size_t c = m_snapshot.snapShots.size();
   for (size_t i = 0; i < c; i++)
   {
-    str.Format("%d-%d:  %s", i ? m_snapshot.snapShots[i - 1].pos : 0, m_snapshot.snapShots[i].pos, m_snapshot.snapShots[i].descr);
+    str.Format(_T("%d-%d:  %s"), i ? m_snapshot.snapShots[i - 1].pos : 0, m_snapshot.snapShots[i].pos, m_snapshot.snapShots[i].descr);
     m_lstSnapsots.AddString(str);
   }
 
@@ -66,11 +66,11 @@ void SnapshotsDlg::fillSnapShots()
 
 void SnapshotsDlg::UpdateSnapshots()
 {
-  snapshot = m_snapshot;
-  snapshot.update();
+  gArchive.getSNAPSHOT() = m_snapshot;
+  gArchive.getSNAPSHOT().update();
 }
 
-bool SnapshotsDlg::AddSnapshot(TCHAR* descr, bool update)
+bool SnapshotsDlg::AddSnapshot(CHAR* descr, bool update)
 {
   if (CanNotAddSnapshot())
     return false;
@@ -78,7 +78,7 @@ bool SnapshotsDlg::AddSnapshot(TCHAR* descr, bool update)
   SNAPSHOT_INFO si;
   si.pos = m_NodeCount;
 
-  int cb = min(strlen(descr), sizeof(si.descr) / sizeof(si.descr[0]) - 1);
+  size_t cb = min(_tcslen(descr), _countof(si.descr) - 1);
   memcpy(si.descr, descr, cb);
   si.descr[cb] = 0;
 
@@ -93,7 +93,7 @@ bool SnapshotsDlg::AddSnapshot(TCHAR* descr, bool update)
 
 LRESULT SnapshotsDlg::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-  TCHAR descr[32];
+  CHAR descr[32];
   int cb = sizeof(descr) / sizeof(descr[0]) - 1;
   m_editComment.GetWindowText(descr, cb);
   descr[cb] = 0;

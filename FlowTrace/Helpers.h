@@ -13,10 +13,10 @@ enum MENU_ICON { MENU_ICON_SYNC, MENU_ICON_FUNC_IN_ECLIPSE, MENU_ICON_CALL_IN_EC
 namespace Helpers
 {
   void CopyToClipboard(HWND hWnd, char* szText, int cbText);
-  void SysErrMessageBox(TCHAR* lpFormat, ...);
-  void ErrMessageBox(TCHAR* lpFormat, ...);
-  TCHAR* find_str(const TCHAR *phaystack, const TCHAR *pneedle, int bMatchCase);  
-  TCHAR* str_format_int_grouped(int num);
+  void SysErrMessageBox(CHAR* lpFormat, ...);
+  void ErrMessageBox(CHAR* lpFormat, ...);
+  CHAR* find_str(const CHAR *phaystack, const CHAR *pneedle, int bMatchCase);  
+  CHAR* str_format_int_grouped(int num);
   void GetTime(DWORD &sec, DWORD& msec);
   void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 };

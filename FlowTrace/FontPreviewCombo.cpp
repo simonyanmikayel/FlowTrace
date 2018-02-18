@@ -35,7 +35,7 @@ BOOL CALLBACK FPC_EnumFontProc(LPLOGFONT lplf, LPTEXTMETRIC lptm, DWORD dwType, 
   {
     int index = pThis->AddString(lplf->lfFaceName);
     ATLASSERT(index != -1);
-    int maxLen = lptm->tmMaxCharWidth * strlen(lplf->lfFaceName);
+    //int maxLen = lptm->tmMaxCharWidth * strlen(lplf->lfFaceName);
     int ret = pThis->SetItemData(index, dwType);
 
     ATLASSERT(ret != -1);
@@ -52,7 +52,7 @@ BOOL CALLBACK FPC_EnumFontProc(LPLOGFONT lplf, LPTEXTMETRIC lptm, DWORD dwType, 
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CFontPreviewCombo::Init(TCHAR* szResFontName)
+void CFontPreviewCombo::Init(CHAR* szResFontName)
 {
   if (szResFontName)
   {
@@ -115,7 +115,7 @@ void CFontPreviewCombo::DrawItem(LPDRAWITEMSTRUCT lpDIS)
   dc.SetBkMode(TRANSPARENT);
   dc.FillRect(&rc, br);
 
-  TCHAR szText[256];
+  CHAR szText[256];
   int i = GetLBText(0, szText);
 
   // which one are we working on?
@@ -123,7 +123,7 @@ void CFontPreviewCombo::DrawItem(LPDRAWITEMSTRUCT lpDIS)
   GetLBText(lpDIS->itemID, csCurFontName);
 
   // draw the cute TTF glyph
-  DWORD dwData = GetItemData(lpDIS->itemID);
+  DWORD_PTR dwData = GetItemData(lpDIS->itemID);
   if (dwData & TRUETYPE_FONTTYPE)
   {
     m_img.Draw(dc, 0, CPoint(rc.left + 5, rc.top + 4), ILD_TRANSPARENT);

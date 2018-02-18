@@ -29,7 +29,7 @@ public:
 
   void    Close(WORD wID);
   bool    CanNotAddSnapshot();
-  bool    AddSnapshot(TCHAR* descr, bool update);
+  bool    AddSnapshot(CHAR* descr, bool update);
   void    UpdateSnapshots();
 
   SNAPSHOT m_snapshot;

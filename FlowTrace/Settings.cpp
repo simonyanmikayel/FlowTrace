@@ -63,7 +63,7 @@ LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 #define DefUdpPort  8888
 #define DefFontSize 11
 
-static char* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsolata
+static CHAR* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsolata
 
 CSettings::CSettings() : 
 CRegKeyExt(STR_APP_REG_KEY)
@@ -132,7 +132,7 @@ void CSettings::AddDefaultFont()
   {
     HGLOBAL mem = LoadResource(hResInstance, res);
     void *data = LockResource(mem);
-    size_t len = SizeofResource(hResInstance, res);
+    DWORD len = SizeofResource(hResInstance, res);
 
     DWORD nFonts;
     m_resourceFonthandle = AddFontMemResourceEx(
@@ -176,7 +176,7 @@ void CSettings::InitFont()
   DeleteDC(hdc);
 }
 
-void CSettings::SetUIFont(TCHAR* lfFaceName, LONG lfWeight, LONG fontSize)
+void CSettings::SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG fontSize)
 {
   Write(STR_APP_REG_VAL_FONTNAME, lfFaceName);
   Write(STR_APP_REG_VAL_FONTWIDTH, lfWeight);
@@ -288,10 +288,10 @@ void CSettings::SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkCol
 }
 
 static const int MAX_SEARCH_LIST = 255;
-static TCHAR searchList[MAX_SEARCH_LIST + 1];
-void CSettings::SetSearchList(TCHAR* szList)
+static CHAR searchList[MAX_SEARCH_LIST + 1];
+void CSettings::SetSearchList(CHAR* szList)
 {
-  int n = strlen(szList);
+  size_t n = _tcslen(szList);
   n = min(MAX_SEARCH_LIST, n);
   memcpy(searchList, szList, n);
   searchList[n] = 0;
@@ -325,7 +325,7 @@ DWORD CSettings::SelectionBkColor(bool haveFocus)
 {
   return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
 }
-TCHAR* CSettings::GetSearchList()
+CHAR* CSettings::GetSearchList()
 {
   if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
   {
@@ -365,9 +365,9 @@ void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_A
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
-void CSettings::SetEclipsePath(const TCHAR* EclipsePath) { int c = sizeof(m_EclipsePath) / sizeof(m_EclipsePath[0]) - 1; _tcsncpy(m_EclipsePath, EclipsePath, c); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
-void CSettings::SetLinuxHome(const TCHAR* LinuxHome) { int c = sizeof(m_LinuxHome) / sizeof(m_LinuxHome[0]) - 1; _tcsncpy(m_LinuxHome, LinuxHome, c); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
-void CSettings::SetMapOnWin(const TCHAR* MapOnWin) { int c = sizeof(m_MapOnWin) / sizeof(m_MapOnWin[0]) - 1; _tcsncpy(m_MapOnWin, MapOnWin, c); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
+void CSettings::SetEclipsePath(const CHAR* EclipsePath) { int c = _countof(m_EclipsePath); _tcsncpy_s(m_EclipsePath, c, EclipsePath, c - 1); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
+void CSettings::SetLinuxHome(const CHAR* LinuxHome) { int c = _countof(m_LinuxHome); _tcsncpy_s(m_LinuxHome, c, LinuxHome, c - 1); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
+void CSettings::SetMapOnWin(const CHAR* MapOnWin) { int c = _countof(m_MapOnWin); _tcsncpy_s(m_MapOnWin, c, MapOnWin, c - 1); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 
 void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 

@@ -4,9 +4,9 @@
 
 SEARCH_INFO searchInfo;
 
-char* SEARCH_INFO::find(TCHAR* p)
+char* SEARCH_INFO::find(CHAR* p)
 {
-  TCHAR* szText = m_strFind.GetBuffer();
+  CHAR* szText = m_strFind.GetBuffer();
   int cbText = m_strFind.GetLength();
   p = Helpers::find_str(p, m_strFind.GetBuffer(), bMatchCase);
   if (p && (!bMatchWholeWord || ((p == szText || !isalpha(*(p - 1))) && !isalpha(*(p + cbText)))))
@@ -15,7 +15,7 @@ char* SEARCH_INFO::find(TCHAR* p)
     return NULL;
 }
 
-int SEARCH_INFO::calcCountIn(TCHAR* p)
+int SEARCH_INFO::calcCountIn(CHAR* p)
 {
   int ret = 0;
   while (p = searchInfo.find(p))

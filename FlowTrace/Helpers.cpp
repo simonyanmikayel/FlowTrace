@@ -32,22 +32,22 @@ namespace Helpers
     }
   }
 
-  void ErrMessageBox(TCHAR* lpFormat, ...)
+  void ErrMessageBox(CHAR* lpFormat, ...)
   {
     va_list vl;
     va_start(vl, lpFormat);
 
-    TCHAR* buf = new TCHAR[1024];
+    CHAR* buf = new CHAR[1024];
     _vsntprintf_s(buf, 1023, 1023, lpFormat, vl);
     va_end(vl);
 
     ::PostMessage(hwndMain, WM_SHOW_NGS, (WPARAM)buf, (LPARAM)0);
   }
 
-  void SysErrMessageBox(TCHAR* lpFormat, ...)
+  void SysErrMessageBox(CHAR* lpFormat, ...)
   {
     DWORD err = GetLastError();
-    TCHAR *s = NULL;
+    CHAR *s = NULL;
     FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
       NULL, err,
       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -56,8 +56,8 @@ namespace Helpers
     va_list vl;
     va_start(vl, lpFormat);
 
-    TCHAR buf[1024];
-    _vsntprintf_s(buf, sizeof(buf) / sizeof(buf[0]), lpFormat, vl);
+    CHAR buf[1024];
+    _vsntprintf_s(buf, _countof(buf), lpFormat, vl);
 
     ErrMessageBox(TEXT("%s\nErr: %d\n%s"), buf, err, s);
     va_end(vl);
@@ -80,9 +80,9 @@ namespace Helpers
 
   #define uppercase(_x) ( (chartype) (bMatchCase ? _x : (_x < 256 ? char_table[_x] : towupper(_x) )) )
 
-  TCHAR* find_str(const TCHAR *phaystack, const TCHAR *pneedle, int bMatchCase)
+  CHAR* find_str(const CHAR *phaystack, const CHAR *pneedle, int bMatchCase)
   {
-    register const TCHAR *haystack, *needle;
+    register const CHAR *haystack, *needle;
     register chartype b, c;
 
     if (!initialised)
@@ -94,8 +94,8 @@ namespace Helpers
     if (!phaystack || !pneedle || !pneedle[0])
       goto ret0;
 
-    haystack = (const TCHAR *)phaystack;
-    needle = (const TCHAR *)pneedle;
+    haystack = (const CHAR *)phaystack;
+    needle = (const CHAR *)pneedle;
     b = uppercase(*needle);
 
     haystack--;             /* possible ANSI violation */
@@ -117,7 +117,7 @@ namespace Helpers
     for (;;)
     {
       register chartype a;
-      register const TCHAR *rhaystack, *rneedle;
+      register const CHAR *rhaystack, *rneedle;
 
       do
       {
@@ -172,22 +172,22 @@ namespace Helpers
     }
 
   foundneedle:
-    return (TCHAR*)haystack;
+    return (CHAR*)haystack;
   ret0:
     return 0;
   }
 
-  TCHAR* str_format_int_grouped(int num)
+  CHAR* str_format_int_grouped(int num)
   {
-    static TCHAR dst[16];
-    TCHAR src[16];
+    static CHAR dst[16];
+    CHAR src[16];
     char *p_src = src;
     char *p_dst = dst;
 
     const char separator = ',';
     int num_len, commas;
 
-    num_len = sprintf(src, "%d", num);
+    num_len = sprintf_s(src, _countof(src), "%d", num);
 
     if (*p_src == '-') {
       *p_dst++ = *p_src++;

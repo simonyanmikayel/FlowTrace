@@ -63,10 +63,7 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
   APP_NODE* appNode = pNode->getApp();
   if (!appNode)
     return;
-  APP_DATA* appData = appNode->getData();
-  if (!appData)
-    return;
-  if (appData->cb_addr_info == INFINITE || appData->cb_addr_info == 0 || appData->p_addr_info == NULL)
+  if (appNode->cb_addr_info == INFINITE || appNode->cb_addr_info == 0 || appNode->p_addr_info == NULL)
     return;
 
   bool firstNodeResolved = false;
@@ -74,24 +71,24 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
   {
     if (pNode->p_call_addr == 0)
     {
-      FLOW_DATA* flowData = ((FLOW_NODE*)pNode)->getData();
+      FLOW_NODE* flowNode = (FLOW_NODE*)pNode;
 
-      const DWORD call_addr = (DWORD)flowData->call_site;
-      DWORD nearest_call_pc = 0;
-      DWORD func_addr = (DWORD)flowData->this_fn;
-      DWORD nearest_func_pc = 0;
-      ADDR_INFO *p_addr_info = appData->p_addr_info;
+      const LONG_PTR call_addr = (LONG_PTR)flowNode->call_site;
+      LONG_PTR nearest_call_pc = 0;
+      LONG_PTR func_addr = (LONG_PTR)flowNode->this_fn;
+      LONG_PTR nearest_func_pc = 0;
+      ADDR_INFO *p_addr_info = appNode->p_addr_info;
       pNode->p_call_addr = p_addr_info; //initial bad value
       pNode->p_func_addr = p_addr_info;
-      char* fn = flowData->fnName();
+      char* fn = flowNode->fnName();
       while (p_addr_info && IsWorking())
       {
-        if (call_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_call_pc)
+        if (call_addr >= (LONG_PTR)p_addr_info->addr && (LONG_PTR)(p_addr_info->addr) >= nearest_call_pc)
         {
           nearest_call_pc = p_addr_info->addr;
           pNode->p_call_addr = p_addr_info;
         }
-        if (func_addr >= p_addr_info->addr && p_addr_info->addr >= nearest_func_pc)
+        if (func_addr >= (LONG_PTR)p_addr_info->addr && (LONG_PTR)(p_addr_info->addr) >= nearest_func_pc)
         {
           nearest_func_pc = p_addr_info->addr;
           pNode->p_func_addr = p_addr_info;
@@ -100,9 +97,9 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
       }
 
       if (call_addr - pNode->p_call_addr->addr > 128)
-        pNode->p_call_addr = appData->p_addr_info;
+        pNode->p_call_addr = appNode->p_addr_info;
       if (func_addr - pNode->p_func_addr->addr > 128)
-        pNode->p_func_addr = appData->p_addr_info;
+        pNode->p_func_addr = appNode->p_addr_info;
     }
 
 
@@ -135,13 +132,12 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
       break;
     if (obj == WAIT_OBJECT_0)
     {
-      APP_NODE* appNode = (APP_NODE*)rootNode->lastChild;
+      APP_NODE* appNode = (APP_NODE*)gArchive.getRootNode()->lastChild;
       while (appNode && IsWorking())
       {
-        APP_DATA* appData = appNode->getData();
-        if (appData->cb_addr_info == INFINITE)
+        if (appNode->cb_addr_info == INFINITE)
         {
-          appData->cb_addr_info = readUrl2(appData);
+            appNode->cb_addr_info = readUrl2(appNode);
           CloseSocket();
         }
         appNode = (APP_NODE*)appNode->prevSibling;
@@ -167,7 +163,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
 }
 
 
-DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
+DWORD Addr2LineThread::readUrl2(APP_NODE* appNode)
 {
   const int bufSize = 1024;
   char readBuffer[bufSize + 1], sendBuffer[256];
@@ -179,25 +175,25 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
   char src[bufSize + 1];
   int total = 0;
 
-  if (appData->cb_app_path >= MAX_PATH || appData->cb_app_path == 0)
+  if (appNode->cb_app_path >= MAX_PATH || appNode->cb_app_path == 0)
     return 0;
 
   HRESULT hr = S_OK;
   char appPath[MAX_PATH + 1];
   char encodedAppPath[2 * MAX_PATH + 1];
   DWORD cchEscaped;
-  memcpy(appPath, appData->appPath(), appData->cb_app_path);
-  appPath[appData->cb_app_path] = 0;
+  memcpy(appPath, appNode->appPath(), appNode->cb_app_path);
+  appPath[appNode->cb_app_path] = 0;
   cchEscaped = 2 * MAX_PATH;
   if (S_OK != (hr = UrlEscapeA(appPath, encodedAppPath, &cchEscaped, 0)))
     return 0;
 
-  if (!connectToServer(appData->ip_address, 80))
+  if (!connectToServer(appNode->ip_address, 80))
     return 0;
 
   char *szReq = "GET /cgi-bin/examineAddressesForFlowTrace.sh?app_name=%s&addresses=0 HTTP/1.1\r\nHost: %s\r\n\r\n";
-  sprintf(sendBuffer, szReq, encodedAppPath, appData->ip_address);
-  send(conn, sendBuffer, strlen(sendBuffer), 0);
+  sprintf_s(sendBuffer, _countof(sendBuffer), szReq, encodedAppPath, appNode->ip_address);
+  send(conn, sendBuffer, (int)strlen(sendBuffer), 0);
   //stdlog("sendBuffer\n%s:\n:\n", sendBuffer);
 
   // Receive until the peer closes the connection
@@ -216,22 +212,22 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
     readBuffer[readSize] = 0;
     while(leinEnd = strchr(readBuffer, '\n'))
     {
-      int cb = leinEnd - readBuffer;
+      int cb = int(leinEnd - readBuffer);
       readBuffer[cb] = 0;
-      cb++;
+      cb++; 
       //stdlog("lineBuffer: %s\n", readBuffer);
-      if (3 == sscanf(readBuffer, TEXT("addr: %X  \t line: %d \t %s"), &addr, &line, src))
+      if (3 == sscanf_s(readBuffer, TEXT("addr: %X  \t line: %d \t %s"), &addr, &line, src, (DWORD)_countof(src)))
       {
-        int cbSrc = strlen(src);
+        int cbSrc = (int)strlen(src);
         ADDR_INFO* p_addr_info = NULL;
         if (last_info && 0 == strcmp(last_info->src, src))
         {
-          if (p_addr_info = (ADDR_INFO*)gArchive.reservDataBuf(sizeof(ADDR_INFO)))
+          if (p_addr_info = (ADDR_INFO*)gArchive.Alloc(sizeof(ADDR_INFO)))
             p_addr_info->src = last_info->src;
         }
         else
         {
-          if (p_addr_info = (ADDR_INFO*)gArchive.reservDataBuf(sizeof(ADDR_INFO) + cbSrc + 1))
+          if (p_addr_info = (ADDR_INFO*)gArchive.Alloc(sizeof(ADDR_INFO) + cbSrc + 1))
           {
             p_addr_info->src = ((char*)p_addr_info) + sizeof(ADDR_INFO);
             memcpy(p_addr_info->src, src, cbSrc + 1);
@@ -245,7 +241,7 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
         p_addr_info->line = line;
         p_addr_info->pPrev = last_info;
         last_info = p_addr_info;
-        appData->p_addr_info = p_addr_info;
+        appNode->p_addr_info = p_addr_info;
         total++;
         //stdlog(TEXT("addr: %X  \t line: %d \t %s\n"), addr, line, src);
       }
@@ -263,17 +259,17 @@ DWORD Addr2LineThread::readUrl2(APP_DATA* appData)
   }
 
   // add a fake info for unknown
-  if (appData->p_addr_info)
+  if (appNode->p_addr_info)
   {
-    ADDR_INFO *p = (ADDR_INFO*)gArchive.reservDataBuf(sizeof(ADDR_INFO));
+    ADDR_INFO *p = (ADDR_INFO*)gArchive.Alloc(sizeof(ADDR_INFO));
     if (p)
     {
       p->addr = maxAddr + 1000;
       p->line = -1;
       p->src = "?";
       p->pPrev = NULL;
-      p->pPrev = appData->p_addr_info;
-      appData->p_addr_info = p;
+      p->pPrev = appNode->p_addr_info;
+      appNode->p_addr_info = p;
       total++;
     }
   }

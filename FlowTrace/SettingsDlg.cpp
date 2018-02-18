@@ -19,7 +19,7 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   m_edtMapOnWin.Attach(GetDlgItem(IDC_EDIT_MAP_ON_WIN));
   
   m_FontSize = gSettings.GetFontSize();
-  strncpy(m_FaceName, gSettings.GetFontName(), sizeof(m_FaceName) - 1);
+  strncpy_s(m_FaceName, _countof(m_FaceName), gSettings.GetFontName(), _countof(m_FaceName) - 1);
   m_FaceName[LF_FACESIZE - 1] = 0;
   m_lfWeight = gSettings.GetFontWeight();
   SetFontLabel();
@@ -38,7 +38,7 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
 void CSettingsDlg::SetFontLabel()
 {
   CString str;
-  str.Format(_T("Font: %s, %s%d point "), m_FaceName, m_lfWeight >= FW_SEMIBOLD  ? "Bold " : _T(""), m_FontSize);
+  str.Format(_T("Font: %s, %s%d point "), m_FaceName, m_lfWeight >= FW_SEMIBOLD  ? _T("Bold ") : _T(""), m_FontSize);
   m_lblFont.SetWindowText(str);
 }
 
@@ -52,8 +52,8 @@ LRESULT CSettingsDlg::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
   lf.lfHeight = -MulDiv(m_FontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
   ::ReleaseDC(0, hdc);
 
-  strncpy(lf.lfFaceName, m_FaceName, sizeof(lf.lfFaceName) - 1);
-  lf.lfFaceName[sizeof(lf.lfFaceName) - 1] = '\0';
+  _tcsncpy_s(lf.lfFaceName, _countof(lf.lfFaceName), m_FaceName, _countof(lf.lfFaceName) - 1);
+  lf.lfFaceName[sizeof(lf.lfFaceName) - 1] = 0;
   lf.lfWidth = lf.lfEscapement = lf.lfOrientation = 0;
   lf.lfItalic = lf.lfUnderline = lf.lfStrikeOut = 0;
   lf.lfWeight = (m_lfWeight >= FW_SEMIBOLD ? FW_BOLD : FW_NORMAL);
@@ -71,7 +71,7 @@ LRESULT CSettingsDlg::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
 
   if (ChooseFont(&cf)) {
     m_FontSize = cf.iPointSize / 10;
-    strncpy(m_FaceName, lf.lfFaceName, sizeof(m_FaceName) - 1);
+    _tcsncpy_s(m_FaceName, _countof(m_FaceName), lf.lfFaceName, _countof(m_FaceName) - 1);
     m_FaceName[LF_FACESIZE - 1] = 0;
     m_lfWeight = (lf.lfWeight >= FW_SEMIBOLD ? FW_BOLD : FW_NORMAL);
     SetFontLabel();

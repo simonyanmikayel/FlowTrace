@@ -124,7 +124,7 @@ bool CLogListView::HasSelection()
 
 LOG_NODE* CLogListView::GetSynkNode()
 {
-  LOG_NODE* pNode = listNodes->getNode(m_ListSelection.CurItem());
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(m_ListSelection.CurItem());
   if (pNode)
     pNode = pNode->getSyncNode();
   return pNode;
@@ -300,8 +300,8 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
 
   UpdateCaret();
 
-  static TCHAR pBuf[128];
-  _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.CurItem() + 1));
+  static CHAR pBuf[128];
+  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.CurItem() + 1));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
 }
 
@@ -358,7 +358,7 @@ void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
   LOG_NODE* pSyncNode = m_pView->selectedNode();
   for (DWORD i = 0; i < m_recCount; i++)
   {
-    if (listNodes->getNode(i)->isSynchronized(pSyncNode))
+    if (gArchive.getListedNodes()->getNode(i)->isSynchronized(pSyncNode))
     {
       ShowItem(i, scrollToMiddle, true);
       break;
@@ -371,7 +371,7 @@ void CLogListView::ShowNode(LOG_NODE* pNode, bool scrollToMiddle)
 {
   for (DWORD i = 0; i < m_recCount; i++)
   {
-    if (pNode == listNodes->getNode(i))
+    if (pNode == gArchive.getListedNodes()->getNode(i))
     {
       ShowItem(i, scrollToMiddle, true);
       break;
@@ -570,7 +570,7 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
 
 LRESULT CLogListView::OnKeyUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
-  //UINT nChar = (TCHAR)wParam;
+  //UINT nChar = (CHAR)wParam;
   bHandled = TRUE;
   return 0;
 }
@@ -621,7 +621,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
   int yPos = GET_Y_LPARAM(lParam);
 
   int iItem = getSelectionItem();
-  LOG_NODE* pNode = listNodes->getNode(iItem);
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 
   DWORD dwFlags;
   int cMenu = 0;
@@ -725,7 +725,7 @@ LRESULT CLogListView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 
 void CLogListView::ToggleBookmark(DWORD item)
 {
-  LOG_NODE* pNode = listNodes->getNode(item);
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(item);
   if (pNode)
   {
     pNode->bookmark = pNode->bookmark ? 0 : 1;
@@ -743,14 +743,14 @@ void CLogListView::OnBookmarks(WORD wID)
   case ID_BOOKMARKS_PREVIOUSBOOKMARK:
   {
     int bookmark = -1;
-    int count = (int)(listNodes->Count());
+    int count = (int)(gArchive.getListedNodes()->Count());
     if (m_curBookmark > count)
       m_curBookmark = count;
     if (ID_BOOKMARKS_NEXTBOOKMARK == wID)
     {
       for (int i = m_curBookmark + 1; i < count; i++)
       {
-        if (listNodes->getNode(i)->bookmark)
+        if (gArchive.getListedNodes()->getNode(i)->bookmark)
         {
           bookmark = i;
           break;
@@ -760,7 +760,7 @@ void CLogListView::OnBookmarks(WORD wID)
       {
         for (int i = 0; i < count; i++)
         {
-          if (listNodes->getNode(i)->bookmark)
+          if (gArchive.getListedNodes()->getNode(i)->bookmark)
           {
             bookmark = i;
             break;
@@ -772,7 +772,7 @@ void CLogListView::OnBookmarks(WORD wID)
     {
       for (int i = m_curBookmark - 1; i >= 0; i--)
       {
-        if (listNodes->getNode(i)->bookmark)
+        if (gArchive.getListedNodes()->getNode(i)->bookmark)
         {
           bookmark = i;
           break;
@@ -782,7 +782,7 @@ void CLogListView::OnBookmarks(WORD wID)
       {
         for (int i = count - 1; i >= 0; i--)
         {
-          if (listNodes->getNode(i)->bookmark)
+          if (gArchive.getListedNodes()->getNode(i)->bookmark)
           {
             bookmark = i;
             break;
@@ -800,11 +800,11 @@ void CLogListView::OnBookmarks(WORD wID)
   break;
   case ID_BOOKMARKS_CLEARBOOKMARKS:
   {
-    for (DWORD i = 0; i < listNodes->Count(); i++)
+    for (DWORD i = 0; i < gArchive.getListedNodes()->Count(); i++)
     {
-      listNodes->getNode(i)->bookmark = 0;
+      gArchive.getListedNodes()->getNode(i)->bookmark = 0;
     }
-    Redraw(0, listNodes->Count());
+    Redraw(0, gArchive.getListedNodes()->Count());
   }
   break;
   case ID_BOOKMARKS_TOGGLE:
@@ -943,7 +943,7 @@ void CLogListView::OnSize(UINT nType, CSize size)
 
 void CLogListView::RefreshList(bool redraw)
 {
-  DWORD newCount = listNodes->Count();
+  DWORD newCount = gArchive.getListedNodes()->Count();
   if (newCount)
   {
     if (newCount == m_recCount && (!redraw))
@@ -964,12 +964,12 @@ void CLogListView::RefreshList(bool redraw)
     Clear();
   }
 
-  static TCHAR pBuf[128];
-  _sntprintf(pBuf, sizeof(pBuf) - 1, TEXT("Listed: %s"), Helpers::str_format_int_grouped(m_recCount));
+  static CHAR pBuf[128];
+  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Listed: %s"), Helpers::str_format_int_grouped(m_recCount));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 1, (LPARAM)pBuf);
 }
 
-void CLogListView::AddColumn(TCHAR* szHeader, LIST_COL col)
+void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)
 {
   if (col == ICON_COL || col == LOG_COL)
   {
@@ -1044,15 +1044,15 @@ LRESULT CLogListView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*l
 
 void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 {
-  LOG_NODE* pNode = listNodes->getNode(iItem);
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
   if (!pNode)
   {
     ATLASSERT(0);
     return;
   }
-  if (pNode->data->lengthCalculated != m_lengthCalculated)
+  if (pNode->lengthCalculated != m_lengthCalculated)
   {
-    pNode->data->lengthCalculated = m_lengthCalculated;
+    pNode->lengthCalculated = m_lengthCalculated;
     //calculate lengths of all columns
     SetColumnLen(m_ColType[0], ICON_MAX * ICON_LEN);
     SIZE size;
@@ -1073,7 +1073,7 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 {
   LIST_COL col = getGolumn(iSubItem);
-  LOG_NODE* pNode = listNodes->getNode(iItem);
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
   if (!pNode)
   {
     ATLASSERT(0);
@@ -1100,8 +1100,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
     }
     if (pNode->isFlow())
     {
-      FLOW_DATA* pData = ((FLOW_NODE*)pNode)->getData();
-      if (pData->isEnter())
+      if (((FLOW_NODE*)pNode)->isEnter())
         ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_ENTER, hdc, x, y, ILD_NORMAL);
       else
         ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_EXIT, hdc, x, y, ILD_NORMAL);
@@ -1196,7 +1195,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   {
     if (pNode->isTrace())
     {
-      gSettings.SetConsoleColor(((TRACE_DATA*)pNode->data)->color, textColor, bkColor);
+      gSettings.SetConsoleColor(((TRACE_NODE*)pNode)->color, textColor, bkColor);
     }
 
 #define bSearched  1
@@ -1214,7 +1213,6 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
       BYTE curFlag = 0;
       if (curSearch && pNode->isInfo())
       {
-        INFO_DATA* pInfoData = (INFO_DATA*)(pNode->data);
         char* p = szText;
         if (pNode->hasSearchResult && searchInfo.total)
         {
@@ -1368,17 +1366,17 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 #endif
 }
 
-TCHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
+CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
   const int MAX_BUF_LEN = 2 * MAX_TRCAE_LEN - 10;
-  static TCHAR pBuf[MAX_BUF_LEN + 10];
+  static CHAR pBuf[MAX_BUF_LEN + 10];
   int c_Buf, c_Info;
   int& cb = cBuf ? *cBuf : c_Buf;
   int& ci = cInfo ? *cInfo : c_Info;
-  TCHAR* ret = pBuf;
+  CHAR* ret = pBuf;
   cb = 0;
   pBuf[0] = 0;
-  LOG_NODE* pNode = listNodes->getNode(iItem);
+  LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
   if (!pNode) 
   {
     //ATLASSERT(0); 
@@ -1400,7 +1398,7 @@ TCHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
     if (funcColFound && pNode->isFlow() && LOG_COL == m_ActualColType[i])
       break;
     int c;
-    TCHAR* p = pNode->getListText(&c, m_ActualColType[i], iItem);
+    CHAR* p = pNode->getListText(&c, m_ActualColType[i], iItem);
     if (c + cb >= MAX_BUF_LEN)
       c = MAX_BUF_LEN - cb;
     memcpy(pBuf + cb, p, c);

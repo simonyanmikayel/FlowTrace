@@ -6,13 +6,13 @@ struct SEARCH_INFO
   HWND hwndEdit;
   bool bMatchCase;
   bool bMatchWholeWord;
-  int cbText;
+  size_t cbText;
   int curLine, firstLine, lastLine, total, posInCur, cur;
-  char* find(TCHAR* p);
-  int calcCountIn(TCHAR* p);
+  char* find(CHAR* p);
+  int calcCountIn(CHAR* p);
   void ClearSearchResults() { curLine = firstLine = lastLine = total = posInCur = cur = 0; };
   void setSerachText(char* text) { m_strFind = text; cbText = m_strFind.GetLength(); }
-  //TCHAR* getSerachText() { return m_strFind.GetBuffer(); }
+  //CHAR* getSerachText() { return m_strFind.GetBuffer(); }
 private:
   CStringA  m_strFind;
 };

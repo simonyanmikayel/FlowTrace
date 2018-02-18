@@ -82,7 +82,7 @@ public:
   bool HasSelection();
   LOG_NODE* GetSynkNode();
   void CopySelection(bool onlyTraces = false);
-  TCHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
+  CHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
   void SelectAll();
   int getSelectionItem() { return m_ListSelection.CurItem(); }
   void Redraw(int nFirst, int nLast);
@@ -100,7 +100,7 @@ private:
   void SetColumnLen(LIST_COL col, int len);
   void MoveSelectionToEnd(bool extend);
   void ClearColumnInfo();
-  void AddColumn(TCHAR* szHeader, LIST_COL col);
+  void AddColumn(CHAR* szHeader, LIST_COL col);
   bool UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
   bool IsWordChar(char c) { return (0 != isalnum(c)) || c == '_'; }
   void ToggleBookmark(DWORD item);

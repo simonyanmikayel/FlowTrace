@@ -86,17 +86,16 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
     int line = 0;
     if (pNode->isTrace())
     {
-      TRACE_DATA* traceData = ((TRACE_NODE*)pNode)->getData();
-      line = traceData->call_line;
+      line = ((TRACE_NODE*)pNode)->call_line;
     }
     else if (pNode->p_call_addr)
     {
       line = pNode->p_call_addr->line;
     }
     if (line > 0)
-      cb = _snprintf(buf, cbBuf, "%d", line);
+      cb = _snprintf_s(buf, cbBuf, cbBuf, "%d", line);
     else
-      cb = _snprintf(buf, cbBuf, "?");
+      cb = _snprintf_s(buf, cbBuf, cbBuf, "?");
   }
   buf[cb] = 0;
   return cb;
@@ -104,15 +103,14 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
 
 void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode)
 {
-  for (; traceNodeIndex < listNodes->Count(); traceNodeIndex++)
+  for (; traceNodeIndex < gArchive.getListedNodes()->Count(); traceNodeIndex++)
   {
-    LOG_NODE* pListedNode = listNodes->getNode(traceNodeIndex);
+    LOG_NODE* pListedNode = gArchive.getListedNodes()->getNode(traceNodeIndex);
     if (pListedNode->isSynchronized(pSelectedNode))
     {
       if (pListedNode != pSelectedNode && pListedNode->isTrace() && pListedNode->parent == pSelectedNode)
       {
-        TRACE_DATA* traceData = ((TRACE_NODE*)pListedNode)->getData();
-        int line = traceData->call_line;
+        int line = ((TRACE_NODE*)pListedNode)->call_line;
         //if (!pFlowNode->p_call_addr)
         //  gArchive.resolveAddr(pFlowNode, false, false);
         if (line > 0 && pFlowNode->p_call_addr)
@@ -250,7 +248,7 @@ void CBackTraceCallView::CopySelection(bool all)
   Helpers::CopyToClipboard(m_hWnd, pBuf, cb);
 }
 
-void CBackTraceCallView::ItemPrePaint(int iItem, HDC hdc, RECT rc)
+void CBackTraceCallView::ItemPrePaint(DWORD iItem, HDC hdc, RECT rc)
 {
 }
 

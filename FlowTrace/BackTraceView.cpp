@@ -78,11 +78,11 @@ LRESULT CBackTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     case CDDS_PREPAINT:
       return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
     case CDDS_ITEMPREPAINT:
-      pCBackTraceCallView->ItemPrePaint(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      pCBackTraceCallView->ItemPrePaint((int)pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_NOTIFYSUBITEMDRAW;
     case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
     {                                    // response to CDDS_ITEMPREPAINT.
-      pCBackTraceCallView->DrawSubItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      pCBackTraceCallView->DrawSubItem((int)pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_SKIPDEFAULT;
     }
     break;

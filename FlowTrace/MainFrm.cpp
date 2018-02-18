@@ -122,16 +122,16 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
         oldEditProc = (WNDPROC)m_searchedit.SetWindowLongPtr(GWLP_WNDPROC, (LONG_PTR)subEditProc);
         searchInfo.hwndEdit = m_searchedit;
 
-        TCHAR* searchList = gSettings.GetSearchList();
-        char *p = strtok(searchList, "\n");
+        CHAR* searchList = gSettings.GetSearchList();
+        char *next_token = NULL;
+        char *p = strtok_s(searchList, "\n", &next_token);
         COMBOBOXEXITEM item = { 0 };
         item.mask = CBEIF_TEXT;
         while (p) {
             item.pszText = p;
             m_cb.InsertItem(&item);
             item.iItem++;
-
-            p = strtok(NULL, "\n");
+            p = strtok_s(NULL, "\n", &next_token);
         }
 
         //m_searchedit.SetCueBannerText(L"Search...");
@@ -179,10 +179,6 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
     StartLogging();
 
-    //CProgressDlg dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
-#ifdef _AUTO_TEST
-    CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
-#endif
     m_view.ShowStackView(!gSettings.GetInfoHiden());
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
     m_view.ShowStackView(!gSettings.GetInfoHiden());
@@ -190,9 +186,23 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     return 0;
 }
 
+LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+    //CProgressDlg dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
+#ifdef _AUTO_TEST
+    static bool autoDone = false;
+    if (!autoDone && wParam != WA_INACTIVE)
+    {
+        autoDone = true;
+        CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+    }
+#endif
+    return 0;
+}
+
 LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
-    StopLogging(true);
+    StopLogging(true, true);
     gSettings.SetVertSplitterPos(m_view.GetVertSplitterPosPct());
     gSettings.SetHorzSplitterPos(m_view.GetHorzSplitterPosPct());
     gSettings.SetStackSplitterPos(m_backTrace.GetStackSplitterPosPct());
@@ -217,7 +227,7 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 
 void CMainFrame::RefreshLog(bool showAll)
 {
-    listNodes->updateList(gSettings.GetFlowTracesHiden());
+    gArchive.getListedNodes()->updateList(gSettings.GetFlowTracesHiden());
     m_tree.RefreshTree(showAll);
     m_list.RefreshList(false);
 }
@@ -249,7 +259,7 @@ void CMainFrame::StartLogging()
     m_pServerThread->StartWork();
 }
 
-void CMainFrame::StopLogging(bool bClearArcive)
+void CMainFrame::StopLogging(bool bClearArcive, bool closing)
 {
     KillTimer(TIMER_DATA_REFRESH);
     if (m_pServerThread)
@@ -258,13 +268,12 @@ void CMainFrame::StopLogging(bool bClearArcive)
     m_pServerThread = NULL;
     if (bClearArcive)
     {
-        gArchive.clearArchive();
+        gArchive.clearArchive(closing);
     }
     else
     {
         RefreshLog(true);
     }
-
 }
 
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -364,7 +373,7 @@ LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 
 LRESULT CMainFrame::onShowMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-  TCHAR* buf = (TCHAR*)wParam;
+  CHAR* buf = (CHAR*)wParam;
   MessageBox(buf, TEXT("Flow Trace Error"), MB_OK | MB_ICONEXCLAMATION);
   delete buf;
   return true;
@@ -399,7 +408,7 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
         //m_searchedit.SetWindowText(_T(""));
         m_searchResult.SetWindowText(_T(""));
         searchInfo.ClearSearchResults();
-        listNodes->applyFilter(gSettings.GetFlowTracesHiden());
+        gArchive.getListedNodes()->applyFilter(gSettings.GetFlowTracesHiden());
         m_list.RefreshList(true);
     }
     return 0;
@@ -567,7 +576,7 @@ LRESULT CMainFrame::OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndC
 void CMainFrame::SearchRefresh(WORD wID)
 {
     //Update Serch
-    TCHAR szText[256];
+    CHAR szText[256];
     ::GetWindowText(searchInfo.hwndEdit, szText, sizeof(szText) / sizeof(szText[0]) - 1);
     szText[sizeof(szText) / sizeof(szText[0]) - 1] = 0;
     searchInfo.setSerachText(szText);
@@ -605,12 +614,12 @@ void CMainFrame::SearchRefresh(WORD wID)
 
 
         //do search
-        DWORD lineCount = listNodes->Count();
+        DWORD lineCount = gArchive.getListedNodes()->Count();
         int countInLast = 0;
         for (DWORD i = 0; i < lineCount; i++)
         {
-            LOG_NODE* pNode = listNodes->getNode(i);
-            TCHAR* p = m_list.getText(i);
+            LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
+            CHAR* p = m_list.getText(i);
             if (p[0])
             {
                 pNode->hasSearchResult = 0;
@@ -662,8 +671,8 @@ void CMainFrame::SearchNavigate(WORD wID)
                 for (int i = item - 1; i >= 0; i--)
                     //for (int i = searchInfo.curLine - 1; i >= 0; i--)
                 {
-                    LOG_NODE* pNode = listNodes->getNode(i);
-                    TCHAR* p = m_list.getText(i);
+                    LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
+                    CHAR* p = m_list.getText(i);
                     if (p[0])
                     {
                         if (pNode->hasSearchResult)
@@ -681,7 +690,7 @@ void CMainFrame::SearchNavigate(WORD wID)
         }
         else if (wID == ID_SEARCH_NEXT)
         {
-            TCHAR* p = m_list.getText(searchInfo.curLine);
+            CHAR* p = m_list.getText(searchInfo.curLine);
             int curCount = searchInfo.calcCountIn(p);
             if (item == searchInfo.curLine && searchInfo.posInCur < curCount - 1)
             {
@@ -694,10 +703,9 @@ void CMainFrame::SearchNavigate(WORD wID)
                 for (int i = item + 1; i <= searchInfo.lastLine; i++)
                     //for (int i = searchInfo.curLine + 1; i <= searchInfo.lastLine; i++)
                 {
-                    LOG_NODE* pNode = listNodes->getNode(i);
+                    LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
                     if (pNode->isInfo())
                     {
-                        INFO_DATA* pLogData = (INFO_DATA*)pNode->data;
                         if (pNode->hasSearchResult)
                         {
                             searchInfo.curLine = i;
@@ -721,7 +729,7 @@ void CMainFrame::SearchNavigate(WORD wID)
         {
             searchInfo.curLine = searchInfo.lastLine;
             searchInfo.cur = searchInfo.total - 1;
-            TCHAR* p = m_list.getText(searchInfo.lastLine);
+            CHAR* p = m_list.getText(searchInfo.lastLine);
             int curCount = searchInfo.calcCountIn(p);
             searchInfo.posInCur = curCount - 1;
         }
@@ -740,14 +748,14 @@ void CMainFrame::SearchNavigate(WORD wID)
 
             if (p)
             {
-              m_list.MoveSelectionEx(searchInfo.curLine, (p - log) + searchInfo.cbText, false);
-              m_list.EnsureTextVisible(searchInfo.curLine, p - log, p - log + searchInfo.cbText);
+              m_list.MoveSelectionEx(searchInfo.curLine, int((p - log) + searchInfo.cbText), false);
+              m_list.EnsureTextVisible(searchInfo.curLine, int(p - log), int(p - log + searchInfo.cbText));
             }
         }
     }
 
-    TCHAR szText[32];
-    _stprintf_s(szText, _T("%d of %d"), searchInfo.total ? searchInfo.cur + 1 : 0, searchInfo.total);
+    CHAR szText[32];
+    _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? searchInfo.cur + 1 : 0, searchInfo.total);
     m_searchResult.SetWindowText(szText);
 
     m_list.Redraw(-1, -1);

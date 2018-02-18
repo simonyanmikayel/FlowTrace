@@ -174,7 +174,7 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
       return CDRF_NOTIFYSUBITEMDRAW;
     case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
     {                                    // response to CDDS_ITEMPREPAINT.
-      m_wndTreeView.DrawSubItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      m_wndTreeView.DrawSubItem((int)(pNMLVCD->nmcd.dwItemSpec), pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_SKIPDEFAULT;
     }
     break;
@@ -189,11 +189,11 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
     case CDDS_PREPAINT:
       return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
     case CDDS_ITEMPREPAINT:
-      m_wndListView.ItemPrePaint(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      m_wndListView.ItemPrePaint((int)(pNMLVCD->nmcd.dwItemSpec), pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_NOTIFYSUBITEMDRAW;
     case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
     {                                    // response to CDDS_ITEMPREPAINT.
-      m_wndListView.DrawSubItem(pNMLVCD->nmcd.dwItemSpec, pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
+      m_wndListView.DrawSubItem((int)(pNMLVCD->nmcd.dwItemSpec), pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
       return CDRF_SKIPDEFAULT;
     }
     break;
@@ -227,8 +227,8 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
       int line = 0;
       if (pSelectedNode->isTrace())
       {
-        TRACE_DATA* pData = ((TRACE_NODE*)(pSelectedNode))->getData();
-        line = (bShowCallSite && pData->call_line != 0) ? pData->call_line : p_addr_info->line;
+        TRACE_NODE* pNode = (TRACE_NODE*)pSelectedNode;
+        line = (bShowCallSite && pNode->call_line != 0) ? pNode->call_line : p_addr_info->line;
       }
       else
       {
@@ -237,7 +237,7 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
       char* szLinuxHome = gSettings.GetLinuxHome();
       if (strstr(src, szLinuxHome))
         src = strstr(src, szLinuxHome) + strlen(szLinuxHome);
-      _sntprintf(cmd, max_cmd, " -name Eclipse --launcher.openFile %s%s:%d", gSettings.GetMapOnWin(), src, line);
+      _sntprintf_s(cmd, max_cmd, max_cmd, " -name Eclipse --launcher.openFile %s%s:%d", gSettings.GetMapOnWin(), src, line);
       CreateProcess(gSettings.GetEclipsePath(), cmd, NULL, NULL, FALSE,
         NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
       CloseHandle(pi.hProcess);
@@ -279,7 +279,7 @@ void CFlowTraceView::SyncViews()
   {
     int iItem = m_wndListView.getSelectionItem();
     fromList = true;
-    pNode = listNodes->getNode(iItem);
+    pNode = gArchive.getListedNodes()->getNode(iItem);
   }
   else if (hwnd == m_wndBackTraceView.m_wndCallFuncView)
   {

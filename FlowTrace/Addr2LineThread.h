@@ -15,7 +15,7 @@ public:
 private:
   void _Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop);
   bool connectToServer(char *szServerName, WORD portNum);
-  DWORD readUrl2(APP_DATA* appData);
+  DWORD readUrl2(APP_NODE* appNode);
   void CloseSocket();
   SOCKET conn;
   LOG_NODE* m_pNode;
