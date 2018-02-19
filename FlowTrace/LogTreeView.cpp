@@ -61,6 +61,7 @@ void CLogTreeView::Clear()
   m_colWidth = min_colWidth;
   SetColumnWidth(0, m_colWidth);
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 0, (LPARAM)"");
+  ::SendMessage(hWndStatusBar, SB_SETTEXT, 1, (LPARAM)"");
 }
 
 LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
@@ -246,6 +247,9 @@ void CLogTreeView::RefreshTree(bool showAll)
   static CHAR pBuf[128];
   _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_recCount));
   ::SendMessage(hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
+  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Mem: %s"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory())));
+  ::SendMessage(hWndStatusBar, SB_SETTEXT, 1, (LPARAM)pBuf);
+  
 }
 
 LOG_NODE* CLogTreeView::getTreeNode(int iItem, int* pOffset)

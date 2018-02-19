@@ -177,7 +177,7 @@ namespace Helpers
     return 0;
   }
 
-  CHAR* str_format_int_grouped(int num)
+  CHAR* str_format_int_grouped(__int64 num)
   {
     static CHAR dst[16];
     CHAR src[16];
@@ -187,7 +187,7 @@ namespace Helpers
     const char separator = ',';
     int num_len, commas;
 
-    num_len = sprintf_s(src, _countof(src), "%d", num);
+    num_len = sprintf_s(src, _countof(src), "%lld", num);
 
     if (*p_src == '-') {
       *p_dst++ = *p_src++;

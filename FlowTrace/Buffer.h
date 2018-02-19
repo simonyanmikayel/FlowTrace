@@ -1,27 +1,99 @@
 #pragma once
 
-#ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#ifdef _STATIC_MEM_BUF
+    #define MEM_BUF StaticMemBuf
+#else
+    #define MEM_BUF DunamicMemBuf
 #endif
 
-#ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
-#endif
 
-struct MemBuf
+inline void* AllocBuf(size_t size, size_t minSize)
 {
-    MemBuf(unsigned _int64 maxBufSize = (128LL * 1024 * 1024 * 1024), unsigned long allocSize = 128 * 1024 * 1024) :
-        m_allocSize(allocSize)
+    minSize = min(size, minSize);
+    size_t allocSize = size;
+    void * buf = nullptr;
+    while (allocSize >= minSize)
     {
+#if defined(_FILE_MAP_MEM_BUF) && defined(_STATIC_MEM_BUF)
+        LARGE_INTEGER li;
+        li.QuadPart = allocSize;
+        buf = nullptr;
+        HANDLE hMap;
+        if (NULL == (hMap = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, li.HighPart, li.LowPart, NULL))
+            || NULL == (buf = (char*)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))
+        {
+            if (hMap)
+                CloseHandle(hMap);
+        }
+#else
+        buf = malloc(allocSize);
+#endif
+        if (buf == nullptr)
+            allocSize = (allocSize / 5) * 4 + 1;
+        else
+            break;
+    }
+    size = buf ? allocSize : 0;
+    return buf;
+}
+
+
+
+
+class StaticMemBuf
+{
+public:
+    StaticMemBuf(size_t maxBufSize)
+    {
+        ZeroMemory(this, sizeof(*this));
+        if (!m_Initialized)
+        {
+            m_Initialized = true;
+            InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
+            m_bufSize = maxBufSize;
+            m_buf = (char*)AllocBuf(m_bufSize, 512 * 1024 * 1024);
+        }
+    }
+
+    void * Alloc(size_t size)
+    {
+        char* buf = nullptr;
+        EnterCriticalSection(&m_cs);
+        if (m_buf && m_curPos + size < m_bufSize)
+        {
+            buf = m_buf + m_curPos;
+            m_curPos += size;
+        }
+        LeaveCriticalSection(&m_cs);
+        return buf;
+    }
+
+    size_t UsedMemory() { return m_curPos; }
+
+private:
+    size_t m_curPos;
+    static bool m_Initialized;
+    static CRITICAL_SECTION m_cs;
+    static size_t m_bufSize;
+    static char* m_buf;
+};
+
+class DunamicMemBuf
+{
+public:
+    DunamicMemBuf(size_t maxBufSize)
+    {
+        ZeroMemory(this, sizeof(*this));
+        m_allocSize = 128 * 1024 * 1024;
         InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
-        unsigned long chankCount = (unsigned long)(maxBufSize / m_allocSize);
+        size_t chankCount = min(1, (unsigned long)(maxBufSize / m_allocSize));
         m_MemBufChank = chankCount ? (MemBufChank*)calloc(chankCount, sizeof(MemBufChank)) : nullptr;
         m_chankCount = m_MemBufChank ? chankCount : 0;
         m_chankEnd = m_MemBufChank ? (m_MemBufChank + m_chankCount) : nullptr;
         m_curChank = m_MemBufChank;
     }
 
-    ~MemBuf()
+    ~DunamicMemBuf()
     {
         MemBufChank * chank = m_MemBufChank;
         DWORD chanckCount = 0;
@@ -34,23 +106,7 @@ struct MemBuf
         DeleteCriticalSection(&m_cs);
     }
 
-    static void* AllocBuf(unsigned long& size, unsigned long minSize)
-    {
-        minSize = min(size, minSize);
-        unsigned long allocSize = size;
-        void * buf = nullptr;
-        while (allocSize >= minSize)
-        {
-            buf = malloc(allocSize);
-            if (buf == nullptr)
-                allocSize = (allocSize / 5) * 4 + 1;
-            else
-                break;
-        }
-        size = buf ? allocSize : 0;
-        return buf;
-    }
-    void * Alloc(unsigned long size)
+    void * Alloc(size_t size)
     {
         void * buf = nullptr;
         EnterCriticalSection(&m_cs);
@@ -63,21 +119,26 @@ struct MemBuf
                 if (m_curChank < m_chankEnd)
                 {
                     buf = _Alloc(size);
+                    if(buf)
+                        m_usedMem += size;
                 }
             }
         }
         LeaveCriticalSection(&m_cs);
         return buf;
     }
+
+    size_t UsedMemory() { return m_usedMem; }
+
 private:
-    void * _Alloc(unsigned long size)
+    void * _Alloc(size_t size)
     {
         if (m_curChank == m_chankEnd)
             return nullptr;
 
         if (m_curChank->buf == nullptr)
         {
-            unsigned long allocSize = max(m_allocSize, size);
+            size_t allocSize = max(m_allocSize, size);
             if (m_curChank->buf = AllocBuf(allocSize, size))
             {
                 m_curChank->size = allocSize;
@@ -102,21 +163,23 @@ private:
     struct MemBufChank
     {
         void * buf;
-        unsigned long size;
-        unsigned long used;
+        size_t size;
+        size_t used;
     };
 
     CRITICAL_SECTION m_cs;
     MemBufChank * m_MemBufChank;
     MemBufChank * m_chankEnd;
     MemBufChank * m_curChank;
-    unsigned long m_chankCount;
-    unsigned long m_allocSize;
+    size_t m_chankCount;
+    size_t m_allocSize;
+    size_t m_usedMem;
 };
 
-struct PtrArray
+class PtrArray
 {
-    PtrArray(MemBuf* pMemBuf, unsigned long maxCount) :
+public:
+    PtrArray(MEM_BUF* pMemBuf, unsigned long maxCount) :
         m_pMemBuf(pMemBuf)
         , m_maxCount(maxCount)
         , m_Count(0)
@@ -154,7 +217,7 @@ struct PtrArray
     bool Full() { return !m_Array || m_Count == m_maxCount; }
 
 private:
-    MemBuf* m_pMemBuf;
+    MEM_BUF * m_pMemBuf;
     unsigned long m_Count;
     unsigned long m_maxCount;
     void ** m_Array;

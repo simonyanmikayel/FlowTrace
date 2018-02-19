@@ -160,8 +160,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
     CreateSimpleStatusBar();
     hWndStatusBar = m_hWndStatusBar;
-    int status_parts[] = { 200, 400, -1 };
-    ::SendMessage(m_hWndStatusBar, SB_SETPARTS, sizeof(status_parts) / sizeof(status_parts[0]), (LPARAM)&status_parts);
+    int status_parts[] = { 200, 400, 600, -1 };
+    ::SendMessage(m_hWndStatusBar, SB_SETPARTS, _countof(status_parts), (LPARAM)&status_parts);
 
     m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE);
 

@@ -6,11 +6,17 @@
 
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
+CRITICAL_SECTION StaticMemBuf::m_cs;
+char* StaticMemBuf::m_buf = nullptr;
+bool StaticMemBuf::m_Initialized = false;
+size_t StaticMemBuf::m_bufSize;
 
 #ifdef _WIN64
-const unsigned long MAX_LOG_COUNT = 12800000;
+const size_t MAX_LOG_COUNT = 64LL * 1024 * 1024;
+const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
 #else
-const unsigned long MAX_LOG_COUNT = 12800000;
+const size_t MAX_LOG_COUNT = 12LL * 1024 * 1024;
+const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 #endif
 
 Archive::Archive()
@@ -48,12 +54,12 @@ void Archive::clearArchive(bool closing)
     {
         delete m_pMemBuf;
         m_pMemBuf = nullptr;
-        m_pMemBuf = new MemBuf();
+        m_pMemBuf = new MEM_BUF(MAX_BUF_SIZE);
         m_listedNodes = new ListedNodes(m_pMemBuf, MAX_LOG_COUNT);
         m_pNodes = new PtrArray(m_pMemBuf, MAX_LOG_COUNT);
         m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
         m_rootNode->data_type = ROOT_DATA_TYPE;
-
+        ATLASSERT(m_pNodes && m_rootNode);
         m_pAddr2LineThread = new Addr2LineThread();
         m_pAddr2LineThread->StartWork();
     }

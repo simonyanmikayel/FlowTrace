@@ -294,9 +294,9 @@ void TaskThread::FileImport()
     if (m_isAuto)
     {
 #ifdef _WIN64
-        m_count = 128;// 128000000;
+        m_count = 128000000;// 16LL * 1024 * 1024;// 128000000;
 #else
-        m_count = 128;// 12800000;
+        m_count = 128000000;// 16LL * 1024 * 1024;// 12800000;
 #endif
         int cRecursion = 30;//10
         int ii = 0;
@@ -319,7 +319,7 @@ void TaskThread::FileImport()
         rec3->len = rec3->size();
         ss = ss && rec1->isValid();
         ss = ss && rec2->isValid();
-        for (DWORD j = 0; ss && j < m_count; j++)
+        for (DWORD j = 0; ss && j < m_count && IsWorking(); j++)
         {
             m_progress = j;
             for (int i = 0; i < cRecursion; i++)

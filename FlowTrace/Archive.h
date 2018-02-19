@@ -81,6 +81,7 @@ public:
     ROOT_NODE* getRootNode() { return m_rootNode; }
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
+    size_t UsedMemory() { return m_pMemBuf->UsedMemory(); }
 
 private:
     inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);
@@ -97,15 +98,16 @@ private:
     ListedNodes* m_listedNodes;
     ROOT_NODE* m_rootNode;
     Addr2LineThread* m_pAddr2LineThread;
-    MemBuf* m_pMemBuf;
+    MEM_BUF* m_pMemBuf;
     PtrArray* m_pNodes;
 };
 
 struct ListedNodes
 {
-    ListedNodes(MemBuf* pMemBuf, unsigned long maxCount) {
+    ListedNodes(MEM_BUF* pMemBuf, unsigned long maxCount) {
         m_maxCount = maxCount;
         m_pNodes = (LOG_NODE**)pMemBuf->Alloc(maxCount * sizeof(LOG_NODE**));
+        ATLASSERT(m_pNodes);
         init();
     }
     LOG_NODE* getNode(DWORD i) {

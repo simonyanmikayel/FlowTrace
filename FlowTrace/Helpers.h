@@ -16,7 +16,7 @@ namespace Helpers
   void SysErrMessageBox(CHAR* lpFormat, ...);
   void ErrMessageBox(CHAR* lpFormat, ...);
   CHAR* find_str(const CHAR *phaystack, const CHAR *pneedle, int bMatchCase);  
-  CHAR* str_format_int_grouped(int num);
+  CHAR* str_format_int_grouped(__int64 num);
   void GetTime(DWORD &sec, DWORD& msec);
   void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 };

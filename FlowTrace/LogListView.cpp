@@ -302,7 +302,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
 
   static CHAR pBuf[128];
   _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.CurItem() + 1));
-  ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
+  ::SendMessage(hWndStatusBar, SB_SETTEXT, 3, (LPARAM)pBuf);
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -916,6 +916,8 @@ void CLogListView::Clear()
     m_ListSelection.Clear();
     ::SetFocus(hwndMain); //force carret destroy
     SetColumns();
+    ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)"");
+    ::SendMessage(hWndStatusBar, SB_SETTEXT, 3, (LPARAM)"");
   }
 }
 
@@ -966,7 +968,7 @@ void CLogListView::RefreshList(bool redraw)
 
   static CHAR pBuf[128];
   _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Listed: %s"), Helpers::str_format_int_grouped(m_recCount));
-  ::SendMessage(hWndStatusBar, SB_SETTEXT, 1, (LPARAM)pBuf);
+  ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
 }
 
 void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)
