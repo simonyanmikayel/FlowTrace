@@ -86,7 +86,7 @@ public:
         ZeroMemory(this, sizeof(*this));
         m_allocSize = 128 * 1024 * 1024;
         InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
-        size_t chankCount = min(1, (unsigned long)(maxBufSize / m_allocSize));
+        size_t chankCount = max(1, (unsigned long)(maxBufSize / m_allocSize));
         m_MemBufChank = chankCount ? (MemBufChank*)calloc(chankCount, sizeof(MemBufChank)) : nullptr;
         m_chankCount = m_MemBufChank ? chankCount : 0;
         m_chankEnd = m_MemBufChank ? (m_MemBufChank + m_chankCount) : nullptr;
