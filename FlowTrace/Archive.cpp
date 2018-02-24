@@ -6,22 +6,12 @@
 
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
-CRITICAL_SECTION StaticMemBuf::m_cs;
-char* StaticMemBuf::m_buf = nullptr;
-bool StaticMemBuf::m_Initialized = false;
-size_t StaticMemBuf::m_bufSize;
-
-#ifdef _WIN64
-const size_t MAX_LOG_COUNT = 64LL * 1024 * 1024;
-const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
-#else
-const size_t MAX_LOG_COUNT = 12LL * 1024 * 1024;
-const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
-#endif
 
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
+    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 256 * 1024 * 1024);
+    m_listedNodes = new ListedNodes();
     clearArchive();
 }
 
@@ -45,24 +35,25 @@ void Archive::clearArchive(bool closing)
     curProc = 0;
     gArchive.getSNAPSHOT().clear();
 
-    delete m_listedNodes;
-    m_listedNodes = nullptr;
     delete m_pNodes;
     m_pNodes = nullptr;
     m_rootNode = nullptr;
+    m_pTraceBuf->Free();
+    m_listedNodes->Free();
     if (!closing)
     {
-        delete m_pMemBuf;
-        m_pMemBuf = nullptr;
-        m_pMemBuf = new MEM_BUF(MAX_BUF_SIZE);
-        m_listedNodes = new ListedNodes(m_pMemBuf, MAX_LOG_COUNT);
-        m_pNodes = new PtrArray(m_pMemBuf, MAX_LOG_COUNT);
+        m_pNodes = new PtrArray<LOG_NODE>(m_pTraceBuf);
         m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
         m_rootNode->data_type = ROOT_DATA_TYPE;
         ATLASSERT(m_pNodes && m_rootNode);
         m_pAddr2LineThread = new Addr2LineThread();
         m_pAddr2LineThread->StartWork();
     }
+}
+
+size_t Archive::UsedMemory() 
+{
+    return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); 
 }
 
 void Archive::resolveAddr(LOG_NODE* pSelectedNode, bool loop)
@@ -554,8 +545,8 @@ void ListedNodes::updateList(BOOL flowTraceHiden)
 
 void ListedNodes::applyFilter(BOOL flowTraceHiden)
 {
-    init();
     archiveCount = gArchive.getCount();
+    Free();
     //stdlog("%u\n", GetTickCount());
     for (DWORD i = 0; i < archiveCount; i++)
     {

@@ -3,6 +3,7 @@
 #include "Helpers.h"
 #include "Archive.h"
 #include "Settings.h"
+#include "MainFrm.h"
 
 #pragma warning( push )
 #pragma warning(disable:4477) //string '%d' requires an argument of type 'int *', but variadic argument 2 has type 'char *'
@@ -30,7 +31,7 @@ LRESULT CProgressDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
     if (m_cmd == ID_FILE_IMPORT)
         ::SendMessage(hwndMain, WM_INPORT_TASK, 0, 0);
     m_pTaskThread->StartWork(NULL);
-    SetTimer(1, 500);
+    SetTimer(1, 2000);
 
     m_ctrlInfo.Attach(GetDlgItem(IDC_STATIC_INFO));
     m_ctrlProgress.Attach(GetDlgItem(IDC_PROGRESS));
@@ -55,6 +56,7 @@ LRESULT CProgressDlg::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, B
             {
                 double progress = 100.0 * (cur / total);
                 m_ctrlProgress.SetPos((int)progress);
+                gMainFrame->UpdateStatusBar();
             }
 
         }
@@ -293,10 +295,10 @@ void TaskThread::FileImport()
 
     if (m_isAuto)
     {
-#ifdef _WIN64
-        m_count = 128000000;// 16LL * 1024 * 1024;// 128000000;
+#ifdef _BUILD_X64 
+        m_count = 12800;// 16LL * 1024 * 1024;// 128000000;
 #else
-        m_count = 128000000;// 16LL * 1024 * 1024;// 12800000;
+        m_count = 128000;// 16LL * 1024 * 1024;// 12800000;
 #endif
         int cRecursion = 30;//10
         int ii = 0;
@@ -340,6 +342,7 @@ void TaskThread::FileImport()
         m_count = ftell(m_fp);
         fseek(m_fp, 0, SEEK_SET);
         bool ss = true;
+        bool appended = true;
         while (ss && IsWorking())
         {
             count++;
@@ -361,7 +364,11 @@ void TaskThread::FileImport()
                 }
                 rec->data[rec->cbData()] = 0;
             }
-            ss = ss && gArchive.append(rec, pc_sec, pc_msec);
+
+            ss = ss && rec->isValid();
+            if (ss)
+                appended = gArchive.append(rec, pc_sec, pc_msec);
+            ss = ss && appended;
             if (feof(m_fp))
             {
                 ss = true;
@@ -371,7 +378,10 @@ void TaskThread::FileImport()
         }
         if (!ss)
         {
-            Helpers::ErrMessageBox(TEXT("Record line %d corupted"), count);
+            if (!appended)
+                Helpers::ErrMessageBox(TEXT("Not enought memory to uppent record %d"), count);
+            else
+                Helpers::ErrMessageBox(TEXT("Record line %d corupted"), count);
         }
     }
 }

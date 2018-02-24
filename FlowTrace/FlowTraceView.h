@@ -9,8 +9,6 @@
 #include "LogTreeView.h"
 #include "BackTraceView.h"
 
-extern HWND hWndStatusBar;
-
 class CFlowTraceView : public CWindowImpl<CFlowTraceView>
 {
 public:

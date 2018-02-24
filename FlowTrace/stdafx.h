@@ -150,6 +150,4 @@ typedef std::string tstring;
 #pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
-//#define _FILE_MAP_MEM_BUF
-#define _STATIC_MEM_BUF
-//#define _AUTO_TEST
+#define _AUTO_TEST

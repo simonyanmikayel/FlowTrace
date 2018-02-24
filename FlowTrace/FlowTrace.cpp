@@ -11,6 +11,7 @@
 #include "Helpers.h"
 
 CAppModule _Module;
+CMainFrame* gMainFrame;
 
 int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
@@ -18,18 +19,18 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	_Module.AddMessageLoop(&theLoop);
 
 
-  CMainFrame* wndMain = new CMainFrame;
+    gMainFrame = new CMainFrame;
 
-	if(wndMain->CreateEx() == NULL)
+	if(gMainFrame->CreateEx() == NULL)
 	{
 		ATLTRACE(_T("Main window creation failed!\n"));
 		return 0;
 	}
-	wndMain->ShowWindow(nCmdShow);
+    gMainFrame->ShowWindow(nCmdShow);
 
 	int nRet = theLoop.Run();
 
-  delete wndMain;
+  delete gMainFrame;
 
 	_Module.RemoveMessageLoop();
 	return nRet;

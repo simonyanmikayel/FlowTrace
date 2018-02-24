@@ -18,7 +18,6 @@
 #include "SnapshotsDlg.h"
 
 HWND       hwndMain;
-HWND hWndStatusBar;
 WNDPROC oldEditProc;
 LRESULT CALLBACK subEditProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -159,10 +158,10 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     SizeSimpleReBarBands();
 
     CreateSimpleStatusBar();
-    hWndStatusBar = m_hWndStatusBar;
+#ifdef _STATUS_BAR_PARTS    
     int status_parts[] = { 200, 400, 600, -1 };
     ::SendMessage(m_hWndStatusBar, SB_SETPARTS, _countof(status_parts), (LPARAM)&status_parts);
-
+#endif
     m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE);
 
     UIAddToolBar(hWndToolBar);
@@ -759,4 +758,27 @@ void CMainFrame::SearchNavigate(WORD wID)
     m_searchResult.SetWindowText(szText);
 
     m_list.Redraw(-1, -1);
+}
+
+void CMainFrame::UpdateStatusBar()
+{
+    static CHAR pBuf[1024];
+
+#ifdef _STATUS_BAR_PARTS    
+    _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_tree.GetRecCount()));
+    ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
+    _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Mem: %s"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory())));
+    ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 1, (LPARAM)pBuf);
+    _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
+    ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
+    _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));
+    ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 3, (LPARAM)pBuf);
+#else
+    int cb = 0;
+    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
+    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %s"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory())));
+    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
+    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Line: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));
+    ::PostMessage(m_hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
+#endif
 }

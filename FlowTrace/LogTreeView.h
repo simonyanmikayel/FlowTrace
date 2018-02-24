@@ -47,6 +47,7 @@ public:
   void CopySelection();
   int ItemByPos(int yPos);
   void SetSelectedNode(LOG_NODE* pNode);
+  DWORD GetRecCount() { return m_recCount; }
 
   int m_colWidth, m_rowHeight;
   bool m_Initialised;

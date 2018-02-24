@@ -4,9 +4,11 @@
 
 #pragma once
 
+#include "Helpers.h"
 #include "LogListView.h"
 #include "LogTreeView.h"
-#include "Helpers.h"
+#include "BackTraceView.h"
+#include "FlowTraceView.h"
 
 #define	TIMER_DATA_REFRESH 43
 #define	TIMER_DATA_REFRESH_INTERVAL	500
@@ -22,7 +24,7 @@ public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
   CMainFrame();
-	CFlowTraceView m_view;
+  CFlowTraceView m_view;
   CLogListView& m_list;
   CLogTreeView& m_tree;
   CBackTraceView& m_backTrace;
@@ -146,6 +148,7 @@ public:
 
 
   HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }
+  void UpdateStatusBar();
 private:
   ServerThread*  m_pServerThread;
 
@@ -164,4 +167,6 @@ private:
   void RefreshLog(bool showAll);
 
 };
+
+extern CMainFrame* gMainFrame;
 

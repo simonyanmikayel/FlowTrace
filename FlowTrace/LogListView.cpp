@@ -4,6 +4,7 @@
 #include "FlowTraceView.h"
 #include "Settings.h"
 #include "SearchInfo.h"
+#include "MainFrm.h"
 
 static const int TEXT_MARGIN = 8;
 enum ICON_TYPE { ICON_BOOKMARK, ICON_MAX };//ICON_SYNC, ICON_BACK_TRACE, 
@@ -300,9 +301,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
 
   UpdateCaret();
 
-  static CHAR pBuf[128];
-  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Ln: %s"), Helpers::str_format_int_grouped(m_ListSelection.CurItem() + 1));
-  ::SendMessage(hWndStatusBar, SB_SETTEXT, 3, (LPARAM)pBuf);
+  gMainFrame->UpdateStatusBar();
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -916,8 +915,7 @@ void CLogListView::Clear()
     m_ListSelection.Clear();
     ::SetFocus(hwndMain); //force carret destroy
     SetColumns();
-    ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)"");
-    ::SendMessage(hWndStatusBar, SB_SETTEXT, 3, (LPARAM)"");
+    gMainFrame->UpdateStatusBar();
   }
 }
 
@@ -966,9 +964,7 @@ void CLogListView::RefreshList(bool redraw)
     Clear();
   }
 
-  static CHAR pBuf[128];
-  _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Listed: %s"), Helpers::str_format_int_grouped(m_recCount));
-  ::SendMessage(hWndStatusBar, SB_SETTEXT, 2, (LPARAM)pBuf);
+  gMainFrame->UpdateStatusBar();
 }
 
 void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)

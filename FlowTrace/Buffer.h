@@ -1,33 +1,14 @@
 #pragma once
 
-#ifdef _STATIC_MEM_BUF
-    #define MEM_BUF StaticMemBuf
-#else
-    #define MEM_BUF DunamicMemBuf
-#endif
 
-
-inline void* AllocBuf(size_t size, size_t minSize)
+inline void* Malloc(size_t size, size_t minSize)
 {
     minSize = min(size, minSize);
     size_t allocSize = size;
     void * buf = nullptr;
     while (allocSize >= minSize)
     {
-#if defined(_FILE_MAP_MEM_BUF) && defined(_STATIC_MEM_BUF)
-        LARGE_INTEGER li;
-        li.QuadPart = allocSize;
-        buf = nullptr;
-        HANDLE hMap;
-        if (NULL == (hMap = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, li.HighPart, li.LowPart, NULL))
-            || NULL == (buf = (char*)MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, 0)))
-        {
-            if (hMap)
-                CloseHandle(hMap);
-        }
-#else
         buf = malloc(allocSize);
-#endif
         if (buf == nullptr)
             allocSize = (allocSize / 5) * 4 + 1;
         else
@@ -37,76 +18,60 @@ inline void* AllocBuf(size_t size, size_t minSize)
     return buf;
 }
 
-
-
-
-class StaticMemBuf
+class MemBuf
 {
 public:
-    StaticMemBuf(size_t maxBufSize)
+    MemBuf(DWORD64 maxBufSize, DWORD allocSize)
     {
         ZeroMemory(this, sizeof(*this));
-        if (!m_Initialized)
-        {
-            m_Initialized = true;
-            InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
-            m_bufSize = maxBufSize;
-            m_buf = (char*)AllocBuf(m_bufSize, 512 * 1024 * 1024);
-        }
-    }
-
-    void * Alloc(size_t size)
-    {
-        char* buf = nullptr;
-        EnterCriticalSection(&m_cs);
-        if (m_buf && m_curPos + size < m_bufSize)
-        {
-            buf = m_buf + m_curPos;
-            m_curPos += size;
-        }
-        LeaveCriticalSection(&m_cs);
-        return buf;
-    }
-
-    size_t UsedMemory() { return m_curPos; }
-
-private:
-    size_t m_curPos;
-    static bool m_Initialized;
-    static CRITICAL_SECTION m_cs;
-    static size_t m_bufSize;
-    static char* m_buf;
-};
-
-class DunamicMemBuf
-{
-public:
-    DunamicMemBuf(size_t maxBufSize)
-    {
-        ZeroMemory(this, sizeof(*this));
-        m_allocSize = 128 * 1024 * 1024;
+        m_allocSize = allocSize;
         InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
-        size_t chankCount = max(1, (unsigned long)(maxBufSize / m_allocSize));
+        size_t chankCount = (unsigned long)(maxBufSize / m_allocSize) + 1;
         m_MemBufChank = chankCount ? (MemBufChank*)calloc(chankCount, sizeof(MemBufChank)) : nullptr;
         m_chankCount = m_MemBufChank ? chankCount : 0;
         m_chankEnd = m_MemBufChank ? (m_MemBufChank + m_chankCount) : nullptr;
         m_curChank = m_MemBufChank;
+        _Alloc(m_allocSize); //alloc firest chank. this will be freeed only by destructor
     }
 
-    ~DunamicMemBuf()
+    ~MemBuf()
     {
-        MemBufChank * chank = m_MemBufChank;
-        DWORD chanckCount = 0;
-        while (chank <= m_curChank && chank < m_chankEnd)
+        if (m_MemBufChank)
         {
-            free(chank->buf);
-            chank++;
-            chanckCount++;
+            Free();
+            free(m_MemBufChank->buf);
         }
         DeleteCriticalSection(&m_cs);
     }
 
-    void * Alloc(size_t size)
+    void Free()
+    {
+        if (m_MemBufChank)
+        {
+            EnterCriticalSection(&m_cs);
+            if (m_chankCount > 1)
+            {
+                MemBufChank * chank = m_MemBufChank + 1; //do not free first chank
+                while (chank <= m_curChank && chank < m_chankEnd)
+                {
+                    free(chank->buf);
+                    chank++;
+                }
+                ZeroMemory(m_MemBufChank + 1, (m_chankCount - 1) * sizeof(MemBufChank));
+            }
+            m_curChank = m_MemBufChank;
+            m_curChank->used = 0;
+            m_usedMem = m_curChank->size;
+            LeaveCriticalSection(&m_cs);
+        }
+    }
+
+    template <typename Type> Type New(size_t count, bool zero)
+    {
+        return Alloc(sizeof(Type)*count, zero);
+    }
+
+    void * Alloc(size_t size, bool zero)
     {
         void * buf = nullptr;
         EnterCriticalSection(&m_cs);
@@ -119,12 +84,12 @@ public:
                 if (m_curChank < m_chankEnd)
                 {
                     buf = _Alloc(size);
-                    if(buf)
-                        m_usedMem += size;
                 }
             }
         }
         LeaveCriticalSection(&m_cs);
+        if (zero && buf)
+            ZeroMemory(buf, size);
         return buf;
     }
 
@@ -139,9 +104,10 @@ private:
         if (m_curChank->buf == nullptr)
         {
             size_t allocSize = max(m_allocSize, size);
-            if (m_curChank->buf = AllocBuf(allocSize, size))
+            if (m_curChank->buf = Malloc(allocSize, allocSize)) // alloc at least m_allocSize
             {
                 m_curChank->size = allocSize;
+                m_usedMem += allocSize;
             }
             else
             {
@@ -176,49 +142,98 @@ private:
     size_t m_usedMem;
 };
 
-class PtrArray
+template <typename Type> class PtrArray
 {
 public:
-    PtrArray(MEM_BUF* pMemBuf, unsigned long maxCount) :
-        m_pMemBuf(pMemBuf)
-        , m_maxCount(maxCount)
-        , m_Count(0)
+    PtrArray(MemBuf* pMemBuf)
     {
-        m_Array = (void**)m_pMemBuf->Alloc(maxCount * sizeof(void**));
+        ZeroMemory(this, sizeof(*this));
+        m_pMemBuf = pMemBuf;
+        m_pp1 = (void**)m_pMemBuf->New<void*>(256, false);
+        m_c1 = m_pp1 ? 0 : 256;
+        m_c2 = m_c3 = m_c4 = 256; //trigger allocation
     }
 
-    void* Add(void* p)
+    const Type* AddPtr(const Type* p)
     {
-        if (!m_Array || m_Count == m_maxCount)
+        const Type* pRet = nullptr;
+
+        while (m_c1 < 256)
+        {
+            if (m_c2 == 256)
+            {
+                m_pp2 = (void**)(m_pp1[m_c1] = m_pMemBuf->New<void*>(256, false));
+                if (m_pp2 == nullptr)
+                {
+                    m_c1 = 256;
+                    continue;
+                }
+                m_c2 = 0;
+                m_c1++;
+            }
+            if (m_c3 == 256)
+            {
+                m_pp3 = (void**)(m_pp2[m_c2] = m_pMemBuf->New<void*>(256, false));
+                if (m_pp3 == nullptr)
+                {
+                    m_c1 = 256;
+                    continue;
+                }
+                m_c3 = 0;
+                m_c2++;
+            }
+            if (m_c4 == 256)
+            {
+                m_pp4 = (void**)(m_pp3[m_c3] = m_pMemBuf->New<void*>(256, false));
+                if (m_pp4 == nullptr)
+                {
+                    m_c1 = 256;
+                    continue;
+                }
+                m_c4 = 0;
+                m_c3++;
+            }
+
+            m_pp4[m_c4] = (void*)p;
+            pRet = p;
+            m_c4++;
+            m_Count++;
+            break;
+        }
+        return pRet;
+    }
+
+    Type* Add(DWORD size, bool zero)
+    {
+        Type* p = (Type*)m_pMemBuf->Alloc(size, zero);
+        if (p == nullptr)
             return nullptr;
-        m_Array[m_Count] = p;
-        m_Count++;
+        return (Type*)AddPtr(p);
+    }
+
+    Type* Get(DWORD i)
+    {
+        if (i >= m_Count)
+            return nullptr;
+
+        void **pp1, **pp2, **pp3, **pp4;
+        DWORD c1, c2, c3, c4;
+
+        pp1 = m_pp1;
+        c1 = (i & 0xFF000000) >> 24;
+        pp2 = (void**)pp1[c1];
+        c2 = (i & 0x00FF0000) >> 16;
+        pp3 = (void**)pp2[c2];
+        c3 = (i & 0x0000FF00) >> 8;
+        pp4 = (void**)pp3[c3];
+        c4 = (i & 0x000000FF);
+        Type* p = (Type*)pp4[c4];
         return p;
     }
 
-    void* Add(unsigned long size, bool zero = false)
-    {
-        void* p = m_pMemBuf->Alloc(size);
-        if (p == nullptr)
-            return nullptr;
-        if (zero)
-            ZeroMemory(p, size);
-        return Add(p);
-    }
-
-    void* Get(unsigned long i)
-    {
-        if (!m_Array || i >= m_Count)
-            return nullptr;
-        return m_Array[i];
-    }
-
     unsigned long Count() { return m_Count; }
-    bool Full() { return !m_Array || m_Count == m_maxCount; }
-
-private:
-    MEM_BUF * m_pMemBuf;
-    unsigned long m_Count;
-    unsigned long m_maxCount;
-    void ** m_Array;
+    MemBuf * m_pMemBuf;
+    DWORD m_Count;
+    int m_c1, m_c2, m_c3, m_c4;
+    void **m_pp1, **m_pp2, **m_pp3, **m_pp4;
 };

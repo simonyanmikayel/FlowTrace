@@ -93,6 +93,7 @@ public:
   void MoveSelectionEx(int iItem, int iChar = 0, bool extend = false, bool ensureVisible = true);
   void SelLogSelection() { m_ListSelection.SelLogSelection(); }
   void OnBookmarks(WORD wID);
+  DWORD GetRecCount() { return m_recCount; }
 
 private:
 

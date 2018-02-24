@@ -7,6 +7,12 @@
 class Addr2LineThread;
 struct ListedNodes;
 
+#ifdef _BUILD_X64
+const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
+#else
+const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
+#endif
+
 #pragma pack(push,4)
 typedef struct
 {
@@ -71,7 +77,7 @@ public:
     void clearArchive(bool closing = false);
     DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
-    char* Alloc(DWORD cb) { return (char*)m_pMemBuf->Alloc(cb); }
+    char* Alloc(DWORD cb) { return (char*)m_pTraceBuf->Alloc(cb, false); }
     bool append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in *p_si_other = NULL);
     bool IsEmpty() { return m_pNodes ==nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
@@ -81,7 +87,7 @@ public:
     ROOT_NODE* getRootNode() { return m_rootNode; }
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
-    size_t UsedMemory() { return m_pMemBuf->UsedMemory(); }
+    size_t UsedMemory();
 
 private:
     inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);
@@ -98,41 +104,46 @@ private:
     ListedNodes* m_listedNodes;
     ROOT_NODE* m_rootNode;
     Addr2LineThread* m_pAddr2LineThread;
-    MEM_BUF* m_pMemBuf;
-    PtrArray* m_pNodes;
+    MemBuf* m_pTraceBuf;
+    PtrArray<LOG_NODE>* m_pNodes;
 };
 
 struct ListedNodes
 {
-    ListedNodes(MEM_BUF* pMemBuf, unsigned long maxCount) {
-        m_maxCount = maxCount;
-        m_pNodes = (LOG_NODE**)pMemBuf->Alloc(maxCount * sizeof(LOG_NODE**));
-        ATLASSERT(m_pNodes);
-        init();
+    ListedNodes() {
+        ZeroMemory(this, sizeof(*this));
+        m_pListBuf = new MemBuf(MAX_BUF_SIZE, 64 * 1024 * 1024);
+    }
+    ~ListedNodes() {
+        delete m_pNodes;
+        delete m_pListBuf;
     }
     LOG_NODE* getNode(DWORD i) {
-        return (i < m_listedCount) ? m_pNodes[i] : 0;
+        return m_pNodes->Get(i);
+    }
+    void Free()
+    {
+        m_pListBuf->Free();
+        delete m_pNodes;
+        archiveCount = 0;
+        m_pNodes = new PtrArray<LOG_NODE>(m_pListBuf);
+    }
+    size_t UsedMemory() {
+        return m_pListBuf->UsedMemory();
     }
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
-        if (m_listedCount < m_maxCount)
+        DWORD64 ndx = gArchive.index(pNode);
+        if (ndx >= gArchive.getSNAPSHOT().first && ndx <= gArchive.getSNAPSHOT().last && pNode->isInfo() && !pNode->proc->isHiden() && (pNode->isTrace() || !flowTraceHiden))
         {
-            DWORD64 ndx = gArchive.index(pNode);
-            if (ndx >= gArchive.getSNAPSHOT().first && ndx <= gArchive.getSNAPSHOT().last && pNode->isInfo() && !pNode->proc->isHiden() && (pNode->isTrace() || !flowTraceHiden))
-            {
-                m_pNodes[m_listedCount++] = pNode;
-            }
+            m_pNodes->AddPtr(pNode);
         }
     }
-    void init() {
-        m_listedCount = 0; archiveCount = 0;
-    }
-    DWORD Count() { return m_listedCount; }
+    DWORD Count() { return m_pNodes->Count(); }
     void applyFilter(BOOL flowTraceHiden);
     void updateList(BOOL flowTraceHiden);
 private:
-    DWORD m_listedCount;
     DWORD archiveCount;
-    DWORD m_maxCount;
-    LOG_NODE** m_pNodes;
+    PtrArray<LOG_NODE>* m_pNodes;
+    MemBuf* m_pListBuf;
 };
 
