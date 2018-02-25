@@ -154,7 +154,6 @@
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="DetailesDlg.h" />
-    <ClInclude Include="FlowTrace.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="Helpers.h" />
@@ -171,7 +170,6 @@
     <ClInclude Include="SnapshotsDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdLog.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="WorkerThread.h" />
   </ItemGroup>
   <ItemGroup>

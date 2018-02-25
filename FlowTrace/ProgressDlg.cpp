@@ -296,9 +296,9 @@ void TaskThread::FileImport()
     if (m_isAuto)
     {
 #ifdef _BUILD_X64 
-        m_count = 12800;// 16LL * 1024 * 1024;// 128000000;
+        m_count = 128;// 16LL * 1024 * 1024;// 128000000;
 #else
-        m_count = 128000;// 16LL * 1024 * 1024;// 12800000;
+        m_count = 128;// 16LL * 1024 * 1024;// 12800000;
 #endif
         int cRecursion = 30;//10
         int ii = 0;
