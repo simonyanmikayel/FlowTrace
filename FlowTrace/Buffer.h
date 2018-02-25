@@ -66,9 +66,9 @@ public:
         }
     }
 
-    template <typename Type> Type New(size_t count, bool zero)
+    template <typename Type> Type* New(size_t count, bool zero)
     {
-        return Alloc(sizeof(Type)*count, zero);
+        return (Type*)Alloc(sizeof(Type)*count, zero);
     }
 
     void * Alloc(size_t size, bool zero)

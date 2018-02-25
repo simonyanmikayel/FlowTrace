@@ -16,6 +16,16 @@
 #define _HAS_EXCEPTIONS 0 //Better than compiling your code with /EHsc if you don't plan on adding exception handling.
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <HtmlHelp.h>
+#include <ShellApi.h>
+#include <tlhelp32.h>
+#include <Psapi.h>
+#include <winuser.h>
+#include <Muiload.h>
 
 //////////////////////////////////////////////////////////////////////////////
 #include <atlbase.h>
@@ -69,13 +79,6 @@ extern CAppModule _Module;
 
 #pragma warning(pop)
 
-#include <HtmlHelp.h>
-#include <ShellApi.h>
-#include <tlhelp32.h>
-#include <Psapi.h>
-#include <winuser.h>
-#include <Muiload.h>
-//#include <WS2tcpip.h>
 
 #if _MSC_VER >= 1900
 /*
@@ -147,7 +150,7 @@ typedef std::wstring tstring;
 typedef std::string tstring;
 #endif
 
-#pragma warning(disable:4996) //This function or variable may be unsafe
+//#pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
 #define _AUTO_TEST
