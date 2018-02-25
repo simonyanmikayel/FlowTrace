@@ -53,7 +53,7 @@ LRESULT CSettingsDlg::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
   ::ReleaseDC(0, hdc);
 
   _tcsncpy_s(lf.lfFaceName, _countof(lf.lfFaceName), m_FaceName, _countof(lf.lfFaceName) - 1);
-  lf.lfFaceName[sizeof(lf.lfFaceName) - 1] = 0;
+  lf.lfFaceName[_countof(lf.lfFaceName) - 1] = 0;
   lf.lfWidth = lf.lfEscapement = lf.lfOrientation = 0;
   lf.lfItalic = lf.lfUnderline = lf.lfStrikeOut = 0;
   lf.lfWeight = (m_lfWeight >= FW_SEMIBOLD ? FW_BOLD : FW_NORMAL);

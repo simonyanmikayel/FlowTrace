@@ -576,8 +576,8 @@ void CMainFrame::SearchRefresh(WORD wID)
 {
     //Update Serch
     CHAR szText[256];
-    ::GetWindowText(searchInfo.hwndEdit, szText, sizeof(szText) / sizeof(szText[0]) - 1);
-    szText[sizeof(szText) / sizeof(szText[0]) - 1] = 0;
+    ::GetWindowText(searchInfo.hwndEdit, szText, _countof(szText) - 1);
+    szText[_countof(szText) - 1] = 0;
     searchInfo.setSerachText(szText);
 
     searchInfo.ClearSearchResults();
