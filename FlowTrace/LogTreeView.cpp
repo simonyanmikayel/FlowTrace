@@ -186,7 +186,7 @@ void CLogTreeView::RefreshTree(bool showAll)
     ATLASSERT(newCount == m_recCount);
     return;
   }
-
+   
 //  if (!showAll)
 //  {
 //#define TREE_UPDATE_CHUNK 10000
