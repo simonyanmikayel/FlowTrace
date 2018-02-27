@@ -178,6 +178,8 @@ void CLogTreeView::CopySelection()
 void CLogTreeView::RefreshTree(bool showAll)
 {
   DWORD newCount = gArchive.getCount();
+  if (newCount <= 1)
+      return;//only root node
 
   if (newCount <= m_recCount)
   {

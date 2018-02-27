@@ -428,8 +428,8 @@ LONG LOG_NODE::getTimeMSec()
     return isInfo() ? (gSettings.GetUsePcTime() ? ((INFO_NODE*)this)->pc_msec : ((INFO_NODE*)this)->term_msec) : 0LL;
 }
 int LOG_NODE::getPid()
-{
-    return  isProc() ? ((PROC_NODE*)this)->threadNN : 0;
+{ 
+    return  isProc() ? ((PROC_NODE*)this)->threadNN : (isInfo() ? proc->threadNN : 0);
 }
 DWORD LOG_NODE::getCallAddr()
 {
