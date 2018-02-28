@@ -515,8 +515,7 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
         {
             int prcessed0 = prcessed;
             int cb_trace0 = rec->cb_trace;
-            if (!addTrace(pProcNode, rec, prcessed, pc_sec, pc_msec))
-                return false;
+            addTrace(pProcNode, rec, prcessed, pc_sec, pc_msec);
             if (prcessed0 >= prcessed && cb_trace0 <= rec->cb_trace && prcessed < rec->cb_trace)
             {
                 ATLASSERT(FALSE);
