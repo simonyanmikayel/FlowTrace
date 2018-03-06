@@ -49,18 +49,18 @@ char* LOG_NODE::getSrcName(bool fullPath)
 int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
 {
     int cb = 0;
-    max_cb_trace -= 5; //space for elipces and zero terminator
+    int max_cb_trace_2 = max_cb_trace - 5; //space for elipces and zero terminator
     if (isTrace())
     {
         TRACE_CHANK* chank = ((TRACE_NODE*)this)->getFirestChank();
         bool truncated = false;
-        while (chank && cb < max_cb_trace && !truncated)
+        while (chank && cb < max_cb_trace_2 && !truncated)
         {
             int cb_chank_trace = chank->len;
-            if (max_cb_trace - cb < chank->len)
+            if (max_cb_trace_2 - cb < chank->len)
             {
                 truncated = true;
-                cb_chank_trace = max_cb_trace - cb;
+                cb_chank_trace = max_cb_trace_2 - cb;
             }
             memcpy(pBuf + cb, chank->trace, cb_chank_trace);
             cb += cb_chank_trace;
