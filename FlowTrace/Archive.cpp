@@ -544,8 +544,8 @@ void ListedNodes::updateList(BOOL flowTraceHiden)
 
 void ListedNodes::applyFilter(BOOL flowTraceHiden)
 {
-    archiveCount = gArchive.getCount();
     Free();
+    archiveCount = gArchive.getCount();
     //stdlog("%u\n", GetTickCount());
     for (DWORD i = 0; i < archiveCount; i++)
     {
