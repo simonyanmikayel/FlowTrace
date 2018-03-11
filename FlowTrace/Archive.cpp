@@ -501,7 +501,7 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
 
     PROC_NODE* pProcNode = getProc(pAppNode, rec);
     if (!pProcNode)
-        return nullptr;
+        return false;
 
     if (rec->isFlow())
     {
