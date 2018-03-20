@@ -8,10 +8,6 @@ struct APP_NODE;
 struct PROC_NODE;
 struct TRACE_NODE;
 struct FLOW_NODE;
-struct INFO_DATA;
-struct LOG_DATA;
-struct TRACE_DATA;
-struct FLOW_DATA;
 struct ListedNodes;
 
 extern Archive  gArchive;
