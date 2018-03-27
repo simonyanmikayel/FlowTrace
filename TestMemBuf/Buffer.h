@@ -273,28 +273,29 @@ public:
 		return p;
 	}
 
-	void Sort()
-	{
-		if (Count())
-			Sort(0, ((int)Count()) - 1);
-	}
-
-	void Sort(int left, int right)
-	{
-		if (left >= right)
-			return;
-
-		Swap(left, (left + right) / 2);
-
-		int i, last;
-		last = left;
-		for (i = left + 1; i <= right; i++) {
-			if (Type::Compare(Get(i), Get(left)) < 0) /* Here's the function call */
-				Swap(++last, i);
+	void Sort() {
+		unsigned len = (unsigned)Count();
+		#define MAX_STACK 64            /* stack size for max 2^(64/2) array elements  */
+		unsigned left = 0, stack[MAX_STACK], pos = 0, seed = rand();
+		for (; ; ) {                                           /* outer loop */
+			for (; left + 1 < len; len++) {                /* sort left to len-1 */
+				if (pos == MAX_STACK) len = stack[pos = 0];  /* stack overflow, reset */
+				Type* pivot = Get(left + seed % (len - left));  /* pick random pivot */
+				seed = seed * 69069 + 1;                /* next pseudorandom number */
+				stack[pos++] = len;                    /* sort right part later */
+				for (unsigned right = left - 1; ; ) { /* inner loop: partitioning */
+					while (Get(++right)->les(pivot));  /* look for greater element */
+					while (pivot->les(Get(--len)));    /* look for smaller element */
+					if (right >= len) break;           /* partition point found? */
+					Type* temp = Get(right);
+					Set(right, Get(len));                  /* the only swap */
+					Set(len, temp);
+				}                            /* partitioned, continue left part */
+			}
+			if (pos == 0) break;                               /* stack empty? */
+			left = len;                             /* left to right is sorted */
+			len = stack[--pos];                      /* get next range to sort */
 		}
-		Swap(left, last);
-		Sort(left, last - 1);
-		Sort(last + 1, right);
 	}
 
 	void Swap(int i1, int i2)

@@ -277,7 +277,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         if (gSettings.GetColCallAddr())
         {
             DWORD p = This->call_site;
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%d)"), p);
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%X)"), p);
         }
         if (gSettings.GetFnCallLine())
         {
