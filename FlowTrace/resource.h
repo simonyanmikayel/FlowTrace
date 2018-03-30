@@ -105,7 +105,6 @@
 #define ID_VIEW_SHOW_HIDE_FLOW_TRACES   32811
 #define ID_TREE_EXPAND_ALL              32812
 #define ID_TREE_COLLAPSE_ALL            32813
-#define ID_TREE_COPY                    32814
 #define ID_TREE_COPY_CALL_PATH          32815
 #define ID_VIEW_SYNCRONISEVIEWS         32816
 #define ID_SEARCH_REFRESH_ON_EMTER      32817

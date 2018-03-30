@@ -113,7 +113,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
     Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
     dwFlags = MF_BYPOSITION | MF_STRING;
-    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
@@ -122,7 +122,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     if (!pNode->lastChild)
       dwFlags |= MF_DISABLED;
     InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
-    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, ID_TREE_COPY, _T(""));
+    InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
     InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
@@ -136,7 +136,7 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       CollapseExpandAll(pNode, false);
     }
-    else if (nRet == ID_TREE_COPY)
+    else if (nRet == ID_EDIT_COPY)
     {
       ::SendMessage(hwndMain, WM_COMMAND, ID_EDIT_COPY, 0);
     }
