@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "SnapshotsDlg.h"
+#include "DlgSnapshots.h"
 
-SnapshotsDlg::SnapshotsDlg()
+DlgSnapshots::DlgSnapshots()
 {
   m_snapshot = gArchive.getSNAPSHOT();
   m_NodeCount = gArchive.getCount();
 }
 
-LRESULT SnapshotsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT DlgSnapshots::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
   m_btnAdd.Attach(GetDlgItem(IDC_BUTTON_ADD));
   m_btnOK.Attach(GetDlgItem(IDOK));
@@ -24,18 +24,18 @@ LRESULT SnapshotsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   return TRUE;
 }
 
-bool SnapshotsDlg::CanNotAddSnapshot()
+bool DlgSnapshots::CanNotAddSnapshot()
 {
   return m_NodeCount == 0 || (m_snapshot.snapShots.size() > 0 && m_NodeCount == m_snapshot.snapShots[m_snapshot.snapShots.size() - 1].pos);
 }
 
-LRESULT SnapshotsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSnapshots::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   Close(wID);
   return 0;
 }
 
-void SnapshotsDlg::Close(WORD wID)
+void DlgSnapshots::Close(WORD wID)
 {
   if (wID == IDOK)
   {
@@ -46,7 +46,7 @@ void SnapshotsDlg::Close(WORD wID)
 }
 
 
-void SnapshotsDlg::fillSnapShots()
+void DlgSnapshots::fillSnapShots()
 {
   while (LB_ERR != m_lstSnapsots.DeleteString(0));
   m_lstSnapsots.AddString(_T("Show all"));
@@ -64,13 +64,13 @@ void SnapshotsDlg::fillSnapShots()
   m_lstSnapsots.SetCurSel(m_snapshot.curSnapShot);
 }
 
-void SnapshotsDlg::UpdateSnapshots()
+void DlgSnapshots::UpdateSnapshots()
 {
   gArchive.getSNAPSHOT() = m_snapshot;
   gArchive.getSNAPSHOT().update();
 }
 
-bool SnapshotsDlg::AddSnapshot(CHAR* descr, bool update)
+bool DlgSnapshots::AddSnapshot(CHAR* descr, bool update)
 {
   if (CanNotAddSnapshot())
     return false;
@@ -91,7 +91,7 @@ bool SnapshotsDlg::AddSnapshot(CHAR* descr, bool update)
   return true;
 }
 
-LRESULT SnapshotsDlg::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSnapshots::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   CHAR descr[32];
   int cb = sizeof(descr) / sizeof(descr[0]) - 1;
@@ -107,7 +107,7 @@ LRESULT SnapshotsDlg::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, H
   return 0;
 }
 
-LRESULT SnapshotsDlg::OnLbnDblClickedLstSnapshots(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSnapshots::OnLbnDblClickedLstSnapshots(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   if (m_lstSnapsots.GetCurSel() >= 0)
     Close(IDOK);

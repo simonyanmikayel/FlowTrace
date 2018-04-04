@@ -30,6 +30,7 @@ LPCTSTR STR_APP_REG_VAL_ColLineNN = _T("ColLineNN");
 LPCTSTR STR_APP_REG_VAL_ColNN = _T("ColNN");
 LPCTSTR STR_APP_REG_VAL_ColApp = _T("ColApp");
 LPCTSTR STR_APP_REG_VAL_ColPID = _T("ColPID");
+LPCTSTR STR_APP_REG_VAL_ColThreadNN = _T("ColThreadNN");
 LPCTSTR STR_APP_REG_VAL_ColFunc = _T("ColFunc");
 LPCTSTR STR_APP_REG_VAL_ColLine = _T("ColLine");
 LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
@@ -86,6 +87,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_ColNN, m_ColNN);
   Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
   Read(STR_APP_REG_VAL_ColPID, m_ColPID);
+  Read(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN);
   Read(STR_APP_REG_VAL_ColFunc, m_ColFunc, 1);
   Read(STR_APP_REG_VAL_ColLine, m_ColLine, 1);
   Read(STR_APP_REG_VAL_ColTime, m_ColTime);
@@ -342,6 +344,7 @@ void CSettings::SetColLineNN(int i){ m_ColLineNN = i;  Write(STR_APP_REG_VAL_Col
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }
 void CSettings::SetColApp(int i){ m_ColApp = i; Write(STR_APP_REG_VAL_ColApp, m_ColApp); }
 void CSettings::SetColPID(int i){ m_ColPID = i; Write(STR_APP_REG_VAL_ColPID, m_ColPID); }
+void CSettings::SetColThreadNN(int i) { m_ColThreadNN = i; Write(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN); }
 void CSettings::SetColFunc(int i){ m_ColFunc = i; Write(STR_APP_REG_VAL_ColFunc, m_ColFunc); }
 void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine, m_ColLine); }
 void CSettings::SetColTime(int i){ m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }

@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "DetailesDlg.h"
+#include "DlgDetailes.h"
 #include "Settings.h"
 
-LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT DlgDetailes::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
   CenterWindow(GetParent());
 
@@ -11,6 +11,7 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkNN.Attach(GetDlgItem(IDC_NN));
   m_chkApp.Attach(GetDlgItem(IDC_APP));
   m_chkPID.Attach(GetDlgItem(IDC_PID));
+  m_chkThreadNN.Attach(GetDlgItem(IDC_THREAD_NN));
   m_chkTime.Attach(GetDlgItem(IDC_TIME));
   m_chkCallAddr.Attach(GetDlgItem(IDC_CALL_ADDR));
   m_chkFnCallLine.Attach(GetDlgItem(IDC_FN_CALL_LINE));
@@ -24,6 +25,7 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkNN.SetCheck(gSettings.GetColNN());
   m_chkApp.SetCheck(gSettings.GetColApp());
   m_chkPID.SetCheck(gSettings.GetColPID());
+  m_chkThreadNN.SetCheck(gSettings.GetColThreadNN());
   m_chkTime.SetCheck(gSettings.GetColTime());
   m_chkCallAddr.SetCheck(gSettings.GetColCallAddr());
   m_chkFnCallLine.SetCheck(gSettings.GetFnCallLine());
@@ -36,7 +38,7 @@ LRESULT CColumnsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   return TRUE;
 }
 
-LRESULT CColumnsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgDetailes::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   if (wID == IDOK)
   {
@@ -44,6 +46,7 @@ LRESULT CColumnsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     gSettings.SetColNN(m_chkNN.GetCheck());
     gSettings.SetColApp(m_chkApp.GetCheck());
     gSettings.SetColPID(m_chkPID.GetCheck());
+	gSettings.SetColThreadNN(m_chkThreadNN.GetCheck());
     gSettings.SetColTime(m_chkTime.GetCheck());
     gSettings.SetColCallAddr(m_chkCallAddr.GetCheck());
     gSettings.SetFnCallLine(m_chkFnCallLine.GetCheck());

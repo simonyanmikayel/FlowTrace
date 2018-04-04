@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "SettingsDlg.h"
+#include "DlgSettings.h"
 #include "Settings.h"
 
 #define AS(s) m_cmbFontSize.AddString(#s)
 
-LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
   m_lblFont.Attach(GetDlgItem(IDC_FONT_NAME));
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
@@ -35,14 +35,14 @@ LRESULT CSettingsDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
   return TRUE;
 }
 
-void CSettingsDlg::SetFontLabel()
+void DlgSettings::SetFontLabel()
 {
   CString str;
   str.Format(_T("Font: %s, %s%d point "), m_FaceName, m_lfWeight >= FW_SEMIBOLD  ? _T("Bold ") : _T(""), m_FontSize);
   m_lblFont.SetWindowText(str);
 }
 
-LRESULT CSettingsDlg::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSettings::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   CHOOSEFONT cf;
   HDC hdc;
@@ -80,7 +80,7 @@ LRESULT CSettingsDlg::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
   return 0;
 }
 
-LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   if (wID == IDOK)
   {
@@ -106,7 +106,7 @@ LRESULT CSettingsDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
   return 0;
 }
 
-LRESULT CSettingsDlg::OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgSettings::OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   return 0;
 }

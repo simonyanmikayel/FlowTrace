@@ -2,12 +2,12 @@
 #include "Settings.h"
 #include "FontPreviewCombo.h"
 
-class CSettingsDlg : public CDialogImpl<CSettingsDlg>
+class DlgSettings : public CDialogImpl<DlgSettings>
 {
 public:
   enum { IDD = IDD_SETTINGS };
 
-  BEGIN_MSG_MAP(CSettingsDlg)
+  BEGIN_MSG_MAP(DlgSettings)
     MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
     COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)

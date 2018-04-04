@@ -1,11 +1,11 @@
 #pragma once
 
-class CColumnsDlg : public CDialogImpl<CColumnsDlg>
+class DlgDetailes : public CDialogImpl<DlgDetailes>
 {
 public:
   enum { IDD = IDD_DETAILES };
 
-  BEGIN_MSG_MAP(CColumnsDlg)
+  BEGIN_MSG_MAP(DlgDetailes)
     MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
     COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
@@ -15,6 +15,7 @@ public:
   CButton m_chkNN;
   CButton m_chkApp;
   CButton m_chkPID;
+  CButton m_chkThreadNN;
   CButton m_chkTime;
   CButton m_chkCallAddr;
   CButton m_chkFnCallLine;

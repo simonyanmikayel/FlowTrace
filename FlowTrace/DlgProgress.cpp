@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "ProgressDlg.h"
+#include "DlgProgress.h"
 #include "Helpers.h"
 #include "Archive.h"
 #include "Settings.h"
@@ -8,19 +8,19 @@
 #pragma warning( push )
 #pragma warning(disable:4477) //string '%d' requires an argument of type 'int *', but variadic argument 2 has type 'char *'
 
-CProgressDlg::CProgressDlg(WORD cmd, LPSTR lpstrFile)
+DlgProgress::DlgProgress(WORD cmd, LPSTR lpstrFile)
 {
     m_cmd = cmd;
     m_pTaskThread = new TaskThread(cmd, lpstrFile);
 }
 
 
-CProgressDlg::~CProgressDlg()
+DlgProgress::~DlgProgress()
 {
     delete m_pTaskThread;
 }
 
-LRESULT CProgressDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT DlgProgress::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     if (!m_pTaskThread->IsOK())
     {
@@ -41,7 +41,7 @@ LRESULT CProgressDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lP
     return TRUE;
 }
 
-LRESULT CProgressDlg::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT DlgProgress::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     if (wParam == 1)
     {
@@ -69,13 +69,13 @@ LRESULT CProgressDlg::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, B
     return 0;
 }
 
-LRESULT CProgressDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT DlgProgress::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     End(IDCANCEL);
     return 0;
 }
 
-void CProgressDlg::End(int wID)
+void DlgProgress::End(int wID)
 {
     KillTimer(1);
     m_pTaskThread->StopWork();

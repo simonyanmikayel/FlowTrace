@@ -253,8 +253,11 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     }
     else if (isProc())
     {
-        cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d]"), getPid());
-    }
+		if (gSettings.GetColPID())
+			cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d-%d]"), getThreadNN(), getPid());
+		else
+			cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d]"), getThreadNN());
+	}
     else if (isFlow())
     {
         FLOW_NODE* This = (FLOW_NODE*)this;
@@ -325,8 +328,11 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == PROC_COL)
     {
-        cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d]"), getPid());
-    }
+		if (gSettings.GetColPID())
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d]"), getThreadNN(), getPid());
+		else
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d]"), getThreadNN());
+	}
     else if (col == TIME_COL)
     {
         if (isInfo())
@@ -429,7 +435,11 @@ LONG LOG_NODE::getTimeMSec()
 }
 int LOG_NODE::getPid()
 { 
-    return  isProc() ? ((PROC_NODE*)this)->threadNN : (isInfo() ? proc->threadNN : 0);
+	return  isProc() ? ((PROC_NODE*)this)->tid : (isInfo() ? proc->tid : 0);
+}
+int LOG_NODE::getThreadNN()
+{
+	return  isProc() ? ((PROC_NODE*)this)->threadNN : (isInfo() ? proc->threadNN : 0);
 }
 DWORD LOG_NODE::getCallAddr()
 {

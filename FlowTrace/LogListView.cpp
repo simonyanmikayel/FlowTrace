@@ -998,7 +998,7 @@ void CLogListView::SetColumns()
     AddColumn(_T("NN"), NN_COL);
   if (gSettings.GetColApp())
     AddColumn(_T("App"), APP_COLL);
-  if (gSettings.GetColPID())
+  if (gSettings.GetColPID() || gSettings.GetColThreadNN())
     AddColumn(_T("PID"), PROC_COL);
   if (gSettings.GetColTime())
     AddColumn(_T("Time"), TIME_COL);

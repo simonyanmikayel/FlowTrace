@@ -153,7 +153,7 @@
     <ClInclude Include="BackTraceCallView.h" />
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="DetailesDlg.h" />
+    <ClInclude Include="DlgDetailes.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="Helpers.h" />
@@ -161,13 +161,13 @@
     <ClInclude Include="LogListView.h" />
     <ClInclude Include="LogTreeView.h" />
     <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="ProgressDlg.h" />
+    <ClInclude Include="DlgProgress.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SearchInfo.h" />
     <ClInclude Include="ServerThread.h" />
     <ClInclude Include="Settings.h" />
-    <ClInclude Include="SettingsDlg.h" />
-    <ClInclude Include="SnapshotsDlg.h" />
+    <ClInclude Include="DlgSettings.h" />
+    <ClInclude Include="DlgSnapshots.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdLog.h" />
     <ClInclude Include="WorkerThread.h" />
@@ -178,7 +178,7 @@
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="BackTraceCallView.cpp" />
     <ClCompile Include="BackTraceView.cpp" />
-    <ClCompile Include="DetailesDlg.cpp" />
+    <ClCompile Include="DlgDetailes.cpp" />
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
     <ClCompile Include="FontPreviewCombo.cpp" />
@@ -187,12 +187,12 @@
     <ClCompile Include="LogListView.cpp" />
     <ClCompile Include="LogTreeView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="ProgressDlg.cpp" />
+    <ClCompile Include="DlgProgress.cpp" />
     <ClCompile Include="SearchInfo.cpp" />
     <ClCompile Include="ServerThread.cpp" />
     <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="SettingsDlg.cpp" />
-    <ClCompile Include="SnapshotsDlg.cpp" />
+    <ClCompile Include="DlgSettings.cpp" />
+    <ClCompile Include="DlgSnapshots.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -207,10 +207,34 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="FlowTrace.ico" />
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\FlowTrace.ico" />
+    <Image Include="res\icon_boo.ico" />
+    <Image Include="res\icon_emp.ico" />
+    <Image Include="res\ICON_LIST_ENTER.ico" />
+    <Image Include="res\ICON_LIST_EXIT.ico" />
+    <Image Include="res\ICON_LIST_TRACE_SEL.ico" />
+    <Image Include="res\ICON_TREE_APP.ico" />
+    <Image Include="res\ICON_TREE_ENTER.ico" />
+    <Image Include="res\ICON_TREE_EXIT.ico" />
+    <Image Include="res\ICON_TREE_PAIRED.ico" />
+    <Image Include="res\ICON_TREE_PROC.ico" />
+    <Image Include="res\ICON_TREE_ROOT.ico" />
+    <Image Include="res\sync1.bmp" />
+    <Image Include="res\sync2.bmp" />
+    <Image Include="res\Toolbar.bmp" />
+    <Image Include="res\tree_node_checked.ico" />
+    <Image Include="res\tree_node_colapsed.ico" />
+    <Image Include="res\tree_node_expanded.ico" />
+    <Image Include="res\tree_node_unchecked.ico" />
+    <Image Include="res\ttf_glyph.bmp" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\font1.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

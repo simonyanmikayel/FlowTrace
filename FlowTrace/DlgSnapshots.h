@@ -2,14 +2,14 @@
 
 #include "Archive.h"
 
-class SnapshotsDlg : public CDialogImpl<SnapshotsDlg>
+class DlgSnapshots : public CDialogImpl<DlgSnapshots>
 {
 public:
-  SnapshotsDlg();
+  DlgSnapshots();
 
   enum { IDD = IDD_SNAPSHOTS };
 
-  BEGIN_MSG_MAP(SnapshotsDlg)
+  BEGIN_MSG_MAP(DlgSnapshots)
     MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
     COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)

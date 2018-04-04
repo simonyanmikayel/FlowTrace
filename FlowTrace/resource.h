@@ -37,6 +37,8 @@
 #define IDC_FONT_NAME                   1002
 #define IDC_PID                         1003
 #define IDC_BTN_FONT                    1004
+#define IDC_PID2                        1004
+#define IDC_THREAD_NN                   1004
 #define IDC_TIME                        1005
 #define IDC_EDIT_PORT                   1006
 #define IDC_CALL_ADDR                   1007

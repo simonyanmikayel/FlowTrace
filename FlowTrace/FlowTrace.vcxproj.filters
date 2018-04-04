@@ -39,9 +39,6 @@
     <ClInclude Include="Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DetailesDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FlowTraceView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,9 +60,6 @@
     <ClInclude Include="MainFrm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProgressDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SearchInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,16 +69,22 @@
     <ClInclude Include="Settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SettingsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SnapshotsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StdLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkerThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDetailes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgProgress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgSnapshots.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -110,9 +110,6 @@
     <ClCompile Include="BackTraceView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DetailesDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FlowTraceView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -134,9 +131,6 @@
     <ClCompile Include="MainFrm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProgressDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SearchInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -146,16 +140,22 @@
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SettingsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SnapshotsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WorkerThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDetailes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgProgress.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgSnapshots.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -171,8 +171,76 @@
     <Image Include="FlowTrace.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ttf_glyph.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\sync1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\sync2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\FlowTrace.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_ROOT.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_APP.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_PROC.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_PAIRED.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_ENTER.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_EXIT.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_LIST_ENTER.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_LIST_EXIT.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_LIST_TRACE_SEL.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tree_node_colapsed.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tree_node_expanded.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tree_node_checked.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\tree_node_unchecked.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\icon_emp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\icon_boo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\font1.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

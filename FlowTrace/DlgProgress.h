@@ -25,12 +25,12 @@ private:
   void FileImport();
 };
 
-class CProgressDlg :
-  public CDialogImpl<CProgressDlg>
+class DlgProgress :
+  public CDialogImpl<DlgProgress>
 {
 public:
-  CProgressDlg(WORD cmd, LPSTR lpstrFile);
-  ~CProgressDlg();
+  DlgProgress(WORD cmd, LPSTR lpstrFile);
+  ~DlgProgress();
   enum { IDD = IDD_PROGRESS };
 
   BEGIN_MSG_MAP(CAboutDlg)

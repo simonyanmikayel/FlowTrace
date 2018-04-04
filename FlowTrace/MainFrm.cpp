@@ -11,11 +11,11 @@
 #include "Settings.h"
 #include "Archive.h"
 #include "ServerThread.h"
-#include "SettingsDlg.h"
-#include "DetailesDlg.h"
-#include "ProgressDlg.h"
+#include "DlgSettings.h"
+#include "DlgDetailes.h"
+#include "DlgProgress.h"
 #include "SearchInfo.h"
-#include "SnapshotsDlg.h"
+#include "DlgSnapshots.h"
 
 HWND       hwndMain;
 WNDPROC oldEditProc;
@@ -187,13 +187,13 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    //CProgressDlg dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
+    //DlgProgress dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
 #ifdef _AUTO_TEST
     static bool autoDone = false;
     if (!autoDone && wParam != WA_INACTIVE)
     {
         autoDone = true;
-        CProgressDlg dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+        DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
     }
 #endif
     return 0;
@@ -311,7 +311,7 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 
 LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    CColumnsDlg dlg;
+    DlgDetailes dlg;
     if (IDOK == dlg.DoModal())
         m_view.ApplySettings(false);
     return 0;
@@ -321,7 +321,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 {
     DWORD udpPort = gSettings.GetUdpPort();
     DWORD resolveAddr = gSettings.GetResolveAddr();
-    CSettingsDlg dlg;
+    DlgSettings dlg;
     if (IDOK == dlg.DoModal())
     {
         if (udpPort != gSettings.GetUdpPort())
@@ -338,14 +338,14 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 
 LRESULT CMainFrame::OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    CProgressDlg dlg(wID, NULL);
+    DlgProgress dlg(wID, NULL);
     dlg.DoModal();
     return 0;
 }
 
 LRESULT CMainFrame::OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    CProgressDlg dlg(wID, NULL);
+    DlgProgress dlg(wID, NULL);
     dlg.DoModal();
     return 0;
 }
@@ -480,7 +480,7 @@ LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 
 LRESULT CMainFrame::OnTakeSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    SnapshotsDlg dlg;
+    DlgSnapshots dlg;
     if (IDOK == dlg.DoModal())
         ::SendMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
     return 0;
@@ -488,7 +488,7 @@ LRESULT CMainFrame::OnTakeSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 
 LRESULT CMainFrame::OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    SnapshotsDlg dlg;
+    DlgSnapshots dlg;
     if (dlg.AddSnapshot("", true))
         ::SendMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
     return 0;

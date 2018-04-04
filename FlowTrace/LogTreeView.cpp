@@ -3,7 +3,7 @@
 #include "LogTreeView.h"
 #include "FlowTraceView.h"
 #include "Settings.h"
-#include "ProgressDlg.h"
+#include "DlgProgress.h"
 #include "MainFrm.h"
 
 enum STATE_IMAGE{ STATE_IMAGE_COLAPSED, STATE_IMAGE_EXPANDED, STATE_IMAGE_CHECKED, STATE_IMAGE_UNCHECKE };

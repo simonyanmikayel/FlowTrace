@@ -58,8 +58,9 @@ public:
     DECL_PROP(int, ColLineNN);
     DECL_PROP(int, ColNN);
     DECL_PROP(int, ColApp);
-    DECL_PROP(int, ColPID);
-    DECL_PROP(int, ColFunc);
+	DECL_PROP(int, ColPID);
+	DECL_PROP(int, ColThreadNN);
+	DECL_PROP(int, ColFunc);
     DECL_PROP(int, ColLine);
     DECL_PROP(int, ColTime);
     DECL_PROP(int, ColCallAddr);

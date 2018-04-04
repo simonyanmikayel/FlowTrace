@@ -100,6 +100,7 @@ struct LOG_NODE
     LONG getTimeSec();
     LONG getTimeMSec();
     int   getPid();
+	int   getThreadNN();
     DWORD getCallAddr();
     int   getCallLine();
     CHAR* getTreeText(int* cBuf = NULL, bool extened = true);
