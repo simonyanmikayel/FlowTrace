@@ -45,9 +45,9 @@ struct LOG_NODE
         WORD expanded : 1;
         WORD hasNodeBox : 1;
         WORD pathExpanded : 1;
-        WORD bookmark : 1;
     };
-    BYTE nextChankCounter;
+	BYTE bookmark;
+	BYTE nextChankCounter;
     int cExpanded;
     int line;
     LOG_NODE* nextChankMarker;

@@ -87,6 +87,7 @@ public:
     ROOT_NODE* getRootNode() { return m_rootNode; }
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
+	BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
     size_t UsedMemory();
 
 private:
@@ -98,6 +99,7 @@ private:
     inline PROC_NODE*   getProc(APP_NODE* pAppNode, ROW_LOG_REC* p);
 
     static DWORD archiveNumber;
+	BYTE bookmarkNumber;
     APP_NODE* curApp;
     PROC_NODE* curProc;
     SNAPSHOT m_snapshot;

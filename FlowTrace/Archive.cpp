@@ -24,6 +24,7 @@ Archive::~Archive()
 void Archive::clearArchive(bool closing)
 {
     archiveNumber++;
+	bookmarkNumber = 0;
     if (m_pAddr2LineThread)
     {
         m_pAddr2LineThread->StopWork();
