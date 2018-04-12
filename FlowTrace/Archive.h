@@ -88,7 +88,8 @@ public:
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
 	BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
-    size_t UsedMemory();
+	BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
+	size_t UsedMemory();
 
 private:
     inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);

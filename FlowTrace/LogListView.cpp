@@ -803,6 +803,7 @@ void CLogListView::OnBookmarks(WORD wID)
 		{
 			gArchive.getListedNodes()->getNode(i)->bookmark = 0;
 		}
+		gArchive.resteBookmarkNumber();
 		Redraw(0, gArchive.getListedNodes()->Count());
 	}
 	break;
