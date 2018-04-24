@@ -150,9 +150,9 @@ LRESULT CFlowTraceView::OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM 
 void CFlowTraceView::ClearLog()
 {
 	m_selectedNode = NULL;
-	m_wndListView.Clear();
 	m_wndTreeView.Clear();
 	m_wndBackTraceView.ClearTrace();
+	m_wndListView.Clear();
 }
 
 LRESULT CFlowTraceView::OnNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
