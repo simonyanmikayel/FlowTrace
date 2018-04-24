@@ -58,6 +58,7 @@ void CLogTreeView::ApplySettings(bool fontChanged)
 void CLogTreeView::Clear()
 {
   m_recCount = 0;
+  m_pSelectedNode = NULL;
   SetItemCountEx(0, 0);
   m_colWidth = min_colWidth;
   SetColumnWidth(0, m_colWidth);
