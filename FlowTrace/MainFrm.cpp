@@ -388,7 +388,7 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
 {
     bool filterChanged = false;
     LOG_NODE* pNode = (LOG_NODE*)lParam;
-    if (pNode && (pNode->isApp() || pNode->isProc()))
+    if (pNode && (pNode->isApp() || pNode->isThread()))
     {
         int cheked = pNode->checked;
         if (pNode->hiden != !cheked)
@@ -519,7 +519,7 @@ LRESULT CALLBACK subEditProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case VK_RETURN:
             ::PostMessage(hwndMain, WM_COMMAND, ID_SEARCH_REFRESH_ON_EMTER, 0);
             return CallWindowProc(oldEditProc, wnd, msg, wParam, lParam);
-            //return 0; //if you don't want to pass it further to def proc
+            //return 0; //if you don't want to pass it further to def thread
             //break;  //If not your key, skip to default:
         }
     default:

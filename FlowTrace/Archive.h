@@ -42,7 +42,7 @@ typedef struct
     }
     bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
-    void Log() { stdlog("name: %s sec: %d msec: %d\n", "appName()", app_sec, app_msec); }
+    void Log() { stdlog("name: %s sec: %d msec: %d\n", "????", app_sec, app_msec); }
 }ROW_LOG_REC;
 
 typedef struct
@@ -93,16 +93,16 @@ public:
 
 private:
     inline APP_NODE* addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other);
-    inline PROC_NODE* addProc(APP_NODE* pAppNode, int tid);
-    inline LOG_NODE* addFlow(PROC_NODE* pProcNode, ROW_LOG_REC *pLogRec, DWORD pc_sec, DWORD pc_msec);
-    inline LOG_NODE* addTrace(PROC_NODE* pProcNode, ROW_LOG_REC *pLogRec, int& prcessed, DWORD pc_sec, DWORD pc_msec);
+    inline THREAD_NODE* addThread(APP_NODE* pAppNode, int tid);
+    inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, DWORD pc_sec, DWORD pc_msec);
+    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, DWORD pc_sec, DWORD pc_msec);
     inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
-    inline PROC_NODE*   getProc(APP_NODE* pAppNode, ROW_LOG_REC* p);
+    inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
 
     static DWORD archiveNumber;
 	BYTE bookmarkNumber;
     APP_NODE* curApp;
-    PROC_NODE* curProc;
+    THREAD_NODE* curThread;
     SNAPSHOT m_snapshot;
     ListedNodes* m_listedNodes;
     ROOT_NODE* m_rootNode;
@@ -136,7 +136,7 @@ struct ListedNodes
     }
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
         DWORD64 ndx = gArchive.index(pNode);
-        if (ndx >= gArchive.getSNAPSHOT().first && ndx <= gArchive.getSNAPSHOT().last && pNode->isInfo() && !pNode->proc->isHiden() && (pNode->isTrace() || !flowTraceHiden))
+        if (ndx >= gArchive.getSNAPSHOT().first && ndx <= gArchive.getSNAPSHOT().last && pNode->isInfo() && !pNode->thread->isHiden() && (pNode->isTrace() || !flowTraceHiden))
         {
             m_pNodes->AddPtr(pNode);
         }

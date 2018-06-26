@@ -195,9 +195,6 @@
     <Image Include="res\ICON_TREE_APP.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ICON_TREE_PROC.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\ICON_TREE_PAIRED.ico">
       <Filter>Resource Files</Filter>
     </Image>
@@ -232,6 +229,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\icon_boo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ICON_TREE_THREAD.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

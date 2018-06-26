@@ -171,7 +171,7 @@ IDI_ICON_TREE_ROOT      ICON                    "res\\ICON_TREE_ROOT.ico"
 
 IDI_ICON_TREE_APP       ICON                    "res\\ICON_TREE_APP.ico"
 
-IDI_ICON_TREE_PROC      ICON                    "res\\ICON_TREE_PROC.ico"
+IDI_ICON_TREE_THREAD      ICON                  "res\\ICON_TREE_THREAD.ico"
 
 IDI_ICON_TREE_PAIRED    ICON                    "res\\ICON_TREE_PAIRED.ico"
 

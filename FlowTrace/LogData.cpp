@@ -118,22 +118,22 @@ int LOG_NODE::getFnNameSize()
 }
 void FLOW_NODE::addToTree()
 {
-    if (proc->curentFlow == NULL)
+    if (thread->curentFlow == NULL)
     {
-        proc->add_proc_child(this, ROOT_CHILD);
+        thread->add_thread_child(this, ROOT_CHILD);
     }
     else
     {
-        FLOW_NODE* pLatestFlowData = proc->curentFlow;
+        FLOW_NODE* pLatestFlowData = thread->curentFlow;
         if (isEnter())
         {
             if (pLatestFlowData->peer || !pLatestFlowData->isEnter())
             {
-                proc->add_proc_child(this, ROOT_CHILD);
+                thread->add_thread_child(this, ROOT_CHILD);
             }
             else
             {
-                proc->add_proc_child(this, LATEST_CHILD);
+                thread->add_thread_child(this, LATEST_CHILD);
             }
         }
         else
@@ -141,20 +141,20 @@ void FLOW_NODE::addToTree()
             if (pLatestFlowData->peer == NULL && pLatestFlowData->isEnter() && pLatestFlowData->this_fn == this_fn && pLatestFlowData->call_site == call_site)
             {
                 pLatestFlowData->peer = this;
-                peer = proc->curentFlow;
-                if (proc->curentFlow->parent != proc) {
-                    proc->curentFlow = (FLOW_NODE*)(proc->curentFlow->parent);
+                peer = thread->curentFlow;
+                if (thread->curentFlow->parent != thread) {
+                    thread->curentFlow = (FLOW_NODE*)(thread->curentFlow->parent);
                 }
             }
             else
             {
                 if (pLatestFlowData->isEnter())
                 {
-                    proc->add_proc_child(this, ROOT_CHILD);
+                    thread->add_thread_child(this, ROOT_CHILD);
                 }
                 else
                 {
-                    proc->add_proc_child(this, LATEST_CHILD);
+                    thread->add_thread_child(this, LATEST_CHILD);
                 }
             }
         }
@@ -171,9 +171,9 @@ int LOG_NODE::getTreeImage()
     {
         return 1;//IDI_ICON_TREE_APP
     }
-    else if (isProc())
+    else if (isThread())
     {
-        return 2;//IDI_ICON_TREE_PROC
+        return 2;//IDI_ICON_TREE_THREAD
     }
     else if (isFlow())
     {
@@ -251,7 +251,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
             cb += (int)_sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(".%03d)"), msec);
         }
     }
-    else if (isProc())
+    else if (isThread())
     {
 		if (gSettings.GetColPID())
 			cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d-%d]"), getThreadNN(), getPid());
@@ -322,11 +322,11 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-        cb += proc->pAppNode->cb_app_name;
-        memcpy(pBuf, proc->pAppNode->appName(), cb);
+        cb += thread->pAppNode->cb_app_name;
+        memcpy(pBuf, thread->pAppNode->appName(), cb);
         pBuf[cb] = 0;
     }
-    else if (col == PROC_COL)
+    else if (col == THREAD_COL)
     {
 		if (gSettings.GetColPID())
 			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d]"), getThreadNN(), getPid());
@@ -435,11 +435,11 @@ LONG LOG_NODE::getTimeMSec()
 }
 int LOG_NODE::getPid()
 { 
-	return  isProc() ? ((PROC_NODE*)this)->tid : (isInfo() ? proc->tid : 0);
+	return  isThread() ? ((THREAD_NODE*)this)->tid : (isInfo() ? thread->tid : 0);
 }
 int LOG_NODE::getThreadNN()
 {
-	return  isProc() ? ((PROC_NODE*)this)->threadNN : (isInfo() ? proc->threadNN : 0);
+	return  isThread() ? ((THREAD_NODE*)this)->threadNN : (isInfo() ? thread->threadNN : 0);
 }
 DWORD LOG_NODE::getCallAddr()
 {

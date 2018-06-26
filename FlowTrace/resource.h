@@ -6,7 +6,7 @@
 #define IDR_MAINFRAME                   128
 #define IDI_ICON_TREE_ROOT              502
 #define IDI_ICON_TREE_APP               503
-#define IDI_ICON_TREE_PROC              504
+#define IDI_ICON_TREE_THREAD              504
 #define IDI_ICON_TREE_PAIRED            505
 #define IDI_ICON_TREE_ENTER             506
 #define IDI_ICON_TREE_EXIT              507

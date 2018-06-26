@@ -205,15 +205,15 @@ void TaskThread::FileSave(WORD cmd)
                 rec->nn = p->nn;
                 rec->sec = p->term_sec;
                 rec->msec = p->term_msec;
-                rec->tid = pNode->proc->tid;
-                rec->app_sec = pNode->proc->pAppNode->app_sec;
-                rec->app_msec = pNode->proc->pAppNode->app_msec;
+                rec->tid = pNode->thread->tid;
+                rec->app_sec = pNode->thread->pAppNode->app_sec;
+                rec->app_msec = pNode->thread->pAppNode->app_msec;
                 rec->this_fn = p->this_fn;
                 rec->call_site = p->call_site;
                 rec->call_line = p->call_line;
 
-                rec->cb_app_path = pNode->proc->pAppNode->cb_app_path;
-                memcpy(rec->appPath(), pNode->proc->pAppNode->appPath(), rec->cb_app_path);
+                rec->cb_app_path = pNode->thread->pAppNode->cb_app_path;
+                memcpy(rec->appPath(), pNode->thread->pAppNode->appPath(), rec->cb_app_path);
 
                 rec->cb_fn_name = p->cb_fn_name;
                 memcpy(rec->fnName(), p->fnName(), p->cb_fn_name);
@@ -229,15 +229,15 @@ void TaskThread::FileSave(WORD cmd)
                 rec->nn = p->nn;
                 rec->sec = p->term_sec;
                 rec->msec = p->term_msec;
-                rec->tid = pNode->proc->tid;
-                rec->app_sec = pNode->proc->pAppNode->app_sec;
-                rec->app_msec = pNode->proc->pAppNode->app_msec;
+                rec->tid = pNode->thread->tid;
+                rec->app_sec = pNode->thread->pAppNode->app_sec;
+                rec->app_msec = pNode->thread->pAppNode->app_msec;
                 rec->this_fn = 0;
                 rec->call_site = 0;
                 rec->call_line = p->call_line;
 
-                rec->cb_app_path = pNode->proc->pAppNode->cb_app_path;
-                memcpy(rec->appPath(), pNode->proc->pAppNode->appPath(), rec->cb_app_path);
+                rec->cb_app_path = pNode->thread->pAppNode->cb_app_path;
+                memcpy(rec->appPath(), pNode->thread->pAppNode->appPath(), rec->cb_app_path);
 
                 rec->cb_fn_name = p->cb_fn_name;
                 memcpy(rec->fnName(), p->fnName(), p->cb_fn_name);
@@ -266,7 +266,7 @@ void TaskThread::FileSave(WORD cmd)
             if (pNode->isFlow())
             {
                 FLOW_NODE* p = (FLOW_NODE*)pNode;
-                fwrite(pNode->proc->pAppNode->appPath(), 1, pNode->proc->pAppNode->cb_app_path, m_fp);
+                fwrite(pNode->thread->pAppNode->appPath(), 1, pNode->thread->pAppNode->cb_app_path, m_fp);
                 fwrite(" ", 1, 1, m_fp);
                 fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
                 fprintf(m_fp, " %d", p->call_line);
@@ -274,7 +274,7 @@ void TaskThread::FileSave(WORD cmd)
             else
             {
                 TRACE_NODE* p = (TRACE_NODE*)pNode;
-                fwrite(pNode->proc->pAppNode->appPath(), 1, pNode->proc->pAppNode->cb_app_path, m_fp);
+                fwrite(pNode->thread->pAppNode->appPath(), 1, pNode->thread->pAppNode->cb_app_path, m_fp);
                 fwrite(" ", 1, 1, m_fp);
                 fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
                 fprintf(m_fp, " %d", p->call_line);

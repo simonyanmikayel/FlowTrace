@@ -5,7 +5,7 @@ class Archive;
 struct LOG_NODE;
 struct ROOT_NODE;
 struct APP_NODE;
-struct PROC_NODE;
+struct THREAD_NODE;
 struct TRACE_NODE;
 struct FLOW_NODE;
 struct ListedNodes;
@@ -15,9 +15,9 @@ extern Archive  gArchive;
 typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 
 #pragma pack(push,1)
-enum PROCESS_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
-enum LOG_DATA_TYPE { ROOT_DATA_TYPE, APP_DATA_TYPE, PROC_DATA_TYPE, FLOW_DATA_TYPE, TRACE_DATA_TYPE };
-enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, PROC_COL, TIME_COL, FUNC_COL, CALL_LINE_COL, LOG_COL, MAX_COL };
+enum THREAD_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
+enum LOG_DATA_TYPE { ROOT_DATA_TYPE, APP_DATA_TYPE, THREAD_DATA_TYPE, FLOW_DATA_TYPE, TRACE_DATA_TYPE };
+enum LIST_COL { ICON_COL, LINE_NN_COL, NN_COL, APP_COLL, THREAD_COL, TIME_COL, FUNC_COL, CALL_LINE_COL, LOG_COL, MAX_COL };
 
 struct ADDR_INFO
 {
@@ -29,7 +29,7 @@ struct ADDR_INFO
 
 struct LOG_NODE
 {
-    PROC_NODE* proc;
+    THREAD_NODE* thread;
     LOG_NODE* parent;
     LOG_NODE* lastChild;
     LOG_NODE* prevSibling;
@@ -60,7 +60,7 @@ struct LOG_NODE
     void init() { lengthCalculated = 0; }
     bool isRoot() { return data_type == ROOT_DATA_TYPE; }
     bool isApp() { return data_type == APP_DATA_TYPE; }
-    bool isProc() { return data_type == PROC_DATA_TYPE; }
+    bool isThread() { return data_type == THREAD_DATA_TYPE; }
     bool isFlow() { return data_type == FLOW_DATA_TYPE; }
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
@@ -135,10 +135,10 @@ struct APP_NODE : LOG_NODE
     DWORD cb_addr_info;
     char* appPath() { return ((char*)(this)) + sizeof(APP_NODE); }
     char* appName() { return appPath() + (cb_app_path - cb_app_name); }
-    void Log() { stdlog("name: %s sec: %d msec: %d\n", "appName()", app_sec, app_msec); }
+    void Log() { stdlog("name: %s sec: %d msec: %d\n", appName(), app_sec, app_msec); }
 };
 
-struct PROC_NODE : LOG_NODE
+struct THREAD_NODE : LOG_NODE
 {
     APP_NODE* pAppNode;
     FLOW_NODE* curentFlow;
@@ -149,7 +149,7 @@ struct PROC_NODE : LOG_NODE
     char COLOR_BUF[10];
     int  cb_color_buf;
 
-    void add_proc_child(FLOW_NODE* pNode, PROCESS_NODE_CHILD type)
+    void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {
         LOG_NODE* pParent = NULL;
         if (type == ROOT_CHILD)
