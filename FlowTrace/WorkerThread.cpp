@@ -16,7 +16,7 @@ void WorkerThread::StopWork()
   }
     if (m_hThread)
     {
-        while (m_hThread != 0 && WAIT_OBJECT_0 != WaitForSingleObject(m_hThread, 0))
+        while (m_hThread != 0 && WAIT_TIMEOUT == WaitForSingleObject(m_hThread, 0))
         {
             //MSG msg;
             //while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
