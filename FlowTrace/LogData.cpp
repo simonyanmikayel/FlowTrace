@@ -254,9 +254,9 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     else if (isThread())
     {
 		if (gSettings.GetColPID())
-			cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d-%d]"), getThreadNN(), getPid());
+			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
 		else
-			cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT("[%d]"), getThreadNN());
+			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
 	}
     else if (isFlow())
     {
@@ -267,25 +267,25 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         if (extened)
         {
             if (gSettings.GetColNN() && NN)
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%d)"), NN); //gArchive.index(this) NN
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), NN); //gArchive.index(this) NN
             if (gSettings.GetShowElapsedTime() && This->getPeer())
             {
                 _int64 sec1 = This->getTimeSec();
                 _int64 msec1 = This->getTimeMSec();
                 _int64 sec2 = (This->getPeer())->getTimeSec();
                 _int64 msec2 = (This->getPeer())->getTimeMSec();
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
             }
         }
         if (gSettings.GetColCallAddr())
         {
             DWORD p = This->call_site;
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%X)"), p);
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%X)"), p);
         }
         if (gSettings.GetFnCallLine())
         {
             if (p_call_addr)
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf, cMaxBuf, TEXT(" (%d)"), p_call_addr->line);
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), p_call_addr->line);
         }
         pBuf[cb] = 0;
     }
@@ -293,7 +293,9 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     {
         ATLASSERT(FALSE);
     }
-    pBuf[cMaxBuf] = 0;
+	if (cb > cMaxBuf)
+		cb = cMaxBuf;
+	pBuf[cb] = 0;
     if (cBuf)
         *cBuf = cb;
     return ret;
@@ -417,7 +419,9 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
         }
     }
 
-    pBuf[MAX_BUF_LEN] = 0;
+	if (cb > MAX_BUF_LEN)
+		cb = MAX_BUF_LEN;
+	pBuf[cb] = 0;
     return ret;
 }
 
