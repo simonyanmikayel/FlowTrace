@@ -86,7 +86,7 @@ void ServerThread::Work(LPVOID pWorkParam)
     while (cb_read < cb)
     {
       ATLASSERT(rec->isValid()); 
-      if (rec->len > cb || !rec->isValid())
+      if (rec->len > (cb - cb_read) || !rec->isValid())
       {
         break;
       }
