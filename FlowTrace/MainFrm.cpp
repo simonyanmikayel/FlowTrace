@@ -271,6 +271,7 @@ void CMainFrame::StopLogging(bool bClearArcive, bool closing)
     }
     else
     {
+		gArchive.onPaused();
         RefreshLog(true);
     }
 }
@@ -362,6 +363,23 @@ LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
   gSettings.SetInfoHiden(!gSettings.GetInfoHiden());
   m_view.ShowStackView(!gSettings.GetInfoHiden());
   return 0;
+}
+
+LRESULT CMainFrame::OnRunExternalCmd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	char* pExternalCmd = gSettings.GetExternalCmd();
+	if (*pExternalCmd)
+	{
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		CreateProcessA(pExternalCmd, "", NULL, NULL, FALSE,
+			NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
+	return 0;
 }
 
 LRESULT CMainFrame::OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -775,7 +793,9 @@ void CMainFrame::UpdateStatusBar()
     ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 3, (LPARAM)pBuf);
 #else
     int cb = 0;
-    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
+	if (gArchive.getLost())
+		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), gArchive.getLost());
+	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %smb"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory()/1000000)));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Line: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));

@@ -29,6 +29,7 @@ public:
     DWORD CurSerachColor();
     DWORD InfoTextColor();
     bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
+	bool CanShowInAndroidStudio() { return *GetAndroidStudio() != 0 && *GetAndroidProject() != 0; }
 
     DECL_PROP(int, VertSplitterPos);
     DECL_PROP(int, HorzSplitterPos);
@@ -48,9 +49,7 @@ public:
     DECL_PROP(DWORD, FlowTracesHiden);
     DECL_PROP(DWORD, TreeViewHiden);
     DECL_PROP(DWORD, InfoHiden);
-    DECL_PROP(DWORD, UsePcTime);
     DECL_PROP(DWORD, ShowAppIp);
-    DECL_PROP(DWORD, ShowAppTime);
     DECL_PROP(DWORD, ShowElapsedTime);
     DECL_PROP(DWORD, ResolveAddr);
     DECL_PROP(DWORD, FullSrcPath);
@@ -74,8 +73,12 @@ public:
     DECL_GET(CHAR*, ResFontName);
 
     DECL_STR_PROP(CHAR, EclipsePath, MAX_PATH);
-    DECL_STR_PROP(CHAR, LinuxHome, MAX_PATH);
+	DECL_STR_PROP(CHAR, ExternalCmd, MAX_PATH);
+	DECL_STR_PROP(CHAR, LinuxHome, MAX_PATH);
     DECL_STR_PROP(CHAR, MapOnWin, MAX_PATH);
+	DECL_STR_PROP(CHAR, AndroidStudio, MAX_PATH);
+	DECL_STR_PROP(CHAR, AndroidProject, MAX_PATH);
+
 
 private:
     LOGFONT   m_logFont;

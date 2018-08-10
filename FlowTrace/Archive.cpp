@@ -21,6 +21,16 @@ Archive::~Archive()
     //delete m_pMemBuf;
 }
 
+void Archive::onPaused()
+{
+	APP_NODE* pApp = (APP_NODE*)gArchive.getRootNode()->lastChild;
+	while (pApp)
+	{
+		pApp->lastNN = INFINITE;
+		pApp = (APP_NODE*)pApp->prevSibling;
+	}
+}
+
 void Archive::clearArchive(bool closing)
 {
     archiveNumber++;
@@ -32,6 +42,7 @@ void Archive::clearArchive(bool closing)
         m_pAddr2LineThread = nullptr;
     }
 
+	m_lost = 0;
     curApp = 0;
     curThread = 0;
     gArchive.getSNAPSHOT().clear();
@@ -75,17 +86,16 @@ void Archive::resolveAddrAsync(LOG_NODE* pNode)
     }
 }
 
-APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD app_msec, DWORD nn, sockaddr_in *p_si_other)
+APP_NODE* Archive::addApp(char* app_path, int cb_app_path, int pid, DWORD nn, sockaddr_in *p_si_other)
 {
     APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE) + cb_app_path, true);
     if (!pNode)
         return nullptr;
 
     pNode->data_type = APP_DATA_TYPE;
-    pNode->app_sec = app_sec;
-    pNode->app_msec = app_msec;
+    pNode->pid = pid;
     pNode->cb_app_path = cb_app_path;
-    pNode->NN = nn;
+    pNode->lastNN = nn;
     pNode->cb_addr_info = INFINITE;
 
     char* appPath = pNode->appPath();
@@ -104,8 +114,6 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, DWORD app_sec, DWORD 
         name_part = appPath;
     }
     pNode->cb_app_name = (int)strlen(name_part);
-
-    Helpers::GetTime(pNode->local_sec, pNode->local_msec);
 
     if (p_si_other)
     {
@@ -145,7 +153,7 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 {
     if (curApp)
     {
-        if (curApp && (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->app_sec == p->app_sec && curApp->app_msec == p->app_msec))
+        if (curApp && (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->pid == p->pid))
             return curApp;
     }
 
@@ -153,14 +161,14 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)
     {
-        if ((0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->app_sec == p->app_sec && curApp->app_msec == p->app_msec))
+        if ((0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->pid == p->pid))
             break;
         curApp = (APP_NODE*)curApp->prevSibling;
     }
     //stdlog("curApp 2 %p\n", curApp);
     if (!curApp)
     {
-        curApp = addApp(p->appPath(), p->cb_app_path, p->app_sec, p->app_msec, p->nn, p_si_other);
+        curApp = addApp(p->appPath(), p->cb_app_path, p->pid, p->nn, p_si_other);
         //curApp->getData()->Log();
     }
 
@@ -189,15 +197,7 @@ THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, ROW_LOG_REC* p)
     return curThread;
 }
 
-void SetTime(THREAD_NODE* pThreadNode, INFO_NODE* pInfoNode, ROW_LOG_REC* pRec, DWORD pc_sec, DWORD pc_msec)
-{
-    pInfoNode->term_sec = pRec->sec;
-    pInfoNode->term_msec = pRec->msec;
-    pInfoNode->pc_sec = pc_sec;
-    pInfoNode->pc_msec = pc_msec;
-}
-
-LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, DWORD pc_sec, DWORD pc_msec)
+LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
 {
     int cb_fn_name = pLogRec->cb_fn_name;
     char* fnName = pLogRec->fnName();
@@ -213,15 +213,18 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, DWORD
     pNode->data_type = FLOW_DATA_TYPE;
     pNode->nn = pLogRec->nn;
     pNode->log_type = pLogRec->log_type;
-    SetTime(pThreadNode, pNode, pLogRec, pc_sec, pc_msec);
+	pNode->log_flags = pLogRec->log_flags;
+	pNode->sec = pLogRec->sec;
+	pNode->msec = pLogRec->msec;
     pNode->this_fn = pLogRec->this_fn;
     pNode->call_site = pLogRec->call_site;
     pNode->call_line = pLogRec->call_line;
+	pNode->fn_line = pLogRec->fn_line;
 
     pNode->cb_fn_name = cb_fn_name;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
 
-    pNode->thread = pThreadNode;
+    pNode->threadNode = pThreadNode;
 
     ((FLOW_NODE*)pNode)->addToTree();
 
@@ -332,7 +335,7 @@ static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, in
     return bRet;
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, DWORD pc_sec, DWORD pc_msec)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed)
 {
     if (prcessed >= pLogRec->cb_trace)
         return NULL;
@@ -448,8 +451,11 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 
         pNode->nn = pLogRec->nn;
         pNode->log_type = pLogRec->log_type;
-        SetTime(pThreadNode, pNode, pLogRec, pc_sec, pc_msec);
-        pNode->call_line = pLogRec->call_line;
+		pNode->log_flags = pLogRec->log_flags;
+		pNode->sec = pLogRec->sec;
+		pNode->msec = pLogRec->msec;
+		pNode->call_line = pLogRec->call_line;
+		pNode->fn_line = pLogRec->call_line;
 
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
@@ -460,7 +466,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
         memcpy(pChank->trace, pLogRec->trace() + prcessed, cb);
         pChank->trace[cb] = 0;
 
-        pNode->thread = pThreadNode;
+        pNode->threadNode = pThreadNode;
         if (endsWithNewLine)
             pNode->hasNewLine = 1;
 
@@ -485,7 +491,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
     return pThreadNode->latestTrace;
 }
 
-bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in *p_si_other)
+bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
 {
     if (!rec->isValid())
         return false;
@@ -493,12 +499,15 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
     APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
         return false;
-    DWORD& NN = pAppNode->NN;
-    if (NN != rec->nn)
+    DWORD& lastNN = pAppNode->lastNN;
+    if (lastNN != rec->nn && lastNN != INFINITE)
     {
-        pAppNode->lost += rec->nn - NN;
-    }
-    NN = rec->nn + 1;
+		int lost = (rec->nn - lastNN > 0) ? rec->nn - lastNN : lastNN - rec->nn;
+        pAppNode->lost += lost;
+		m_lost += lost;
+		Helpers::UpdateStatusBar();
+	}
+	lastNN = rec->nn + 1;
 
     THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)
@@ -506,7 +515,7 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
 
     if (rec->isFlow())
     {
-        if (!addFlow(pThreadNode, rec, pc_sec, pc_msec))
+        if (!addFlow(pThreadNode, rec))
             return false;
     }
     else
@@ -516,7 +525,7 @@ bool Archive::append(ROW_LOG_REC* rec, DWORD pc_sec, DWORD pc_msec, sockaddr_in 
         {
             int prcessed0 = prcessed;
             int cb_trace0 = rec->cb_trace;
-            addTrace(pThreadNode, rec, prcessed, pc_sec, pc_msec);
+            addTrace(pThreadNode, rec, prcessed);
             if (prcessed0 >= prcessed && cb_trace0 <= rec->cb_trace && prcessed < rec->cb_trace)
             {
                 ATLASSERT(FALSE);

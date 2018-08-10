@@ -203,9 +203,79 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
 	return CDRF_DODEFAULT;
 }
 
-void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
+void CFlowTraceView::ShowInIDE(char* src, int line, bool IsAndroidLog)
 {
-	if (pSelectedNode && gSettings.CanShowInEclipse())
+	if (!src || !src[0] || !line)
+		return;
+
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	const int max_cmd = 2 * MAX_PATH;
+	char cmd[max_cmd + 1];
+	char *process;
+
+	if (IsAndroidLog)
+	{
+		_sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\\%s.java\"", gSettings.GetAndroidStudio(), line, gSettings.GetAndroidProject(), src);
+		process = NULL;
+	}
+	else
+	{
+		char* szLinuxHome = gSettings.GetLinuxHome();
+		if (strstr(src, szLinuxHome))
+			src = strstr(src, szLinuxHome) + strlen(szLinuxHome);
+		_sntprintf_s(cmd, max_cmd, max_cmd, " -name Eclipse --launcher.openFile %s\\%s:%d", gSettings.GetMapOnWin(), src, line);
+		//D:\Programs\eclipse\eclipse-cpp-neon-M4a-win32-x86_64\eclipsec.exe -name Eclipse --launcher.openFile X:\prj\c\c\ctap\kernel\CTAPparameters\src\CTAP_parameters.c:50
+		process = gSettings.GetEclipsePath();
+	}
+
+	CreateProcess(process, cmd, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+}
+
+void CFlowTraceView::ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite)
+{
+	if (!pSelectedNode || !pSelectedNode->CanShowInIDE())
+		return;
+	bool IsAndroidLog = pSelectedNode->isInfo() && (((INFO_NODE*)pSelectedNode)->log_flags & LOG_FLAG_ANDTROID);
+	char* src = 0;
+	int line = 0;
+	char src2[MAX_PATH + 1];
+	if (IsAndroidLog)
+	{
+		INFO_NODE* pNode = (INFO_NODE*)pSelectedNode;
+		int cb;
+		if ((!bShowCallSite || pSelectedNode->isTrace()))
+		{
+			src = pSelectedNode->getFnName();
+			cb = pSelectedNode->getFnNameSize();
+			line = ((INFO_NODE*)pSelectedNode)->fn_line;
+			if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
+				line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
+		}
+		else if (pNode->parent && pNode->parent->isFlow())
+		{
+			src = pSelectedNode->parent->getFnName();
+			cb = pSelectedNode->parent->getFnNameSize();
+			line = ((INFO_NODE*)pSelectedNode)->call_line;
+		}
+		if (src && cb < MAX_PATH)
+		{
+			strncpy_s(src2, src, cb);
+			src2[cb] = 0;
+			char* dot = strrchr(src2, '.');
+			if (dot)
+				*dot = 0;
+			dot = src2;
+			while (dot = strchr(dot, '.'))
+				*dot = '\\';
+			src = src2;
+		}
+	}
+	else
 	{
 		LOG_NODE* pNode = pSelectedNode->getSyncNode();
 		ADDR_INFO * p_addr_info = (!bShowCallSite || pSelectedNode->isTrace()) ? pNode->p_func_addr : pNode->p_call_addr;
@@ -216,15 +286,8 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
 		}
 		if (pNode && p_addr_info && p_addr_info->line > 0)
 		{
-			STARTUPINFO si;
-			PROCESS_INFORMATION pi;
-			ZeroMemory(&si, sizeof(si));
-			si.cb = sizeof(si);
-			//D:\Programs\eclipse\eclipse-cpp-neon-M4a-win32-x86_64\eclipsec.exe -name Eclipse --launcher.openFile X:\prj\c\c\ctap\kernel\CTAPparameters\src\CTAP_parameters.c:50
-			const int max_cmd = 2 * MAX_PATH;
-			char cmd[max_cmd + 1];
-			char* src = p_addr_info->src;
-			int line = 0;
+			src = p_addr_info->src;
+			line = 0;
 			if (pSelectedNode->isTrace())
 			{
 				TRACE_NODE* pNode = (TRACE_NODE*)pSelectedNode;
@@ -234,16 +297,9 @@ void CFlowTraceView::ShowInEclipse(LOG_NODE* pSelectedNode, bool bShowCallSite)
 			{
 				line = p_addr_info->line;
 			}
-			char* szLinuxHome = gSettings.GetLinuxHome();
-			if (strstr(src, szLinuxHome))
-				src = strstr(src, szLinuxHome) + strlen(szLinuxHome);
-			_sntprintf_s(cmd, max_cmd, max_cmd, " -name Eclipse --launcher.openFile %s%s:%d", gSettings.GetMapOnWin(), src, line);
-			CreateProcess(gSettings.GetEclipsePath(), cmd, NULL, NULL, FALSE,
-				NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
 		}
 	}
+	ShowInIDE(src, line, IsAndroidLog);
 }
 
 void CFlowTraceView::SyncViews(LOG_NODE* pNode, bool fromList)

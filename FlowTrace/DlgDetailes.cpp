@@ -18,7 +18,6 @@ LRESULT DlgDetailes::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkFuncName.Attach(GetDlgItem(IDC_FUNC_NAME));
   m_chkCallLine.Attach(GetDlgItem(IDC_CALL_LINE));
   m_ShowAppIp.Attach(GetDlgItem(IDC_CHECK_SHOW_APP_IP));
-  m_ShowAppTime.Attach(GetDlgItem(IDC_CHECK_SHOW_APP_TIME));
   m_ShowElapsedTime.Attach(GetDlgItem(IDC_CHECK_SHOW_ELAPSED_TIME));
 
   m_chkLineNN.SetCheck(gSettings.GetColLineNN());
@@ -32,7 +31,6 @@ LRESULT DlgDetailes::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_chkFuncName.SetCheck(gSettings.GetColFunc());
   m_chkCallLine.SetCheck(gSettings.GetColLine());
   m_ShowAppIp.SetCheck(gSettings.GetShowAppIp());
-  m_ShowAppTime.SetCheck(gSettings.GetShowAppTime());
   m_ShowElapsedTime.SetCheck(gSettings.GetShowElapsedTime());
 
   return TRUE;
@@ -53,7 +51,6 @@ LRESULT DlgDetailes::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     gSettings.SetColFunc(m_chkFuncName.GetCheck());
     gSettings.SetColLine(m_chkCallLine.GetCheck());
     gSettings.SetShowAppIp(m_ShowAppIp.GetCheck());
-    gSettings.SetShowAppTime(m_ShowAppTime.GetCheck());
     gSettings.SetShowElapsedTime(m_ShowElapsedTime.GetCheck());
   }
   EndDialog(wID);

@@ -19,4 +19,5 @@ namespace Helpers
   CHAR* str_format_int_grouped(__int64 num);
   void GetTime(DWORD &sec, DWORD& msec);
   void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
+  void UpdateStatusBar();
 };

@@ -301,7 +301,7 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
 
 	UpdateCaret();
 
-	gMainFrame->UpdateStatusBar();
+	Helpers::UpdateStatusBar();
 }
 
 void CLogListView::MoveSelectionToEnd(bool extend)
@@ -631,11 +631,14 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
 	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
 	dwFlags = MF_BYPOSITION | MF_STRING;
-	if (pNode == NULL || !gSettings.CanShowInEclipse())
+	if (pNode == NULL || !pNode->CanShowInIDE())
 		dwFlags |= MF_DISABLED;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call line in IDE"));
 	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+	dwFlags = MF_BYPOSITION | MF_STRING;
+	if (pNode == NULL || !pNode->CanShowInIDE() || pNode->isTrace())
+		dwFlags |= MF_DISABLED;
+	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE"));
 	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
 	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
 	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
@@ -660,11 +663,11 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	}
 	else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
 	{
-		m_pView->ShowInEclipse(pNode, true);
+		m_pView->ShowInIDE(pNode, true);
 	}
 	else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
 	{
-		m_pView->ShowInEclipse(pNode, false);
+		m_pView->ShowInIDE(pNode, false);
 	}
 
 	return 0;
@@ -916,7 +919,7 @@ void CLogListView::Clear()
 		m_ListSelection.Clear();
 		::SetFocus(hwndMain); //force carret destroy
 		SetColumns();
-		gMainFrame->UpdateStatusBar();
+		Helpers::UpdateStatusBar();
 	}
 }
 
@@ -965,7 +968,7 @@ void CLogListView::RefreshList(bool redraw)
 		Clear();
 	}
 
-	gMainFrame->UpdateStatusBar();
+	Helpers::UpdateStatusBar();
 }
 
 void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)

@@ -31,12 +31,14 @@ public:
   CEdit m_UdpPort;
   CButton m_btnFont;
   CButton m_btnReset;
-  CButton m_UsePcTime;
   CButton m_ResolveAddr;
   CButton m_FullSrcPath;
   CEdit   m_edtEclipsePath;
+  CEdit   m_edtExternalCmd;
   CEdit   m_edtLinuxHome;
   CEdit   m_edtMapOnWin;
+  CEdit   m_edtAndroidStudio;
+  CEdit   m_edtAndroidProject;
 
   DWORD     m_FontSize;
   CHAR     m_FaceName[LF_FACESIZE];

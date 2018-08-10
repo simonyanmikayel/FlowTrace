@@ -22,7 +22,6 @@ public:
   CButton m_chkFuncName;
   CButton m_chkCallLine;
   CButton m_ShowAppIp;
-  CButton m_ShowAppTime;
   CButton m_ShowElapsedTime;
 
   // Handler prototypes (uncomment arguments if needed):

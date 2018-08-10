@@ -6,6 +6,7 @@ WorkerThread::WorkerThread(void)
 {
     m_bWorking = false;
     m_hThread = 0;
+	m_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 }
 
 void WorkerThread::StopWork()
@@ -36,6 +37,8 @@ void WorkerThread::StartWork(LPVOID pWorkParam /*=0*/)
     m_pWorkParam = pWorkParam;
     m_hTreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     m_hThread = CreateThread(0, 0, ThreadFunk, this, 0, &m_dwTID);
+	bool b = SetThreadPriority(m_hThread, m_priority);
+	int i = GetThreadPriority(m_hThread);
     WaitForSingleObject(m_hTreadEvent, INFINITE);
     CloseHandle(m_hTreadEvent);
 }

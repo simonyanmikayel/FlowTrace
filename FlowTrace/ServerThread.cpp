@@ -6,6 +6,8 @@
 
 ServerThread::ServerThread()
 {
+	m_priority = THREAD_PRIORITY_HIGHEST;
+
   struct sockaddr_in server;
 
   //Create a socket
@@ -55,8 +57,6 @@ void ServerThread::Work(LPVOID pWorkParam)
   char buf[MAX_RECORD_LEN] = { 0 };
   int slen, cb, cb_read;
   struct sockaddr_in si_other;
-  int64_t time, pc_time, rec_time, pac_time;
-  DWORD pc_sec, pc_msec;
 
   if (s == INVALID_SOCKET)
     return;
@@ -77,10 +77,6 @@ void ServerThread::Work(LPVOID pWorkParam)
       stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(UDP_PACK));
     }
 
-    Helpers::GetTime(pc_sec, pc_msec);
-    pc_time = (int64_t)pc_sec * (int64_t)1000 + (int64_t)pc_msec;
-    pac_time = (int64_t)pack->term_sec * (int64_t)1000 + (int64_t)pack->term_msec;
-
     ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(UDP_PACK));
     cb_read = sizeof(UDP_PACK);
     while (cb_read < cb)
@@ -90,9 +86,7 @@ void ServerThread::Work(LPVOID pWorkParam)
       {
         break;
       }
-      rec_time = (int64_t)rec->sec * (int64_t)1000 + (int64_t)rec->msec;
-      time = rec_time + (pc_time - pac_time);
-      if (!gArchive.append(rec, (DWORD)(time / (int64_t)1000), (DWORD)(time % (int64_t)1000), &si_other))
+      if (!gArchive.append(rec, &si_other))
       {
         break;
       }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Helpers.h"
 #include "Resource.h"
+#include "MainFrm.h"
 
 namespace Helpers
 {
@@ -40,8 +41,12 @@ namespace Helpers
     CHAR* buf = new CHAR[1024];
     _vsntprintf_s(buf, 1023, 1023, lpFormat, vl);
     va_end(vl);
-
     ::PostMessage(hwndMain, WM_SHOW_NGS, (WPARAM)buf, (LPARAM)0);
+  }
+
+  void UpdateStatusBar()
+  {
+	  gMainFrame->UpdateStatusBar();
   }
 
   void SysErrMessageBox(CHAR* lpFormat, ...)

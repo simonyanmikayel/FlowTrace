@@ -6,7 +6,7 @@
 #define IDR_MAINFRAME                   128
 #define IDI_ICON_TREE_ROOT              502
 #define IDI_ICON_TREE_APP               503
-#define IDI_ICON_TREE_THREAD              504
+#define IDI_ICON_TREE_THREAD            504
 #define IDI_ICON_TREE_PAIRED            505
 #define IDI_ICON_TREE_ENTER             506
 #define IDI_ICON_TREE_EXIT              507
@@ -76,6 +76,10 @@
 #define IDC_EDIT2                       1202
 #define IDC_EDIT_MAP_ON_WIN             1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
+#define IDC_EDIT_EXTERNAL_COMMAND       1204
+#define IDC_EDIT_ANDROID_STUDIO         1205
+#define IDC_EDIT_ANDOID_PROJECT         1206
+#define IDC_EDIT_ANDROID_PROJECT        1206
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
@@ -120,13 +124,14 @@
 #define ID_EDIT_COPY_ALL                32829
 #define ID_EDIT_COPY_TRACES             32830
 #define ID_CALL_STACK                   32831
+#define ID_VIEW_RUN_EXTERNAL_CMD        32832
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        536
-#define _APS_NEXT_COMMAND_VALUE         32832
+#define _APS_NEXT_COMMAND_VALUE         32833
 #define _APS_NEXT_CONTROL_VALUE         1202
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

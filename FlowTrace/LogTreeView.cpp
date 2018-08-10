@@ -62,7 +62,7 @@ void CLogTreeView::Clear()
   SetItemCountEx(0, 0);
   m_colWidth = min_colWidth;
   SetColumnWidth(0, m_colWidth);
-  gMainFrame->UpdateStatusBar();
+  Helpers::UpdateStatusBar();
 }
 
 LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
@@ -107,11 +107,14 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
     Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
     dwFlags = MF_BYPOSITION | MF_STRING;
-    if (pNode == NULL || !gSettings.CanShowInEclipse())
+    if (pNode == NULL || !pNode->CanShowInIDE())
       dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call Line in Eclipse"));
+    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call line in IDE"));
     Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in Eclipse"));
+	dwFlags = MF_BYPOSITION | MF_STRING;
+	if (pNode == NULL || !pNode->CanShowInIDE() || pNode->isTrace())
+		dwFlags |= MF_DISABLED;
+	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE"));
     Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
     dwFlags = MF_BYPOSITION | MF_STRING;
     InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
@@ -147,11 +150,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     }
     else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
     {
-      m_pView->ShowInEclipse(pNode, true);
+      m_pView->ShowInIDE(pNode, true);
     }
     else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
     {
-      m_pView->ShowInEclipse(pNode, false);
+      m_pView->ShowInIDE(pNode, false);
     }
 
     //stdlog("%u\n", GetTickCount());
@@ -246,7 +249,7 @@ void CLogTreeView::RefreshTree(bool showAll)
     SetItemCountEx(1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
 
   m_recCount = newCount;
-  gMainFrame->UpdateStatusBar();
+  Helpers::UpdateStatusBar();
 
 }
 
@@ -613,6 +616,16 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
       RedrawItems(iItem, iItem);
       EnsureItemVisible(iItem);
     }
+	//if (m_pSelectedNode != NULL)
+	//{
+	//	stdlog("wParam: %X\n", wParam);
+	//	if (wParam & MK_CONTROL)
+	//		m_pSelectedNode = m_pSelectedNode;
+	//	if (wParam & MK_XBUTTON1)
+	//		m_pSelectedNode = m_pSelectedNode;
+	//	if (wParam & MK_XBUTTON2)
+	//		m_pSelectedNode = m_pSelectedNode;
+	//}
   }
   return 0;
 }

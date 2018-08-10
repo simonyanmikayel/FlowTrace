@@ -118,43 +118,48 @@ int LOG_NODE::getFnNameSize()
 }
 void FLOW_NODE::addToTree()
 {
-    if (thread->curentFlow == NULL)
+    if (threadNode->curentFlow == NULL)
     {
-        thread->add_thread_child(this, ROOT_CHILD);
+		threadNode->add_thread_child(this, ROOT_CHILD);
     }
     else
     {
-        FLOW_NODE* pLatestFlowData = thread->curentFlow;
+        FLOW_NODE* lastFlowNode = threadNode->curentFlow;
         if (isEnter())
         {
-            if (pLatestFlowData->peer || !pLatestFlowData->isEnter())
+            if (lastFlowNode->peer || !lastFlowNode->isEnter())
             {
-                thread->add_thread_child(this, ROOT_CHILD);
+				threadNode->add_thread_child(this, ROOT_CHILD);
             }
             else
             {
-                thread->add_thread_child(this, LATEST_CHILD);
+				threadNode->add_thread_child(this, LATEST_CHILD);
             }
         }
         else
         {
-            if (pLatestFlowData->peer == NULL && pLatestFlowData->isEnter() && pLatestFlowData->this_fn == this_fn && pLatestFlowData->call_site == call_site)
+			while ((void*)lastFlowNode != (void*)threadNode)
+			{
+				if (lastFlowNode->peer == NULL && lastFlowNode->isEnter() && lastFlowNode->this_fn == this_fn && lastFlowNode->call_site == call_site)
+				{
+					lastFlowNode->peer = this;
+					peer = lastFlowNode;
+					if (lastFlowNode->parent != threadNode) {
+						threadNode->curentFlow = (FLOW_NODE*)(lastFlowNode->parent);
+					}
+					break;
+				}
+				lastFlowNode = (FLOW_NODE*)(lastFlowNode->parent);
+			}
+            if ((void*)lastFlowNode == (void*)threadNode)
             {
-                pLatestFlowData->peer = this;
-                peer = thread->curentFlow;
-                if (thread->curentFlow->parent != thread) {
-                    thread->curentFlow = (FLOW_NODE*)(thread->curentFlow->parent);
-                }
-            }
-            else
-            {
-                if (pLatestFlowData->isEnter())
+                if (lastFlowNode->isEnter())
                 {
-                    thread->add_thread_child(this, ROOT_CHILD);
+					threadNode->add_thread_child(this, ROOT_CHILD);
                 }
                 else
                 {
-                    thread->add_thread_child(this, LATEST_CHILD);
+					threadNode->add_thread_child(this, LATEST_CHILD);
                 }
             }
         }
@@ -237,19 +242,6 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         {
             cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%s)"), This->ip_address);
         }
-        if (gSettings.GetShowAppTime())
-        {
-            struct tm timeinfo;
-            DWORD sec = This->app_sec;
-            DWORD msec = This->app_msec;
-            time_t rawtime = sec;
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" ("));
-            if (0 == localtime_s(&timeinfo, &rawtime))
-            {
-                cb += (int)strftime(pBuf + cb, cMaxBuf - cb, "%H:%M:%S", &timeinfo);
-            }
-            cb += (int)_sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(".%03d)"), msec);
-        }
     }
     else if (isThread())
     {
@@ -324,8 +316,8 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-        cb += thread->pAppNode->cb_app_name;
-        memcpy(pBuf, thread->pAppNode->appName(), cb);
+        cb += threadNode->pAppNode->cb_app_name;
+        memcpy(pBuf, threadNode->pAppNode->appName(), cb);
         pBuf[cb] = 0;
     }
     else if (col == THREAD_COL)
@@ -431,19 +423,19 @@ int LOG_NODE::getNN()
 }
 LONG LOG_NODE::getTimeSec()
 {
-    return isInfo() ? (gSettings.GetUsePcTime() ? ((INFO_NODE*)this)->pc_sec : ((INFO_NODE*)this)->term_sec) : 0LL;
+    return isInfo() ? (((INFO_NODE*)this)->sec) : 0LL;
 }
 LONG LOG_NODE::getTimeMSec()
 {
-    return isInfo() ? (gSettings.GetUsePcTime() ? ((INFO_NODE*)this)->pc_msec : ((INFO_NODE*)this)->term_msec) : 0LL;
+    return isInfo() ? (((INFO_NODE*)this)->msec) : 0LL;
 }
 int LOG_NODE::getPid()
 { 
-	return  isThread() ? ((THREAD_NODE*)this)->tid : (isInfo() ? thread->tid : 0);
+	return  isThread() ? ((THREAD_NODE*)this)->tid : (isInfo() ? threadNode->tid : 0);
 }
 int LOG_NODE::getThreadNN()
 {
-	return  isThread() ? ((THREAD_NODE*)this)->threadNN : (isInfo() ? thread->threadNN : 0);
+	return  isThread() ? ((THREAD_NODE*)this)->threadNN : (isInfo() ? threadNode->threadNN : 0);
 }
 DWORD LOG_NODE::getCallAddr()
 {
@@ -540,6 +532,15 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     } while (pNode0 != pNode);
     //stdlog("CollapseExpandAll %d\n", GetTickCount());
     CalcLines();
+}
+bool LOG_NODE::CanShowInIDE()
+{
+	if (!isInfo())
+		return false;
+	else if (((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID)
+		return gSettings.CanShowInAndroidStudio();
+	else
+		return gSettings.CanShowInEclipse();
 }
 
 

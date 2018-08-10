@@ -40,9 +40,7 @@ LPCTSTR STR_APP_REG_VAL_FnCallLine = _T("FnCallLine");
 LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
 LPCTSTR STR_APP_REG_VAL_TREE_VIEW_HIDEN = _T("TreeViewHiden");
 LPCTSTR STR_APP_REG_VAL_INFO_HIDEN = _T("InfoHiden");
-LPCTSTR STR_APP_REG_VAL_USE_PC_TIME = _T("UsePcTime");
 LPCTSTR STR_APP_REG_VAL_SHOW_APP_IP = _T("ShowAppIp");
-LPCTSTR STR_APP_REG_VAL_SHOW_APP_TIME = _T("ShowAppTIME");
 LPCTSTR STR_APP_REG_VAL_SHOW_ELAPSED_TIME = _T("ShowElapsedTime");
 LPCTSTR STR_APP_REG_VAL_RESOLVE_ADDR = _T("ResolveAddr");
 LPCTSTR STR_APP_REG_VAL_FULL_SRC_PATH = _T("FullSrcPath");
@@ -51,6 +49,9 @@ LPCTSTR STR_APP_REG_VAL_UpdateStack = _T("UpdateStack");
 LPCTSTR STR_APP_REG_VAL_EclipsePath = _T("EclipsePath");
 LPCTSTR STR_APP_REG_VAL_LinuxHome = _T("LinuxHome");
 LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
+LPCTSTR STR_APP_REG_VAL_AndroidStudio = _T("AndroidStudio");
+LPCTSTR STR_APP_REG_VAL_AndroidProject = _T("AndroidProject");
+LPCTSTR STR_APP_REG_VAL_ExternalCmd = _T("ExternalCmd");
 
 //#define DefBkColor RGB(0,0,0)
 //#define DefTextColor RGB(176,176,176)
@@ -76,9 +77,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden, TRUE);
   Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
   Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
-  Read(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime, FALSE);
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
-  Read(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
   Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
   Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
@@ -95,8 +94,11 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
 
   Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
+  Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");
   Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
   Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
+  Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
+  Read(STR_APP_REG_VAL_AndroidProject, m_AndroidProject, sizeof(m_AndroidProject), "");
 
   //Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
   //Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
@@ -361,16 +363,17 @@ void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_F
 void CSettings::SetFlowTracesHiden(DWORD i){ m_FlowTracesHiden = i; Write(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden); }
 void CSettings::SetTreeViewHiden(DWORD i){ m_TreeViewHiden = i; Write(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden); }
 void CSettings::SetInfoHiden(DWORD i) { m_InfoHiden = i; Write(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden); }
-void CSettings::SetUsePcTime(DWORD i){ m_UsePcTime = i; Write(STR_APP_REG_VAL_USE_PC_TIME, m_UsePcTime); }
 void CSettings::SetShowAppIp(DWORD i) { m_ShowAppIp = i; Write(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp); }
-void CSettings::SetShowAppTime(DWORD i) { m_ShowAppTime = i; Write(STR_APP_REG_VAL_SHOW_APP_TIME, m_ShowAppTime); }
 void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime); }
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
 void CSettings::SetEclipsePath(const CHAR* EclipsePath) { int c = _countof(m_EclipsePath); _tcsncpy_s(m_EclipsePath, c, EclipsePath, c - 1); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
+void CSettings::SetExternalCmd(const CHAR* ExternalCmd) { int c = _countof(m_ExternalCmd); _tcsncpy_s(m_ExternalCmd, c, ExternalCmd, c - 1); m_ExternalCmd[c] = 0; Write(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd); }
 void CSettings::SetLinuxHome(const CHAR* LinuxHome) { int c = _countof(m_LinuxHome); _tcsncpy_s(m_LinuxHome, c, LinuxHome, c - 1); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
 void CSettings::SetMapOnWin(const CHAR* MapOnWin) { int c = _countof(m_MapOnWin); _tcsncpy_s(m_MapOnWin, c, MapOnWin, c - 1); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
+void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m_AndroidStudio); _tcsncpy_s(m_AndroidStudio, c, AndroidStudio, c - 1); m_AndroidStudio[c] = 0; Write(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio); }
+void CSettings::SetAndroidProject(const CHAR* AndroidProject) { int c = _countof(m_AndroidProject); _tcsncpy_s(m_AndroidProject, c, AndroidProject, c - 1); m_AndroidProject[c] = 0; Write(STR_APP_REG_VAL_AndroidProject, m_AndroidProject); }
 
 void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 

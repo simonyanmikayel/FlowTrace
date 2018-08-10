@@ -29,7 +29,7 @@ struct ADDR_INFO
 
 struct LOG_NODE
 {
-    THREAD_NODE* thread;
+    THREAD_NODE* threadNode;
     LOG_NODE* parent;
     LOG_NODE* lastChild;
     LOG_NODE* prevSibling;
@@ -64,6 +64,7 @@ struct LOG_NODE
     bool isFlow() { return data_type == FLOW_DATA_TYPE; }
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
+	bool CanShowInIDE();
 
     void CalcLines();
     int GetExpandCount() { return expanded ? cExpanded : 0; }
@@ -121,12 +122,9 @@ struct ROOT_NODE : LOG_NODE
 
 struct APP_NODE : LOG_NODE
 {
-    DWORD app_sec;
-    DWORD app_msec;
-    DWORD local_sec;
-    DWORD local_msec;
-    int threadCount;
-    DWORD NN;
+    int pid;
+	int threadCount;
+    DWORD lastNN;
     DWORD lost;
     char ip_address[66];
     int cb_app_path;
@@ -135,7 +133,6 @@ struct APP_NODE : LOG_NODE
     DWORD cb_addr_info;
     char* appPath() { return ((char*)(this)) + sizeof(APP_NODE); }
     char* appName() { return appPath() + (cb_app_path - cb_app_name); }
-    void Log() { stdlog("name: %s sec: %d msec: %d\n", appName(), app_sec, app_msec); }
 };
 
 struct THREAD_NODE : LOG_NODE
@@ -166,13 +163,13 @@ struct THREAD_NODE : LOG_NODE
 struct INFO_NODE : LOG_NODE
 {
     int  nn;
-    int log_type;
-    int call_line;
+    WORD log_type;
+	WORD log_flags;
+	int fn_line;
+	int call_line;
     int cb_fn_name;
-    DWORD pc_sec;
-    DWORD pc_msec;
-    DWORD term_sec;
-    DWORD term_msec;
+    DWORD sec;
+    DWORD msec;
     bool isEnter() { return log_type == LOG_TYPE_ENTER; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
 };

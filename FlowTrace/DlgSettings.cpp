@@ -9,15 +9,17 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 {
   m_lblFont.Attach(GetDlgItem(IDC_FONT_NAME));
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
-  m_UsePcTime.Attach(GetDlgItem(IDC_CHECK_USE_PC_TIME));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
   m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
   m_FullSrcPath.Attach(GetDlgItem(IDC_CHECK_FULL_SRC_PATH));
   m_edtEclipsePath.Attach(GetDlgItem(IDC_EDIT_ECLIPSE_ON_WIN));
+  m_edtExternalCmd.Attach(GetDlgItem(IDC_EDIT_EXTERNAL_COMMAND));
   m_edtLinuxHome.Attach(GetDlgItem(IDC_EDIT_LINUX_HOME));
   m_edtMapOnWin.Attach(GetDlgItem(IDC_EDIT_MAP_ON_WIN));
-  
+  m_edtAndroidStudio.Attach(GetDlgItem(IDC_EDIT_ANDROID_STUDIO));
+  m_edtAndroidProject.Attach(GetDlgItem(IDC_EDIT_ANDROID_PROJECT));
+
   m_FontSize = gSettings.GetFontSize();
   strncpy_s(m_FaceName, _countof(m_FaceName), gSettings.GetFontName(), _countof(m_FaceName) - 1);
   m_FaceName[LF_FACESIZE - 1] = 0;
@@ -25,12 +27,15 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   SetFontLabel();
 
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
-  m_UsePcTime.SetCheck(gSettings.GetUsePcTime() ? BST_CHECKED : BST_UNCHECKED);
   m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
   m_edtEclipsePath.SetWindowText(gSettings.GetEclipsePath());
+  m_edtExternalCmd.SetWindowText(gSettings.GetExternalCmd());
   m_edtLinuxHome.SetWindowText(gSettings.GetLinuxHome());
   m_edtMapOnWin.SetWindowText(gSettings.GetMapOnWin());
+  m_edtAndroidStudio.SetWindowText(gSettings.GetAndroidStudio());
+  m_edtAndroidProject.SetWindowText(gSettings.GetAndroidProject());
+
   CenterWindow(GetParent());
   return TRUE;
 }
@@ -86,7 +91,6 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
   {
     gSettings.SetUIFont(m_FaceName, m_lfWeight, m_FontSize);
     gSettings.SetUdpPort(GetDlgItemInt(IDC_EDIT_PORT));
-    gSettings.SetUsePcTime(m_UsePcTime.GetCheck());
     gSettings.SetResolveAddr(m_ResolveAddr.GetCheck());
     gSettings.SetFullSrcPath(m_FullSrcPath.GetCheck());
 
@@ -94,12 +98,22 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     m_edtEclipsePath.GetWindowText(strEclipsePath);
     gSettings.SetEclipsePath(strEclipsePath.GetString());
 
+	CString strExternalCmd;
+	m_edtExternalCmd.GetWindowText(strExternalCmd);
+	gSettings.SetExternalCmd(strExternalCmd.GetString());
+
     CString strLinuxHome;
     m_edtLinuxHome.GetWindowText(strLinuxHome);
     gSettings.SetLinuxHome(strLinuxHome.GetString());
     CString strMapOnWin;
     m_edtMapOnWin.GetWindowText(strMapOnWin);
     gSettings.SetMapOnWin(strMapOnWin.GetString());
+	CString strAndroidStudio;
+	m_edtAndroidStudio.GetWindowText(strAndroidStudio);
+	gSettings.SetAndroidStudio(strAndroidStudio.GetString());
+	CString strAndroidProject;
+	m_edtAndroidProject.GetWindowText(strAndroidProject);
+	gSettings.SetAndroidProject(strAndroidProject.GetString());
 
   }
   EndDialog(wID);
