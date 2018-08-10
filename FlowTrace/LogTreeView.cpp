@@ -101,22 +101,8 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     POINT pt = { xPos, yPos };
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
-    dwFlags = MF_BYPOSITION | MF_STRING;
-    if (!pNode->isFlow())
-      dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
-    dwFlags = MF_BYPOSITION | MF_STRING;
-    if (pNode == NULL || !pNode->CanShowInIDE())
-      dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call line in IDE"));
-    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
+	Helpers::AddCommonMenu(pNode, hMenu, cMenu);
 	dwFlags = MF_BYPOSITION | MF_STRING;
-	if (pNode == NULL || !pNode->CanShowInIDE() || pNode->isTrace())
-		dwFlags |= MF_DISABLED;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE"));
-    Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
-    dwFlags = MF_BYPOSITION | MF_STRING;
     InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
     dwFlags = MF_BYPOSITION | MF_STRING;
     if (!pNode->lastChild)
@@ -150,11 +136,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     }
     else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
     {
-      m_pView->ShowInIDE(pNode, true);
+      Helpers::ShowInIDE(pNode, true);
     }
     else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
     {
-      m_pView->ShowInIDE(pNode, false);
+      Helpers::ShowInIDE(pNode, false);
     }
 
     //stdlog("%u\n", GetTickCount());
@@ -569,13 +555,18 @@ int CLogTreeView::ItemByPos(int yPos)
   return ht.iItem;
  }
 
+LRESULT CLogTreeView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+	Helpers::OnLButtonUp(m_pSelectedNode, wParam, lParam);
+	return 0;
+}
+
 LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
   if (GetFocus() != *this)
     SetFocus();
 
   bHandled = TRUE;
-
 
   int xPos = GET_X_LPARAM(lParam);
   int yPos = GET_Y_LPARAM(lParam);
@@ -616,16 +607,7 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
       RedrawItems(iItem, iItem);
       EnsureItemVisible(iItem);
     }
-	//if (m_pSelectedNode != NULL)
-	//{
-	//	stdlog("wParam: %X\n", wParam);
-	//	if (wParam & MK_CONTROL)
-	//		m_pSelectedNode = m_pSelectedNode;
-	//	if (wParam & MK_XBUTTON1)
-	//		m_pSelectedNode = m_pSelectedNode;
-	//	if (wParam & MK_XBUTTON2)
-	//		m_pSelectedNode = m_pSelectedNode;
-	//}
+	Helpers::OnLButtonDoun(wParam, lParam);
   }
   return 0;
 }

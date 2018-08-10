@@ -36,8 +36,6 @@ public:
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
   void SyncViews();
-  void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite);
-  void ShowInIDE(char* src, int line, bool IsAndroidLog);
   void ShowTreeView(bool show);
   void ShowStackView(bool show);
   void ClearLog();

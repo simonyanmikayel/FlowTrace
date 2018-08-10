@@ -627,20 +627,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	POINT pt = { xPos, yPos };
 	ClientToScreen(&pt);
 	HMENU hMenu = CreatePopupMenu();
-	dwFlags = MF_BYPOSITION | MF_STRING;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
-	dwFlags = MF_BYPOSITION | MF_STRING;
-	if (pNode == NULL || !pNode->CanShowInIDE())
-		dwFlags |= MF_DISABLED;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call line in IDE"));
-	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
-	dwFlags = MF_BYPOSITION | MF_STRING;
-	if (pNode == NULL || !pNode->CanShowInIDE() || pNode->isTrace())
-		dwFlags |= MF_DISABLED;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE"));
-	Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
-	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
+	Helpers::AddCommonMenu(pNode, hMenu, cMenu);
 	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
 	dwFlags = MF_BYPOSITION | MF_STRING;
 	if (m_ListSelection.IsEmpty())
@@ -663,11 +650,11 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	}
 	else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
 	{
-		m_pView->ShowInIDE(pNode, true);
+		Helpers::ShowInIDE(pNode, true);
 	}
 	else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
 	{
-		m_pView->ShowInIDE(pNode, false);
+		Helpers::ShowInIDE(pNode, false);
 	}
 
 	return 0;
@@ -708,20 +695,22 @@ LRESULT CLogListView::OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL 
 	return 0;
 }
 
-LRESULT CLogListView::OnLButtonUp(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+LRESULT CLogListView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
 	if (m_IsCupture)
 	{
 		m_IsCupture = false;
 		ReleaseCapture();
 	}
+	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(getSelectionItem());
+	Helpers::OnLButtonUp(pNode, wParam, lParam);
 	return 0;
 }
 
 LRESULT CLogListView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
 	UdjustSelectionOnMouseEven(uMsg, wParam, lParam);
-
+	Helpers::OnLButtonDoun(wParam, lParam);
 	return 0;
 }
 

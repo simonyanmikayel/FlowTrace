@@ -307,9 +307,16 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
   ::SetBkMode(hdc, old_bkMode);
 }
 
+LRESULT CBackTraceCallView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+	Helpers::OnLButtonUp(m_sel.pNode, wParam, lParam);
+	return 0;
+}
+
 LRESULT CBackTraceCallView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
   SetSelectionOnMouseEven(uMsg, wParam, lParam);
+  Helpers::OnLButtonDoun(wParam, lParam);
   return 0;
 }
 
@@ -326,22 +333,7 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
   POINT pt = { xPos, yPos };
   ClientToScreen(&pt);
   HMENU hMenu = CreatePopupMenu();
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  if (m_sel.pNode == NULL)
-    dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  if (m_sel.pNode == NULL || !m_sel.pNode->CanShowInIDE())
-    dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_ECLIPSE, _T("Call line in IDE"));
-  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
-  dwFlags = MF_BYPOSITION | MF_STRING;
-  if (m_sel.pNode == NULL || !m_sel.pNode->CanShowInIDE() || m_sel.pNode->isTrace())
-	  dwFlags |= MF_DISABLED;
-  InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE"));
-  Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
-  InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
+  Helpers::AddCommonMenu(m_sel.pNode, hMenu, cMenu);
   dwFlags = MF_BYPOSITION | MF_STRING;
   InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
   dwFlags = MF_BYPOSITION | MF_STRING;
@@ -375,11 +367,11 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
   }
   else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
   {
-    m_pView->ShowInIDE(m_sel.pNode, true);
+	  Helpers::ShowInIDE(m_sel.pNode, true);
   }
   else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
   {
-    m_pView->ShowInIDE(m_sel.pNode, false);
+    Helpers::ShowInIDE(m_sel.pNode, false);
   }
 
   return 0;

@@ -294,32 +294,36 @@ void TaskThread::FileImport()
     if (m_isAuto)
     {
 #ifdef _BUILD_X64 
-        m_count = 128;// 16LL * 1024 * 1024;// 128000000;
+        m_count = 3;// 16LL * 1024 * 1024;// 128000000;
 #else
-        m_count = 128;// 16LL * 1024 * 1024;// 12800000;
+        m_count = 3;// 16LL * 1024 * 1024;// 12800000;
 #endif
-        int cRecursion = 30;//10
+        int cRecursion = 3;//10
         int ii = 0;
         bool ss = true;
-        char sz1[] = { "86 0 0 0 7 18 1 3171 1466073590 349287000 1466073590 350294000 00023230 001699F8 0 0-CTAPapp^thread_init_slave\n" };
-        char sz2[] = { "90 2 0 2 7 18 5 3171 1466073590 349287000 1466073590 350752000 00023230 001699F8 0 0-CTAPapp^thread_init_slavetest " };
-        char sz3[] = { "86 1 30  7 18 1 3171 1466073590 349287000 1466073590 350752000 00023230 001699F8 0 0-CTAPapp^thread_init_slave\n" };
+        char sz1[] = { "84 0 0 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
+        char sz2[] = { "87 2 0 3 1 23 3 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.123456123" };
+        char sz3[] = { "84 1 0 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
         char buf1[MAX_RECORD_LEN / 2] = { 0 }, buf2[MAX_RECORD_LEN / 2] = { 0 }, buf3[MAX_RECORD_LEN / 2] = { 0 };
         ROW_LOG_REC* rec1 = (ROW_LOG_REC*)buf1;
         ROW_LOG_REC* rec2 = (ROW_LOG_REC*)buf2;
         ROW_LOG_REC* rec3 = (ROW_LOG_REC*)buf3;
-        ss = (17 == (ii = sscanf_s(sz1, TEXT("%d %d %d %d %d %d %d %d %u %u %p %p %d %d-%s"),
+		char *format = TEXT("%d %d %d %d %d %d %d %d %u %u %p %p %d %d-%s");
+        ss = ((ii = sscanf_s(sz1, format, 
             &rec1->len, &rec1->log_type, &rec1->log_flags, &rec1->nn, &rec1->cb_app_path, 
 			&rec1->cb_fn_name, &rec1->cb_trace, &rec1->tid, 
 			&rec1->sec, &rec1->msec, 
 			&rec1->this_fn, &rec1->call_site, &rec1->fn_line, &rec1->call_line, &rec1->data, 100)));
-        ss = (17 == sscanf_s(sz2, TEXT("%d %d %d %d %d %d %d %d %u %u %p %p %d %d-%s"),
+        ss = ((ii = sscanf_s(sz2, format,
             &rec2->len, &rec2->log_type, &rec1->log_flags, &rec2->nn, &rec2->cb_app_path, 
 			&rec2->cb_fn_name, &rec2->cb_trace, &rec2->tid, 
 			&rec2->sec, &rec2->msec, 
-			&rec2->this_fn, &rec2->call_site, &rec1->fn_line, &rec2->call_line, &rec2->data, 100));
-        ss = (17 == sscanf_s(sz3, TEXT("%d %d %d %d %d %d %d %d %u %u %p %p %d %d-%s"),
-            &rec3->len, &rec3->log_type, &rec1->log_flags, &rec3->nn, &rec3->cb_app_path, &rec3->cb_fn_name, &rec3->cb_trace, &rec3->tid, &rec3->sec, &rec3->msec, &rec3->this_fn, &rec3->call_site, &rec1->fn_line, &rec3->call_line, &rec3->data, 100));
+			&rec2->this_fn, &rec2->call_site, &rec1->fn_line, &rec2->call_line, &rec2->data, 100)));
+        ss = ((ii = sscanf_s(sz3, format,
+            &rec3->len, &rec3->log_type, &rec1->log_flags, &rec3->nn, &rec3->cb_app_path, 
+			&rec3->cb_fn_name, &rec3->cb_trace, &rec3->tid, 
+			&rec3->sec, &rec3->msec, 
+			&rec3->this_fn, &rec3->call_site, &rec1->fn_line, &rec3->call_line, &rec3->data, 100)));
         rec1->len = rec1->size();
         rec2->len = rec2->size(); rec2->trace()[rec2->cb_trace - 1] = '\n';
         rec3->len = rec3->size();
