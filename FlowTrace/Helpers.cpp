@@ -100,6 +100,9 @@ namespace Helpers
 				dot = src2;
 				while (dot = strchr(dot, '.'))
 					*dot = '\\';
+				dot = strchr(src2, '$');
+				if (dot)
+					*dot = 0;
 				src = src2;
 			}
 		}
