@@ -261,3 +261,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# But not these files...
+!Out/Release/x64/FlowTrace.exe
