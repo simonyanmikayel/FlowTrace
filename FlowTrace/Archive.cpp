@@ -7,7 +7,7 @@
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
 
-Archive::Archive() 
+Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
     m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 256 * 1024 * 1024);
