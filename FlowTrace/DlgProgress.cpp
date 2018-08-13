@@ -301,9 +301,9 @@ void TaskThread::FileImport()
         int cRecursion = 3;//10
         int ii = 0;
         bool ss = true;
-        char sz1[] = { "84 0 0 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
-        char sz2[] = { "87 2 0 3 1 23 3 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.123456123" };
-        char sz3[] = { "84 1 0 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
+        char sz1[] = { "84 0 2 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
+        char sz2[] = { "87 2 2 3 1 23 3 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.123456123" };
+        char sz3[] = { "84 1 2 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
         char buf1[MAX_RECORD_LEN / 2] = { 0 }, buf2[MAX_RECORD_LEN / 2] = { 0 }, buf3[MAX_RECORD_LEN / 2] = { 0 };
         ROW_LOG_REC* rec1 = (ROW_LOG_REC*)buf1;
         ROW_LOG_REC* rec2 = (ROW_LOG_REC*)buf2;

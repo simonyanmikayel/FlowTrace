@@ -68,7 +68,7 @@ namespace Helpers
 	{
 		if (!pSelectedNode || !pSelectedNode->CanShowInIDE() || !pSelectedNode->isInfo())
 			return;
-		bool IsAndroidLog = pSelectedNode->isInfo() && (((INFO_NODE*)pSelectedNode)->log_flags & LOG_FLAG_ANDTROID);
+		bool IsAndroidLog = pSelectedNode->isAndroid();
 		char* src = 0;
 		int line = 0;
 		char src2[MAX_PATH + 1];

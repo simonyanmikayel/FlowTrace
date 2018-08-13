@@ -62,7 +62,11 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
   //}
   else if (iSubItem == BACK_TRACE_SRC)
   {
-    if (pNode->isTrace())
+	if (pNode->isAndroid())
+	{
+		//cb = pNode->getTraceText(buf, min(max_trace_text, cbBuf));
+	}
+	else if (pNode->isTrace())
     {
       cb = pNode->getTraceText(buf, min(max_trace_text, cbBuf));
     }
@@ -84,7 +88,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
   else if (iSubItem == BACK_TRACE_LINE)
   {
     int line = 0;
-    if (pNode->isTrace())
+    if (pNode->isTrace() || pNode->isAndroid())
     {
       line = ((TRACE_NODE*)pNode)->call_line;
     }

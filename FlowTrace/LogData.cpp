@@ -533,11 +533,16 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     //stdlog("CollapseExpandAll %d\n", GetTickCount());
     CalcLines();
 }
+bool LOG_NODE::isAndroid() 
+{ 
+	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID; 
+}
+
 bool LOG_NODE::CanShowInIDE()
 {
 	if (!isInfo())
 		return false;
-	else if (((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID)
+	else if (isAndroid())
 		return gSettings.CanShowInAndroidStudio();
 	else
 		return gSettings.CanShowInEclipse();

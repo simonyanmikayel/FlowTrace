@@ -13,9 +13,6 @@ const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
 const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 #endif
 
-#define LOG_FLAG_NEW_LINE 1
-#define LOG_FLAG_ANDTROID 2
-
 #pragma pack(push,4)
 typedef struct
 {
