@@ -263,4 +263,9 @@ __pycache__/
 *.pyc
 
 # But not these files...
+Out/*
+!Out/Release
+Out/Release/*
+!Out/Release/x64
+Out/Release/x64/*
 !Out/Release/x64/FlowTrace.exe
