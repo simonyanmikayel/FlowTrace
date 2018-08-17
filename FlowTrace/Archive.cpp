@@ -104,16 +104,31 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, int pid, DWORD nn, so
     char* name_part = strrchr(appPath, '/');
     if (name_part)
     {
-        char* dot_part = strrchr(name_part, ':'); //like com.worldline.spica.tp:token_app
-        if (dot_part)
-            name_part = dot_part;
+        //char* dot_part = strrchr(name_part, ':'); //like com.worldline.spica.tp:token_app
+        //if (dot_part)
+        //    name_part = dot_part;
         name_part++;
     }
     else
     {
         name_part = appPath;
     }
-    pNode->cb_app_name = (int)strlen(name_part);
+
+	pNode->cb_module_name = 0;
+	pNode->cb_app_name = (int)strlen(name_part);
+
+	char* module_part = strrchr(name_part, ';');
+	if (module_part) {
+		pNode->cb_module_name = (int)strlen(module_part + 1);
+		pNode->cb_app_name -= pNode->cb_module_name + 1;
+		pNode->cb_app_path -= pNode->cb_module_name + 1;
+	}
+
+	//char* p1 = pNode->appPath();
+	//char* p2 = pNode->appName();
+	//char* p3 = pNode->moduleName();
+
+
 
     if (p_si_other)
     {
@@ -153,7 +168,7 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 {
     if (curApp)
     {
-        if (curApp && (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->pid == p->pid))
+        if (curApp && (curApp->pid == p->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
             return curApp;
     }
 
@@ -161,7 +176,7 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)
     {
-        if ((0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path)) && (curApp->pid == p->pid))
+        if ((curApp->pid == p->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
             break;
         curApp = (APP_NODE*)curApp->prevSibling;
     }

@@ -3,6 +3,7 @@
 #include "Resource.h"
 #include "MainFrm.h"
 #include "Settings.h"
+#include "DlgInfo.h"
 
 namespace Helpers
 {
@@ -131,6 +132,39 @@ namespace Helpers
 			}
 		}
 		ShowInIDE(src, line, IsAndroidLog);
+	}
+
+	void ShowNodeDetails(LOG_NODE* pNode)
+	{
+		if (pNode == NULL || !pNode->isInfo())
+			return;
+		const int cMax = 2048;
+		char buf[cMax + 1];
+		int cb = 0;
+		INFO_NODE* pInfoNode = (INFO_NODE*)pNode;
+		FLOW_NODE* pFlowNode = pNode->isFlow() ? (FLOW_NODE*)pNode : 0;
+
+		if (pFlowNode) {
+			if (cb < cMax - pFlowNode->cb_fn_name) {
+				memcpy(buf + cb, pFlowNode->fnName(), pFlowNode->cb_fn_name);
+				cb += pFlowNode->cb_fn_name;
+				if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
+			}
+		}
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "nn: %d\r\n", pInfoNode->nn);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_type: %d\r\n", pInfoNode->log_type);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_flags: %d\r\n", pInfoNode->log_flags);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "fn_line: %d\r\n", pInfoNode->fn_line);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_line: %d\r\n", pInfoNode->call_line);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "data_type: %d\r\n", pInfoNode->data_type);
+		if (pFlowNode) {
+			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "this_fn: %X\r\n", pFlowNode->this_fn);
+			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_site: %X\r\n", pFlowNode->call_site);
+		}
+
+		buf[cMax] = 0;
+		DlgInfo dlg(buf);
+		dlg.DoModal();
 	}
 
 	void CopyToClipboard(HWND hWnd, char* szText, int cbText)
@@ -381,6 +415,10 @@ namespace Helpers
 			dwFlags |= MF_DISABLED;
 		InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE\tAlt+Click"));
 		Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
+		dwFlags = MF_BYPOSITION | MF_STRING;
+		if (pNode == NULL || !pNode->isInfo())
+			dwFlags |= MF_DISABLED;
+		InsertMenu(hMenu, cMenu++, dwFlags, ID_VIEW_NODE_DATA, _T("Details..."));
 		InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
 	}
 	void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon)

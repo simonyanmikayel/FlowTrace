@@ -142,6 +142,11 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       Helpers::ShowInIDE(pNode, false);
     }
+	else if (nRet == ID_VIEW_NODE_DATA)
+	{
+		Helpers::ShowNodeDetails(pNode);
+	}
+	
 
     //stdlog("%u\n", GetTickCount());
   }
@@ -207,13 +212,13 @@ void CLogTreeView::RefreshTree(bool showAll)
         if (p->parent->GetExpandCount() > 0 && !p->parent->hasNodeBox)
         {
           p->parent->hasNodeBox = 1;
-          if (firstAffected == -1 || firstAffected > p->parent->line)
-            firstAffected = p->parent->line;
+          if (firstAffected == -1 || firstAffected > p->parent->posInTree)
+            firstAffected = p->parent->posInTree;
         }
         if (p->parent->expanded)
         {
-          if (firstAffected == -1 || firstAffected > p->line)
-            firstAffected = p->line;
+          if (firstAffected == -1 || firstAffected > p->posInTree)
+            firstAffected = p->posInTree;
         }
       }
     }
@@ -256,19 +261,19 @@ again:
   pNode = gArchive.getRootNode();
   ATLASSERT(gArchive.getRootNode()->expanded || iItem == 0);
 
-  while (iItem != pNode->line)
+  while (iItem != pNode->posInTree)
   {
     //stdlog("\tline %d offset = %d %s\n", pNode->line, offset, pNode->getTreeText());
     //if (pNode->nextSibling && (pNode->line + pNode->GetExpandCount()) < iItem)
-    if (pNode->nextSibling && pNode->nextSibling->line <= iItem)
+    if (pNode->nextSibling && pNode->nextSibling->posInTree <= iItem)
     {
-      while (pNode->nextChank && pNode->nextChank->line <= iItem)
+      while (pNode->nextChank && pNode->nextChank->posInTree <= iItem)
       {
         //stdlog("\t1 index = %d line %d offset = %d %s\n", pNode->index, pNode->line, offset, pNode->getTreeText());
         pNode = pNode->nextChank;
         //stdlog("\t\t1 index = %d line %d offset = %d %s\n", pNode->index, pNode->line, offset, pNode->getTreeText());
       }
-      while (pNode->nextSibling && pNode->nextSibling->line <= iItem)
+      while (pNode->nextSibling && pNode->nextSibling->posInTree <= iItem)
       {
         //stdlog("\t2 index = %d line %d offset = %d %s\n", pNode->index, pNode->line, offset, pNode->getTreeText());
         pNode = pNode->nextSibling;

@@ -656,6 +656,10 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	{
 		Helpers::ShowInIDE(pNode, false);
 	}
+	else if (nRet == ID_VIEW_NODE_DATA)
+	{
+		Helpers::ShowNodeDetails(pNode);
+	}
 
 	return 0;
 }

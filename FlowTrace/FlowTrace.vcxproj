@@ -76,19 +76,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)Out\$(Configuration)\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -158,6 +158,7 @@
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="DlgDetailes.h" />
+    <ClInclude Include="DlgInfo.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="Helpers.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="BackTraceCallView.cpp" />
     <ClCompile Include="BackTraceView.cpp" />
     <ClCompile Include="DlgDetailes.cpp" />
+    <ClCompile Include="DlgInfo.cpp" />
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
     <ClCompile Include="FontPreviewCombo.cpp" />

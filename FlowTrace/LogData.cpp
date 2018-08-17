@@ -5,7 +5,8 @@
 bool LOG_NODE::isSynchronized(LOG_NODE* pSyncNode)
 {
     FLOW_NODE* pPeer = getPeer();
-    return pSyncNode && (this == pSyncNode || pPeer == pSyncNode || isParent(pSyncNode) || (pPeer && pPeer->isParent(pSyncNode)));
+    return pSyncNode && 
+		(this == pSyncNode || pPeer == pSyncNode || isParent(pSyncNode) || (pPeer && pPeer->isParent(pSyncNode)));
 }
 
 FLOW_NODE* LOG_NODE::getPeer()
@@ -316,9 +317,11 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-        cb += threadNode->pAppNode->cb_app_name;
-        memcpy(pBuf, threadNode->pAppNode->appName(), cb);
-        pBuf[cb] = 0;
+		int cbName;
+		char* name = moduleName(cbName);
+		cb += cbName;
+		memcpy(pBuf, name, cbName);
+		pBuf[cb] = 0;
     }
     else if (col == THREAD_COL)
     {
@@ -463,7 +466,7 @@ void LOG_NODE::CalcLines()
         pNode->pathExpanded = (!pNode->parent || (pNode->parent->pathExpanded && pNode->parent->expanded));
         if (pNode->parent)
             pNode->parent->cExpanded++;
-        pNode->line = ++l;
+        pNode->posInTree = ++l;
         //stdlog("index = %d e = %d l = %d %s\n", pNode->index, pNode->cExpanded, pNode->line, pNode->getTreeText());
 
         if (pNode->firstChild && pNode->expanded)
@@ -536,6 +539,18 @@ void LOG_NODE::CollapseExpandAll(bool expand)
 bool LOG_NODE::isAndroid() 
 { 
 	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID; 
+}
+
+char* LOG_NODE::moduleName(int &cb)
+{ 
+	if (threadNode->pAppNode->cb_module_name && !isAndroid()) {
+		cb = threadNode->pAppNode->cb_module_name;
+		return threadNode->pAppNode->appModuleName();
+	}
+	else {
+		cb = threadNode->pAppNode->cb_app_name;
+		return threadNode->pAppNode->appName();
+	}
 }
 
 bool LOG_NODE::CanShowInIDE()

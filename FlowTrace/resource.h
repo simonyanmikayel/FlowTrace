@@ -30,6 +30,7 @@
 #define IDB_TTF_BMP                     531
 #define IDB_SYNC                        535
 #define IDB_FUNC_IN_ECLIPSE             536
+#define IDD_INFO                        536
 #define IDB_SYNC2                       537
 #define IDB_CALL_IN_ECLIPSE             537
 #define IDC_NN                          1000
@@ -75,6 +76,8 @@
 #define IDC_EDIT_LINUX_HOME             1201
 #define IDC_EDIT2                       1202
 #define IDC_EDIT_MAP_ON_WIN             1202
+#define IDC_EDIT1                       1202
+#define IDC_EIDT_INFO                   1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
 #define IDC_EDIT_EXTERNAL_COMMAND       1204
 #define IDC_EDIT_ANDROID_STUDIO         1205
@@ -103,6 +106,7 @@
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_EDIT_FIND32798               32798
+#define ID_VIEW_NODE_DATA               32799
 #define ID_EDIT_FINDNEXT                32801
 #define ID_EDIT_FINNDPREVIOUS           32802
 #define ID_EDIT_FINDLAST                32803
@@ -130,9 +134,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        536
+#define _APS_NEXT_RESOURCE_VALUE        538
 #define _APS_NEXT_COMMAND_VALUE         32833
-#define _APS_NEXT_CONTROL_VALUE         1202
+#define _APS_NEXT_CONTROL_VALUE         1203
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

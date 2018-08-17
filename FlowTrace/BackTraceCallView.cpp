@@ -22,7 +22,7 @@ CBackTraceCallView::~CBackTraceCallView()
 {
 }
 
-static const char* szPending = "pending to resolve call line";
+static const char* szPending = "?";// "pending to resolve call line";
 
 void CBackTraceCallView::OnSize(UINT nType, CSize size)
 {
@@ -114,18 +114,19 @@ void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowN
     {
       if (pListedNode != pSelectedNode && pListedNode->isTrace() && pListedNode->parent == pSelectedNode)
       {
-        int line = ((TRACE_NODE*)pListedNode)->call_line;
         //if (!pFlowNode->p_call_addr)
         //  gArchive.resolveAddr(pFlowNode, false, false);
-        if (line > 0 && pFlowNode->p_call_addr)
+
+		  //int line = ((TRACE_NODE*)pListedNode)->call_line;
+		  //if (line > 0 && pFlowNode->p_call_addr)
         {
-          if ((beforeFlowNode && line <= pFlowNode->p_call_addr->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr->line))
+          //if ((beforeFlowNode && line <= pFlowNode->p_call_addr->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr->line))
           {
             nodes[c_nodes] = pListedNode;
             c_nodes++;
           }
-          else
-            break;
+          //else
+            //break;
         }
       }
     }
@@ -154,7 +155,7 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
   }
   else
   {
-    while (pNode && (pNode->isFlow() || pNode->isTrace()) && c_nodes < MAX_BACK_TRACE)
+    while (pNode && pNode->isInfo() && c_nodes < MAX_BACK_TRACE)
     {
       if (bNested && pNode->isFlow())
         AddTraceNodes(pSelectedNode, pNode, traceNodeIndex, true);
@@ -376,6 +377,10 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
   else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
   {
     Helpers::ShowInIDE(m_sel.pNode, false);
+  }
+  else if (nRet == ID_VIEW_NODE_DATA)
+  {
+	  Helpers::ShowNodeDetails(m_sel.pNode);
   }
 
   return 0;

@@ -25,4 +25,5 @@ namespace Helpers
 	void UpdateStatusBar();
 	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite);
 	void ShowInIDE(char* src, int line, bool IsAndroidLog);
+	void ShowNodeDetails(LOG_NODE* pNode);
 };

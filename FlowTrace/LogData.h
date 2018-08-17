@@ -53,7 +53,7 @@ struct LOG_NODE
 	BYTE bookmark;
 	BYTE nextChankCounter;
     int cExpanded;
-    int line;
+    int posInTree;
     LOG_NODE* nextChankMarker;
     LOG_NODE* nextChank;
     LOG_NODE* firstChild;
@@ -74,7 +74,7 @@ struct LOG_NODE
     void CalcLines();
     int GetExpandCount() { return expanded ? cExpanded : 0; }
     void CollapseExpand(BOOL expand);
-    int GetPosInTree() { return line; }
+    int GetPosInTree() { return posInTree; }
     void CollapseExpandAll(bool expand);
 
     void add_child(LOG_NODE* pNode)
@@ -119,6 +119,7 @@ struct LOG_NODE
     bool PendingToResolveAddr(bool bNested = false);
     char* getSrcName(bool fullPath);
     int getTraceText(char* pBuf, int max_cb_trace);
+	char* moduleName(int &cb);
 };
 
 struct ROOT_NODE : LOG_NODE
@@ -133,11 +134,13 @@ struct APP_NODE : LOG_NODE
     DWORD lost;
     char ip_address[66];
     int cb_app_path;
-    int cb_app_name;
-    ADDR_INFO *p_addr_info;
+	int cb_app_name;
+	int cb_module_name;
+	ADDR_INFO *p_addr_info;
     DWORD cb_addr_info;
     char* appPath() { return ((char*)(this)) + sizeof(APP_NODE); }
-    char* appName() { return appPath() + (cb_app_path - cb_app_name); }
+	char* appName() { return appPath() + (cb_app_path - cb_app_name); }
+	char* appModuleName() { return appPath() + (cb_app_path + 1); }
 };
 
 struct THREAD_NODE : LOG_NODE
