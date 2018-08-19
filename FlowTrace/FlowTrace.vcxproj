@@ -101,6 +101,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)\lib\addr2line_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,6 +117,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)\lib\addr2line_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -131,6 +137,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)\lib\addr2line_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,10 +155,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(ProjectDir)\lib\addr2line_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="addr2line.h" />
     <ClInclude Include="Addr2LineThread.h" />
     <ClInclude Include="Archive.h" />
     <ClInclude Include="BackTraceCallView.h" />
@@ -159,6 +168,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="DlgDetailes.h" />
     <ClInclude Include="DlgInfo.h" />
+    <ClInclude Include="DlgModules.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="Helpers.h" />
@@ -185,6 +195,7 @@
     <ClCompile Include="BackTraceView.cpp" />
     <ClCompile Include="DlgDetailes.cpp" />
     <ClCompile Include="DlgInfo.cpp" />
+    <ClCompile Include="DlgModules.cpp" />
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
     <ClCompile Include="FontPreviewCombo.cpp" />

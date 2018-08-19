@@ -17,31 +17,34 @@ const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 typedef struct
 {
     int len;
-	WORD log_type;
-	WORD log_flags;
-	int nn;
-    int cb_app_path;
-    int cb_fn_name;
-    int cb_trace;
+    WORD log_type;
+    WORD log_flags;
+    int nn;
+    WORD cb_app_name;
+    WORD cb_module_name;
+    WORD cb_fn_name;
+    WORD cb_trace;
     int tid;
-	int pid;
-	DWORD sec;
+    int pid;
+    DWORD sec;
     DWORD msec;
     DWORD this_fn;
     DWORD call_site;
-	int fn_line;
-	int call_line;
+    int fn_line;
+    int call_line;
     char data[1];
 
-    char* appPath() { return data; }
-    char* fnName() { return data + cb_app_path; }
-    char* trace() { return data + cb_app_path + cb_fn_name; }
-    int cbData() { return cb_app_path + cb_fn_name + cb_trace; }
+    char* appName() { return data; }
+    char* moduleName() { return cb_module_name ? (appName() + cb_app_name) : appName(); }
+    char* fnName() { return moduleName() + cb_module_name; }
+    char* trace() { return fnName() + cb_fn_name; }
+    int cbModuleName() { return cb_module_name ? cb_module_name : cb_app_name; }
+    int cbData() { return cb_app_name + cb_module_name + cb_fn_name + cb_trace; }
     int size() { return sizeof(ROW_LOG_REC) + cbData(); }
     bool isValid() {
-		int cb_data = cbData();
-		int cb_size = size();
-		return len >= cb_size && cb_app_path >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(ROW_LOG_REC) && cb_size < MAX_RECORD_LEN;
+        int cb_data = cbData();
+        int cb_size = size();
+        return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(ROW_LOG_REC) && cb_size < MAX_RECORD_LEN;
     }
     bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
@@ -77,12 +80,12 @@ public:
     ~Archive();
 
     void clearArchive(bool closing = false);
-	void onPaused();
-	DWORD getCount();
+    void onPaused();
+    DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb) { return (char*)m_pTraceBuf->Alloc(cb, false); }
     bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL);
-    bool IsEmpty() { return m_pNodes ==nullptr || m_pNodes->Count() == 0; }
+    bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     void resolveAddrAsync(LOG_NODE* pNode = NULL);
     void resolveAddr(LOG_NODE* pSelectedNode, bool loop);
@@ -90,22 +93,22 @@ public:
     ROOT_NODE* getRootNode() { return m_rootNode; }
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
-	BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
-	BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
-	size_t UsedMemory();
-	DWORD getLost() { return m_lost; }
+    BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
+    BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
+    size_t UsedMemory();
+    DWORD getLost() { return m_lost; }
 
 private:
-    inline APP_NODE* addApp(char* app_path, int cb_app_path, int pid, DWORD nn, sockaddr_in *p_si_other);
-    inline THREAD_NODE* addThread(APP_NODE* pAppNode, int tid);
+    inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
+    inline THREAD_NODE* addThread(ROW_LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec);
     inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed);
     inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
 
-	DWORD m_lost;
-	static DWORD archiveNumber;
-	BYTE bookmarkNumber;
+    DWORD m_lost;
+    static DWORD archiveNumber;
+    BYTE bookmarkNumber;
     APP_NODE* curApp;
     THREAD_NODE* curThread;
     SNAPSHOT m_snapshot;

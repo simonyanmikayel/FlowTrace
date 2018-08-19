@@ -90,6 +90,12 @@
     <ClInclude Include="DlgInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="addr2line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgModules.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -162,6 +168,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgModules.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

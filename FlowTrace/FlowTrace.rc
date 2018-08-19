@@ -148,8 +148,9 @@ BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
-        MENUITEM "View Detailes...",            ID_VIEW_DETAILES
-        MENUITEM "Settings...",                 ID_VIEW_SETTINGS
+        MENUITEM "Modules ...",                 ID_VIEW_MODULES
+        MENUITEM "View Detailes ...",           ID_VIEW_DETAILES
+        MENUITEM "Settings ...",                ID_VIEW_SETTINGS
     END
     POPUP "&Help"
     BEGIN
@@ -223,8 +224,6 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,176,198,50,14
     EDITTEXT        IDC_EDIT_PORT,256,27,40,14,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "UDP Listen Port:",IDC_STATIC,198,30,53,8
-    CONTROL         "Resolve function call line via HTML board",IDC_CHECK_RESOLVE_ADDR,
-                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,29,56,145,10
     CONTROL         "Show full source path in call stack",IDC_CHECK_FULL_SRC_PATH,
                     "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,51,71,123,10
     GROUPBOX        "Call Stack Options",IDC_STATIC,16,26,167,151
@@ -299,6 +298,18 @@ BEGIN
     EDITTEXT        IDC_EIDT_INFO,20,17,271,122,ES_MULTILINE | ES_AUTOHSCROLL
 END
 
+IDD_MODULES DIALOGEX 0, 0, 311, 299
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Modules"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,200,278,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,254,278,50,14
+    GROUPBOX        "Static",IDC_STATIC_MODUL_LST,7,34,297,228
+    CONTROL         "Resolve function call lines",IDC_CHECK_RESOLVE_ADDR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,19,99,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -350,6 +361,14 @@ BEGIN
         RIGHTMARGIN, 302
         TOPMARGIN, 7
         BOTTOMMARGIN, 169
+    END
+
+    IDD_MODULES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 304
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 292
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -445,6 +464,11 @@ BEGIN
 END
 
 IDD_INFO AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_MODULES AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

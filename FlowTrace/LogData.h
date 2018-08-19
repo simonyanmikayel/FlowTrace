@@ -37,8 +37,6 @@ struct LOG_NODE
     LOG_NODE* parent;
     LOG_NODE* lastChild;
     LOG_NODE* prevSibling;
-    ADDR_INFO *p_call_addr;
-    ADDR_INFO *p_func_addr;
     struct {
         WORD hasNewLine : 1;
         WORD hasSearchResult : 1;
@@ -49,6 +47,7 @@ struct LOG_NODE
         WORD expanded : 1;
         WORD hasNodeBox : 1;
         WORD pathExpanded : 1;
+        WORD addr_resolved : 1;
     };
 	BYTE bookmark;
 	BYTE nextChankCounter;
@@ -107,19 +106,15 @@ struct LOG_NODE
     LONG getTimeMSec();
     int   getPid();
 	int   getThreadNN();
-    DWORD getCallAddr();
-    int   getCallLine();
     CHAR* getTreeText(int* cBuf = NULL, bool extened = true);
     CHAR* getListText(int* cBuf, LIST_COL col, int iItem = 0);
     int getTreeImage();
-    LOG_NODE* getSyncNode();
+    FLOW_NODE* getSyncNode();
     APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
     char* getFnName();
     int getFnNameSize();
     bool PendingToResolveAddr(bool bNested = false);
-    char* getSrcName(bool fullPath);
     int getTraceText(char* pBuf, int max_cb_trace);
-	char* moduleName(int &cb);
 };
 
 struct ROOT_NODE : LOG_NODE
@@ -133,14 +128,8 @@ struct APP_NODE : LOG_NODE
     DWORD lastNN;
     DWORD lost;
     char ip_address[66];
-    int cb_app_path;
 	int cb_app_name;
-	int cb_module_name;
-	ADDR_INFO *p_addr_info;
-    DWORD cb_addr_info;
-    char* appPath() { return ((char*)(this)) + sizeof(APP_NODE); }
-	char* appName() { return appPath() + (cb_app_path - cb_app_name); }
-	char* appModuleName() { return appPath() + (cb_app_path + 1); }
+    char appName[1];
 };
 
 struct THREAD_NODE : LOG_NODE
@@ -148,11 +137,16 @@ struct THREAD_NODE : LOG_NODE
     APP_NODE* pAppNode;
     FLOW_NODE* curentFlow;
     TRACE_NODE* latestTrace;
+    int cb_actual_module_name;
+    int cb_module_name;
     int emptLineColor;
     int tid;
     int threadNN;
     char COLOR_BUF[10];
     int  cb_color_buf;
+    ADDR_INFO *p_addr_info;
+    DWORD cb_addr_info;
+    char moduleName[1];
 
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {
@@ -173,13 +167,14 @@ struct INFO_NODE : LOG_NODE
     int  nn;
     WORD log_type;
 	WORD log_flags;
-	int fn_line;
-	int call_line;
     int cb_fn_name;
+    int call_line;
     DWORD sec;
     DWORD msec;
     bool isEnter() { return log_type == LOG_TYPE_ENTER; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
+    char* fnName();
+    int   callLine();
 };
 
 struct FLOW_NODE : INFO_NODE
@@ -187,9 +182,12 @@ struct FLOW_NODE : INFO_NODE
     FLOW_NODE* peer;
     DWORD this_fn;
     DWORD call_site;
-    char* fnName() { return ((char*)(this)) + sizeof(FLOW_NODE); }
+    int fn_line;
+    ADDR_INFO *p_fn_addr_info;
+    ADDR_INFO *p_call_addr_info;
     bool isOpenEnter() { return isEnter() && peer == 0; }
     void addToTree();
+    char* getCallSrc(bool fullPath);
 };
 
 struct TRACE_CHANK
@@ -203,7 +201,6 @@ struct TRACE_NODE : INFO_NODE
 {
     BYTE color;
     int cb_trace;
-    char* fnName() { return ((char*)(this)) + sizeof(TRACE_NODE); }
     TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
 };

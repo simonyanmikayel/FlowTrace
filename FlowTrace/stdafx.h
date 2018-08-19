@@ -61,6 +61,7 @@ extern CAppModule _Module;
 #pragma warning(push)
 #pragma warning(disable: 4091 4189 4267 4458 4838)
 #include <atlgdix.h>
+#include <gridctrl.h>
 
 #if defined _M_IX86
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -153,4 +154,4 @@ typedef std::string tstring;
 //#pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////
-//#define _AUTO_TEST
+#define _AUTO_TEST

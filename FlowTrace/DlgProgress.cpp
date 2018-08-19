@@ -189,7 +189,7 @@ void TaskThread::FileSave(WORD cmd)
     for (DWORD i = 0; (i < m_count) && IsWorking(); i++, m_progress++)
     {
         LOG_NODE* pNode = isExport ? gArchive.getNode(i) : gArchive.getListedNodes()->getNode(i);
-        if (!(pNode->isFlow() || pNode->isTrace()))
+        if (!pNode->isInfo())
             continue;
 
 		if (isExport)
@@ -210,14 +210,6 @@ void TaskThread::FileSave(WORD cmd)
                 rec->call_site = p->call_site;
 				rec->fn_line = p->fn_line;
 				rec->call_line = p->call_line;
-
-                rec->cb_app_path = pNode->threadNode->pAppNode->cb_app_path;
-                memcpy(rec->appPath(), pNode->threadNode->pAppNode->appPath(), rec->cb_app_path);
-
-                rec->cb_fn_name = p->cb_fn_name;
-                memcpy(rec->fnName(), p->fnName(), p->cb_fn_name);
-
-                rec->cb_trace = 0;
             }
             else
             {
@@ -230,16 +222,33 @@ void TaskThread::FileSave(WORD cmd)
                 rec->tid = pNode->threadNode->tid;
                 rec->this_fn = 0;
                 rec->call_site = 0;
-				rec->fn_line = p->fn_line;
+				rec->fn_line = 0;
 				rec->call_line = p->call_line;
-
-                rec->cb_app_path = pNode->threadNode->pAppNode->cb_app_path;
-                memcpy(rec->appPath(), pNode->threadNode->pAppNode->appPath(), rec->cb_app_path);
 
                 rec->cb_fn_name = p->cb_fn_name;
                 memcpy(rec->fnName(), p->fnName(), p->cb_fn_name);
 
-                char* log = pNode->getListText(&rec->cb_trace, LOG_COL);
+            }
+
+            rec->cb_app_name = pNode->threadNode->pAppNode->cb_app_name;
+            memcpy(rec->appName(), pNode->threadNode->pAppNode->appName, rec->cb_app_name);
+            rec->cb_module_name = pNode->threadNode->cb_actual_module_name;
+            if (rec->cb_module_name)
+                memcpy(rec->moduleName(), pNode->threadNode->moduleName, rec->cb_module_name);
+
+            rec->cb_fn_name = ((INFO_NODE*)pNode)->cb_fn_name;
+            memcpy(rec->fnName(), ((INFO_NODE*)pNode)->fnName(), rec->cb_fn_name);
+
+            if (pNode->isFlow())
+            {
+                rec->cb_trace = 0;
+            }
+            if (pNode->isTrace())
+            {
+                TRACE_NODE* p = (TRACE_NODE*)pNode;
+                int cb_trace;
+                char* log = pNode->getListText(&cb_trace, LOG_COL);
+                rec->cb_trace = cb_trace;
                 memcpy(rec->trace(), log, rec->cb_trace + 1);
                 if (p->color)
                 {
@@ -247,10 +256,11 @@ void TaskThread::FileSave(WORD cmd)
                     rec->cb_trace += cbColor;
                 }
             }
+
             rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
 
-            fprintf(m_fp, "%d %d %d %d %d %d %d %d %u %u %d %d %d %d-",
-                rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_path, 
+            fprintf(m_fp, "%d %d %d %d %d %d %d %u %u %d %d %d %d %d %d-",
+                rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_name, rec->cb_module_name,
 				rec->cb_fn_name, rec->cb_trace, rec->tid, 
 				rec->sec, rec->msec, 
 				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line);
@@ -266,7 +276,7 @@ void TaskThread::FileSave(WORD cmd)
             if (pNode->isFlow())
             {
                 FLOW_NODE* p = (FLOW_NODE*)pNode;
-                fwrite(pNode->threadNode->pAppNode->appPath(), 1, pNode->threadNode->pAppNode->cb_app_path, m_fp);
+                fwrite(pNode->threadNode->pAppNode->appName, 1, pNode->threadNode->pAppNode->cb_app_name, m_fp);
                 fwrite(" ", 1, 1, m_fp);
                 fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
                 fprintf(m_fp, " %d", p->call_line);
@@ -274,7 +284,7 @@ void TaskThread::FileSave(WORD cmd)
             else
             {
                 TRACE_NODE* p = (TRACE_NODE*)pNode;
-                fwrite(pNode->threadNode->pAppNode->appPath(), 1, pNode->threadNode->pAppNode->cb_app_path, m_fp);
+                fwrite(pNode->threadNode->pAppNode->appName, 1, pNode->threadNode->pAppNode->cb_app_name, m_fp);
                 fwrite(" ", 1, 1, m_fp);
                 fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
                 fprintf(m_fp, " %d", p->call_line);
@@ -283,8 +293,10 @@ void TaskThread::FileSave(WORD cmd)
 
             if (pNode->isFlow())
                 fwrite("\n", 1, 1, m_fp);
-            else
-                fprintf(m_fp, "%s\n", pNode->getListText(&rec->cb_trace, LOG_COL));
+            else {
+                int cb_trace;
+                fprintf(m_fp, "%s\n", pNode->getListText(&cb_trace, LOG_COL));
+            }
         }
     }
 }
@@ -301,44 +313,55 @@ void TaskThread::FileImport()
         int cRecursion = 3;//10
         int ii = 0;
         bool ss = true;
-        char sz1[] = { "84 0 2 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
-        char sz2[] = { "87 2 2 3 1 23 3 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.123456123" };
-        char sz3[] = { "84 1 2 3 1 23 0 1 0 0 -944928792 -2144780369 18 6-JHello.HelloWorld.<init>\n" };
-        char buf1[MAX_RECORD_LEN / 2] = { 0 }, buf2[MAX_RECORD_LEN / 2] = { 0 }, buf3[MAX_RECORD_LEN / 2] = { 0 };
-        ROW_LOG_REC* rec1 = (ROW_LOG_REC*)buf1;
-        ROW_LOG_REC* rec2 = (ROW_LOG_REC*)buf2;
-        ROW_LOG_REC* rec3 = (ROW_LOG_REC*)buf3;
-		char *format = TEXT("%d %d %d %d %d %d %d %d %u %u %p %p %d %d-%s");
-        ss = ((ii = sscanf_s(sz1, format, 
-            &rec1->len, &rec1->log_type, &rec1->log_flags, &rec1->nn, &rec1->cb_app_path, 
-			&rec1->cb_fn_name, &rec1->cb_trace, &rec1->tid, 
-			&rec1->sec, &rec1->msec, 
-			&rec1->this_fn, &rec1->call_site, &rec1->fn_line, &rec1->call_line, &rec1->data, 100)));
-        ss = ((ii = sscanf_s(sz2, format,
-            &rec2->len, &rec2->log_type, &rec1->log_flags, &rec2->nn, &rec2->cb_app_path, 
-			&rec2->cb_fn_name, &rec2->cb_trace, &rec2->tid, 
-			&rec2->sec, &rec2->msec, 
-			&rec2->this_fn, &rec2->call_site, &rec1->fn_line, &rec2->call_line, &rec2->data, 100)));
-        ss = ((ii = sscanf_s(sz3, format,
-            &rec3->len, &rec3->log_type, &rec1->log_flags, &rec3->nn, &rec3->cb_app_path, 
-			&rec3->cb_fn_name, &rec3->cb_trace, &rec3->tid, 
-			&rec3->sec, &rec3->msec, 
-			&rec3->this_fn, &rec3->call_site, &rec1->fn_line, &rec3->call_line, &rec3->data, 100)));
+        char log_buf[3][1024];
+        ZeroMemory(log_buf, sizeof(log_buf));
+        char* appName = "app_name";
+        char* moduleName = "libAppSel.so";
+        char* fnName = "fn_name";
+        char* trace= "trace\n";
+
+        ROW_LOG_REC* rec1 = (ROW_LOG_REC*)log_buf[0];
+        rec1->log_type = LOG_TYPE_ENTER;
+        rec1->cb_app_name = (WORD)strlen(appName);
+        rec1->cb_module_name = (WORD)strlen(moduleName);
+        rec1->cb_fn_name = (WORD)strlen(fnName);
+        rec1->this_fn = 0x19800;
+        rec1->call_site = 0x199F4;
+        memcpy(rec1->appName(), appName, rec1->cb_app_name);
+        memcpy(rec1->moduleName(), moduleName, rec1->cb_module_name);
+        memcpy(rec1->fnName(), fnName, rec1->cb_fn_name);
         rec1->len = rec1->size();
-        rec2->len = rec2->size(); rec2->trace()[rec2->cb_trace - 1] = '\n';
-        rec3->len = rec3->size();
+
+        ROW_LOG_REC* rec2 = (ROW_LOG_REC*)log_buf[1];
+        memcpy(rec2, rec1, rec1->len);
+        rec2->log_type = LOG_TYPE_TRACE;
+        rec2->cb_trace = (WORD)strlen(trace);
+        memcpy(rec2->trace(), trace, rec2->cb_trace);
+        rec2->len = rec2->size();
+
+        ROW_LOG_REC* rec3 = (ROW_LOG_REC*)log_buf[2];
+        memcpy(rec3, rec1, rec1->len);
+        rec3->log_type = LOG_TYPE_EXIT;
+
         ss = ss && rec1->isValid();
         ss = ss && rec2->isValid();
+        ss = ss && rec3->isValid();
+        int nn = 0;
         for (DWORD j = 0; ss && j < m_count && IsWorking(); j++)
         {
             m_progress = j;
             for (int i = 0; i < cRecursion; i++)
             {
+                rec1->nn = ++nn;
                 ss = ss && gArchive.append(rec1);
+                rec2->nn = ++nn;
                 ss = ss && gArchive.append(rec2);
             }
             for (int i = 0; i < cRecursion; i++)
+            {
+                rec3->nn = ++nn;
                 ss = ss && gArchive.append(rec3);
+            }
         }
     }
     else
@@ -357,9 +380,12 @@ void TaskThread::FileImport()
             if (count == 2656)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
-			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %u %u %d %d %d %d-"),
-				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, &rec->cb_app_path, &rec->cb_fn_name, &rec->cb_trace, &rec->tid, &rec->sec, &rec->msec, &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line);
-            ss = (14 == cf);
+			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %u %u %d %d %d %d-"),
+				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
+                &rec->cb_app_name, &rec->cb_module_name, 
+                &rec->cb_fn_name, &rec->cb_trace, &rec->tid, &rec->sec, &rec->msec, 
+                &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line);
+            ss = (15 == cf);
             ss = ss && rec->isValid();
             if (rec->cbData())
                 ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));

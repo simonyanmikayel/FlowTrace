@@ -16,6 +16,7 @@
 #include "DlgProgress.h"
 #include "SearchInfo.h"
 #include "DlgSnapshots.h"
+#include "DlgModules.h"
 
 HWND       hwndMain;
 WNDPROC oldEditProc;
@@ -307,6 +308,14 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 {
     CAboutDlg dlg;
     dlg.DoModal();
+    return 0;
+}
+
+LRESULT CMainFrame::OnViewModules(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    DlgModules dlg;
+    if (IDOK == dlg.DoModal())
+        gArchive.resolveAddrAsync();
     return 0;
 }
 

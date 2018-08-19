@@ -19,6 +19,8 @@ public:
     void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
     bool CheckUIFont(HDC hdc);
 
+    void SetModules(const CHAR* szList);
+    CHAR* GetModules();
     void SetSearchList(CHAR* szList);
     CHAR* GetSearchList();
     DWORD SelectionBkColor(bool haveFocus);

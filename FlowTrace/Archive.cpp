@@ -86,49 +86,19 @@ void Archive::resolveAddrAsync(LOG_NODE* pNode)
     }
 }
 
-APP_NODE* Archive::addApp(char* app_path, int cb_app_path, int pid, DWORD nn, sockaddr_in *p_si_other)
+APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 {
-    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE) + cb_app_path, true);
+    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE) + p->cb_app_name + 1, true);
     if (!pNode)
         return nullptr;
 
     pNode->data_type = APP_DATA_TYPE;
-    pNode->pid = pid;
-    pNode->cb_app_path = cb_app_path;
-    pNode->lastNN = nn;
-    pNode->cb_addr_info = INFINITE;
+    pNode->pid = p->pid;
+    pNode->cb_app_name = p->cb_app_name;
+    pNode->lastNN = p->nn;
 
-    char* appPath = pNode->appPath();
-    memcpy(appPath, app_path, cb_app_path);
-    appPath[cb_app_path] = 0;//do not rely on this in other functions. This will be ovewriten with next data
-    char* name_part = strrchr(appPath, '/');
-    if (name_part)
-    {
-        //char* dot_part = strrchr(name_part, ':'); //like com.worldline.spica.tp:token_app
-        //if (dot_part)
-        //    name_part = dot_part;
-        name_part++;
-    }
-    else
-    {
-        name_part = appPath;
-    }
-
-	pNode->cb_module_name = 0;
-	pNode->cb_app_name = (int)strlen(name_part);
-
-	char* module_part = strrchr(name_part, ';');
-	if (module_part) {
-		pNode->cb_module_name = (int)strlen(module_part + 1);
-		pNode->cb_app_name -= pNode->cb_module_name + 1;
-		pNode->cb_app_path -= pNode->cb_module_name + 1;
-	}
-
-	//char* p1 = pNode->appPath();
-	//char* p2 = pNode->appName();
-	//char* p3 = pNode->moduleName();
-
-
+    memcpy(pNode->appName, p->appName(), p->cb_app_name);
+    pNode->appName[pNode->cb_app_name] = 0;
 
     if (p_si_other)
     {
@@ -143,24 +113,31 @@ APP_NODE* Archive::addApp(char* app_path, int cb_app_path, int pid, DWORD nn, so
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
-    resolveAddrAsync();
     return pNode;
 }
 
-THREAD_NODE* Archive::addThread(APP_NODE* pAppNode, int tid)
+THREAD_NODE* Archive::addThread(ROW_LOG_REC* p, APP_NODE* pAppNode)
 {
-    THREAD_NODE* pNode = (THREAD_NODE*)m_pNodes->Add(sizeof(THREAD_NODE), true);
+    THREAD_NODE* pNode = (THREAD_NODE*)m_pNodes->Add(sizeof(THREAD_NODE) + p->cbModuleName() + 1, true);
     if (!pNode)
         return nullptr;
 
     pNode->threadNN = ++(pAppNode->threadCount);
     pNode->data_type = THREAD_DATA_TYPE;
     pNode->pAppNode = pAppNode;
-    pNode->tid = tid;
+    pNode->tid = p->tid;
+    pNode->cb_module_name = p->cbModuleName();
+    pNode->cb_actual_module_name = p->cb_module_name;
+    pNode->cb_addr_info = INFINITE;
+
+    memcpy(pNode->moduleName, p->moduleName(), p->cbModuleName());
+    pNode->moduleName[pNode->cb_module_name] = 0;
 
     pAppNode->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
+    resolveAddrAsync();
+
     return pNode;
 }
 
@@ -183,7 +160,7 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
     //stdlog("curApp 2 %p\n", curApp);
     if (!curApp)
     {
-        curApp = addApp(p->appPath(), p->cb_app_path, p->pid, p->nn, p_si_other);
+        curApp = addApp(p, p_si_other);
         //curApp->getData()->Log();
     }
 
@@ -206,7 +183,7 @@ THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, ROW_LOG_REC* p)
 
     if (!curThread)
     {
-        curThread = addThread(pAppNode, p->tid);
+        curThread = addThread(p, pAppNode);
     }
 
     return curThread;
@@ -233,8 +210,8 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
 	pNode->msec = pLogRec->msec;
     pNode->this_fn = pLogRec->this_fn;
     pNode->call_site = pLogRec->call_site;
+    pNode->fn_line = pLogRec->fn_line;
     pNode->call_line = pLogRec->call_line;
-	pNode->fn_line = pLogRec->fn_line;
 
     pNode->cb_fn_name = cb_fn_name;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
@@ -263,7 +240,7 @@ static int getCollor(char* pBuf, int &iSkip, int cb)
     return color;
 }
 
-static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, int &cb_trace, int& color)
+static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, WORD &cb_trace, int& color)
 {
     char* pBuf = pThreadNode->COLOR_BUF;
     bool bRet = false;
@@ -470,7 +447,6 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 		pNode->sec = pLogRec->sec;
 		pNode->msec = pLogRec->msec;
 		pNode->call_line = pLogRec->call_line;
-		pNode->fn_line = pLogRec->call_line;
 
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);

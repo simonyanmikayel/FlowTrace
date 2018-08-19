@@ -52,6 +52,7 @@ LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 LPCTSTR STR_APP_REG_VAL_AndroidStudio = _T("AndroidStudio");
 LPCTSTR STR_APP_REG_VAL_AndroidProject = _T("AndroidProject");
 LPCTSTR STR_APP_REG_VAL_ExternalCmd = _T("ExternalCmd");
+LPCTSTR STR_APP_REG_VAL_Modules = _T("Modules");
 
 //#define DefBkColor RGB(0,0,0)
 //#define DefTextColor RGB(176,176,176)
@@ -291,6 +292,25 @@ void CSettings::SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkCol
   }
 }
 
+static const int MAX_MODULES = 16*256;
+static CHAR szModuls[MAX_MODULES + 1];
+void CSettings::SetModules(const CHAR* szList)
+{
+    size_t n = _tcslen(szList);
+    n = min(MAX_MODULES, n);
+    memcpy(szModuls, szList, n);
+    szModuls[n] = 0;
+    Write(STR_APP_REG_VAL_Modules, szModuls);
+}
+CHAR* CSettings::GetModules()
+{
+    if (!Read(STR_APP_REG_VAL_Modules, szModuls, MAX_MODULES))
+    {
+        szModuls[0] = 0;
+    }
+    return szModuls;
+}
+
 static const int MAX_SEARCH_LIST = 255;
 static CHAR searchList[MAX_SEARCH_LIST + 1];
 void CSettings::SetSearchList(CHAR* szList)
@@ -300,6 +320,14 @@ void CSettings::SetSearchList(CHAR* szList)
   memcpy(searchList, szList, n);
   searchList[n] = 0;
   Write(STR_APP_REG_VAL_SEARCH_LIST, searchList);
+}
+CHAR* CSettings::GetSearchList()
+{
+    if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
+    {
+        searchList[0] = 0;
+    }
+    return searchList;
 }
 DWORD CSettings::InfoTextColor()
 {
@@ -328,14 +356,6 @@ DWORD CSettings::SelectionTxtColor()
 DWORD CSettings::SelectionBkColor(bool haveFocus)
 {
   return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
-}
-CHAR* CSettings::GetSearchList()
-{
-  if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
-  {
-    searchList[0] = 0;
-  }
-  return searchList;
 }
 
 void CSettings::SetVertSplitterPos(int i) { m_VertSplitterPos = i;  Write(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos); }

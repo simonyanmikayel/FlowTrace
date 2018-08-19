@@ -31,7 +31,6 @@ public:
   CEdit m_UdpPort;
   CButton m_btnFont;
   CButton m_btnReset;
-  CButton m_ResolveAddr;
   CButton m_FullSrcPath;
   CEdit   m_edtEclipsePath;
   CEdit   m_edtExternalCmd;

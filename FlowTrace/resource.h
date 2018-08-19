@@ -33,6 +33,7 @@
 #define IDD_INFO                        536
 #define IDB_SYNC2                       537
 #define IDB_CALL_IN_ECLIPSE             537
+#define IDD_MODULES                     538
 #define IDC_NN                          1000
 #define IDC_APP                         1001
 #define IDC_FONT_NAME                   1002
@@ -79,6 +80,8 @@
 #define IDC_EDIT1                       1202
 #define IDC_EIDT_INFO                   1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
+#define IDC_STATIC_MODULES              1203
+#define IDC_STATIC_MODUL_LST            1203
 #define IDC_EDIT_EXTERNAL_COMMAND       1204
 #define IDC_EDIT_ANDROID_STUDIO         1205
 #define IDC_EDIT_ANDOID_PROJECT         1206
@@ -129,14 +132,15 @@
 #define ID_EDIT_COPY_TRACES             32830
 #define ID_CALL_STACK                   32831
 #define ID_VIEW_RUN_EXTERNAL_CMD        32832
+#define ID_VIEW_MODULES                 32833
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        538
-#define _APS_NEXT_COMMAND_VALUE         32833
-#define _APS_NEXT_CONTROL_VALUE         1203
+#define _APS_NEXT_RESOURCE_VALUE        540
+#define _APS_NEXT_COMMAND_VALUE         32834
+#define _APS_NEXT_CONTROL_VALUE         1204
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -14,10 +14,7 @@ public:
 
 private:
   void _Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop);
-  bool connectToServer(char *szServerName, WORD portNum);
-  DWORD readUrl2(APP_NODE* appNode);
-  void CloseSocket();
-  SOCKET conn;
+  DWORD ReadAdresses(THREAD_NODE* threadNode);
   LOG_NODE* m_pNode;
   HANDLE m_hParseEvent;
   HANDLE m_hResolveEvent;

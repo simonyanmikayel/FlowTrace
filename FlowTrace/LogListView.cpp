@@ -1384,10 +1384,6 @@ CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 		return ret;
 	}
 
-#ifdef _DEBUG
-	if (221 == pNode->getCallLine())
-		cb = cb;
-#endif
 	cb = 0;
 	bool funcColFound = false;
 	for (int i = 1; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)

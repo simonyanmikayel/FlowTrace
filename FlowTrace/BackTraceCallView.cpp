@@ -79,7 +79,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
       }
       else
       {
-        txt = pNode->getSrcName(gSettings.GetFullSrcPath());
+        txt = ((FLOW_NODE*)pNode)->getCallSrc(gSettings.GetFullSrcPath());
       }
       cb = min((int)strlen(txt), cbBuf);
       memcpy(buf, txt, cb);
@@ -88,13 +88,9 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
   else if (iSubItem == BACK_TRACE_LINE)
   {
     int line = 0;
-    if (pNode->isTrace() || pNode->isAndroid())
+    if (pNode->isFlow())
     {
-      line = ((TRACE_NODE*)pNode)->call_line;
-    }
-    else if (pNode->p_call_addr)
-    {
-      line = pNode->p_call_addr->line;
+      line = ((FLOW_NODE*)pNode)->callLine();
     }
     if (line > 0)
       cb = _snprintf_s(buf, cbBuf, cbBuf, "%d", line);

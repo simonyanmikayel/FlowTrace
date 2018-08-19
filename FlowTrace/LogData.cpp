@@ -32,12 +32,12 @@ char* LOG_NODE::getFnName()
         return "";
     }
 }
-char* LOG_NODE::getSrcName(bool fullPath)
+char* FLOW_NODE::getCallSrc(bool fullPath)
 {
     char* src = "";
-    if (p_call_addr)
+    if (p_call_addr_info)
     {
-        src = p_call_addr->src;
+        src = p_call_addr_info->src;
         if (!fullPath)
         {
             char* name = strrchr(src, '/');
@@ -46,6 +46,23 @@ char* LOG_NODE::getSrcName(bool fullPath)
         }
     }
     return src;
+}
+int INFO_NODE::callLine()
+{
+    int line = 0;
+    if (isAndroid() || isTrace())
+    {
+        line = call_line;
+    }
+    else
+    {
+        FLOW_NODE* This = (FLOW_NODE*)this;
+        if (This->p_call_addr_info)
+        {
+            line = This->p_call_addr_info->line;
+        }
+    }
+    return line;
 }
 int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
 {
@@ -80,19 +97,19 @@ bool LOG_NODE::PendingToResolveAddr(bool bNested)
     LOG_NODE* pNode = getSyncNode();
     if (pNode)
     {
-        APP_NODE* appNode = pNode->getApp();
-        if (pNode->isFlow() && gSettings.GetResolveAddr() && appNode)
+        if (pNode->isFlow() && gSettings.GetResolveAddr())
         {
-            pendingToResolveAddr = (appNode->cb_addr_info == INFINITE);
+            pendingToResolveAddr = (pNode->threadNode->cb_addr_info == INFINITE);
             if (!pendingToResolveAddr)
             {
-                pendingToResolveAddr = (pNode->p_call_addr == NULL);
+                pendingToResolveAddr = (((FLOW_NODE*)pNode)->p_call_addr_info == NULL);
                 if (!pendingToResolveAddr && bNested)
                 {
                     pNode = pNode->firstChild;
                     while (!pendingToResolveAddr && pNode)
                     {
-                        pendingToResolveAddr = (pNode->p_call_addr == NULL);
+                        if (pNode->isFlow())
+                            pendingToResolveAddr = (((FLOW_NODE*)pNode)->p_call_addr_info == NULL);
                         pNode = pNode->nextSibling;
                     }
                 }
@@ -117,6 +134,11 @@ int LOG_NODE::getFnNameSize()
     }
 
 }
+char* INFO_NODE::fnName()
+{ 
+    return ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE)); 
+}
+
 void FLOW_NODE::addToTree()
 {
     if (threadNode->curentFlow == NULL)
@@ -193,7 +215,7 @@ int LOG_NODE::getTreeImage()
     }
 }
 
-LOG_NODE* LOG_NODE::getSyncNode()
+FLOW_NODE* LOG_NODE::getSyncNode()
 {
     LOG_NODE* pNode = this;
     while (pNode && !pNode->isTreeNode() && (pNode->getPeer() || pNode->parent))
@@ -208,11 +230,10 @@ LOG_NODE* LOG_NODE::getSyncNode()
             pNode = pNode->parent;
         }
     }
-    if (pNode && !pNode->isTreeNode())
-    {
-        pNode = NULL;
-    }
-    return pNode;
+    if (pNode && pNode->isFlow())
+        return (FLOW_NODE*)pNode;
+    else
+        return NULL;
 }
 
 CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
@@ -233,7 +254,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     {
         APP_NODE* This = (APP_NODE*)this;
         cb = This->cb_app_name;
-        memcpy(pBuf, This->appName(), cb);
+        memcpy(pBuf, This->appName, cb);
         pBuf[cb] = 0;
         if (This->lost)
         {
@@ -277,8 +298,8 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         }
         if (gSettings.GetFnCallLine())
         {
-            if (p_call_addr)
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), p_call_addr->line);
+            if (This->p_call_addr_info)
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), This->p_call_addr_info->line);
         }
         pBuf[cb] = 0;
     }
@@ -317,10 +338,8 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-		int cbName;
-		char* name = moduleName(cbName);
-		cb += cbName;
-		memcpy(pBuf, name, cbName);
+		cb += threadNode->cb_module_name;
+		memcpy(pBuf, threadNode->moduleName, threadNode->cb_module_name);
 		pBuf[cb] = 0;
     }
     else if (col == THREAD_COL)
@@ -369,9 +388,13 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == CALL_LINE_COL)
     {
-        int n = getCallLine();
-        if (n)
-            cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), n);
+        if (isInfo())
+        {
+            INFO_NODE* This = (INFO_NODE*)this;
+            int n = This->callLine();
+            if (n)
+                cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), n);
+        }
     }
     else if (col == LOG_COL)
     {
@@ -439,14 +462,6 @@ int LOG_NODE::getPid()
 int LOG_NODE::getThreadNN()
 {
 	return  isThread() ? ((THREAD_NODE*)this)->threadNN : (isInfo() ? threadNode->threadNN : 0);
-}
-DWORD LOG_NODE::getCallAddr()
-{
-    return isFlow() ? ((FLOW_NODE*)this)->call_site : 0;
-}
-int LOG_NODE::getCallLine()
-{
-    return isInfo() ? ((INFO_NODE*)this)->call_line : 0;
 }
 
 void LOG_NODE::CollapseExpand(BOOL expand)
@@ -539,18 +554,6 @@ void LOG_NODE::CollapseExpandAll(bool expand)
 bool LOG_NODE::isAndroid() 
 { 
 	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID; 
-}
-
-char* LOG_NODE::moduleName(int &cb)
-{ 
-	if (threadNode->pAppNode->cb_module_name && !isAndroid()) {
-		cb = threadNode->pAppNode->cb_module_name;
-		return threadNode->pAppNode->appModuleName();
-	}
-	else {
-		cb = threadNode->pAppNode->cb_app_name;
-		return threadNode->pAppNode->appName();
-	}
 }
 
 bool LOG_NODE::CanShowInIDE()
