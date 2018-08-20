@@ -36,7 +36,7 @@ typedef struct
 
     char* appName() { return data; }
     char* moduleName() { return cb_module_name ? (appName() + cb_app_name) : appName(); }
-    char* fnName() { return moduleName() + cb_module_name; }
+    char* fnName() { return moduleName() + cbModuleName(); }
     char* trace() { return fnName() + cb_fn_name; }
     int cbModuleName() { return cb_module_name ? cb_module_name : cb_app_name; }
     int cbData() { return cb_app_name + cb_module_name + cb_fn_name + cb_trace; }
@@ -97,6 +97,7 @@ public:
     BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
     size_t UsedMemory();
     DWORD getLost() { return m_lost; }
+    void Log(ROW_LOG_REC* rec);
 
 private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);

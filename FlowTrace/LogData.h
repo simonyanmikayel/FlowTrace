@@ -16,7 +16,7 @@ extern Archive  gArchive;
 typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 
 #define LOG_FLAG_NEW_LINE 1
-#define LOG_FLAG_ANDTROID 2
+#define LOG_FLAG_JAVA 2
 
 #pragma pack(push,1)
 enum THREAD_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
@@ -67,7 +67,7 @@ struct LOG_NODE
     bool isFlow() { return data_type == FLOW_DATA_TYPE; }
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
-	bool isAndroid();
+	bool isJava();
 	bool CanShowInIDE();
 
     void CalcLines();

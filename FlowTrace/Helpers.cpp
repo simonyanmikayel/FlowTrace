@@ -69,7 +69,7 @@ namespace Helpers
 	{
 		if (!pSelectedNode || !pSelectedNode->CanShowInIDE() || !pSelectedNode->isInfo())
 			return;
-		bool IsAndroidLog = pSelectedNode->isAndroid();
+		bool IsAndroidLog = pSelectedNode->isJava();
 		char* src = 0;
 		int line = 0;
 		char src2[MAX_PATH + 1];

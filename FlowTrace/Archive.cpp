@@ -482,10 +482,24 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
     return pThreadNode->latestTrace;
 }
 
+void Archive::Log(ROW_LOG_REC* rec)
+{
+  stdlog(" rec-> len: %d, type: %d, flags: %d, nn: %d, "
+    "cb_app: %d, cb_module: %d, cb_fn: %d, cb_trace: %d, "
+    "pid: %d, tid: %d, sec: %d, msec: %u, "
+    "this_fn: %x, call_site: %x, fn_line: %d, call_line: %d, data: %s\n\n",
+    rec->len, rec->log_type, rec->log_flags, rec->nn,
+    rec->cb_app_name, rec->cb_module_name, rec->cb_fn_name, rec->cb_trace,
+    rec->pid, rec->tid, rec->sec, rec->msec,
+    rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->data);
+}
+
 bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
 {
     if (!rec->isValid())
         return false;
+
+    //Log(rec);
 
     APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)

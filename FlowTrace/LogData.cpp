@@ -50,7 +50,7 @@ char* FLOW_NODE::getCallSrc(bool fullPath)
 int INFO_NODE::callLine()
 {
     int line = 0;
-    if (isAndroid() || isTrace())
+    if (isJava() || isTrace())
     {
         line = call_line;
     }
@@ -551,16 +551,16 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     //stdlog("CollapseExpandAll %d\n", GetTickCount());
     CalcLines();
 }
-bool LOG_NODE::isAndroid() 
+bool LOG_NODE::isJava() 
 { 
-	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_ANDTROID; 
+	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_JAVA; 
 }
 
 bool LOG_NODE::CanShowInIDE()
 {
 	if (!isInfo())
 		return false;
-	else if (isAndroid())
+	else if (isJava())
 		return gSettings.CanShowInAndroidStudio();
 	else
 		return gSettings.CanShowInEclipse();
