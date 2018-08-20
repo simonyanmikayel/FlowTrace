@@ -49,6 +49,7 @@ static bfd_boolean base_names;		/* -s, strip directory names.  */
 
 static int naddr;		/* Number of addresses to process.  */
 static char **addr;		/* Hex addresses to process.  */
+const char *enum_file_name;
 
 static asymbol **syms;		/* Symbol table.  */
 
@@ -525,6 +526,8 @@ int resolve_addr(int argc, char **argv)
 	}
     }
 
+  if (enum_file_name)
+    file_name = enum_file_name;
   if (file_name == NULL)
     file_name = "a.out";
 
@@ -543,6 +546,7 @@ int enum_file_addresses(const char *file_name, line_info_cb cb)
   argv[1] = "-e";
   argv[2] = file_name;
   fn_line_info_cb = cb;
+  enum_file_name = file_name;
   return resolve_addr(argc, argv);
 }
 

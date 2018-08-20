@@ -128,9 +128,7 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
                 while (threadNode && IsWorking())
                 {
                     if (threadNode->cb_addr_info == INFINITE)
-                    {
-                        threadNode->cb_addr_info = ReadAdresses(threadNode);
-                    }
+                        ReadAdresses(threadNode);
                     threadNode = (THREAD_NODE*)threadNode->prevSibling;
                 }
                 appNode = (APP_NODE*)appNode->prevSibling;
@@ -153,6 +151,30 @@ void Addr2LineThread::Work(LPVOID pWorkParam)
             break;
         }
     }
+}
+
+void Addr2LineThread::CkeckAdresses(THREAD_NODE* curThreadNode)
+{
+    if (curThreadNode->cb_addr_info != INFINITE)
+        return;
+
+    APP_NODE* appNode = curThreadNode->pAppNode;
+    THREAD_NODE* threadNode = (THREAD_NODE*)appNode->lastChild;
+    while (threadNode && IsWorking())
+    {
+        if (curThreadNode != threadNode && threadNode->cb_addr_info != INFINITE && threadNode->cb_addr_info != 0)
+        {
+            if (0 == strcmp(threadNode->modulePath, curThreadNode->modulePath))
+            {
+                curThreadNode->cb_addr_info = threadNode->cb_addr_info;
+                curThreadNode->p_addr_info = threadNode->p_addr_info;
+                break;
+            }
+        }
+        threadNode = (THREAD_NODE*)threadNode->prevSibling;
+    }
+    if (!IsWorking())
+        curThreadNode->cb_addr_info = 0;
 }
 
 struct WORK_CTXT {
@@ -204,15 +226,25 @@ static int line_info(
     return 1;
 }
 
-DWORD Addr2LineThread::ReadAdresses(THREAD_NODE* threadNode)
+void Addr2LineThread::ReadAdresses(THREAD_NODE* threadNode)
 {
+    if (threadNode->cb_addr_info != INFINITE)
+    {
+        return;
+    }
     if (threadNode->cb_module_name == 0)
-        return 0;
+    {
+        threadNode->cb_addr_info = 0;
+        return;
+    }
 
     CHAR* szModules = gSettings.GetModules();
     CHAR* modulePath = strstr(szModules, threadNode->moduleName);
     if (!modulePath || modulePath[threadNode->cb_module_name] != '\n')
-        return 0;
+    {
+        threadNode->cb_addr_info = 0;
+        return;
+    }
     modulePath[threadNode->cb_module_name] = 0;
     char* p = strrchr(szModules, '\n');
     if (p)
@@ -220,11 +252,20 @@ DWORD Addr2LineThread::ReadAdresses(THREAD_NODE* threadNode)
     else
         modulePath = szModules;
 
+    strncpy_s(threadNode->modulePath, modulePath, MAX_PATH);
+    threadNode->modulePath[MAX_PATH] = 0;
+
+    CkeckAdresses(threadNode);
+    if (threadNode->cb_addr_info != INFINITE)
+    {
+        return;
+    }
+     
     ZeroMemory(&workCtxt, sizeof(workCtxt));
     workCtxt.This = this;
     workCtxt.threadNode = threadNode;
 
-    enum_file_addresses(modulePath, line_info);
+    enum_file_addresses(threadNode->modulePath, line_info);
 
     // add a fake info for unknown
     if (threadNode->p_addr_info)
@@ -241,6 +282,6 @@ DWORD Addr2LineThread::ReadAdresses(THREAD_NODE* threadNode)
             workCtxt.total++;
         }
     }
-    return workCtxt.total;
+    threadNode->cb_addr_info = workCtxt.total;
 }
 

@@ -14,7 +14,8 @@ public:
 
 private:
   void _Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop);
-  DWORD ReadAdresses(THREAD_NODE* threadNode);
+  void  ReadAdresses(THREAD_NODE* threadNode);
+  void  CkeckAdresses(THREAD_NODE* threadNode);
   LOG_NODE* m_pNode;
   HANDLE m_hParseEvent;
   HANDLE m_hResolveEvent;

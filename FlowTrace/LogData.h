@@ -47,7 +47,6 @@ struct LOG_NODE
         WORD expanded : 1;
         WORD hasNodeBox : 1;
         WORD pathExpanded : 1;
-        WORD addr_resolved : 1;
     };
 	BYTE bookmark;
 	BYTE nextChankCounter;
@@ -146,6 +145,7 @@ struct THREAD_NODE : LOG_NODE
     int  cb_color_buf;
     ADDR_INFO *p_addr_info;
     DWORD cb_addr_info;
+    char modulePath[MAX_PATH + 1];
     char moduleName[1];
 
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
