@@ -112,7 +112,11 @@ namespace Helpers
             FLOW_NODE* flowNode = pSelectedNode->getSyncNode();
             if (flowNode)
             {
-                ADDR_INFO * p_addr_info = bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_fn_addr_info;
+                ADDR_INFO * p_addr_info = NULL;
+                if (pSelectedNode->isTrace())
+                    p_addr_info = flowNode->p_fn_addr_info;
+                else
+                    p_addr_info = bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_fn_addr_info;
                 if (!p_addr_info)
                 {
                     gArchive.resolveAddr(flowNode, false);

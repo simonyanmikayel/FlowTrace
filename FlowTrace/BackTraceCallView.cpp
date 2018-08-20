@@ -106,7 +106,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
     return cb;
 }
 
-void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode)
+void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, FLOW_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode)
 {
     for (; traceNodeIndex < gArchive.getListedNodes()->Count(); traceNodeIndex++)
     {
@@ -115,19 +115,18 @@ void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, LOG_NODE* pFlowN
         {
             if (pListedNode != pSelectedNode && pListedNode->isTrace() && pListedNode->parent == pSelectedNode)
             {
-                //if (!pFlowNode->p_call_addr)
-                //  gArchive.resolveAddr(pFlowNode, false, false);
-
-              //int line = ((TRACE_NODE*)pListedNode)->call_line;
-              //if (line > 0 && pFlowNode->p_call_addr)
+                int line = ((TRACE_NODE*)pListedNode)->call_line;
+                if (!pFlowNode->p_call_addr_info)
+                  gArchive.resolveAddr(pFlowNode, false);
+                if (line > 0 && pFlowNode->p_call_addr_info)
                 {
-                    //if ((beforeFlowNode && line <= pFlowNode->p_call_addr->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr->line))
+                    if ((beforeFlowNode && line <= pFlowNode->p_call_addr_info->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr_info->line))
                     {
                         nodes[c_nodes] = pListedNode;
                         c_nodes++;
                     }
-                    //else
-                      //break;
+                    else
+                        break;
                 }
             }
         }
@@ -152,14 +151,14 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
     DWORD traceNodeIndex = 0;
     if (!pNode && pSelectedNode->isFlow())
     {
-        AddTraceNodes(pSelectedNode, pSelectedNode, traceNodeIndex, true);
+        AddTraceNodes(pSelectedNode, (FLOW_NODE*)pSelectedNode, traceNodeIndex, true);
     }
     else
     {
         while (pNode && pNode->isInfo() && c_nodes < MAX_BACK_TRACE)
         {
             if (bNested && pNode->isFlow())
-                AddTraceNodes(pSelectedNode, pNode, traceNodeIndex, true);
+                AddTraceNodes(pSelectedNode, (FLOW_NODE*)pNode, traceNodeIndex, true);
 
             nodes[c_nodes] = pNode;
             c_nodes++;
@@ -167,7 +166,7 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
             if (bNested && pNode->isFlow())
             {
                 if (!pNode->nextSibling)
-                    AddTraceNodes(pSelectedNode, pNode, traceNodeIndex, false);
+                    AddTraceNodes(pSelectedNode, (FLOW_NODE*)pNode, traceNodeIndex, false);
             }
 
             if (bNested)
