@@ -13,7 +13,7 @@ Addr2LineThread::Addr2LineThread()
     m_hParseEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     m_hResolveEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
-
+ 
 void Addr2LineThread::Terminate()
 {
     SetEvent(m_hParseEvent);

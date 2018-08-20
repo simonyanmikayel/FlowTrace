@@ -1,0 +1,531 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="binutils">
+      <UniqueIdentifier>{54658966-a513-40b7-8679-f821a6bf412a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bfd">
+      <UniqueIdentifier>{0ac8be51-fab7-4900-b4df-28f279973eb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="linux">
+      <UniqueIdentifier>{00a1ce2a-b512-4e60-b037-701b08925d29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="opcodes">
+      <UniqueIdentifier>{fc8b293b-64b8-4227-a9e0-410d785af0aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libiberty">
+      <UniqueIdentifier>{31fd479f-3a93-4d9e-9149-c2f341acdf3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{9e299faf-3557-4809-a8e0-5f6ffa32414a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="binutils\addr2line.c">
+      <Filter>binutils</Filter>
+    </ClCompile>
+    <ClCompile Include="linux\linux.c">
+      <Filter>linux</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\safe-ctype.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\xstrerror.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\cplus-dem.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\bfd.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\libbfd.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\opncls.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\archures.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\targets.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\d-demangle.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\reloc.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\bfdio.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-aarch64.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\section.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-alpha.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-arc.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-arm.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-avr.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-bfin.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-cr16.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-cr16c.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-cris.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-crx.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-d10v.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-d30v.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-epiphany.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-fr30.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-frv.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-h8300.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-h8500.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-hppa.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-i370.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-i386.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-i860.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-i960.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-iamcu.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-ip2k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-iq2000.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-k1om.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-l1om.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-lm32.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m9s12x.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m9s12xg.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m32c.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m32r.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m68hc11.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m68hc12.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m68k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m88k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m10200.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-m10300.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-mcore.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-mep.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-metag.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-microblaze.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-mips.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-mmix.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-moxie.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-ft32.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-msp430.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-mt.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-nds32.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-nios2.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-or1k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-pdp11.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-powerpc.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-rl78.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-rs6000.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-rx.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-s390.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-score.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-sh.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-sparc.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-spu.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tic4x.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tic6x.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tic54x.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tic80.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tilegx.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tilepro.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-v850.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-v850_rh850.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-vax.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-w65.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-we32k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-xc16x.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-xgate.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-z8k.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-z80.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-dlx.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-tic30.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-visium.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-xstormy16.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cpu-xtensa.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\hash.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\objalloc.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\cache.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\unlink-if-ordinary.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\format.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\binary.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\syms.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\linker.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\archive.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\hashtab.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\filename_cmp.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\lbasename.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\lrealpath.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\archive64.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\plugin.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\corefile.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\compress.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzclose.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzlib.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzread.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzwrite.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\infback.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzip_compress.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\dwarf1.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\dwarf2.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\simple.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\stabs.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\hex.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\getopt1.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\argv.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\xmalloc.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="binutils\bucomm.c">
+      <Filter>binutils</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\getopt.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\make-temp-file.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\xexit.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="binutils\filemode.c">
+      <Filter>binutils</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\mkstemps.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\cp-demangle.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\alloca.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\fnmatch.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-attrs.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-nacl.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\merge.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\init.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf32.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf32-arm.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elflink.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-strtab.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-eh-frame.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-vxworks.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="libiberty\ffs.c">
+      <Filter>libiberty</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\vms-lib.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\vms-misc.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+    <ClCompile Include="bfd\elf32-am33lin.c">
+      <Filter>bfd</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="binutils\config.h">
+      <Filter>binutils</Filter>
+    </ClInclude>
+    <ClInclude Include="binutils\addr2line.h">
+      <Filter>binutils</Filter>
+    </ClInclude>
+    <ClInclude Include="bfd\bfd.h">
+      <Filter>bfd</Filter>
+    </ClInclude>
+    <ClInclude Include="bfd\config.h">
+      <Filter>bfd</Filter>
+    </ClInclude>
+    <ClInclude Include="linux\linux.h">
+      <Filter>linux</Filter>
+    </ClInclude>
+    <ClInclude Include="libiberty\config.h">
+      <Filter>libiberty</Filter>
+    </ClInclude>
+    <ClInclude Include="bfd\targmatch.h">
+      <Filter>bfd</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+</Project>

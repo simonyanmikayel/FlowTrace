@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Profiler|Win32">
+      <Configuration>Profiler</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Profiler|x64">
+      <Configuration>Profiler</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="bfd\archive.c" />
+    <ClCompile Include="bfd\archive64.c" />
+    <ClCompile Include="bfd\archures.c" />
+    <ClCompile Include="bfd\bfd.c" />
+    <ClCompile Include="bfd\bfdio.c" />
+    <ClCompile Include="bfd\binary.c" />
+    <ClCompile Include="bfd\cache.c" />
+    <ClCompile Include="bfd\compress.c" />
+    <ClCompile Include="bfd\corefile.c" />
+    <ClCompile Include="bfd\cpu-aarch64.c" />
+    <ClCompile Include="bfd\cpu-alpha.c" />
+    <ClCompile Include="bfd\cpu-arc.c" />
+    <ClCompile Include="bfd\cpu-arm.c" />
+    <ClCompile Include="bfd\cpu-avr.c" />
+    <ClCompile Include="bfd\cpu-bfin.c" />
+    <ClCompile Include="bfd\cpu-cr16.c" />
+    <ClCompile Include="bfd\cpu-cr16c.c" />
+    <ClCompile Include="bfd\cpu-cris.c" />
+    <ClCompile Include="bfd\cpu-crx.c" />
+    <ClCompile Include="bfd\cpu-d10v.c" />
+    <ClCompile Include="bfd\cpu-d30v.c" />
+    <ClCompile Include="bfd\cpu-dlx.c" />
+    <ClCompile Include="bfd\cpu-epiphany.c" />
+    <ClCompile Include="bfd\cpu-fr30.c" />
+    <ClCompile Include="bfd\cpu-frv.c" />
+    <ClCompile Include="bfd\cpu-ft32.c" />
+    <ClCompile Include="bfd\cpu-h8300.c" />
+    <ClCompile Include="bfd\cpu-h8500.c" />
+    <ClCompile Include="bfd\cpu-hppa.c" />
+    <ClCompile Include="bfd\cpu-i370.c" />
+    <ClCompile Include="bfd\cpu-i386.c" />
+    <ClCompile Include="bfd\cpu-i860.c" />
+    <ClCompile Include="bfd\cpu-i960.c" />
+    <ClCompile Include="bfd\cpu-iamcu.c" />
+    <ClCompile Include="bfd\cpu-ip2k.c" />
+    <ClCompile Include="bfd\cpu-iq2000.c" />
+    <ClCompile Include="bfd\cpu-k1om.c" />
+    <ClCompile Include="bfd\cpu-l1om.c" />
+    <ClCompile Include="bfd\cpu-lm32.c" />
+    <ClCompile Include="bfd\cpu-m10200.c" />
+    <ClCompile Include="bfd\cpu-m10300.c" />
+    <ClCompile Include="bfd\cpu-m32c.c" />
+    <ClCompile Include="bfd\cpu-m32r.c" />
+    <ClCompile Include="bfd\cpu-m68hc11.c" />
+    <ClCompile Include="bfd\cpu-m68hc12.c" />
+    <ClCompile Include="bfd\cpu-m68k.c" />
+    <ClCompile Include="bfd\cpu-m88k.c" />
+    <ClCompile Include="bfd\cpu-m9s12x.c" />
+    <ClCompile Include="bfd\cpu-m9s12xg.c" />
+    <ClCompile Include="bfd\cpu-mcore.c" />
+    <ClCompile Include="bfd\cpu-mep.c" />
+    <ClCompile Include="bfd\cpu-metag.c" />
+    <ClCompile Include="bfd\cpu-microblaze.c" />
+    <ClCompile Include="bfd\cpu-mips.c" />
+    <ClCompile Include="bfd\cpu-mmix.c" />
+    <ClCompile Include="bfd\cpu-moxie.c" />
+    <ClCompile Include="bfd\cpu-msp430.c" />
+    <ClCompile Include="bfd\cpu-mt.c" />
+    <ClCompile Include="bfd\cpu-nds32.c" />
+    <ClCompile Include="bfd\cpu-nios2.c" />
+    <ClCompile Include="bfd\cpu-or1k.c" />
+    <ClCompile Include="bfd\cpu-pdp11.c" />
+    <ClCompile Include="bfd\cpu-powerpc.c" />
+    <ClCompile Include="bfd\cpu-rl78.c" />
+    <ClCompile Include="bfd\cpu-rs6000.c" />
+    <ClCompile Include="bfd\cpu-rx.c" />
+    <ClCompile Include="bfd\cpu-s390.c" />
+    <ClCompile Include="bfd\cpu-score.c" />
+    <ClCompile Include="bfd\cpu-sh.c" />
+    <ClCompile Include="bfd\cpu-sparc.c" />
+    <ClCompile Include="bfd\cpu-spu.c" />
+    <ClCompile Include="bfd\cpu-tic30.c" />
+    <ClCompile Include="bfd\cpu-tic4x.c" />
+    <ClCompile Include="bfd\cpu-tic54x.c" />
+    <ClCompile Include="bfd\cpu-tic6x.c" />
+    <ClCompile Include="bfd\cpu-tic80.c" />
+    <ClCompile Include="bfd\cpu-tilegx.c" />
+    <ClCompile Include="bfd\cpu-tilepro.c" />
+    <ClCompile Include="bfd\cpu-v850.c" />
+    <ClCompile Include="bfd\cpu-v850_rh850.c" />
+    <ClCompile Include="bfd\cpu-vax.c" />
+    <ClCompile Include="bfd\cpu-visium.c" />
+    <ClCompile Include="bfd\cpu-w65.c" />
+    <ClCompile Include="bfd\cpu-we32k.c" />
+    <ClCompile Include="bfd\cpu-xc16x.c" />
+    <ClCompile Include="bfd\cpu-xgate.c" />
+    <ClCompile Include="bfd\cpu-xstormy16.c" />
+    <ClCompile Include="bfd\cpu-xtensa.c" />
+    <ClCompile Include="bfd\cpu-z80.c" />
+    <ClCompile Include="bfd\cpu-z8k.c" />
+    <ClCompile Include="bfd\dwarf1.c" />
+    <ClCompile Include="bfd\dwarf2.c" />
+    <ClCompile Include="bfd\elf-attrs.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="bfd\elf-eh-frame.c" />
+    <ClCompile Include="bfd\elf-nacl.c" />
+    <ClCompile Include="bfd\elf-strtab.c" />
+    <ClCompile Include="bfd\elf-vxworks.c" />
+    <ClCompile Include="bfd\elf.c" />
+    <ClCompile Include="bfd\elf32-am33lin.c" />
+    <ClCompile Include="bfd\elf32-arm.c" />
+    <ClCompile Include="bfd\elf32.c" />
+    <ClCompile Include="bfd\elflink.c" />
+    <ClCompile Include="bfd\format.c" />
+    <ClCompile Include="bfd\hash.c" />
+    <ClCompile Include="bfd\init.c" />
+    <ClCompile Include="bfd\libbfd.c" />
+    <ClCompile Include="bfd\linker.c" />
+    <ClCompile Include="bfd\merge.c" />
+    <ClCompile Include="bfd\opncls.c" />
+    <ClCompile Include="bfd\plugin.c" />
+    <ClCompile Include="bfd\reloc.c" />
+    <ClCompile Include="bfd\section.c" />
+    <ClCompile Include="bfd\simple.c" />
+    <ClCompile Include="bfd\stabs.c" />
+    <ClCompile Include="bfd\syms.c" />
+    <ClCompile Include="bfd\targets.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="bfd\vms-lib.c" />
+    <ClCompile Include="bfd\vms-misc.c" />
+    <ClCompile Include="binutils\addr2line.c" />
+    <ClCompile Include="binutils\bucomm.c" />
+    <ClCompile Include="binutils\filemode.c" />
+    <ClCompile Include="libiberty\alloca.c" />
+    <ClCompile Include="libiberty\argv.c" />
+    <ClCompile Include="libiberty\cp-demangle.c" />
+    <ClCompile Include="libiberty\cplus-dem.c" />
+    <ClCompile Include="libiberty\d-demangle.c" />
+    <ClCompile Include="libiberty\ffs.c" />
+    <ClCompile Include="libiberty\filename_cmp.c" />
+    <ClCompile Include="libiberty\fnmatch.c" />
+    <ClCompile Include="libiberty\getopt.c" />
+    <ClCompile Include="libiberty\getopt1.c" />
+    <ClCompile Include="libiberty\hashtab.c" />
+    <ClCompile Include="libiberty\hex.c" />
+    <ClCompile Include="libiberty\lbasename.c" />
+    <ClCompile Include="libiberty\lrealpath.c" />
+    <ClCompile Include="libiberty\make-temp-file.c" />
+    <ClCompile Include="libiberty\mkstemps.c" />
+    <ClCompile Include="libiberty\objalloc.c" />
+    <ClCompile Include="libiberty\safe-ctype.c" />
+    <ClCompile Include="libiberty\unlink-if-ordinary.c" />
+    <ClCompile Include="libiberty\xexit.c" />
+    <ClCompile Include="libiberty\xmalloc.c" />
+    <ClCompile Include="libiberty\xstrerror.c" />
+    <ClCompile Include="linux\linux.c" />
+    <ClCompile Include="zlib\adler32.c" />
+    <ClCompile Include="zlib\gzip_compress.c" />
+    <ClCompile Include="zlib\crc32.c" />
+    <ClCompile Include="zlib\deflate.c" />
+    <ClCompile Include="zlib\gzclose.c" />
+    <ClCompile Include="zlib\gzlib.c" />
+    <ClCompile Include="zlib\gzread.c" />
+    <ClCompile Include="zlib\gzwrite.c" />
+    <ClCompile Include="zlib\infback.c" />
+    <ClCompile Include="zlib\inffast.c" />
+    <ClCompile Include="zlib\inflate.c" />
+    <ClCompile Include="zlib\inftrees.c" />
+    <ClCompile Include="zlib\trees.c" />
+    <ClCompile Include="zlib\uncompr.c" />
+    <ClCompile Include="zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bfd\bfd.h" />
+    <ClInclude Include="bfd\config.h" />
+    <ClInclude Include="bfd\targmatch.h" />
+    <ClInclude Include="binutils\addr2line.h" />
+    <ClInclude Include="binutils\config.h" />
+    <ClInclude Include="libiberty\config.h" />
+    <ClInclude Include="linux\linux.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>addr2line</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <ProjectName>addr2line</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>$(ProjectName)_$(Platform)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_PROFILER;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/GH /Gh %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>c:\temp_vs\bin\ProfilerDesktop_$(Platform)_Debug.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_PROFILER;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/GH /Gh %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalDependencies>c:\temp_vs\bin\ProfilerDesktop_$(Platform)_Debug.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

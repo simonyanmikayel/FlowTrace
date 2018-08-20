@@ -1,0 +1,3 @@
+solve '_LIB': macro redefinition. For the moment _LIB renamed to _LIBB
+add more targets in targmatch.h and targets.c
+remove from addr2line.lib call of xexit and exit

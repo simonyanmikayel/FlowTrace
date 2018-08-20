@@ -90,9 +90,6 @@
     <ClInclude Include="DlgInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="addr2line.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DlgModules.h">
       <Filter>Header Files</Filter>
     </ClInclude>
