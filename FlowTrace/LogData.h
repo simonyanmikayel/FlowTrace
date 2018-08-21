@@ -39,7 +39,6 @@ struct LOG_NODE
     LOG_NODE* prevSibling;
     struct {
         WORD hasNewLine : 1;
-        WORD hasSearchResult : 1;
         WORD hiden : 1;
         WORD hasCheckBox : 1;
         WORD checked : 1;
@@ -52,6 +51,7 @@ struct LOG_NODE
 	BYTE nextChankCounter;
     int cExpanded;
     int posInTree;
+    int lineSearchPos;
     LOG_NODE* nextChankMarker;
     LOG_NODE* nextChank;
     LOG_NODE* firstChild;

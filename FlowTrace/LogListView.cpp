@@ -107,7 +107,7 @@ bool LOG_SELECTION::Move(int iItem, int iChar, bool extend)
 	{
 		start = end = cur = sel;
 	}
-	//stdlog("old == *this %d\n", old == *this);
+	//stdlog("cur.iChar %d\n", cur.iChar);
 	return !(old == *this);
 
 }
@@ -1215,7 +1215,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 			if (curSearch && pNode->isInfo())
 			{
 				char* p = szText;
-				if (pNode->hasSearchResult && searchInfo.total)
+				if (pNode->lineSearchPos && searchInfo.total)
 				{
 					if (curChar == startChar)
 					{

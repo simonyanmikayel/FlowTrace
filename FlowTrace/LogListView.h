@@ -84,8 +84,9 @@ public:
 	void CopySelection(bool onlyTraces = false);
 	CHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
 	void SelectAll();
-	int getSelectionItem() { return m_ListSelection.CurItem(); }
-	void Redraw(int nFirst, int nLast);
+    int getSelectionItem() { return m_ListSelection.CurItem(); }
+    int getSelectionColumn() { return m_ListSelection.CurChar(); }
+    void Redraw(int nFirst, int nLast);
 	void EnsureTextVisible(int iItem, int startChar, int endChar);
 	void ShowItem(DWORD i, bool scrollToMiddle, bool scrollToLeft);
 	void ShowNode(LOG_NODE* pNode, bool scrollToMiddle);

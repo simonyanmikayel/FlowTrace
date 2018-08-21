@@ -655,20 +655,21 @@ void CMainFrame::SearchRefresh(WORD wID)
             CHAR* p = m_list.getText(i);
             if (p[0])
             {
-                pNode->hasSearchResult = 0;
+                pNode->lineSearchPos = 0;
                 while (p = searchInfo.find(p))
                 {
                     if (searchInfo.firstLine == 0 && searchInfo.total == 0)
                     {
                         searchInfo.firstLine = i;
                     }
-                    if (pNode->hasSearchResult == 0)
+                    if (pNode->lineSearchPos == 0)
                     {
                         countInLast = 0;
                     }
                     searchInfo.lastLine = i;
                     searchInfo.total++;
-                    pNode->hasSearchResult = 1;
+                    if (pNode->lineSearchPos == 0)
+                        pNode->lineSearchPos = searchInfo.total;
                     countInLast++;
                     p += searchInfo.cbText;
                 }
@@ -676,7 +677,6 @@ void CMainFrame::SearchRefresh(WORD wID)
         }
         searchInfo.curLine = searchInfo.lastLine;
         searchInfo.posInCur = countInLast - 1;
-        searchInfo.cur = searchInfo.total - 1;
     }
 
     SearchNavigate(wID);
@@ -685,9 +685,11 @@ void CMainFrame::SearchRefresh(WORD wID)
 
 void CMainFrame::SearchNavigate(WORD wID)
 {
-    if (wID != ID_SEARCH_REFRESH)
-        m_list.SelLogSelection();
+    //if (wID != ID_SEARCH_REFRESH)
+    //    m_list.SelLogSelection();
     int item = m_list.getSelectionItem();
+    int column = m_list.getSelectionColumn();
+    int logLen;
     bool found = false;
     if (searchInfo.total)
     {
@@ -696,26 +698,45 @@ void CMainFrame::SearchNavigate(WORD wID)
             if (item == searchInfo.curLine && searchInfo.posInCur > 0)
             {
                 searchInfo.posInCur--;
-                searchInfo.cur--;
                 found = true;
             }
             else //if (searchInfo.curLine > 0)
             {
-                for (int i = item - 1; i >= 0; i--)
-                    //for (int i = searchInfo.curLine - 1; i >= 0; i--)
+                for (int i = item; i >= 0; i--)
                 {
                     LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
-                    CHAR* p = m_list.getText(i);
-                    if (p[0])
+                    ATLASSERT(pNode);
+                    if (pNode && pNode->isInfo())
                     {
-                        if (pNode->hasSearchResult)
+                        CHAR* p = m_list.getText(i);
+                        if (p[0])
                         {
-                            searchInfo.curLine = i;
-                            searchInfo.cur--;
-                            int curCount = searchInfo.calcCountIn(p);
-                            searchInfo.posInCur = curCount - 1;
-                            found = true;
-                            break;
+                            if (pNode->lineSearchPos)
+                            {
+                                searchInfo.curLine = i;
+                                int curCount = searchInfo.calcCountIn(p);
+                                searchInfo.posInCur = curCount - 1;
+                                if (i == item)
+                                {
+                                    searchInfo.posInCur = -1;
+                                    char* log = m_list.getText(searchInfo.curLine, &logLen);
+                                    if (column > 0 && column < logLen)
+                                    {
+                                        char* p = log;
+                                        while (NULL != (p = searchInfo.find(p)) && (p - log) < column - (int)searchInfo.cbText)
+                                        {
+                                            p += searchInfo.cbText;
+                                            searchInfo.posInCur++;
+                                        }
+                                        if (searchInfo.posInCur < 0)
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                }
+                                found = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -728,22 +749,37 @@ void CMainFrame::SearchNavigate(WORD wID)
             if (item == searchInfo.curLine && searchInfo.posInCur < curCount - 1)
             {
                 searchInfo.posInCur++;
-                searchInfo.cur++;
                 found = true;
             }
             else //if (searchInfo.curLine != searchInfo.lastLine)
             {
-                for (int i = item + 1; i <= searchInfo.lastLine; i++)
-                    //for (int i = searchInfo.curLine + 1; i <= searchInfo.lastLine; i++)
+                for (int i = item; i <= searchInfo.lastLine; i++)
                 {
                     LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
-                    if (pNode->isInfo())
+                    ATLASSERT(pNode);
+                    if (pNode && pNode->isInfo())
                     {
-                        if (pNode->hasSearchResult)
+                        if (pNode->lineSearchPos)
                         {
                             searchInfo.curLine = i;
-                            searchInfo.cur++;
                             searchInfo.posInCur = 0;
+                            if (i == item)
+                            {
+                                char* log = m_list.getText(searchInfo.curLine, &logLen);
+                                if (column > 0 && column < logLen)
+                                {
+                                    char* p = log;
+                                    while (NULL != (p = searchInfo.find(p)) && (p - log) < column)
+                                    {
+                                        p += searchInfo.cbText;
+                                        searchInfo.posInCur++;
+                                    }
+                                    if (searchInfo.posInCur >= curCount)
+                                    {
+                                        continue;
+                                    }
+                                }
+                            }
                             found = true;
                             break;
                         }
@@ -752,16 +788,19 @@ void CMainFrame::SearchNavigate(WORD wID)
             }
         }
 
-        if (wID == ID_SEARCH_FIRST || (!found && wID == ID_SEARCH_PREV))
+        if (searchInfo.posInCur < 0)
         {
-            searchInfo.curLine = searchInfo.firstLine;
-            searchInfo.cur = 0;
+            ATLASSERT(0);
             searchInfo.posInCur = 0;
         }
-        else if (wID == ID_SEARCH_LAST || (!found && wID == ID_SEARCH_NEXT))
+        if (wID == ID_SEARCH_FIRST || (!found && wID == ID_SEARCH_PREV) || (searchInfo.curLine < searchInfo.firstLine))
+        {
+            searchInfo.curLine = searchInfo.firstLine;
+            searchInfo.posInCur = 0;
+        }
+        else if (wID == ID_SEARCH_LAST || (!found && wID == ID_SEARCH_NEXT) || (searchInfo.curLine > searchInfo.lastLine))
         {
             searchInfo.curLine = searchInfo.lastLine;
-            searchInfo.cur = searchInfo.total - 1;
             CHAR* p = m_list.getText(searchInfo.lastLine);
             int curCount = searchInfo.calcCountIn(p);
             searchInfo.posInCur = curCount - 1;
@@ -769,7 +808,6 @@ void CMainFrame::SearchNavigate(WORD wID)
 
         if (wID != ID_SEARCH_REFRESH)
         {
-            int logLen;
             char* log = m_list.getText(searchInfo.curLine, &logLen);
             char* p = log;
             int searchPos = 0;
@@ -787,9 +825,14 @@ void CMainFrame::SearchNavigate(WORD wID)
         }
     }
 
-    CHAR szText[32];
-    _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? searchInfo.cur + 1 : 0, searchInfo.total);
-    m_searchResult.SetWindowText(szText);
+    LOG_NODE* pNode = gArchive.getListedNodes()->getNode(searchInfo.curLine);
+    ATLASSERT(pNode);
+    if (pNode)
+    {
+        CHAR szText[32];
+        _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? pNode->lineSearchPos + searchInfo.posInCur : 0, searchInfo.total);
+        m_searchResult.SetWindowText(szText);
+    }
 
     m_list.Redraw(-1, -1);
 }
