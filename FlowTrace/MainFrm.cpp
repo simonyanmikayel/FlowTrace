@@ -200,8 +200,8 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
     if (!autoDone && wParam != WA_INACTIVE)
     {
         autoDone = true;
-        DlgModules dlg;
-        dlg.DoModal();
+        //DlgModules dlg;
+        //dlg.DoModal();
     }
 
     return 0;
