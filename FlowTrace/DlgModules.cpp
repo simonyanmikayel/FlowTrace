@@ -33,7 +33,8 @@ LRESULT DlgModules::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
     m_ModulGrid.SetRedraw(TRUE);
 
 	CenterWindow(GetParent());
-	return TRUE;
+    m_ModulGrid.SetFocus();
+    return TRUE;
 }
 
 LRESULT DlgModules::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -67,4 +68,28 @@ LRESULT DlgModules::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
     }
 	EndDialog(wID);
 	return 0;
+}
+
+
+LRESULT DlgModules::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    m_ModulGrid.SetFocus();
+    m_ModulGrid.InsertRow();
+    return 0;
+}
+
+
+LRESULT DlgModules::OnBnClickedButtonEdit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    m_ModulGrid.SetFocus();
+    m_ModulGrid.EditSelectedRow();
+    return 0;
+}
+
+
+LRESULT DlgModules::OnBnClickedButtonDel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    m_ModulGrid.SetFocus();
+    m_ModulGrid.DeleteSelectedRow();
+    return 0;
 }

@@ -307,7 +307,10 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,254,278,50,14
     GROUPBOX        "Static",IDC_STATIC_MODUL_LST,7,34,297,228
     CONTROL         "Resolve function call lines",IDC_CHECK_RESOLVE_ADDR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,19,99,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,99,10
+    PUSHBUTTON      "Add (Ins.)",IDC_BUTTON_ADD,137,16,50,14
+    PUSHBUTTON      "Edit (Click)",IDC_BUTTON_EDIT,195,16,50,14
+    PUSHBUTTON      "Delete (Del.)",IDC_BUTTON_DEL,253,16,50,14
 END
 
 

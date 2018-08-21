@@ -474,6 +474,21 @@ public:
 		return m_grid.m_nSelectedRow;
 	}
 
+    void InsertRow() {
+        BOOL bHandled;
+        OnAddRow(0, 0, 0, bHandled);
+    }
+
+    void EditSelectedRow() {
+        if (m_grid.m_nSelectedRow >= 0)
+            m_grid.EditRow();
+    }
+
+    void DeleteSelectedRow() {
+        if (m_grid.m_nSelectedRow >= 0)
+            DeleteItem(m_grid.m_nSelectedRow);
+    }
+
 	void SetItem(long nItem,long nColumn,_variant_t vtValue) {
 		ATLASSERT(nItem<GetRowCount());
 		ATLASSERT(nColumn<GetColumnCount());
@@ -566,10 +581,14 @@ public:
 		if(m_grid.m_pListener && !m_grid.m_pListener->OnDeleteRow(GetWindowLong(GWL_ID),nItem))
 			return;
 
-		m_grid.SelectRow(-1);
 		delete m_grid.m_rows[nItem];
 		m_grid.m_rows.RemoveAt(nItem);
 		UpdateScrollSize();
+
+        if (nItem>=GetRowCount())
+            nItem = GetRowCount()-1;
+        m_grid.SelectRow(nItem);
+
 	}
 
 	void EnsureVisible(long nRow) {

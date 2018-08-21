@@ -73,6 +73,8 @@
 #define IDC_COMBO_FONT_SIZE             1043
 #define IDC_CHECK_FONT_WEIGHT           1044
 #define IDC_BUTTON1                     1045
+#define IDC_BUTTON_EDIT                 1046
+#define IDC_BUTTON_DEL                  1047
 #define IDC_BUTTON_RESET                1200
 #define IDC_EDIT_LINUX_HOME             1201
 #define IDC_EDIT2                       1202

@@ -189,14 +189,21 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     //DlgProgress dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
-#ifdef _AUTO_TEST
     static bool autoDone = false;
+#ifdef _AUTO_TEST
     if (!autoDone && wParam != WA_INACTIVE)
     {
         autoDone = true;
         DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
     }
 #endif
+    if (!autoDone && wParam != WA_INACTIVE)
+    {
+        autoDone = true;
+        DlgModules dlg;
+        dlg.DoModal();
+    }
+
     return 0;
 }
 
