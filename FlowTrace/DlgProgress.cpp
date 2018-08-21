@@ -192,6 +192,8 @@ void TaskThread::FileSave(WORD cmd)
         if (!pNode->isInfo())
             continue;
 
+        if (i == 1711)
+            i = i;
 		if (isExport)
         {
             int cbColor = 0;
@@ -224,19 +226,14 @@ void TaskThread::FileSave(WORD cmd)
                 rec->call_site = 0;
 				rec->fn_line = 0;
 				rec->call_line = p->call_line;
-
-                rec->cb_fn_name = p->cb_fn_name;
-                memcpy(rec->fnName(), p->fnName(), p->cb_fn_name);
-
             }
 
             rec->cb_app_name = pNode->threadNode->pAppNode->cb_app_name;
-            memcpy(rec->appName(), pNode->threadNode->pAppNode->appName, rec->cb_app_name);
             rec->cb_module_name = pNode->threadNode->cb_actual_module_name;
+            rec->cb_fn_name = ((INFO_NODE*)pNode)->cb_fn_name;
+            memcpy(rec->appName(), pNode->threadNode->pAppNode->appName, rec->cb_app_name);
             if (rec->cb_module_name)
                 memcpy(rec->moduleName(), pNode->threadNode->moduleName, rec->cb_module_name);
-
-            rec->cb_fn_name = ((INFO_NODE*)pNode)->cb_fn_name;
             memcpy(rec->fnName(), ((INFO_NODE*)pNode)->fnName(), rec->cb_fn_name);
 
             if (pNode->isFlow())
@@ -249,12 +246,24 @@ void TaskThread::FileSave(WORD cmd)
                 int cb_trace;
                 char* log = pNode->getListText(&cb_trace, LOG_COL);
                 rec->cb_trace = cb_trace;
+                int cb_size = rec->size();
+                bool truncate = cb_size > MAX_RECORD_LEN - 10;
+                if (truncate) {
+                    cb_trace -= (cb_size - MAX_RECORD_LEN + 10);
+                    rec->cb_trace = cb_trace;
+                }
                 memcpy(rec->trace(), log, rec->cb_trace + 1);
+                if (truncate) {
+                    memcpy(rec->trace() + rec->cb_trace, "...", 3);
+                    rec->cb_trace += 3;
+                }
                 if (p->color)
                 {
                     cbColor = sprintf_s(szColor, _countof(szColor), "\033[0;%dm", p->color);
                     rec->cb_trace += cbColor;
                 }
+                if (rec->cb_trace > 2000)
+                    i = i;
             }
 
             rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
@@ -377,7 +386,7 @@ void TaskThread::FileImport()
         while (ss && IsWorking())
         {
             count++;
-            if (count == 2656)
+            if (count == 1712)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
 			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %u %u %d %d %d %d-"),

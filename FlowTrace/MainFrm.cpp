@@ -790,7 +790,6 @@ void CMainFrame::SearchNavigate(WORD wID)
 
         if (searchInfo.posInCur < 0)
         {
-            ATLASSERT(0);
             searchInfo.posInCur = 0;
         }
         if (wID == ID_SEARCH_FIRST || (!found && wID == ID_SEARCH_PREV) || (searchInfo.curLine < searchInfo.firstLine))
