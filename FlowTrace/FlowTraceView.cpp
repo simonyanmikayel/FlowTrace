@@ -12,7 +12,7 @@ CFlowTraceView::CFlowTraceView()
 	: m_wndListView(this)
 	, m_wndTreeView(this)
 	, m_wndBackTraceView(this)
-	, m_selectedNode(NULL)
+	, m_syncNode(NULL)
 {
 
 }
@@ -149,7 +149,7 @@ LRESULT CFlowTraceView::OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM 
 
 void CFlowTraceView::ClearLog()
 {
-	m_selectedNode = NULL;
+	m_syncNode = NULL;
 	m_wndTreeView.Clear();
 	m_wndBackTraceView.ClearTrace();
 	m_wndListView.Clear();
@@ -203,26 +203,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
 	return CDRF_DODEFAULT;
 }
 
-void CFlowTraceView::SyncViews(LOG_NODE* pNode, bool fromList)
-{
-	if (pNode)
-	{
-		pNode = pNode->getSyncNode();
-		if (pNode)
-		{
-			m_selectedNode = pNode;
-			m_wndTreeView.EnsureNodeVisible(pNode, false);
-			if (!fromList)
-				m_wndListView.ShowFirstSyncronised(true);
-			ShowBackTrace(pNode);
-
-			m_wndListView.Invalidate();
-			m_wndTreeView.Invalidate();
-			m_wndBackTraceView.m_wndCallFuncView.Invalidate();
-			m_wndBackTraceView.m_wndCallStackView.Invalidate();
-		}
-	}
-}
 void CFlowTraceView::SyncViews()
 {
 	HWND hwnd = GetFocus();
@@ -246,7 +226,24 @@ void CFlowTraceView::SyncViews()
 	{
 		pNode = m_wndBackTraceView.m_wndCallStackView.GetSelectedNode();
 	}
-	SyncViews(pNode, fromList);
+
+    if (pNode)
+    {
+        FLOW_NODE* pFlowNode = pNode->getSyncNode();
+        if (pFlowNode)
+        {
+            m_syncNode = pFlowNode;
+            m_wndTreeView.EnsureNodeVisible(pFlowNode, false);
+            if (!fromList)
+                m_wndListView.ShowFirstSyncronised(true);
+            ShowBackTrace(pFlowNode);
+
+            m_wndListView.Invalidate();
+            m_wndTreeView.Invalidate();
+            m_wndBackTraceView.m_wndCallFuncView.Invalidate();
+            m_wndBackTraceView.m_wndCallStackView.Invalidate();
+        }
+    }
 }
 
 void CFlowTraceView::ShowStackView(bool show)

@@ -41,7 +41,7 @@ public:
   void ClearLog();
   void ApplySettings(bool fontChanged);
   void SetChildPos(int cx, int cy);
-  LOG_NODE* selectedNode() { return m_selectedNode; }
+  FLOW_NODE* syncNode() { return m_syncNode; }
   CLogListView& list() { return m_wndListView; }
   CLogTreeView& tree() { return m_wndTreeView; }
   CBackTraceView& backTrace() { return m_wndBackTraceView; }
@@ -49,12 +49,11 @@ public:
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
   void ShowBackTrace(LOG_NODE* pNode, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
 private:
-  void SyncViews(LOG_NODE* pNode, bool fromList);
 
   CSplitterWindow m_wndVertSplitter;
   CSplitterWindow m_wndHorzSplitter;
   CLogTreeView    m_wndTreeView;
   CLogListView    m_wndListView;
   CBackTraceView  m_wndBackTraceView;
-  LOG_NODE*       m_selectedNode;
+  FLOW_NODE*      m_syncNode;
 };

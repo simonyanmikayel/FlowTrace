@@ -354,7 +354,7 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
 
 void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
 {
-	LOG_NODE* pSyncNode = m_pView->selectedNode();
+	LOG_NODE* pSyncNode = m_pView->syncNode();
 	for (DWORD i = 0; i < m_recCount; i++)
 	{
 		if (gArchive.getListedNodes()->getNode(i)->isSynchronized(pSyncNode))
@@ -656,7 +656,11 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	{
 		Helpers::ShowInIDE(pNode, false);
 	}
-	else if (nRet == ID_VIEW_NODE_DATA)
+    else if (nRet == ID_TRACE_CONTEXT_IN_ECLIPSE)
+    {
+        Helpers::ShowInIDE(pNode, false, true);
+    }
+    else if (nRet == ID_VIEW_NODE_DATA)
 	{
 		Helpers::ShowNodeDetails(pNode);
 	}
@@ -1080,7 +1084,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		int y = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - ICON_LEN / 2;
 		int x = rcItem.left + ICON_BOOKMARK * ICON_LEN;
 
-		LOG_NODE* pSyncNode = m_pView->selectedNode();
+		LOG_NODE* pSyncNode = m_pView->syncNode();
 		if (pNode && pNode->isSynchronized(pSyncNode))
 		{
 			ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_TRACE_SEL, hdc, x, y, ILD_NORMAL);

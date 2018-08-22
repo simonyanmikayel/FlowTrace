@@ -106,33 +106,6 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
     return cb;
 }
 
-void CBackTraceCallView::AddTraceNodes(LOG_NODE* pSelectedNode, FLOW_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode)
-{
-    for (; traceNodeIndex < gArchive.getListedNodes()->Count(); traceNodeIndex++)
-    {
-        LOG_NODE* pListedNode = gArchive.getListedNodes()->getNode(traceNodeIndex);
-        if (pListedNode->isSynchronized(pSelectedNode))
-        {
-            if (pListedNode != pSelectedNode && pListedNode->isTrace() && pListedNode->parent == pSelectedNode)
-            {
-                int line = ((TRACE_NODE*)pListedNode)->call_line;
-                if (!pFlowNode->p_call_addr_info)
-                  gArchive.resolveAddr(pFlowNode, false);
-                if (line > 0 && pFlowNode->p_call_addr_info)
-                {
-                    if ((beforeFlowNode && line <= pFlowNode->p_call_addr_info->line) || (!beforeFlowNode && line >= pFlowNode->p_call_addr_info->line))
-                    {
-                        nodes[c_nodes] = pListedNode;
-                        c_nodes++;
-                    }
-                    else
-                        break;
-                }
-            }
-        }
-    }
-}
-
 void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
 {
     if (!m_Initialised)
@@ -143,38 +116,37 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
     pNode = pSelectedNode->parent ? pSelectedNode : pSelectedNode->getPeer();
     if (bNested)
     {
-        if (pSelectedNode->isFlow())
-            pNode = pNode->firstChild;
-        else
-            pNode = pNode->parent->firstChild;
-    }
-    DWORD traceNodeIndex = 0;
-    if (!pNode && pSelectedNode->isFlow())
-    {
-        AddTraceNodes(pSelectedNode, (FLOW_NODE*)pSelectedNode, traceNodeIndex, true);
+        if (pNode && pNode->isTrace())
+        {
+            pNode = pNode->parent;
+        }
+        DWORD count = gArchive.getCount();
+        LOG_NODE* pArchivedNode;
+        for (DWORD i = 0; i < count && c_nodes < MAX_BACK_TRACE; i++)
+        {
+            pArchivedNode = gArchive.getNode(i);
+            if (pArchivedNode->isFlow() && pArchivedNode->parent == pNode)
+            {
+                nodes[c_nodes] = pArchivedNode;
+                c_nodes++;
+            }
+            else if (pArchivedNode->isTrace() && pArchivedNode->isParent(pNode))
+            {
+                nodes[c_nodes] = pArchivedNode;
+                c_nodes++;
+            }
+        }
     }
     else
     {
-        while (pNode && pNode->isInfo() && c_nodes < MAX_BACK_TRACE)
+        while (pNode && pNode->isFlow() && c_nodes < MAX_BACK_TRACE)
         {
-            if (bNested && pNode->isFlow())
-                AddTraceNodes(pSelectedNode, (FLOW_NODE*)pNode, traceNodeIndex, true);
-
             nodes[c_nodes] = pNode;
             c_nodes++;
-
-            if (bNested && pNode->isFlow())
-            {
-                if (!pNode->nextSibling)
-                    AddTraceNodes(pSelectedNode, (FLOW_NODE*)pNode, traceNodeIndex, false);
-            }
-
-            if (bNested)
-                pNode = pNode->nextSibling;
-            else
-                pNode = pNode->parent;
+            pNode = pNode->parent;
         }
     }
+
     if (c_nodes == 0)
     {
         ClearTrace();
@@ -283,6 +255,12 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
     ::SetBkMode(hdc, OPAQUE);
 
     int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
+    LOG_NODE* pNode = nodes[iItem];
+
+    if (pNode->isTrace())
+        ::SetTextColor(hdc, RGB(0, 0, 0));
+    else
+        ::SetTextColor(hdc, RGB(64, 64, 64));
     if (cb)
     {
         //if (!selected) { pBuf[0] = '1'; pBuf[1] = '2'; pBuf[2] = '3'; pBuf[3] = '4'; pBuf[4] = '5';}//memset(pBuf, 'W', cb);
@@ -378,6 +356,10 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
     {
         Helpers::ShowInIDE(m_sel.pNode, false);
     }
+    else if (nRet == ID_TRACE_CONTEXT_IN_ECLIPSE)
+    {
+        Helpers::ShowInIDE(m_sel.pNode, false, true);
+    }    
     else if (nRet == ID_VIEW_NODE_DATA)
     {
         Helpers::ShowNodeDetails(m_sel.pNode);

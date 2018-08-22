@@ -65,11 +65,13 @@ namespace Helpers
 		CloseHandle(pi.hThread);
 	}
 
-	void ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite)
+	void ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite, bool bShowTraceInComtext)
 	{
 		if (!pSelectedNode || !pSelectedNode->CanShowInIDE() || !pSelectedNode->isInfo())
 			return;
-		bool IsAndroidLog = pSelectedNode->isJava();
+        if (bShowTraceInComtext && (!pSelectedNode->isTrace() || !pSelectedNode->isSynchronized(gMainFrame->syncNode()) ))
+            return;
+        bool IsAndroidLog = pSelectedNode->isJava();
 		char* src = 0;
 		int line = 0;
 		char src2[MAX_PATH + 1];
@@ -109,10 +111,10 @@ namespace Helpers
 		}
 		else
 		{
-            FLOW_NODE* flowNode = pSelectedNode->getSyncNode();
+            FLOW_NODE* flowNode = bShowTraceInComtext ? gMainFrame->syncNode() : pSelectedNode->getSyncNode();
             if (flowNode)
             {
-                ADDR_INFO * p_addr_info = NULL;
+                ADDR_INFO* p_addr_info = NULL;
                 p_addr_info = pSelectedNode->isTrace() ? flowNode->p_func_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_func_addr_info);
                 if (!p_addr_info)
                 {
@@ -125,8 +127,31 @@ namespace Helpers
                     line = 0;
                     if (pSelectedNode->isTrace())
                     {
-                        TRACE_NODE* pNode = (TRACE_NODE*)pSelectedNode;
-                        line = pNode->call_line;
+                        if (bShowTraceInComtext)
+                        {
+                            LOG_NODE* pContextNode = pSelectedNode->getSyncNode();
+                            if (pContextNode == flowNode)
+                            {
+                                TRACE_NODE* pTraceNode = (TRACE_NODE*)pSelectedNode;
+                                line = pTraceNode->call_line;
+                            }
+                            else
+                            {
+                                while (pContextNode && pContextNode->parent != flowNode)
+                                    pContextNode = pContextNode->parent;
+                                if (pContextNode && pContextNode->isFlow())
+                                {
+                                    FLOW_NODE* flowContextNode = (FLOW_NODE*)pContextNode;
+                                    if (flowContextNode->p_call_addr_info)
+                                        line = flowContextNode->p_call_addr_info->line;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            TRACE_NODE* pTraceNode = (TRACE_NODE*)pSelectedNode;
+                            line = pTraceNode->call_line;
+                        }
                     }
                     else
                     {
@@ -419,7 +444,11 @@ namespace Helpers
 			dwFlags |= MF_DISABLED;
 		InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNC_IN_ECLIPSE, _T("Function in IDE\tAlt+Click"));
 		Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
-		dwFlags = MF_BYPOSITION | MF_STRING;
+        dwFlags = MF_BYPOSITION | MF_STRING;
+        if (pNode == NULL || !pNode->isTrace() || !pNode->isSynchronized(gMainFrame->syncNode()))
+            dwFlags |= MF_DISABLED;
+        InsertMenu(hMenu, cMenu++, dwFlags, ID_TRACE_CONTEXT_IN_ECLIPSE, _T("Trace context in IDE"));
+        dwFlags = MF_BYPOSITION | MF_STRING;
 		if (pNode == NULL || !pNode->isInfo())
 			dwFlags |= MF_DISABLED;
 		InsertMenu(hMenu, cMenu++, dwFlags, ID_VIEW_NODE_DATA, _T("Details..."));

@@ -66,8 +66,8 @@ struct LOG_NODE
     bool isFlow() { return data_type == FLOW_DATA_TYPE; }
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
-	bool isJava();
-	bool CanShowInIDE();
+    bool isJava();
+    bool CanShowInIDE();
 
     void CalcLines();
     int GetExpandCount() { return expanded ? cExpanded : 0; }

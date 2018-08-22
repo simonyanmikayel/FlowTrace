@@ -52,8 +52,6 @@ public:
 	LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 
 private:
-	void AddTraceNodes(LOG_NODE* pSelectedNode, FLOW_NODE* pFlowNode, DWORD& traceNodeIndex, bool beforeFlowNode);
-
 	BackTraceSelection m_sel;
 	int c_nodes;
 	bool m_Initialised;

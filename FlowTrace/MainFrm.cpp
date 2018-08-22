@@ -836,6 +836,11 @@ void CMainFrame::SearchNavigate(WORD wID)
     m_list.Redraw(-1, -1);
 }
 
+FLOW_NODE* CMainFrame::syncNode()
+{
+    return m_view.syncNode();
+}
+
 void CMainFrame::UpdateStatusBar()
 {
     static CHAR pBuf[1024];

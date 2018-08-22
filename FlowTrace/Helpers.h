@@ -23,7 +23,7 @@ namespace Helpers
 	void OnLButtonDoun(WPARAM wParam, LPARAM lParam);
 	void OnLButtonUp(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam);
 	void UpdateStatusBar();
-	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite);
+	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite, bool bShowTraceInComtext = false);
 	void ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
 };

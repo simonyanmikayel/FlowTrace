@@ -153,6 +153,7 @@ public:
 
     HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }
     void UpdateStatusBar();
+    FLOW_NODE* syncNode();
 private:
     ServerThread * m_pServerThread;
 

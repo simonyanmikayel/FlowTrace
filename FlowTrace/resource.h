@@ -110,6 +110,7 @@
 #define ID_SHOW_FUNC_IN_ECLIPSE         32793
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
+#define ID_TRACE_CONTEXT_IN_ECLIPSE     32796
 #define ID_EDIT_FIND32798               32798
 #define ID_VIEW_NODE_DATA               32799
 #define ID_EDIT_FINDNEXT                32801
