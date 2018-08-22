@@ -183,7 +183,7 @@ struct FLOW_NODE : INFO_NODE
     DWORD this_fn;
     DWORD call_site;
     int fn_line;
-    ADDR_INFO *p_fn_addr_info;
+    ADDR_INFO *p_func_addr_info;
     ADDR_INFO *p_call_addr_info;
     bool isOpenEnter() { return isEnter() && peer == 0; }
     void addToTree();

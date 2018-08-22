@@ -113,11 +113,11 @@ namespace Helpers
             if (flowNode)
             {
                 ADDR_INFO * p_addr_info = NULL;
-                p_addr_info = pSelectedNode->isTrace() ? flowNode->p_fn_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_fn_addr_info);
+                p_addr_info = pSelectedNode->isTrace() ? flowNode->p_func_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_func_addr_info);
                 if (!p_addr_info)
                 {
                     gArchive.resolveAddr(flowNode, false);
-                    p_addr_info = pSelectedNode->isTrace() ? flowNode->p_fn_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_fn_addr_info);
+                    p_addr_info = pSelectedNode->isTrace() ? flowNode->p_func_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_func_addr_info);
                 }
                 if (p_addr_info && p_addr_info->line > 0)
                 {

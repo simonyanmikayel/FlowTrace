@@ -54,41 +54,55 @@ void Addr2LineThread::_Resolve(LOG_NODE* pSelectedNode, bool bNested, bool loop)
     THREAD_NODE* threadNode = pNode->threadNode;
     if (threadNode->cb_addr_info == INFINITE || threadNode->cb_addr_info == 0 || threadNode->p_addr_info == NULL)
         return;
-
     bool firstNodeResolved = false;
     while (pNode && pNode->isFlow() && IsWorking())
     {
         FLOW_NODE* flowNode = (FLOW_NODE*)pNode;
+        if (flowNode->this_fn == 0xC6D10)
+            int iiiii = 0;
         if (flowNode->p_call_addr_info == 0)
         {
 
-            LONG_PTR call_addr = (LONG_PTR)flowNode->call_site;
-            LONG_PTR func_addr = (LONG_PTR)flowNode->this_fn;
-            LONG_PTR nearest_call_pc = 0;
-            LONG_PTR nearest_func_pc = 0;
+            DWORD call_addr = flowNode->call_site;
+            DWORD func_addr = flowNode->this_fn;
+            const int max_delta = 128;
+            DWORD call_addr_delta = max_delta;
+            DWORD func_addr_delta = max_delta;
             ADDR_INFO *p_addr_info = threadNode->p_addr_info;
             flowNode->p_call_addr_info = p_addr_info; //initial bad value
             flowNode->p_call_addr_info = p_addr_info;
             char* fn = flowNode->fnName();
             while (p_addr_info && IsWorking())
             {
-                if (call_addr >= (LONG_PTR)p_addr_info->addr && (LONG_PTR)(p_addr_info->addr) >= nearest_call_pc)
+                if (call_addr >= p_addr_info->addr && (call_addr - p_addr_info->addr) < call_addr_delta)
                 {
-                    nearest_call_pc = p_addr_info->addr;
+                    call_addr_delta = call_addr - p_addr_info->addr;
                     flowNode->p_call_addr_info = p_addr_info;
                 }
-                if (func_addr >= (LONG_PTR)p_addr_info->addr && (LONG_PTR)(p_addr_info->addr) >= nearest_func_pc)
+                else if (call_addr < p_addr_info->addr && (p_addr_info->addr - call_addr) < call_addr_delta)
                 {
-                    nearest_func_pc = p_addr_info->addr;
-                    flowNode->p_fn_addr_info = p_addr_info;
+                    call_addr_delta = p_addr_info->addr - call_addr;
+                    flowNode->p_call_addr_info = p_addr_info;
                 }
+                 
+                if (func_addr >= p_addr_info->addr && (func_addr - p_addr_info->addr) < func_addr_delta)
+                {
+                    func_addr_delta = func_addr - p_addr_info->addr;
+                    flowNode->p_func_addr_info = p_addr_info;
+                }
+                else if (func_addr < p_addr_info->addr && (p_addr_info->addr - func_addr) < func_addr_delta)
+                {
+                    func_addr_delta = p_addr_info->addr - func_addr;
+                    flowNode->p_func_addr_info = p_addr_info;
+                }
+
                 p_addr_info = p_addr_info->pPrev;
             }
 
-            if (call_addr - flowNode->p_call_addr_info->addr > 128)
+            if (call_addr_delta == max_delta)
                 flowNode->p_call_addr_info = threadNode->p_addr_info;
-            if (func_addr - flowNode->p_call_addr_info->addr > 128)
-                flowNode->p_fn_addr_info = threadNode->p_addr_info;
+            if (func_addr_delta == max_delta)
+                flowNode->p_func_addr_info = threadNode->p_addr_info;
         }
 
 
