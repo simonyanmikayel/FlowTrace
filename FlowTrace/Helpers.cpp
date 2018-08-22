@@ -74,7 +74,7 @@ namespace Helpers
             bCallSiteInContext = false; // functions context always paren function
             bShowCallSite = true;
         }
-        if (bCallSiteInContext || !pSelectedNode->isSynchronized(gSyncronizedNode))
+        if (bCallSiteInContext && !pSelectedNode->isSynchronized(gSyncronizedNode))
             return;
         bool IsAndroidLog = pSelectedNode->isJava();
 		char* src = 0;
