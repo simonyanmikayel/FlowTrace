@@ -134,15 +134,15 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     {
       m_pView->SyncViews();
     }
-    else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_CALL_IN_FUNCTION)
     {
       Helpers::ShowInIDE(pNode, true);
     }
-    else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_FUNCTION)
     {
       Helpers::ShowInIDE(pNode, false);
     }
-    else if (nRet == ID_TRACE_CONTEXT_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_CALL_IN_CONTEXT)
     {
         Helpers::ShowInIDE(pNode, false, true);
     }
@@ -750,7 +750,7 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
   RECT rcFrame = rcItem;
   rcFrame.left = left - 2;
   rcFrame.right = rcFrame.left + cxText + 4;
-  if (m_pView->syncNode() == pNode)
+  if (gSyncronizedNode == pNode)
   {
     CBrush brush1;
     brush1.CreateSolidBrush(RGB(0, 255, 128)); //gSettings.GetSyncColor()

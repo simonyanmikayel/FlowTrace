@@ -95,7 +95,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
         }
         else if (pNode->isTrace())
         {
-            line = ((TRACE_NODE*)pNode)->call_line;
+            line = ((TRACE_NODE*)pNode)->getCallLine(true);
         }
         if (line > 0)
             cb = _snprintf_s(buf, cbBuf, cbBuf, "%d", line);
@@ -348,15 +348,15 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
     {
         m_pView->SyncViews();
     }
-    else if (nRet == ID_SHOW_CALL_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_CALL_IN_FUNCTION)
     {
         Helpers::ShowInIDE(m_sel.pNode, true);
     }
-    else if (nRet == ID_SHOW_FUNC_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_FUNCTION)
     {
         Helpers::ShowInIDE(m_sel.pNode, false);
     }
-    else if (nRet == ID_TRACE_CONTEXT_IN_ECLIPSE)
+    else if (nRet == ID_SHOW_CALL_IN_CONTEXT)
     {
         Helpers::ShowInIDE(m_sel.pNode, false, true);
     }    

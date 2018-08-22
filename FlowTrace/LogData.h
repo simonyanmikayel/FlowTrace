@@ -203,6 +203,8 @@ struct TRACE_NODE : INFO_NODE
     int cb_trace;
     TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
+    bool IsInContext();
+    int getCallLine(bool bCallSiteInContext);
 };
 
 #pragma pack(pop)

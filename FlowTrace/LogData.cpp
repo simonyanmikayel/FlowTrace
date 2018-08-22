@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Archive.h"
 #include "Settings.h"
+#include "Helpers.h"
 
 bool LOG_NODE::isSynchronized(LOG_NODE* pSyncNode)
 {
@@ -566,4 +567,38 @@ bool LOG_NODE::CanShowInIDE()
 		return gSettings.CanShowInEclipse();
 }
 
+bool TRACE_NODE::IsInContext()
+{
+    LOG_NODE* pContextNode = getSyncNode();
+    return pContextNode == gSyncronizedNode;        
+}
+
+int TRACE_NODE::getCallLine(bool bCallSiteInContext)
+{
+    int line = 0;
+    if (bCallSiteInContext)
+    {
+        if (IsInContext())
+        {
+            line = call_line;
+        }
+        else
+        {
+            LOG_NODE* pContextNode = getSyncNode();
+            while (pContextNode && pContextNode->parent != gSyncronizedNode)
+                pContextNode = pContextNode->parent;
+            if (pContextNode && pContextNode->isFlow())
+            {
+                FLOW_NODE* flowContextNode = (FLOW_NODE*)pContextNode;
+                if (flowContextNode->p_call_addr_info)
+                    line = flowContextNode->p_call_addr_info->line;
+            }
+        }
+    }
+    else
+    {
+        line = call_line;
+    }
+    return line;
+}
 

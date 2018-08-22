@@ -8,11 +8,12 @@
 #include "Helpers.h"
 #include "FlowTraceView.h"
 
+FLOW_NODE*  gSyncronizedNode = NULL;
+
 CFlowTraceView::CFlowTraceView()
 	: m_wndListView(this)
 	, m_wndTreeView(this)
 	, m_wndBackTraceView(this)
-	, m_syncNode(NULL)
 {
 
 }
@@ -149,7 +150,7 @@ LRESULT CFlowTraceView::OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM 
 
 void CFlowTraceView::ClearLog()
 {
-	m_syncNode = NULL;
+    gSyncronizedNode = NULL;
 	m_wndTreeView.Clear();
 	m_wndBackTraceView.ClearTrace();
 	m_wndListView.Clear();
@@ -232,7 +233,7 @@ void CFlowTraceView::SyncViews()
         FLOW_NODE* pFlowNode = pNode->getSyncNode();
         if (pFlowNode)
         {
-            m_syncNode = pFlowNode;
+            gSyncronizedNode = pFlowNode;
             m_wndTreeView.EnsureNodeVisible(pFlowNode, false);
             if (!fromList)
                 m_wndListView.ShowFirstSyncronised(true);

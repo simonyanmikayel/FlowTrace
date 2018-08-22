@@ -41,7 +41,6 @@ public:
   void ClearLog();
   void ApplySettings(bool fontChanged);
   void SetChildPos(int cx, int cy);
-  FLOW_NODE* syncNode() { return m_syncNode; }
   CLogListView& list() { return m_wndListView; }
   CLogTreeView& tree() { return m_wndTreeView; }
   CBackTraceView& backTrace() { return m_wndBackTraceView; }
@@ -55,5 +54,4 @@ private:
   CLogTreeView    m_wndTreeView;
   CLogListView    m_wndListView;
   CBackTraceView  m_wndBackTraceView;
-  FLOW_NODE*      m_syncNode;
 };
