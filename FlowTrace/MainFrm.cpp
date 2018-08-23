@@ -825,7 +825,6 @@ void CMainFrame::SearchNavigate(WORD wID)
     }
 
     LOG_NODE* pNode = gArchive.getListedNodes()->getNode(searchInfo.curLine);
-    ATLASSERT(pNode);
     if (pNode)
     {
         CHAR szText[32];
