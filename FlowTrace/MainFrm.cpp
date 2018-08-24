@@ -853,7 +853,7 @@ void CMainFrame::UpdateStatusBar()
 	if (gArchive.getLost())
 		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), gArchive.getLost());
 	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
-    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %smb"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory()/1000000)));
+    cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %s mb"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory()/1000000)));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Line: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));
     ::PostMessage(m_hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
