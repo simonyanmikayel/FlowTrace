@@ -35,8 +35,10 @@ struct LOG_NODE
 {
     THREAD_NODE* threadNode;
     LOG_NODE* parent;
+    LOG_NODE* firstChild;
     LOG_NODE* lastChild;
     LOG_NODE* prevSibling;
+    LOG_NODE* nextSibling;
     struct {
         WORD hasNewLine : 1;
         WORD hiden : 1;
@@ -54,8 +56,6 @@ struct LOG_NODE
     int lineSearchPos;
     LOG_NODE* nextChankMarker;
     LOG_NODE* nextChank;
-    LOG_NODE* firstChild;
-    LOG_NODE* nextSibling;
 
     LOG_DATA_TYPE data_type;
     DWORD lengthCalculated;

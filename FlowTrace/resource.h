@@ -110,7 +110,7 @@
 #define ID_SHOW_FUNCTION         32793
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
-#define ID_SHOW_CALL_IN_CONTEXT     32796
+#define ID_SHOW_CALL_IN_CONTEXT         32796
 #define ID_EDIT_FIND32798               32798
 #define ID_VIEW_NODE_DATA               32799
 #define ID_EDIT_FINDNEXT                32801
@@ -121,10 +121,12 @@
 #define ID_VIEW_SHOW_HIDE_FLOW_TRACES   32811
 #define ID_TREE_EXPAND_ALL              32812
 #define ID_TREE_COLLAPSE_ALL            32813
+#define ID_TREE_FIRST_SIBLING           32814
 #define ID_TREE_COPY_CALL_PATH          32815
 #define ID_VIEW_SYNCRONISEVIEWS         32816
 #define ID_SEARCH_REFRESH_ON_EMTER      32817
 #define ID_EDIT_BOOKMARKS               32818
+#define ID_TREE_LAST_SIBLING            32819
 #define ID_BOOKMARKS_NEXTBOOKMARK       32820
 #define ID_BOOKMARKS_PREVIOUSBOOKMARK   32821
 #define ID_BOOKMARKS_CLEARBOOKMARKS     32822
