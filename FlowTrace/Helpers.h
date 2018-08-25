@@ -12,7 +12,7 @@ extern FLOW_NODE*  gSyncronizedNode;
 #define WM_UPDATE_BACK_TRACE           WM_USER + 1004
 static const int ICON_LEN = 16;
 static const int ICON_OFFSET = 16 + 4;
-enum MENU_ICON { MENU_ICON_SYNC, MENU_ICON_FUNC_IN_ECLIPSE, MENU_ICON_CALL_IN_ECLIPSE, MENU_ICON_MAX };
+enum MENU_ICON { MENU_ICON_NON = -1, MENU_ICON_SYNC, MENU_ICON_FUNC_IN_ECLIPSE, MENU_ICON_CALL_IN_ECLIPSE, MENU_ICON_MAX };
 namespace Helpers
 {
 	void CopyToClipboard(HWND hWnd, char* szText, int cbText);
@@ -23,7 +23,8 @@ namespace Helpers
 	void GetTime(DWORD &sec, DWORD& msec);
 	void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 	void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu);
-	void OnLButtonDoun(WPARAM wParam, LPARAM lParam);
+    void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable = false, MENU_ICON ID_ICON = MENU_ICON_NON);
+    void OnLButtonDoun(WPARAM wParam, LPARAM lParam);
 	void OnLButtonUp(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam);
 	void UpdateStatusBar();
 	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite, bool bCallSiteInContext = false);

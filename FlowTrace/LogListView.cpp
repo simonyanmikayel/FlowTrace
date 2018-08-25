@@ -621,18 +621,19 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	int iItem = getSelectionItem();
 	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 
-	DWORD dwFlags;
-	int cMenu = 0;
+    bool disable;
+    int cMenu = 0;
 	POINT pt = { xPos, yPos };
 	ClientToScreen(&pt);
 	HMENU hMenu = CreatePopupMenu();
 	Helpers::AddCommonMenu(pNode, hMenu, cMenu);
-	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
-	dwFlags = MF_BYPOSITION | MF_STRING;
-	if (m_ListSelection.IsEmpty())
-		dwFlags |= MF_DISABLED;
-	InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
-	UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
+
+    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
+
+    disable = (m_ListSelection.IsEmpty());
+    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
+
+    UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
 	DestroyMenu(hMenu);
 
 	if (nRet == ID_EDIT_COPY)

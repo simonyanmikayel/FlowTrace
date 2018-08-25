@@ -117,6 +117,8 @@
 #define ID_EDIT_FINNDPREVIOUS           32802
 #define ID_EDIT_FINDLAST                32803
 #define ID_EDIT_FINDFIRST               32804
+#define ID_TREE_PREV_SIBLING            32805
+#define ID_TREE_NEXT_SIBLING            32806
 #define ID_VIEW_SHOW                    32810
 #define ID_VIEW_SHOW_HIDE_FLOW_TRACES   32811
 #define ID_TREE_EXPAND_ALL              32812

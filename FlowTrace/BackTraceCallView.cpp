@@ -312,26 +312,16 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
     int xPos = GET_X_LPARAM(lParam);
     int yPos = GET_Y_LPARAM(lParam);
     int cMenu = 0;
-    DWORD dwFlags;
+    bool disable;
     POINT pt = { xPos, yPos };
     ClientToScreen(&pt);
     HMENU hMenu = CreatePopupMenu();
     Helpers::AddCommonMenu(m_sel.pNode, hMenu, cMenu);
-    dwFlags = MF_BYPOSITION | MF_STRING;
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY_ALL, _T("Copy All"));
-    dwFlags = MF_BYPOSITION | MF_STRING;
-    if (m_sel.pNode == NULL)
-        dwFlags |= MF_DISABLED;
-    InsertMenu(hMenu, cMenu++, dwFlags, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
-    //MENUITEMINFO mii;
-    //mii.cbSize = sizeof(MENUITEMINFO);
-    //mii.fMask = MIIM_BITMAP;
-    //GetMenuItemInfo(hMenu, 0, TRUE, &mii);
-    //mii.hbmpItem = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_SYNC));
-    //SetMenuItemInfo(hMenu, 0, TRUE, &mii);
+    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_ALL, _T("Copy All"));
 
-
+    disable = (m_sel.pNode == NULL);
+    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
 
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
     DestroyMenu(hMenu);

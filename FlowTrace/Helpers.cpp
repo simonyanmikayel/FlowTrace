@@ -407,32 +407,36 @@ namespace Helpers
 
 		sec = (DWORD)(mktime(&local));
 	}
-	void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu)
-	{
-		DWORD dwFlags;
-		dwFlags = MF_BYPOSITION | MF_STRING;
-		if (pNode == NULL || !pNode->isInfo())
-			dwFlags |= MF_DISABLED;
-		InsertMenu(hMenu, cMenu++, dwFlags, ID_SYNC_VIEWES, _T("Synchronize views\tTab"));
-		Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_SYNC);
+
+    void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable, MENU_ICON ID_ICON)
+    {
+        DWORD dwFlags;
         dwFlags = MF_BYPOSITION | MF_STRING;
-        if (pNode == NULL || !pNode->CanShowInIDE() || (pNode->isTrace() && !pNode->isSynchronized(gSyncronizedNode)) )
+        if (disable)
             dwFlags |= MF_DISABLED;
-        InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_CONTEXT, _T("Show Call line in context\tCtrl+Click"));
-        Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_CALL_IN_ECLIPSE);
-        dwFlags = MF_BYPOSITION | MF_STRING;
-		if (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo())
-			dwFlags |= MF_DISABLED;
-		InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_CALL_IN_FUNCTION, _T("Show Call line in function"));
-		dwFlags = MF_BYPOSITION | MF_STRING;
-		if (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo() || pNode->isTrace())
-			dwFlags |= MF_DISABLED;
-		InsertMenu(hMenu, cMenu++, dwFlags, ID_SHOW_FUNCTION, _T("Show Function\tAlt+Click"));
-		Helpers::SetMenuIcon(hMenu, cMenu - 1, MENU_ICON_FUNC_IN_ECLIPSE);
-        dwFlags = MF_BYPOSITION | MF_STRING;
-		if (pNode == NULL || !pNode->isInfo())
-			dwFlags |= MF_DISABLED;
-		InsertMenu(hMenu, cMenu++, dwFlags, ID_VIEW_NODE_DATA, _T("Details..."));
+        InsertMenu(hMenu, cMenu++, dwFlags, ID_MENU, str);
+        if (ID_ICON >= 0)
+            Helpers::SetMenuIcon(hMenu, cMenu - 1, ID_ICON);
+    }
+
+    void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu)
+	{
+        bool disable;
+        disable = (pNode == NULL || !pNode->isInfo());
+        AddMenu(hMenu, cMenu, ID_SYNC_VIEWES, _T("Synchronize views\tTab"), disable, MENU_ICON_SYNC);
+
+        disable = (pNode == NULL || !pNode->CanShowInIDE() || (pNode->isTrace() && !pNode->isSynchronized(gSyncronizedNode)));
+        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_CONTEXT, _T("Show Call line in context\tCtrl+Click"), disable, MENU_ICON_CALL_IN_ECLIPSE);
+
+        disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo());
+        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_FUNCTION, _T("Show Call line in function"), disable);
+
+        disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo() || pNode->isTrace());
+        AddMenu(hMenu, cMenu, ID_SHOW_FUNCTION, _T("Show Function\tAlt+Click"), disable, MENU_ICON_FUNC_IN_ECLIPSE);
+
+        disable = (pNode == NULL || !pNode->isInfo());
+        AddMenu(hMenu, cMenu, ID_VIEW_NODE_DATA, _T("Details..."), disable);
+
 		InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
 	}
 	void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon)

@@ -96,36 +96,36 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
             EnsureItemVisible(iItem);
         }
 
-        DWORD dwFlags;
+        bool disable;
         int cMenu = 0;
         POINT pt = { xPos, yPos };
         ClientToScreen(&pt);
         HMENU hMenu = CreatePopupMenu();
         Helpers::AddCommonMenu(pNode, hMenu, cMenu);
-        dwFlags = MF_BYPOSITION | MF_STRING;
+
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_COLLAPSE_ALL, _T("Collapse All"));
+
+        disable = (!pNode->lastChild);
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_EXPAND_ALL, _T("Expand All"), disable);
+
+        disable = (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild);
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_FIRST_SIBLING, _T("First Sibling\tCtrl+UP"), disable);
+
+        disable = (!pNode->prevSibling);
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_PREV_SIBLING, _T("Previous Sibling\tShift+UP"), disable);
+
+        disable = (!pNode->nextSibling);
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_NEXT_SIBLING, _T("Next Sibling\tShift+UP"), disable);
+
+        disable = (!pNode->parent || !pNode->parent->lastChild || pNode->parent->firstChild == pNode->parent->lastChild);
+        Helpers::AddMenu(hMenu, cMenu, ID_TREE_LAST_SIBLING, _T("Last Sibling\tCtrl+DOWN"), disable);
+            
         InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
-        dwFlags = MF_BYPOSITION | MF_STRING;
-        if (!pNode->lastChild)
-            dwFlags |= MF_DISABLED;
-        InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_COLLAPSE_ALL, _T("Collapse All"));
-        dwFlags = MF_BYPOSITION | MF_STRING;
-        if (!pNode->lastChild)
-            dwFlags |= MF_DISABLED;
-        InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_EXPAND_ALL, _T("Expand All"));
-        dwFlags = MF_BYPOSITION | MF_STRING;
-        if (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild)
-            dwFlags |= MF_DISABLED;
-        InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_FIRST_SIBLING, _T("First Sibling\tCtrl+UP"));
-        dwFlags = MF_BYPOSITION | MF_STRING;
-        if (!pNode->parent || !pNode->parent->lastChild || pNode->parent->firstChild == pNode->parent->lastChild)
-            dwFlags |= MF_DISABLED;
-        InsertMenu(hMenu, cMenu++, dwFlags, ID_TREE_LAST_SIBLING, _T("Last Sibling\tCtrl+DOWN"));
-        InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
-        InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_STRING, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
+
+        Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"));
 
         UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
         DestroyMenu(hMenu);
-        //stdlog("%u\n", GetTickCount());
         if (nRet == ID_TREE_EXPAND_ALL)
         {
             CollapseExpandAll(pNode, true);
@@ -161,6 +161,14 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         else if (nRet == ID_TREE_FIRST_SIBLING)
         {
             OnKeyDown(VK_UP, false, true);
+        }
+        else if (nRet == ID_TREE_PREV_SIBLING)
+        {
+            OnKeyDown(VK_UP, true, false);
+        }
+        else if (nRet == ID_TREE_NEXT_SIBLING)
+        {
+            OnKeyDown(VK_DOWN, true, false);
         }
         else if (nRet == ID_TREE_LAST_SIBLING)
         {
@@ -548,8 +556,16 @@ LRESULT CLogTreeView::OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlP
             if (pNode && pNode->parent && pNode->parent->firstChild)
                 iNewSelected = pNode->parent->firstChild->GetPosInTree();
         }
+        else if (bShiftPressed)
+        {
+            LOG_NODE* pNode = m_pSelectedNode;
+            if (pNode && pNode->prevSibling)
+                iNewSelected = pNode->prevSibling->GetPosInTree();
+        }
         else
+        {
             iNewSelected--;
+        }
     }
     break;
     case VK_DOWN:       // Down arrow 
@@ -560,8 +576,16 @@ LRESULT CLogTreeView::OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlP
             if (pNode && pNode->parent && pNode->parent->lastChild)
                 iNewSelected = pNode->parent->lastChild->GetPosInTree();
         }
+        else if (bShiftPressed)
+        {
+            LOG_NODE* pNode = m_pSelectedNode;
+            if (pNode && pNode->nextSibling)
+                iNewSelected = pNode->nextSibling->GetPosInTree();
+        }
         else
+        {
             iNewSelected++;
+        }
     }
     break;
     default:
