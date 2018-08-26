@@ -47,6 +47,7 @@
 #define IDC_CHECK1                      1008
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
+#define IDC_CHILD_COUNT                 1008
 #define IDC_CHECK_USE_PC_TIME           1009
 #define IDC_CALL_ADDR3                  1009
 #define IDC_FN_CALL_LINE                1009
@@ -106,8 +107,8 @@
 #define ID_VIEW_DETAILES                32789
 #define ID_VIEW_SETTINGS                32790
 #define ID_VIEW_CLEARLOG                32791
-#define ID_SHOW_CALL_IN_FUNCTION         32792
-#define ID_SHOW_FUNCTION         32793
+#define ID_SHOW_CALL_IN_FUNCTION        32792
+#define ID_SHOW_FUNCTION                32793
 #define ID_SYNC_VIEWES                  32794
 #define ID_EDIT_SELECTALL               32795
 #define ID_SHOW_CALL_IN_CONTEXT         32796

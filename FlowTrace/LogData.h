@@ -59,7 +59,7 @@ struct LOG_NODE
 
     LOG_DATA_TYPE data_type;
     DWORD lengthCalculated;
-    void init() { lengthCalculated = 0; }
+    DWORD childCount;
     bool isRoot() { return data_type == ROOT_DATA_TYPE; }
     bool isApp() { return data_type == APP_DATA_TYPE; }
     bool isThread() { return data_type == THREAD_DATA_TYPE; }
@@ -94,6 +94,12 @@ struct LOG_NODE
         pNode->prevSibling = lastChild;
         pNode->parent = this;
         lastChild = pNode;
+        LOG_NODE* p = pNode->parent;
+        while (p)
+        {
+            p->childCount++;
+            p = p->parent;
+        }
     }
 
     bool isTreeNode() { return parent && !isTrace(); }

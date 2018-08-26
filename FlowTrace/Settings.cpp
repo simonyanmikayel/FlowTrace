@@ -31,6 +31,7 @@ LPCTSTR STR_APP_REG_VAL_ColNN = _T("ColNN");
 LPCTSTR STR_APP_REG_VAL_ColApp = _T("ColApp");
 LPCTSTR STR_APP_REG_VAL_ColPID = _T("ColPID");
 LPCTSTR STR_APP_REG_VAL_ColThreadNN = _T("ColThreadNN");
+LPCTSTR STR_APP_REG_VAL_ShowChildCount = _T("ShowChildCount");
 LPCTSTR STR_APP_REG_VAL_ColFunc = _T("ColFunc");
 LPCTSTR STR_APP_REG_VAL_ColLine = _T("ColLine");
 LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
@@ -88,6 +89,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
   Read(STR_APP_REG_VAL_ColPID, m_ColPID);
   Read(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN);
+  Read(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount);
   Read(STR_APP_REG_VAL_ColFunc, m_ColFunc, 1);
   Read(STR_APP_REG_VAL_ColLine, m_ColLine, 1);
   Read(STR_APP_REG_VAL_ColTime, m_ColTime);
@@ -372,6 +374,7 @@ void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine,
 void CSettings::SetColTime(int i){ m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
 void CSettings::SetColCallAddr(int i){ m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
+void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount); }
 
 //void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }
 //void CSettings::SetTextColor(DWORD i){ m_TextColor = i; Write(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor); }

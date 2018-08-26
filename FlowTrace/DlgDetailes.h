@@ -23,6 +23,7 @@ public:
   CButton m_chkCallLine;
   CButton m_ShowAppIp;
   CButton m_ShowElapsedTime;
+  CButton m_chkChildCount;
 
   // Handler prototypes (uncomment arguments if needed):
   //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)

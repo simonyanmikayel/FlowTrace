@@ -272,6 +272,9 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
 		else
 			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
+        if (gSettings.GetShowChildCount())
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
+
 	}
     else if (isFlow())
     {
@@ -303,6 +306,8 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
                 cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), This->p_call_addr_info->line);
         }
         pBuf[cb] = 0;
+        if (gSettings.GetShowChildCount())
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
     }
     else
     {
