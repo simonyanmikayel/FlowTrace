@@ -500,9 +500,14 @@ LRESULT CMainFrame::onSelectAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
     return 0;
 }
 
-LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+void CMainFrame::SyncViews()
 {
     m_view.SyncViews();
+}
+
+LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    SyncViews();
     return 0;
 }
 

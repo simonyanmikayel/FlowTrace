@@ -23,6 +23,8 @@ namespace Helpers
 		{
 			if (bCtrlPressed)
 			{
+                if (pNode && !pNode->isSynchronized(gSyncronizedNode))
+                    gMainFrame->SyncViews();
 				ShowInIDE(pNode, true, true);
 			}
 			else if (bAltPressed)

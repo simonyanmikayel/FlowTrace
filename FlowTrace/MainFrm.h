@@ -153,6 +153,7 @@ public:
 
     HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }
     void UpdateStatusBar();
+    void SyncViews();
 private:
     ServerThread * m_pServerThread;
 
