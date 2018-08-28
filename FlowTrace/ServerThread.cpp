@@ -6,7 +6,7 @@
 
 ServerThread::ServerThread()
 {
-	m_priority = THREAD_PRIORITY_HIGHEST;
+	m_priority = THREAD_PRIORITY_TIME_CRITICAL;
 
   struct sockaddr_in server;
 

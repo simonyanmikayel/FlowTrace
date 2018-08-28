@@ -10,7 +10,7 @@ DWORD Archive::archiveNumber = 0;
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
-    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 768 * 1024 * 1024);
+    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 256 * 2 * 1024 * 1024);
     m_listedNodes = new ListedNodes();
     clearArchive();
 }
