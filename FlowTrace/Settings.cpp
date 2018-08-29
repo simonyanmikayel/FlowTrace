@@ -306,6 +306,9 @@ void CSettings::SetModules(const CHAR* szList)
 }
 CHAR* CSettings::GetModules()
 {
+#ifdef _DEBUG
+    //ZeroMemory(szModuls, sizeof(szModuls));
+#endif
     if (!Read(STR_APP_REG_VAL_Modules, szModuls, MAX_MODULES))
     {
         szModuls[0] = 0;

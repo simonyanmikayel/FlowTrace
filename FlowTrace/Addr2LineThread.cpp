@@ -254,6 +254,8 @@ void Addr2LineThread::ReadAdresses(THREAD_NODE* threadNode)
 
     CHAR* szModules = gSettings.GetModules();
     CHAR* modulePath = strstr(szModules, threadNode->moduleName);
+    while (modulePath && modulePath[threadNode->cb_module_name] != '\n')
+        modulePath = strstr(modulePath+1, threadNode->moduleName);
     if (!modulePath || modulePath[threadNode->cb_module_name] != '\n')
     {
         threadNode->cb_addr_info = 0;
