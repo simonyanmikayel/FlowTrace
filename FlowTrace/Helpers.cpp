@@ -411,7 +411,7 @@ namespace Helpers
         if (ID_ICON >= 0)
             Helpers::SetMenuIcon(hMenu, cMenu - 1, ID_ICON);
     }
-
+     
     void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu)
 	{
         bool disable;
