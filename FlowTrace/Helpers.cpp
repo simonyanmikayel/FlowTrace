@@ -7,32 +7,23 @@
 
 namespace Helpers
 {
-	static std::pair<WPARAM, LPARAM> m_LBtnParams;
 
-	void OnLButtonDoun(WPARAM wParam, LPARAM lParam)
-	{
-		m_LBtnParams.first = wParam;
-		m_LBtnParams.second = lParam;
-	}
-
-	void OnLButtonUp(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam)
+	void OnLButtonDoun(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam)
 	{
 		bool bAltPressed = (GetKeyState(VK_MENU) & 0x8000) != 0;
 		bool bCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-		if ((m_LBtnParams.first & MK_LBUTTON) && m_LBtnParams.second == lParam)
-		{
-			if (bCtrlPressed)
-			{
-                if (pNode && !pNode->isSynchronized(gSyncronizedNode))
-                    gMainFrame->SyncViews();
-				ShowInIDE(pNode, true, true);
-			}
-			else if (bAltPressed)
-			{
-				ShowInIDE(pNode, false);
-			}
-		}
-	}
+        bool bMbuttonPressed = (GetKeyState(VK_MBUTTON) & 0x8000) != 0;
+        if (bCtrlPressed || bMbuttonPressed)
+        {
+            if (pNode && !pNode->isSynchronized(gSyncronizedNode))
+                gMainFrame->SyncViews();
+            ShowInIDE(pNode, true, true);
+        }
+        else if (bAltPressed)
+        {
+            ShowInIDE(pNode, false);
+        }
+    }
 
 	void ShowInIDE(char* src, int line, bool IsAndroidLog)
 	{
@@ -428,7 +419,7 @@ namespace Helpers
         AddMenu(hMenu, cMenu, ID_SYNC_VIEWES, _T("Synchronize views\tTab"), disable, MENU_ICON_SYNC);
 
         disable = (pNode == NULL || !pNode->CanShowInIDE() || (pNode->isTrace() && !pNode->isSynchronized(gSyncronizedNode)));
-        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_CONTEXT, _T("Show Call line in context\tCtrl+Click"), disable, MENU_ICON_CALL_IN_ECLIPSE);
+        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_CONTEXT, _T("Show Call line in context\tCtrl+Click, Middle Click"), disable, MENU_ICON_CALL_IN_ECLIPSE);
 
         disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo());
         AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_FUNCTION, _T("Show Call line in function"), disable);

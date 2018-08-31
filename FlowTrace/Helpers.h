@@ -24,8 +24,7 @@ namespace Helpers
 	void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 	void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu);
     void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable = false, MENU_ICON ID_ICON = MENU_ICON_NON);
-    void OnLButtonDoun(WPARAM wParam, LPARAM lParam);
-	void OnLButtonUp(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam);
+    void OnLButtonDoun(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam);
 	void UpdateStatusBar();
 	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite, bool bCallSiteInContext = false);
 	void ShowInIDE(char* src, int line, bool IsAndroidLog);

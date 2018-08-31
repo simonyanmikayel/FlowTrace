@@ -624,8 +624,12 @@ int CLogTreeView::ItemByPos(int yPos)
 
 LRESULT CLogTreeView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
-    Helpers::OnLButtonUp(m_pSelectedNode, wParam, lParam);
     return 0;
+}
+
+LRESULT CLogTreeView::OnMButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+    return OnLButtonDown(uMsg, wParam, lParam, bHandled);
 }
 
 LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
@@ -674,7 +678,7 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
             RedrawItems(iItem, iItem);
             EnsureItemVisible(iItem);
         }
-        Helpers::OnLButtonDoun(wParam, lParam);
+        Helpers::OnLButtonDoun(m_pSelectedNode, wParam, lParam);
     }
     return 0;
 }

@@ -710,15 +710,19 @@ LRESULT CLogListView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL 
 		m_IsCupture = false;
 		ReleaseCapture();
 	}
-	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(getSelectionItem());
-	Helpers::OnLButtonUp(pNode, wParam, lParam);
 	return 0;
+}
+
+LRESULT CLogListView::OnMButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+    return OnLButtonDown(uMsg, wParam, lParam, bHandled);
 }
 
 LRESULT CLogListView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
 	UdjustSelectionOnMouseEven(uMsg, wParam, lParam);
-	Helpers::OnLButtonDoun(wParam, lParam);
+    LOG_NODE* pNode = gArchive.getListedNodes()->getNode(getSelectionItem());
+    Helpers::OnLButtonDoun(pNode, wParam, lParam);
 	return 0;
 }
 

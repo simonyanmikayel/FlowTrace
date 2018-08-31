@@ -292,14 +292,18 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
 
 LRESULT CBackTraceCallView::OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
-    Helpers::OnLButtonUp(m_sel.pNode, wParam, lParam);
     return 0;
+}
+
+LRESULT CBackTraceCallView::OnMButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
+{
+    return OnLButtonDown(uMsg, wParam, lParam, bHandled);
 }
 
 LRESULT CBackTraceCallView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled)
 {
     SetSelectionOnMouseEven(uMsg, wParam, lParam);
-    Helpers::OnLButtonDoun(wParam, lParam);
+    Helpers::OnLButtonDoun(m_sel.pNode, wParam, lParam);
     return 0;
 }
 
