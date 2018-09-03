@@ -140,6 +140,34 @@ char* INFO_NODE::fnName()
     return ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE)); 
 }
 
+char* INFO_NODE::shortFnName()
+{
+    char* name = fnName();
+    if (cb_short_fn_name_offset == 0xFFFF)
+    {
+        cb_short_fn_name_offset = 0;
+        if (log_flags & LOG_FLAG_JAVA)
+        {
+            int dot1 = 0, dot2 = 0;
+            for (int i = 0; i < cb_fn_name; i++)
+            {
+                if (name[i] == '.')
+                {
+                    if (dot1 == dot2)
+                        dot2 = i;
+                    else {
+                        dot1 = dot2;
+                        dot2 = i;
+                    }
+                }
+            }
+            if (dot1 < dot2)
+                cb_short_fn_name_offset = dot1 + 1;
+        }
+    }
+    return name + cb_short_fn_name_offset;
+}
+
 void FLOW_NODE::addToTree()
 {
     if (threadNode->curentFlow == NULL)
@@ -280,8 +308,9 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     {
         FLOW_NODE* This = (FLOW_NODE*)this;
         int cb_fn_name = This->cb_fn_name;
-        memcpy(pBuf + cb, This->fnName(), cb_fn_name);
-        cb += cb_fn_name;
+        char* name = This->shortFnName();
+        memcpy(pBuf + cb, name, This->cb_fn_name - This->cb_short_fn_name_offset);
+        cb += This->cb_fn_name - This->cb_short_fn_name_offset;
         if (extened)
         {
             if (gSettings.GetColNN() && NN)
@@ -334,7 +363,7 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
 
     if (col == LINE_NN_COL)
     {
-        cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), iItem);
+        cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), iItem + 1);
     }
     else if (col == NN_COL)
     {
@@ -377,18 +406,12 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == FUNC_COL)
     {
-        if (isTrace())
+        if (isInfo())
         {
-            TRACE_NODE* This = (TRACE_NODE*)this;
-            cb += This->cb_fn_name;
-            memcpy(pBuf, This->fnName(), cb);
-            pBuf[cb] = 0;
-        }
-        else if (isFlow())
-        {
-            FLOW_NODE* This = (FLOW_NODE*)this;
-            cb += This->cb_fn_name;
-            memcpy(pBuf, This->fnName(), cb);
+            INFO_NODE* This = (INFO_NODE*)this;
+            char* name = This->shortFnName();
+            cb += This->cb_fn_name - This->cb_short_fn_name_offset;
+            memcpy(pBuf, name, This->cb_fn_name - This->cb_short_fn_name_offset);
             pBuf[cb] = 0;
         }
     }

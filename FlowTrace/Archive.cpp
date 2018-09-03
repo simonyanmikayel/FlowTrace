@@ -214,6 +214,7 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
     pNode->call_line = pLogRec->call_line;
 
     pNode->cb_fn_name = cb_fn_name;
+    pNode->cb_short_fn_name_offset = 0xFFFF;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
 
     pNode->threadNode = pThreadNode;
@@ -448,6 +449,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 		pNode->msec = pLogRec->msec;
 		pNode->call_line = pLogRec->call_line;
 
+        pNode->cb_short_fn_name_offset = 0xFFFF;
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
 
@@ -504,6 +506,8 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
     APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
         return false;
+    //if (rec->nn == 110586)
+    //    int iiii = 0;
     DWORD& lastNN = pAppNode->lastNN;
     if (lastNN != rec->nn && lastNN != INFINITE)
     {

@@ -173,13 +173,15 @@ struct INFO_NODE : LOG_NODE
     int  nn;
     WORD log_type;
 	WORD log_flags;
-    int cb_fn_name;
+    WORD cb_fn_name;
+    WORD cb_short_fn_name_offset;
     int call_line;
     DWORD sec;
     DWORD msec;
     bool isEnter() { return log_type == LOG_TYPE_ENTER; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
     char* fnName();
+    char* shortFnName();
     int   callLine();
 };
 
