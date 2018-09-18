@@ -552,6 +552,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
                 char buf[sizeof(ROW_LOG_REC) + MAX_JAVA_FUNC_NAME_LEN];
                 ROW_LOG_REC* pNewRec = (ROW_LOG_REC*)buf;
                 memcpy(pNewRec, rec, sizeof(ROW_LOG_REC));
+                pNewRec->log_type = LOG_TYPE_ENTER;
                 pNewRec->cb_fn_name = min(rec->cb_java_call_site, MAX_JAVA_FUNC_NAME_LEN);
                 memcpy(pNewRec->fnName(), rec->trace(), pNewRec->cb_fn_name);
                 pNewRec->cb_java_call_site = 0;
