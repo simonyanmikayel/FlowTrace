@@ -2,6 +2,7 @@
 
 #include "LogData.h"
 
+#define MAX_JAVA_FUNC_NAME_LEN 1200
 #define MAX_TRCAE_LEN (1024*2)
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(ROW_LOG_REC))
 class Addr2LineThread;
@@ -23,7 +24,10 @@ typedef struct
     WORD cb_app_name;
     WORD cb_module_name;
     WORD cb_fn_name;
-    WORD cb_trace;
+    union {
+        WORD cb_trace;
+        WORD cb_java_call_site; // for java we keep here caller class:method
+    };
     int tid;
     int pid;
     DWORD sec;

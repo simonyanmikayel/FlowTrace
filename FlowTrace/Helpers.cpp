@@ -27,7 +27,7 @@ namespace Helpers
 
 	void ShowInIDE(char* src, int line, bool IsAndroidLog)
 	{
-		if (!src || !src[0] || !line)
+		if (!src || !src[0] || line <= 0)
 			return;
 
 		STARTUPINFO si;
@@ -85,26 +85,24 @@ namespace Helpers
 				if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
 					line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
 			}
-			else if (pNode->parent && pNode->parent->isFlow())
+			else
 			{
-				src = pSelectedNode->parent->getFnName();
-				cb = pSelectedNode->parent->getFnNameSize();
-				line = ((INFO_NODE*)pSelectedNode)->call_line;
-			}
-			if (src && cb && cb < MAX_PATH)
-			{
-				strncpy_s(src2, src, cb);
-				src2[cb] = 0;
-				char* dot = strrchr(src2, '.');
-				if (dot)
-					*dot = 0;
-				dot = src2;
-				while (dot = strchr(dot, '.'))
-					*dot = '\\';
-				dot = strchr(src2, '$');
-				if (dot)
-					*dot = 0;
+                cb = min(MAX_PATH, pNode->cb_java_call_site);
+                memcpy(src2, pNode->JavaCallSite(), cb);
+                src2[cb] = 0;
+
+                for (int i = 0; i < cb; i++)
+                {
+                    if (src2[i] == ':' || src2[i] == '$')
+                    {
+                        src2[i] = 0;
+                        break;
+                    }
+                    if (src2[i] == '/' || src2[i] == '.')
+                        src2[i] = '\\';
+                }
 				src = src2;
+				line = pNode->call_line;
 			}
 		}
 		else
@@ -153,7 +151,12 @@ namespace Helpers
 				cb += pFlowNode->cb_fn_name;
 				if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
 			}
-		}
+            if (pFlowNode->isJava() && cb < cMax - pFlowNode->cb_java_call_site) {
+                memcpy(buf + cb, pFlowNode->JavaCallSite(), pFlowNode->cb_java_call_site);
+                cb += pFlowNode->cb_java_call_site;
+                if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
+            }
+        }
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "nn: %d\r\n", pInfoNode->nn);
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_type: %d\r\n", pInfoNode->log_type);
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_flags: %d\r\n", pInfoNode->log_flags);

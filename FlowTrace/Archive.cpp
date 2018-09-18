@@ -198,7 +198,10 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
         fnName++;
         cb_fn_name--;
     }
-    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name, true);
+    if (0 == (pLogRec->log_flags & LOG_FLAG_JAVA))
+        pLogRec->cb_java_call_site = 0;
+
+    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogRec->cb_java_call_site + 1, true);
     if (!pNode)
         return nullptr;
 
@@ -214,8 +217,12 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
     pNode->call_line = pLogRec->call_line;
 
     pNode->cb_fn_name = cb_fn_name;
-    pNode->cb_short_fn_name_offset = 0xFFFF;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
+    pNode->parseName();
+
+    pNode->cb_java_call_site = pLogRec->cb_java_call_site;
+    if (pLogRec->cb_java_call_site && (pLogRec->log_flags & LOG_FLAG_JAVA))
+        memcpy(pNode->JavaCallSite(), pLogRec->trace(), pLogRec->cb_java_call_site);
 
     pNode->threadNode = pThreadNode;
 
@@ -449,9 +456,10 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 		pNode->msec = pLogRec->msec;
 		pNode->call_line = pLogRec->call_line;
 
-        pNode->cb_short_fn_name_offset = 0xFFFF;
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
+        pNode->parseName();
+
 
         TRACE_CHANK* pChank = pNode->getFirestChank();
         pChank->len = cb;
@@ -522,10 +530,41 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
     if (!pThreadNode)
         return false;
 
-    if (rec->isFlow())
+    if (rec->isFlow() || rec->log_type == LOG_EMPTY_METHOD_ENTER_EXIT)
     {
-        if (!addFlow(pThreadNode, rec))
-            return false;
+        FLOW_NODE* lastFlowNode = pThreadNode->curentFlow;
+        bool addNewRec = (rec->log_flags & LOG_FLAG_JAVA) && (lastFlowNode == NULL || lastFlowNode->peer); // || lastFlowNode->this_fn != rec->call_site
+        if (rec->log_type == LOG_EMPTY_METHOD_ENTER_EXIT) {
+            if (addNewRec)
+            {
+            //    rec->log_type = LOG_TYPE_ENTER;
+            //    if (!addFlow(pThreadNode, rec))
+            //        return false;
+            //    rec->log_type = LOG_TYPE_EXIT;
+            //    if (!addFlow(pThreadNode, rec))
+            //        return false;
+            }
+        }
+        else 
+        {
+            if (addNewRec && rec->cb_java_call_site ) {
+                // add a log according
+                char buf[sizeof(ROW_LOG_REC) + MAX_JAVA_FUNC_NAME_LEN];
+                ROW_LOG_REC* pNewRec = (ROW_LOG_REC*)buf;
+                memcpy(pNewRec, rec, sizeof(ROW_LOG_REC));
+                pNewRec->cb_fn_name = min(rec->cb_java_call_site, MAX_JAVA_FUNC_NAME_LEN);
+                memcpy(pNewRec->fnName(), rec->trace(), pNewRec->cb_fn_name);
+                pNewRec->cb_java_call_site = 0;
+                pNewRec->this_fn = rec->call_site;
+                pNewRec->call_site = -1;
+                pNewRec->fn_line = rec->call_line;
+                pNewRec->call_line = -1;
+                if (!addFlow(pThreadNode, pNewRec))
+                    return false;
+            }
+            if (!addFlow(pThreadNode, rec))
+                return false;
+        }
     }
     else
     {

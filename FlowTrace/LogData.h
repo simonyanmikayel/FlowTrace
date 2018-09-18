@@ -13,7 +13,7 @@ struct ListedNodes;
 
 extern Archive  gArchive;
 
-typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
+typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE, LOG_EMPTY_METHOD_ENTER_EXIT } ROW_LOG_TYPE;
 
 #define LOG_FLAG_NEW_LINE 1
 #define LOG_FLAG_JAVA 2
@@ -175,13 +175,19 @@ struct INFO_NODE : LOG_NODE
 	WORD log_flags;
     WORD cb_fn_name;
     WORD cb_short_fn_name_offset;
+    union {
+        WORD cb_trace;
+        WORD cb_java_call_site; // for java we keep here caller class:method
+    };
     int call_line;
     DWORD sec;
     DWORD msec;
     bool isEnter() { return log_type == LOG_TYPE_ENTER; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
     char* fnName();
+    char* JavaCallSite() { return fnName() + cb_fn_name; }
     char* shortFnName();
+    void parseName();
     int   callLine();
 };
 
@@ -208,7 +214,6 @@ struct TRACE_CHANK
 struct TRACE_NODE : INFO_NODE
 {
     BYTE color;
-    int cb_trace;
     TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
     bool IsInContext();

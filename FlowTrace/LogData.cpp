@@ -140,32 +140,34 @@ char* INFO_NODE::fnName()
     return ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE)); 
 }
 
-char* INFO_NODE::shortFnName()
+void INFO_NODE::parseName()
 {
     char* name = fnName();
-    if (cb_short_fn_name_offset == 0xFFFF)
+    cb_short_fn_name_offset = 0;
+    if (log_flags & LOG_FLAG_JAVA)
     {
-        cb_short_fn_name_offset = 0;
-        if (log_flags & LOG_FLAG_JAVA)
+        int dot1 = 0, dot2 = 0;
+        for (int i = 0; i < cb_fn_name; i++)
         {
-            int dot1 = 0, dot2 = 0;
-            for (int i = 0; i < cb_fn_name; i++)
+            if (name[i] == '.' || name[i] == '/' || name[i] == ':')
             {
-                if (name[i] == '.')
-                {
-                    if (dot1 == dot2)
-                        dot2 = i;
-                    else {
-                        dot1 = dot2;
-                        dot2 = i;
-                    }
+                if (dot1 == dot2)
+                    dot2 = i;
+                else {
+                    dot1 = dot2;
+                    dot2 = i;
                 }
+                name[i] = '.';
             }
-            if (dot1 < dot2)
-                cb_short_fn_name_offset = dot1 + 1;
         }
+        if (dot1 < dot2)
+            cb_short_fn_name_offset = dot1 + 1;
     }
-    return name + cb_short_fn_name_offset;
+}
+
+char* INFO_NODE::shortFnName()
+{
+    return fnName() + cb_short_fn_name_offset;
 }
 
 void FLOW_NODE::addToTree()
