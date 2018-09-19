@@ -13,7 +13,13 @@ struct ListedNodes;
 
 extern Archive  gArchive;
 
-typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE, LOG_EMPTY_METHOD_ENTER_EXIT } ROW_LOG_TYPE;
+typedef enum {
+    LOG_EMPTY_METHOD_ENTER_EXIT = 3,
+    LOG_INFO_ENTER_FIRST,
+    LOG_INFO_EXIT_LAST,
+} LOG_INFO_TYPE;
+
+typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 
 #define LOG_FLAG_NEW_LINE 1
 #define LOG_FLAG_JAVA 2

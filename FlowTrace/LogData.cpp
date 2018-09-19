@@ -194,7 +194,7 @@ void FLOW_NODE::addToTree()
         {
 			while ((void*)lastFlowNode != (void*)threadNode)
 			{
-				if (lastFlowNode->peer == NULL && lastFlowNode->isEnter() && lastFlowNode->this_fn == this_fn) // && lastFlowNode->call_site == call_site
+				if (lastFlowNode->peer == NULL && lastFlowNode->isEnter() && lastFlowNode->this_fn == this_fn && lastFlowNode->call_site == call_site)
 				{
 					lastFlowNode->peer = this;
 					peer = lastFlowNode;
