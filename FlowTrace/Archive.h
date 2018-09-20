@@ -88,7 +88,7 @@ public:
     DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb) { return (char*)m_pTraceBuf->Alloc(cb, false); }
-    bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL);
+    bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false);
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     void resolveAddrAsync(LOG_NODE* pNode = NULL);

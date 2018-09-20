@@ -504,7 +504,7 @@ void Archive::Log(ROW_LOG_REC* rec)
     rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->data);
 }
 
-bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
+bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
 {
     if (!rec->isValid())
         return false;
@@ -517,7 +517,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other)
     //if (rec->nn == 110586)
     //    int iiii = 0;
     DWORD& lastNN = pAppNode->lastNN;
-    if (lastNN != rec->nn && lastNN != INFINITE)
+    if (lastNN != rec->nn && lastNN != INFINITE && !fromImport)
     {
 		int lost = (rec->nn - lastNN > 0) ? rec->nn - lastNN : lastNN - rec->nn;
         pAppNode->lost += lost;

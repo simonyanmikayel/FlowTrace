@@ -222,6 +222,7 @@ void TaskThread::FileSave(WORD cmd)
                 rec->sec = p->sec;
                 rec->msec = p->msec;
                 rec->tid = pNode->threadNode->tid;
+                rec->pid = pNode->threadNode->pAppNode->pid;
                 rec->this_fn = 0;
                 rec->call_site = 0;
 				rec->fn_line = 0;
@@ -264,9 +265,9 @@ void TaskThread::FileSave(WORD cmd)
 
             rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
 
-            fprintf(m_fp, "%d %d %d %d %d %d %d %u %u %d %d %d %d %d %d-",
+            fprintf(m_fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-",
                 rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_name, rec->cb_module_name,
-				rec->cb_fn_name, rec->cb_trace, rec->tid, 
+				rec->cb_fn_name, rec->cb_trace, rec->pid, rec->tid,
 				rec->sec, rec->msec, 
 				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line);
 
@@ -385,12 +386,12 @@ void TaskThread::FileImport()
             if (count == 1712)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
-			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %u %u %d %d %d %d-"),
+			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-"),
 				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
                 &rec->cb_app_name, &rec->cb_module_name, 
-                &rec->cb_fn_name, &rec->cb_trace, &rec->tid, &rec->sec, &rec->msec, 
+                &rec->cb_fn_name, &rec->cb_trace, &rec->pid, &rec->tid, &rec->sec, &rec->msec,
                 &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line);
-            ss = (15 == cf);
+            ss = (16 == cf);
             ss = ss && rec->isValid();
             if (rec->cbData())
                 ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));
@@ -407,7 +408,7 @@ void TaskThread::FileImport()
 
             ss = ss && rec->isValid();
             if (ss)
-                appended = gArchive.append(rec);
+                appended = gArchive.append(rec, NULL, true);
             ss = ss && appended;
             if (feof(m_fp))
             {
@@ -419,7 +420,7 @@ void TaskThread::FileImport()
         if (!ss)
         {
             if (!appended)
-                Helpers::ErrMessageBox(TEXT("Not enought memory to uppent record %d"), count);
+                Helpers::ErrMessageBox(TEXT("Not enought memory to uppend record %d"), count);
             else
                 Helpers::ErrMessageBox(TEXT("Record line %d corupted"), count);
         }
