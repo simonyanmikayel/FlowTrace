@@ -25,10 +25,10 @@ namespace Helpers
         }
     }
 
-	void ShowInIDE(char* src, int line, bool IsAndroidLog)
+	bool ShowInIDE(char* src, int line, bool IsAndroidLog)
 	{
 		if (!src || !src[0] || line <= 0)
-			return;
+			return false;
 
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;
@@ -41,10 +41,25 @@ namespace Helpers
 		if (IsAndroidLog)
 		{
             char src2[MAX_PATH + 1];
-            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "%s.java", src);
-            char* srcPath = dirFindFile(gSettings.GetAndroidProject(), src2);
-            if (srcPath)
-			    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\"", gSettings.GetAndroidStudio(), line, srcPath);
+            char fileName2[MAX_PATH + 1];
+            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "src\\main\\java\\%s", src);
+            src2[MAX_PATH] = 0;
+            char* fileName = strrchr(src2, '\\');
+            if (!fileName)
+                return false;
+            *fileName = 0;
+            fileName++;
+            char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, false);
+            if (!srcPath)
+                return false;
+            _sntprintf_s(fileName2, MAX_PATH, MAX_PATH, "%s.java", fileName);
+            fileName2[MAX_PATH] = 0;
+            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "%s", srcPath);
+            srcPath = FindFile(src2, fileName2, true);
+            src2[MAX_PATH] = 0;
+            if (!srcPath)
+                return false;
+		    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\"", gSettings.GetAndroidStudio(), line, srcPath);
 			process = NULL;
 		}
 		else
@@ -56,10 +71,10 @@ namespace Helpers
 			//D:\Programs\eclipse\eclipse-cpp-neon-M4a-win32-x86_64\eclipsec.exe -name Eclipse --launcher.openFile X:\prj\c\c\ctap\kernel\CTAPparameters\src\CTAP_parameters.c:50
 			process = gSettings.GetEclipsePath();
 		}
-
 		CreateProcess(process, cmd, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
+        return true;
 	}
 
 	void ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite, bool bCallSiteInContext)
@@ -89,7 +104,7 @@ namespace Helpers
 				if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
 					line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
 			}
-            else
+            else if(pNode->parent && pNode->parent->isFlow())
             {
                 src = pNode->JavaCallSite();
                 cb = pNode->cb_java_call_site;
@@ -471,12 +486,12 @@ namespace Helpers
 	}
 
     static char szFindFilePath[2*MAX_PATH];
-    char* dirFindFile(char* szDirName, char* szFileName, size_t cbFileName)
+    bool fileFound = false;
+    void _FindFile(char* szDirName, char* szFileName, bool isFile, size_t cbFileName)
     {
         HANDLE hFind;
         WIN32_FIND_DATA wfd;
         char path[MAX_PATH];
-        char *ret = 0;
         sprintf_s(path, "%s\\*", szDirName);
         if (cbFileName == 0)
             cbFileName = strlen(szFileName);
@@ -485,23 +500,36 @@ namespace Helpers
         if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE)
         {
             //fprintf(stderr, "FindFirstFIle failed on path = \"%s\"\n", path);
-            return 0;
+            return;
         }
 
         BOOL cont = TRUE;
-        while (cont == TRUE)
+        while (cont == TRUE && !fileFound)
         {
             //if ((strncmp(".", wfd.cFileName, 1) != 0) && (strncmp("..", wfd.cFileName, 2) != 0))
-            if (wfd.cFileName[0] != '.')
+            if (wfd.cFileName[0] != '.' && 0 != strcmp(wfd.cFileName, "build"))
             {
                 if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     sprintf_s(path, "%s\\%s", szDirName, wfd.cFileName);
-                    ret = dirFindFile(path, szFileName);
-                    if (ret)
+                    if (!isFile) 
+                    {
+                        size_t cbFindFilePath = sprintf_s(szFindFilePath, "%s\\%s", szDirName, wfd.cFileName);
+                        if (cbFindFilePath > cbFileName)
+                        {
+                            if (0 == _stricmp(szFindFilePath + (cbFindFilePath - cbFileName), szFileName))
+                            {
+                                fileFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (fileFound)
                         break;
+                    else
+                        _FindFile(path, szFileName, isFile, cbFileName);
                 }
-                else
+                else if (isFile)
                 {  
                     size_t cbFindFilePath = sprintf_s(szFindFilePath, "%s\\%s", szDirName, wfd.cFileName);
                     if (cbFindFilePath > cbFileName)
@@ -510,7 +538,7 @@ namespace Helpers
                         //stdlog("%s  %s\n", szFindFilePath, szFileName);
                         if (0 == _stricmp(szFindFilePath + (cbFindFilePath - cbFileName), szFileName))
                         {
-                            ret = szFindFilePath;
+                            fileFound = true;
                             break;
                         }
                     }
@@ -519,7 +547,16 @@ namespace Helpers
             cont = FindNextFile(hFind, &wfd);
         }
         FindClose(hFind);
-        return ret;
+    }
+    char* FindFile(char* szDirName, char* szFileName, bool isFile)
+    {
+        fileFound = false;
+        szFindFilePath[0] = 0;
+        _FindFile(szDirName, szFileName, isFile, 0);
+        if (fileFound)
+            return szFindFilePath;
+        else
+            return 0;
     }
 };
 

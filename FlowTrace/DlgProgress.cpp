@@ -236,11 +236,7 @@ void TaskThread::FileSave(WORD cmd)
                 memcpy(rec->moduleName(), pNode->threadNode->moduleName, rec->cb_module_name);
             memcpy(rec->fnName(), ((INFO_NODE*)pNode)->fnName(), rec->cb_fn_name);
 
-            if (pNode->isFlow())
-            {
-                rec->cb_trace = 0;
-            }
-            if (pNode->isTrace())
+            if (rec->cb_trace)
             {
                 TRACE_NODE* p = (TRACE_NODE*)pNode;
                 int cb_trace;
