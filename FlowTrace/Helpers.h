@@ -29,4 +29,5 @@ namespace Helpers
 	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite, bool bCallSiteInContext = false);
 	void ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
+    char* dirFindFile(char* szDirName, char* szFileName, size_t cbFileName = 0);
 };

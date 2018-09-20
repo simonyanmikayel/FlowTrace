@@ -40,7 +40,11 @@ namespace Helpers
 
 		if (IsAndroidLog)
 		{
-			_sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\\%s.java\"", gSettings.GetAndroidStudio(), line, gSettings.GetAndroidProject(), src);
+            char src2[MAX_PATH + 1];
+            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "%s.java", src);
+            char* srcPath = dirFindFile(gSettings.GetAndroidProject(), src2);
+            if (srcPath)
+			    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\"", gSettings.GetAndroidStudio(), line, srcPath);
 			process = NULL;
 		}
 		else
@@ -85,25 +89,28 @@ namespace Helpers
 				if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
 					line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
 			}
-			else
-			{
-                cb = min(MAX_PATH, pNode->cb_java_call_site);
-                memcpy(src2, pNode->JavaCallSite(), cb);
+            else
+            {
+                src = pNode->JavaCallSite();
+                cb = pNode->cb_java_call_site;
+                line = ((INFO_NODE*)pSelectedNode)->callLine();
+            }
+            if (src && src[0] && cb)
+            {
+                cb = min(cb, MAX_PATH);
+                strncpy_s(src2, src, cb);
                 src2[cb] = 0;
-
-                for (int i = 0; i < cb; i++)
-                {
-                    if (src2[i] == ':' || src2[i] == '$')
-                    {
-                        src2[i] = 0;
-                        break;
-                    }
-                    if (src2[i] == '/' || src2[i] == '.')
-                        src2[i] = '\\';
-                }
-				src = src2;
-				line = pNode->call_line;
-			}
+                char* dot = strrchr(src2, '.');
+                if (dot)
+                    *dot = 0;
+                dot = src2;
+                while (dot = strchr(dot, '.'))
+                    *dot = '\\';
+                dot = strchr(src2, '$');
+                if (dot)
+                    *dot = 0;
+                src = src2;
+            }
 		}
 		else
 		{
@@ -463,5 +470,56 @@ namespace Helpers
 		SetMenuItemInfo(hMenu, item, TRUE, &mii);
 	}
 
+    static char szFindFilePath[2*MAX_PATH];
+    char* dirFindFile(char* szDirName, char* szFileName, size_t cbFileName)
+    {
+        HANDLE hFind;
+        WIN32_FIND_DATA wfd;
+        char path[MAX_PATH];
+        char *ret = 0;
+        sprintf_s(path, "%s\\*", szDirName);
+        if (cbFileName == 0)
+            cbFileName = strlen(szFileName);
+
+        //fprintf(stdout, "In Directory \"%s\"\n\n", szDirName);
+        if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE)
+        {
+            //fprintf(stderr, "FindFirstFIle failed on path = \"%s\"\n", path);
+            return 0;
+        }
+
+        BOOL cont = TRUE;
+        while (cont == TRUE)
+        {
+            //if ((strncmp(".", wfd.cFileName, 1) != 0) && (strncmp("..", wfd.cFileName, 2) != 0))
+            if (wfd.cFileName[0] != '.')
+            {
+                if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                {
+                    sprintf_s(path, "%s\\%s", szDirName, wfd.cFileName);
+                    ret = dirFindFile(path, szFileName);
+                    if (ret)
+                        break;
+                }
+                else
+                {  
+                    size_t cbFindFilePath = sprintf_s(szFindFilePath, "%s\\%s", szDirName, wfd.cFileName);
+                    if (cbFindFilePath > cbFileName)
+                    {
+                        //if (strstr(szFindFilePath, szFileName))
+                        //stdlog("%s  %s\n", szFindFilePath, szFileName);
+                        if (0 == _stricmp(szFindFilePath + (cbFindFilePath - cbFileName), szFileName))
+                        {
+                            ret = szFindFilePath;
+                            break;
+                        }
+                    }
+                }
+            }
+            cont = FindNextFile(hFind, &wfd);
+        }
+        FindClose(hFind);
+        return ret;
+    }
 };
 

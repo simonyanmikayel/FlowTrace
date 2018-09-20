@@ -218,7 +218,7 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
 
     pNode->cb_fn_name = cb_fn_name;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
-    pNode->parseName();
+    pNode->cb_short_fn_name_offset = 0xFFFF;
 
     pNode->cb_java_call_site = pLogRec->cb_java_call_site;
     if (pLogRec->cb_java_call_site && (pLogRec->log_flags & LOG_FLAG_JAVA))
@@ -458,7 +458,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
-        pNode->parseName();
+        pNode->cb_short_fn_name_offset = 0xFFFF;
 
 
         TRACE_CHANK* pChank = pNode->getFirestChank();

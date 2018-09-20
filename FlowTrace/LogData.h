@@ -193,7 +193,6 @@ struct INFO_NODE : LOG_NODE
     char* fnName();
     char* JavaCallSite() { return fnName() + cb_fn_name; }
     char* shortFnName();
-    void parseName();
     int   callLine();
 };
 
