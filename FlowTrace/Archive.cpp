@@ -132,6 +132,18 @@ THREAD_NODE* Archive::addThread(ROW_LOG_REC* p, APP_NODE* pAppNode)
 
     memcpy(pNode->moduleName, p->moduleName(), p->cbModuleName());
     pNode->moduleName[pNode->cb_module_name] = 0;
+    pNode->cb_short_module_name_offset = 0;
+    char* dotdot = strrchr(p->moduleName(), ':');
+    if (dotdot) {
+        *dotdot = 0;
+        char* dot = strrchr(p->moduleName(), '.');
+        if (dot) {
+            pNode->cb_short_module_name_offset = int(dot - p->moduleName() + 1);
+        }
+        *dotdot = ':';
+    }
+
+
 
     pAppNode->add_child(pNode);
     pNode->hasCheckBox = 1;

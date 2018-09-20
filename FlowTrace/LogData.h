@@ -149,6 +149,7 @@ struct THREAD_NODE : LOG_NODE
     FLOW_NODE* curentFlow;
     TRACE_NODE* latestTrace;
     int cb_actual_module_name;
+    int cb_short_module_name_offset;
     int cb_module_name;
     int emptLineColor;
     int tid;

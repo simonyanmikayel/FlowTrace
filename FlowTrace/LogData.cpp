@@ -373,8 +373,8 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-		cb += threadNode->cb_module_name;
-		memcpy(pBuf, threadNode->moduleName, threadNode->cb_module_name);
+		cb += threadNode->cb_module_name - threadNode->cb_short_module_name_offset;
+		memcpy(pBuf, threadNode->moduleName + threadNode->cb_short_module_name_offset, threadNode->cb_module_name);
 		pBuf[cb] = 0;
     }
     else if (col == THREAD_COL)
