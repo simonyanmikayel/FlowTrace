@@ -160,7 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
-    <ClInclude Include="Addr2LineThread.h" />
+    <ClInclude Include="AddrInfo.h" />
     <ClInclude Include="Archive.h" />
     <ClInclude Include="BackTraceCallView.h" />
     <ClInclude Include="BackTraceView.h" />
@@ -188,7 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
-    <ClCompile Include="Addr2LineThread.cpp" />
+    <ClCompile Include="AddrInfo.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="BackTraceCallView.cpp" />
     <ClCompile Include="BackTraceView.cpp" />

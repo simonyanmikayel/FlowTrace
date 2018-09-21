@@ -22,8 +22,6 @@ CBackTraceCallView::~CBackTraceCallView()
 {
 }
 
-static const char* szPending = "?";// "pending to resolve call line";
-
 void CBackTraceCallView::OnSize(UINT nType, CSize size)
 {
     if (!m_Initialised)
@@ -40,14 +38,14 @@ void CBackTraceCallView::OnSize(UINT nType, CSize size)
 
 int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int cbBuf)
 {
-    LOG_NODE* pNode = nodes[iItem];
+    INFO_NODE* pNode = nodes[iItem];
     int cb = 0;
     if (iSubItem == BACK_TRACE_FN)
     {
-        cb = min(pNode->getFnNameSize(), cbBuf);
+        cb = min(pNode->cb_fn_name, cbBuf);
         if (cb != 0)
         {
-            memcpy(buf, pNode->getFnName(), cb);
+            memcpy(buf, pNode->fnName(), cb);
         }
         else
         {
@@ -72,16 +70,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
         }
         else
         {
-            const char* txt;
-            if (pNode->PendingToResolveAddr())
-            {
-                gArchive.resolveAddr(pNode, false);
-                txt = szPending;
-            }
-            else
-            {
-                txt = ((FLOW_NODE*)pNode)->getCallSrc(gSettings.GetFullSrcPath());
-            }
+            const char* txt = ((FLOW_NODE*)pNode)->getCallSrc(gSettings.GetFullSrcPath(), true);
             cb = min((int)strlen(txt), cbBuf);
             memcpy(buf, txt, cb);
         }
@@ -91,11 +80,11 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
         int line = 0;
         if (pNode->isFlow())
         {
-            line = ((FLOW_NODE*)pNode)->callLine();
+            line = ((FLOW_NODE*)pNode)->callLine(true);
         }
         else if (pNode->isTrace())
         {
-            line = ((TRACE_NODE*)pNode)->getCallLine(true);
+            line = ((TRACE_NODE*)pNode)->getCallLine(true, false);
         }
         if (line > 0)
             cb = _snprintf_s(buf, cbBuf, cbBuf, "%d", line);
@@ -127,12 +116,12 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
             pArchivedNode = gArchive.getNode(i);
             if (pArchivedNode->isFlow() && pArchivedNode->parent == pNode)
             {
-                nodes[c_nodes] = pArchivedNode;
+                nodes[c_nodes] = (INFO_NODE*)pArchivedNode;
                 c_nodes++;
             }
             else if (pArchivedNode->isTrace() && pArchivedNode->isParent(pNode))
             {
-                nodes[c_nodes] = pArchivedNode;
+                nodes[c_nodes] = (INFO_NODE*)pArchivedNode;
                 c_nodes++;
             }
         }
@@ -141,7 +130,7 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
     {
         while (pNode && pNode->isFlow() && c_nodes < MAX_BACK_TRACE)
         {
-            nodes[c_nodes] = pNode;
+            nodes[c_nodes] = (INFO_NODE*)pNode;
             c_nodes++;
             pNode = pNode->parent;
         }
@@ -255,7 +244,7 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
     ::SetBkMode(hdc, OPAQUE);
 
     int cb = getSubItemText(iItem, iSubItem, pBuf, cMaxBuf);
-    LOG_NODE* pNode = nodes[iItem];
+    INFO_NODE* pNode = nodes[iItem];
 
     if (pNode->isTrace())
         ::SetTextColor(hdc, RGB(0, 0, 0));

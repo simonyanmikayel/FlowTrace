@@ -5,7 +5,6 @@
 #define MAX_JAVA_FUNC_NAME_LEN 1200
 #define MAX_TRCAE_LEN (1024*2)
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(ROW_LOG_REC))
-class Addr2LineThread;
 struct ListedNodes;
 
 #ifdef _BUILD_X64
@@ -87,12 +86,10 @@ public:
     void onPaused();
     DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
-    char* Alloc(DWORD cb) { return (char*)m_pTraceBuf->Alloc(cb, false); }
+    char* Alloc(DWORD cb, bool zero = false) { return (char*)m_pTraceBuf->Alloc(cb, zero); }
     bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false);
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
-    void resolveAddrAsync(LOG_NODE* pNode = NULL);
-    void resolveAddr(LOG_NODE* pSelectedNode, bool loop);
     ListedNodes* getListedNodes() { return m_listedNodes; }
     ROOT_NODE* getRootNode() { return m_rootNode; }
     SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
@@ -119,7 +116,6 @@ private:
     SNAPSHOT m_snapshot;
     ListedNodes* m_listedNodes;
     ROOT_NODE* m_rootNode;
-    Addr2LineThread* m_pAddr2LineThread;
     MemBuf* m_pTraceBuf;
     PtrArray<LOG_NODE>* m_pNodes;
 };

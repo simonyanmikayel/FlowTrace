@@ -321,8 +321,7 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 LRESULT CMainFrame::OnViewModules(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DlgModules dlg;
-    if (IDOK == dlg.DoModal())
-        gArchive.resolveAddrAsync();
+    dlg.DoModal();
     return 0;
 }
 
@@ -337,7 +336,6 @@ LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
 LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DWORD udpPort = gSettings.GetUdpPort();
-    DWORD resolveAddr = gSettings.GetResolveAddr();
     DlgSettings dlg;
     if (IDOK == dlg.DoModal())
     {
@@ -346,8 +344,6 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
             StopLogging(false);
             StartLogging();
         }
-        if (gSettings.GetResolveAddr() && !resolveAddr)
-          gArchive.resolveAddrAsync();
         m_view.ApplySettings(true);
     }
     return 0;
@@ -415,7 +411,7 @@ LRESULT CMainFrame::onShowMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, B
 LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
   LOG_NODE* pNode = (LOG_NODE*)lParam;
-  m_view.ShowBackTrace(NULL, pNode, gArchive.getArchiveNumber());
+  m_view.ShowBackTrace(pNode);
   return 0;
 }
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)

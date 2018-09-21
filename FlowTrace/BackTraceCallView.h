@@ -38,7 +38,7 @@ public:
 	void ItemPrePaint(DWORD iItem, HDC hdc, RECT rc);
 	void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
 	void OnSize(UINT nType, CSize size);
-	LOG_NODE* nodes[MAX_BACK_TRACE];
+	INFO_NODE* nodes[MAX_BACK_TRACE];
 	int subItemColWidth[BACK_TRACE_LAST_COL];
 	void SetSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void SetSelection(int iItem, int iSubItem);

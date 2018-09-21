@@ -2,6 +2,7 @@
 #include "Archive.h"
 #include "Settings.h"
 #include "Helpers.h"
+#include "AddrInfo.h"
 
 bool LOG_NODE::isSynchronized(LOG_NODE* pSyncNode)
 {
@@ -18,25 +19,11 @@ FLOW_NODE* LOG_NODE::getPeer()
         return nullptr;
 }
 
-char* LOG_NODE::getFnName()
-{
-    if (isFlow())
-    {
-        return  ((FLOW_NODE*)this)->fnName();
-    }
-    else if (isTrace())
-    {
-        return  ((TRACE_NODE*)this)->fnName();
-    }
-    else
-    {
-        return "";
-    }
-}
-char* FLOW_NODE::getCallSrc(bool fullPath)
+char* FLOW_NODE::getCallSrc(bool fullPath, bool resolve)
 {
     char* src = "";
-    if (p_call_addr_info)
+    ADDR_INFO *p_call_addr_info = getCallInfo(resolve);
+    if (p_call_addr_info != 0)
     {
         src = p_call_addr_info->src;
         if (!fullPath)
@@ -48,7 +35,7 @@ char* FLOW_NODE::getCallSrc(bool fullPath)
     }
     return src;
 }
-int INFO_NODE::callLine()
+int INFO_NODE::callLine(bool resolve)
 {
     int line = 0;
     if (isJava() || isTrace())
@@ -58,9 +45,10 @@ int INFO_NODE::callLine()
     else
     {
         FLOW_NODE* This = (FLOW_NODE*)this;
-        if (This->p_call_addr_info)
+        ADDR_INFO *p_call_addr_info = This->getCallInfo(resolve);
+        if (p_call_addr_info != 0)
         {
-            line = This->p_call_addr_info->line;
+            line = p_call_addr_info->line;
         }
     }
     return line;
@@ -92,52 +80,25 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
     return cb;
 }
 
-bool LOG_NODE::PendingToResolveAddr(bool bNested)
-{
-    bool pendingToResolveAddr = false;
-    LOG_NODE* pNode = getSyncNode();
-    if (pNode)
-    {
-        if (pNode->isFlow() && gSettings.GetResolveAddr())
-        {
-            pendingToResolveAddr = (pNode->threadNode->cb_addr_info == INFINITE);
-            if (!pendingToResolveAddr)
-            {
-                pendingToResolveAddr = (((FLOW_NODE*)pNode)->p_call_addr_info == NULL);
-                if (!pendingToResolveAddr && bNested)
-                {
-                    pNode = pNode->firstChild;
-                    while (!pendingToResolveAddr && pNode)
-                    {
-                        if (pNode->isFlow())
-                            pendingToResolveAddr = (((FLOW_NODE*)pNode)->p_call_addr_info == NULL);
-                        pNode = pNode->nextSibling;
-                    }
-                }
-            }
-        }
-    }
-    return pendingToResolveAddr;
-}
-int LOG_NODE::getFnNameSize()
-{
-    if (isFlow())
-    {
-        return  ((FLOW_NODE*)this)->cb_fn_name;
-    }
-    else if (isTrace())
-    {
-        return  ((TRACE_NODE*)this)->cb_fn_name;
-    }
-    else
-    {
-        return 0;
-    }
-
-}
 char* INFO_NODE::fnName()
 { 
     return ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE)); 
+}
+
+char* INFO_NODE::moduleName()
+{
+    if (cb_module_name)
+        return fnName() + cb_fn_name;
+    else
+        return threadNode->pAppNode->appName;
+}
+
+int INFO_NODE::moduleNameLength()
+{
+    if (cb_module_name)
+        return cb_module_name;
+    else
+        return threadNode->pAppNode->cb_app_name;
 }
 
 char* INFO_NODE::shortFnName()
@@ -331,8 +292,9 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         }
         if (gSettings.GetFnCallLine())
         {
-            if (This->p_call_addr_info)
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), This->p_call_addr_info->line);
+            ADDR_INFO *p_call_addr_info = This->getCallInfo(false);
+            if (p_call_addr_info != 0)
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), p_call_addr_info->line);
         }
         pBuf[cb] = 0;
         if (gSettings.GetShowChildCount())
@@ -373,9 +335,21 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == APP_COLL)
     {
-		cb += threadNode->cb_module_name - threadNode->cb_short_module_name_offset;
-		memcpy(pBuf, threadNode->moduleName + threadNode->cb_short_module_name_offset, threadNode->cb_module_name);
-		pBuf[cb] = 0;
+        if (isInfo())
+        {
+            INFO_NODE* This = (INFO_NODE*)this;
+            APP_NODE* pAppNode = This->threadNode->pAppNode;
+            memcpy(pBuf, pAppNode->appName + pAppNode->cb_short_app_name_offset, pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset);
+            cb += pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset;
+            if (This->cb_module_name)
+            {
+                pBuf[cb++] = ':';
+                char* name = This->moduleName();
+                memcpy(pBuf + cb, This->moduleName(), This->cb_module_name);
+                cb += This->cb_module_name;
+            }
+            pBuf[cb] = 0;
+        }
     }
     else if (col == THREAD_COL)
     {
@@ -420,7 +394,7 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
         if (isInfo())
         {
             INFO_NODE* This = (INFO_NODE*)this;
-            int n = This->callLine();
+            int n = This->callLine(false);
             if (n)
                 cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), n);
         }
@@ -601,7 +575,7 @@ bool TRACE_NODE::IsInContext()
     return pContextNode == gSyncronizedNode;        
 }
 
-int TRACE_NODE::getCallLine(bool bCallSiteInContext)
+int TRACE_NODE::getCallLine(bool bCallSiteInContext, bool resolve)
 {
     int line = 0;
     if (bCallSiteInContext)
@@ -617,9 +591,10 @@ int TRACE_NODE::getCallLine(bool bCallSiteInContext)
                 pContextNode = pContextNode->parent;
             if (pContextNode && pContextNode->isFlow())
             {
-                FLOW_NODE* flowContextNode = (FLOW_NODE*)pContextNode;
-                if (flowContextNode->p_call_addr_info)
-                    line = flowContextNode->p_call_addr_info->line;
+                FLOW_NODE* This = (FLOW_NODE*)pContextNode;
+                ADDR_INFO *p_call_addr_info = This->getCallInfo(resolve);
+                if (p_call_addr_info != 0)
+                    line = p_call_addr_info->line;
             }
         }
     }
@@ -628,5 +603,22 @@ int TRACE_NODE::getCallLine(bool bCallSiteInContext)
         line = call_line;
     }
     return line;
+}
+
+ADDR_INFO * FLOW_NODE::getFuncInfo(bool resolve)
+{
+    if (p_func_info == pInvalidAddrInfo)
+        return 0;
+    if (p_func_info == NULL && resolve)
+        AddrInfo::Resolve(this);
+    return p_func_info;
+}
+ADDR_INFO * FLOW_NODE::getCallInfo(bool resolve)
+{
+    if (p_call_info == pInvalidAddrInfo)
+        return 0;
+    if (p_call_info == NULL && resolve)
+        AddrInfo::Resolve(this);
+    return p_call_info;
 }
 

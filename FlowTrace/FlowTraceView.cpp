@@ -80,43 +80,17 @@ LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHa
 	return 0;
 }
 
-void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode, LOG_NODE* pUpdatedNode, DWORD archiveNumber)
+void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
 {
 	if (gSettings.GetInfoHiden())
 		return;
 
-	static DWORD curArchiveNumber = 0;
-	static LOG_NODE* pCurNode = 0;
-
-	if (archiveNumber != INFINITE && curArchiveNumber != archiveNumber)
-	{
-		return;
-	}
-	if (pUpdatedNode != NULL && pCurNode != pUpdatedNode)
+	if (pSelectedNode == 0)
 	{
 		return;
 	}
 
-	if (pSelectedNode == 0 && pUpdatedNode == 0)
-	{
-		return;
-	}
-
-	pCurNode = pSelectedNode ? pSelectedNode : pUpdatedNode;
-	curArchiveNumber = gArchive.getArchiveNumber();
-
-	if (pUpdatedNode == NULL)
-	{
-		if (pSelectedNode->PendingToResolveAddr(true) || pSelectedNode->PendingToResolveAddr(false))
-		{
-			gArchive.resolveAddrAsync(pSelectedNode);
-		}
-	}
-
-	if (pUpdatedNode && pUpdatedNode == m_wndTreeView.GetSelectedNode() && gSettings.GetFnCallLine())
-		m_wndTreeView.Invalidate();
-
-	m_wndBackTraceView.UpdateBackTrace(pCurNode);
+	m_wndBackTraceView.UpdateBackTrace(pSelectedNode);
 }
 
 void CFlowTraceView::SetChildPos(int cx, int cy)

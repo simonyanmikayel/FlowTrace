@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Archive.h"
 #include "Helpers.h"
+#include "AddrInfo.h"
 #include "Settings.h"
-#include "Addr2LineThread.h"
 
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
@@ -35,13 +35,6 @@ void Archive::clearArchive(bool closing)
 {
     archiveNumber++;
 	bookmarkNumber = 0;
-    if (m_pAddr2LineThread)
-    {
-        m_pAddr2LineThread->StopWork();
-        delete m_pAddr2LineThread;
-        m_pAddr2LineThread = nullptr;
-    }
-
 	m_lost = 0;
     curApp = 0;
     curThread = 0;
@@ -52,38 +45,19 @@ void Archive::clearArchive(bool closing)
     m_rootNode = nullptr;
     m_pTraceBuf->Free();
     m_listedNodes->Free();
+    AddrInfo::Reset();
     if (!closing)
     {
         m_pNodes = new PtrArray<LOG_NODE>(m_pTraceBuf);
         m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
         m_rootNode->data_type = ROOT_DATA_TYPE;
         ATLASSERT(m_pNodes && m_rootNode);
-        m_pAddr2LineThread = new Addr2LineThread();
-        m_pAddr2LineThread->StartWork();
     }
 }
 
 size_t Archive::UsedMemory() 
 {
     return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); 
-}
-
-void Archive::resolveAddr(LOG_NODE* pSelectedNode, bool loop)
-{
-    if (gSettings.GetResolveAddr())
-    {
-        if (m_pAddr2LineThread)
-            m_pAddr2LineThread->Resolve(pSelectedNode, loop);
-    }
-}
-
-void Archive::resolveAddrAsync(LOG_NODE* pNode)
-{
-    if (gSettings.GetResolveAddr())
-    {
-        if (m_pAddr2LineThread)
-            m_pAddr2LineThread->ResolveAsync(pNode);
-    }
 }
 
 APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
@@ -99,6 +73,15 @@ APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 
     memcpy(pNode->appName, p->appName(), p->cb_app_name);
     pNode->appName[pNode->cb_app_name] = 0;
+    char* dotdot = strrchr(pNode->appName, ':');
+    if (dotdot) {
+        *dotdot = 0;
+        char* dot = strrchr(pNode->appName, '.');
+        if (dot) {
+            pNode->cb_short_app_name_offset = int(dot - pNode->appName + 1);
+        }
+        *dotdot = ':'; //restore
+    }    
 
     if (p_si_other)
     {
@@ -126,29 +109,10 @@ THREAD_NODE* Archive::addThread(ROW_LOG_REC* p, APP_NODE* pAppNode)
     pNode->data_type = THREAD_DATA_TYPE;
     pNode->pAppNode = pAppNode;
     pNode->tid = p->tid;
-    pNode->cb_module_name = p->cbModuleName();
-    pNode->cb_actual_module_name = p->cb_module_name;
-    pNode->cb_addr_info = INFINITE;
-
-    memcpy(pNode->moduleName, p->moduleName(), p->cbModuleName());
-    pNode->moduleName[pNode->cb_module_name] = 0;
-    pNode->cb_short_module_name_offset = 0;
-    char* dotdot = strrchr(p->moduleName(), ':');
-    if (dotdot) {
-        *dotdot = 0;
-        char* dot = strrchr(p->moduleName(), '.');
-        if (dot) {
-            pNode->cb_short_module_name_offset = int(dot - p->moduleName() + 1);
-        }
-        *dotdot = ':';
-    }
-
-
-
+    
     pAppNode->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
-    resolveAddrAsync();
 
     return pNode;
 }
@@ -213,7 +177,7 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
     if (0 == (pLogRec->log_flags & LOG_FLAG_JAVA))
         pLogRec->cb_java_call_site = 0;
 
-    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogRec->cb_java_call_site + 1, true);
+    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogRec->cb_module_name + pLogRec->cb_java_call_site + 1, true);
     if (!pNode)
         return nullptr;
 
@@ -232,9 +196,17 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
     memcpy(pNode->fnName(), fnName, cb_fn_name);
     pNode->cb_short_fn_name_offset = 0xFFFF;
 
-    pNode->cb_java_call_site = pLogRec->cb_java_call_site;
+    if (pLogRec->cb_module_name)
+    {
+        pNode->cb_module_name = pLogRec->cb_module_name;
+        memcpy(pNode->fnName() + cb_fn_name, pLogRec->moduleName(), pNode->cb_module_name);
+    }
+
     if (pLogRec->cb_java_call_site && (pLogRec->log_flags & LOG_FLAG_JAVA))
+    {
+        pNode->cb_java_call_site = pLogRec->cb_java_call_site;
         memcpy(pNode->JavaCallSite(), pLogRec->trace(), pLogRec->cb_java_call_site);
+    }
 
     pNode->threadNode = pThreadNode;
 
@@ -455,7 +427,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
             fnName++;
             cb_fn_name--;
         }
-        TRACE_NODE* pNode = (TRACE_NODE*)m_pNodes->Add(sizeof(TRACE_NODE) + cb_fn_name + sizeof(TRACE_CHANK) + cb, true);
+        TRACE_NODE* pNode = (TRACE_NODE*)m_pNodes->Add(sizeof(TRACE_NODE) + cb_fn_name + pLogRec->cb_module_name + sizeof(TRACE_CHANK) + cb, true);
         if (!pNode)
             return nullptr;
 
@@ -472,6 +444,11 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
         memcpy(pNode->fnName(), fnName, cb_fn_name);
         pNode->cb_short_fn_name_offset = 0xFFFF;
 
+        if (pLogRec->cb_module_name)
+        {
+            pNode->cb_module_name = pLogRec->cb_module_name;
+            memcpy(pNode->fnName() + cb_fn_name, pLogRec->moduleName(), pNode->cb_module_name);
+        }
 
         TRACE_CHANK* pChank = pNode->getFirestChank();
         pChank->len = cb;

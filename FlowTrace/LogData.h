@@ -10,6 +10,7 @@ struct INFO_NODE;
 struct TRACE_NODE;
 struct FLOW_NODE;
 struct ListedNodes;
+struct ADDR_INFO;
 
 extern Archive  gArchive;
 
@@ -122,9 +123,6 @@ struct LOG_NODE
     int getTreeImage();
     FLOW_NODE* getSyncNode();
     APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
-    char* getFnName();
-    int getFnNameSize();
-    bool PendingToResolveAddr(bool bNested = false);
     int getTraceText(char* pBuf, int max_cb_trace);
 };
 
@@ -139,7 +137,8 @@ struct APP_NODE : LOG_NODE
     DWORD lastNN;
     DWORD lost;
     char ip_address[66];
-	int cb_app_name;
+    int cb_app_name;
+    int cb_short_app_name_offset;
     char appName[1];
 };
 
@@ -148,18 +147,11 @@ struct THREAD_NODE : LOG_NODE
     APP_NODE* pAppNode;
     FLOW_NODE* curentFlow;
     TRACE_NODE* latestTrace;
-    int cb_actual_module_name;
-    int cb_short_module_name_offset;
-    int cb_module_name;
     int emptLineColor;
     int tid;
     int threadNN;
     char COLOR_BUF[10];
     int  cb_color_buf;
-    ADDR_INFO *p_addr_info;
-    DWORD cb_addr_info;
-    char modulePath[MAX_PATH + 1];
-    char moduleName[1];
 
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {
@@ -182,6 +174,7 @@ struct INFO_NODE : LOG_NODE
 	WORD log_flags;
     WORD cb_fn_name;
     WORD cb_short_fn_name_offset;
+    WORD cb_module_name;
     union {
         WORD cb_trace;
         WORD cb_java_call_site; // for java we keep here caller class:method
@@ -192,22 +185,37 @@ struct INFO_NODE : LOG_NODE
     bool isEnter() { return log_type == LOG_TYPE_ENTER; }
     bool isTrace() { return log_type == LOG_TYPE_TRACE; }
     char* fnName();
-    char* JavaCallSite() { return fnName() + cb_fn_name; }
+    char* moduleName();
+    int moduleNameLength();
+    char* JavaCallSite() { return fnName() + cb_fn_name + cb_module_name; }
     char* shortFnName();
-    int   callLine();
+    int   callLine(bool resolve);
+
+    //int cb_actual_module_name;
+    //int cb_short_module_name_offset;
+    //
+    //char modulePath[MAX_PATH + 1];
+    //char moduleName[1];
+
 };
 
 struct FLOW_NODE : INFO_NODE
 {
+    friend class AddrInfo;
+
     FLOW_NODE* peer;
     DWORD this_fn;
     DWORD call_site;
     int fn_line;
-    ADDR_INFO *p_func_addr_info;
-    ADDR_INFO *p_call_addr_info;
+private:
+    ADDR_INFO *p_func_info;
+    ADDR_INFO *p_call_info;
+public:
+    ADDR_INFO *getFuncInfo(bool resolve);
+    ADDR_INFO *getCallInfo(bool resolve);
     bool isOpenEnter() { return isEnter() && peer == 0; }
     void addToTree();
-    char* getCallSrc(bool fullPath);
+    char* getCallSrc(bool fullPath, bool resolve);
 };
 
 struct TRACE_CHANK
@@ -220,10 +228,10 @@ struct TRACE_CHANK
 struct TRACE_NODE : INFO_NODE
 {
     BYTE color;
-    TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name); }
+    TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name + cb_module_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
     bool IsInContext();
-    int getCallLine(bool bCallSiteInContext);
+    int getCallLine(bool bCallSiteInContext, bool resolve);
 };
 
 #pragma pack(pop)

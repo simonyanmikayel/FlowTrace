@@ -46,7 +46,7 @@ public:
   CBackTraceView& backTrace() { return m_wndBackTraceView; }
   int GetVertSplitterPosPct() { return m_wndVertSplitter.GetSplitterPosPct(); }
   int GetHorzSplitterPosPct() { return m_wndHorzSplitter.GetSplitterPosPct(); }
-  void ShowBackTrace(LOG_NODE* pNode, LOG_NODE* pUpdatedNode = NULL, DWORD archiveNumber = INFINITE);
+  void ShowBackTrace(LOG_NODE* pNode);
 private:
 
   CSplitterWindow m_wndVertSplitter;

@@ -98,17 +98,22 @@ namespace Helpers
 			int cb = 0;
 			if ((!bShowCallSite || pSelectedNode->isTrace()))
 			{
-				src = pSelectedNode->getFnName();
-				cb = pSelectedNode->getFnNameSize();
-				line = ((INFO_NODE*)pSelectedNode)->callLine();
-				if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
-					line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
+				src = pNode->fnName();
+				cb = pNode->cb_fn_name;
+                if (pSelectedNode->isTrace()) {
+                    line = pNode->call_line;
+                } else if (pSelectedNode->isFlow()) {
+                    FLOW_NODE* flowNode = (FLOW_NODE*)pNode;
+                    line = flowNode->fn_line;
+                }               
+				//if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
+				//	line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
 			}
             else if(pNode->parent && pNode->parent->isFlow())
             {
                 src = pNode->JavaCallSite();
                 cb = pNode->cb_java_call_site;
-                line = ((INFO_NODE*)pSelectedNode)->callLine();
+                line = ((INFO_NODE*)pSelectedNode)->callLine(true);
             }
             if (src && src[0] && cb)
             {
@@ -133,19 +138,18 @@ namespace Helpers
             if (flowNode)
             {
                 ADDR_INFO* p_addr_info = NULL;
-                p_addr_info = pSelectedNode->isTrace() ? flowNode->p_func_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_func_addr_info);
+                p_addr_info = pSelectedNode->isTrace() ? flowNode->getFuncInfo(true) : (bShowCallSite ? flowNode->getCallInfo(true) : flowNode->getFuncInfo(true));
                 if (!p_addr_info)
                 {
-                    gArchive.resolveAddr(flowNode, false);
-                    p_addr_info = pSelectedNode->isTrace() ? flowNode->p_func_addr_info : (bShowCallSite ? flowNode->p_call_addr_info : flowNode->p_func_addr_info);
-                }
+                    p_addr_info = pSelectedNode->isTrace() ? flowNode->getFuncInfo(true) : (bShowCallSite ? flowNode->getCallInfo(true) : flowNode->getFuncInfo(true));
+                }                
                 if (p_addr_info && p_addr_info->line > 0)
                 {
                     src = p_addr_info->src;
                     line = 0;
                     if (pSelectedNode->isTrace())
                     {
-                        line = ((TRACE_NODE*)pSelectedNode)->getCallLine(bCallSiteInContext);
+                        line = ((TRACE_NODE*)pSelectedNode)->getCallLine(bCallSiteInContext, true);
                     }
                     else
                     {

@@ -24,9 +24,6 @@
     <ClInclude Include="AboutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Addr2LineThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Archive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,6 +90,9 @@
     <ClInclude Include="DlgModules.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AddrInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -102,9 +102,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AboutDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Addr2LineThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Archive.cpp">
@@ -168,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgModules.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AddrInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
