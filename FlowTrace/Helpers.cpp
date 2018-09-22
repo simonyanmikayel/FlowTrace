@@ -92,22 +92,53 @@ namespace Helpers
 		char* src = 0;
 		int line = 0;
 		char src2[MAX_PATH + 1];
-		if (IsAndroidLog)
+        char src3[MAX_PATH + 1];
+        if (IsAndroidLog)
 		{
 			INFO_NODE* pNode = (INFO_NODE*)pSelectedNode;
 			int cb = 0;
-			if ((!bShowCallSite || pSelectedNode->isTrace()))
+			if ((!bShowCallSite || pNode->isTrace()))
 			{
-				src = pNode->fnName();
-				cb = pNode->cb_fn_name;
-                if (pSelectedNode->isTrace()) {
-                    line = pNode->call_line;
-                } else if (pSelectedNode->isFlow()) {
-                    FLOW_NODE* flowNode = (FLOW_NODE*)pNode;
-                    line = flowNode->fn_line;
-                }               
-				//if (line <= 0 && pSelectedNode->isFlow() && ((FLOW_NODE*)pSelectedNode)->peer)
-				//	line = (((FLOW_NODE*)pSelectedNode)->peer)->fn_line;
+                if (pNode->isTrace() && (LOG_FLAG_EXCEPTION & pNode->log_flags)) 
+                {
+                    TRACE_CHANK* pTraceChank = ((TRACE_NODE*)pNode)->getFirestChank();
+                    cb = min(pTraceChank->len, MAX_PATH);
+                    strncpy_s(src3, pTraceChank->trace, cb);
+                    src3[cb] = 0;
+                    //at com.example.testapplication.MainActivity$1.onClick(MainActivity.java:34)
+                    char* at = src3;
+                    while (*at == ' ')
+                        at++;
+                    if (strncmp(at, "at ", 3) == 0) 
+                    {
+                        at += 3;
+                        char* ch = strrchr(at, '(');
+                        if (ch)
+                        {
+                            *ch = 0;
+                            ch = strrchr(ch + 1, ':');
+                            if (ch && strrchr(ch, ')'))
+                            {
+                                line = atoi(ch+1);
+                                if (line)
+                                    src = at;
+                            }
+                        }
+                    }
+                }
+
+                if(line == 0 || src ==0) 
+                {
+                    src = pNode->fnName();
+                    cb = pNode->cb_fn_name;
+                    if (pSelectedNode->isTrace()) {
+                        line = pNode->call_line;
+                    }
+                    else if (pSelectedNode->isFlow()) {
+                        FLOW_NODE* flowNode = (FLOW_NODE*)pNode;
+                        line = flowNode->fn_line;
+                    }
+                }
 			}
             else if(pNode->parent && pNode->parent->isFlow())
             {
@@ -115,7 +146,7 @@ namespace Helpers
                 cb = pNode->cb_java_call_site;
                 line = ((INFO_NODE*)pSelectedNode)->callLine(true);
             }
-            if (src && src[0] && cb)
+            if (src && src[0] && cb && line)
             {
                 cb = min(cb, MAX_PATH);
                 strncpy_s(src2, src, cb);
@@ -169,21 +200,19 @@ namespace Helpers
 		char buf[cMax + 1];
 		int cb = 0;
 		INFO_NODE* pInfoNode = (INFO_NODE*)pNode;
-		FLOW_NODE* pFlowNode = pNode->isFlow() ? (FLOW_NODE*)pNode : 0;
+        FLOW_NODE* pFlowNode = pNode->isFlow() ? (FLOW_NODE*)pNode : 0;
 
-		if (pFlowNode) {
-			if (cb < cMax - pFlowNode->cb_fn_name) {
-				memcpy(buf + cb, pFlowNode->fnName(), pFlowNode->cb_fn_name);
-				cb += pFlowNode->cb_fn_name;
-				if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
-			}
-            if (pFlowNode->isJava() && cb < cMax - pFlowNode->cb_java_call_site) {
-                memcpy(buf + cb, pFlowNode->JavaCallSite(), pFlowNode->cb_java_call_site);
-                cb += pFlowNode->cb_java_call_site;
-                if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
-            }
+        if (cb < cMax - pInfoNode->cb_fn_name) {
+            memcpy(buf + cb, pInfoNode->fnName(), pInfoNode->cb_fn_name);
+            cb += pInfoNode->cb_fn_name;
+            if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
         }
-		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "nn: %d\r\n", pInfoNode->nn);
+        if (pInfoNode->isJava() && cb < cMax - pInfoNode->cb_java_call_site) {
+            memcpy(buf + cb, pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
+            cb += pInfoNode->cb_java_call_site;
+            if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
+        }
+        if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "nn: %d\r\n", pInfoNode->nn);
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_type: %d\r\n", pInfoNode->log_type);
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_flags: %d\r\n", pInfoNode->log_flags);
         if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "data_type: %d\r\n", pInfoNode->data_type);
