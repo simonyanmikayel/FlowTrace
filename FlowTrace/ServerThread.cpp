@@ -71,14 +71,14 @@ void ServerThread::Work(LPVOID pWorkParam)
     {
       break;
     }
-    UDP_PACK* pack = (UDP_PACK*)buf;
-    if (cb != pack->data_len + sizeof(UDP_PACK))
+    UDP_PACK_INFO* pack = (UDP_PACK_INFO*)buf;
+    if (cb != pack->data_len + sizeof(UDP_PACK_INFO))
     {
-      stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(UDP_PACK));
+      stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(UDP_PACK_INFO));
     }
 
-    ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(UDP_PACK));
-    cb_read = sizeof(UDP_PACK);
+    ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(UDP_PACK_INFO));
+    cb_read = sizeof(UDP_PACK_INFO);
     while (cb_read < cb)
     {
       ATLASSERT(rec->isValid()); 

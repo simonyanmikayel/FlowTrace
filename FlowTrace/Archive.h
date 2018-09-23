@@ -58,7 +58,7 @@ typedef struct
     int data_len;
     DWORD term_sec;
     DWORD term_msec;
-}UDP_PACK;
+}UDP_PACK_INFO;
 #pragma pack(pop)
 
 struct SNAPSHOT_INFO
