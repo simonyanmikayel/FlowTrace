@@ -10,7 +10,7 @@
 #include "MainFrm.h"
 #include "Settings.h"
 #include "Archive.h"
-#include "ServerThread.h"
+#include "LogReceiver.h"
 #include "DlgSettings.h"
 #include "DlgDetailes.h"
 #include "DlgProgress.h"
@@ -262,7 +262,7 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 void CMainFrame::StartLogging()
 {
     SetTimer(TIMER_DATA_REFRESH, TIMER_DATA_REFRESH_INTERVAL);
-    m_pServerThread = new ServerThread();
+    m_pServerThread = new LogReceiver();
     m_pServerThread->StartWork();
 }
 

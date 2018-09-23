@@ -178,7 +178,7 @@
     <ClInclude Include="DlgProgress.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SearchInfo.h" />
-    <ClInclude Include="ServerThread.h" />
+    <ClInclude Include="LogReceiver.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="DlgSettings.h" />
     <ClInclude Include="DlgSnapshots.h" />
@@ -205,7 +205,7 @@
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="DlgProgress.cpp" />
     <ClCompile Include="SearchInfo.cpp" />
-    <ClCompile Include="ServerThread.cpp" />
+    <ClCompile Include="LogReceiver.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="DlgSettings.cpp" />
     <ClCompile Include="DlgSnapshots.cpp" />

@@ -1,11 +1,11 @@
 #pragma once
 #include "WorkerThread.h"
 
-class ServerThread :
+class LogReceiver :
   public WorkerThread
 {
 public:
-  ServerThread();
+  LogReceiver();
   virtual void Terminate();
   void Work(LPVOID pWorkParam);
 

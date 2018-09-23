@@ -1,10 +1,10 @@
 #include "stdafx.h"
-#include "ServerThread.h"
+#include "LogReceiver.h"
 #include "Archive.h"
 #include "Helpers.h"
 #include "Settings.h"
 
-ServerThread::ServerThread()
+LogReceiver::LogReceiver()
 {
 	m_priority = THREAD_PRIORITY_TIME_CRITICAL;
 
@@ -44,7 +44,7 @@ err:
 }
 
 
-void ServerThread::Terminate()
+void LogReceiver::Terminate()
 {
   SOCKET s0 = s;
   s = INVALID_SOCKET;
@@ -52,7 +52,7 @@ void ServerThread::Terminate()
     closesocket(s0);
 }
 
-void ServerThread::Work(LPVOID pWorkParam)
+void LogReceiver::Work(LPVOID pWorkParam)
 {
   char buf[MAX_RECORD_LEN] = { 0 };
   int slen, cb, cb_read;
