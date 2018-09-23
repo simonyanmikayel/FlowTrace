@@ -5,6 +5,7 @@
 #define MAX_JAVA_FUNC_NAME_LEN 1200
 #define MAX_TRCAE_LEN (1024*2)
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(ROW_LOG_REC))
+#define MAX_NET_BUF 16*1024  //maximum TCP window size in Microsoft Windows 2000 is 17,520 bytes 
 struct ListedNodes;
 
 #ifdef _BUILD_X64
@@ -58,7 +59,7 @@ typedef struct
     int data_len;
     DWORD term_sec;
     DWORD term_msec;
-}UDP_PACK_INFO;
+}NET_PACK_INFO;
 #pragma pack(pop)
 
 struct SNAPSHOT_INFO

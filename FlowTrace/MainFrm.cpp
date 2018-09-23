@@ -22,9 +22,8 @@ HWND       hwndMain;
 WNDPROC oldEditProc;
 LRESULT CALLBACK subEditProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-CMainFrame::CMainFrame()
-    : m_pServerThread(NULL)
-    , m_list(m_view.list())
+CMainFrame::CMainFrame() :
+      m_list(m_view.list())
     , m_tree(m_view.tree())
     , m_backTrace(m_view.backTrace())
 {
@@ -46,8 +45,8 @@ BOOL CMainFrame::OnIdle()
     UIEnable(ID_SEARCH_LAST, searchInfo.total); //  && (searchInfo.cur + 1 != searchInfo.total)
     UIEnable(ID_SEARCH_REFRESH, 1);
     UIEnable(ID_SEARCH_CLEAR, 1);
-    UIEnable(ID_VIEW_PAUSERECORDING, m_pServerThread != NULL);
-    UIEnable(ID_VIEW_STARTRECORDIG, m_pServerThread == NULL);
+    UIEnable(ID_VIEW_PAUSERECORDING, gLogReceiver.working());
+    UIEnable(ID_VIEW_STARTRECORDIG, !gLogReceiver.working());
     UIEnable(ID_EDIT_SELECTALL, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_FIND32798, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_COPY, m_list.HasSelection() || ::GetFocus() == m_tree.m_hWnd);
@@ -243,17 +242,9 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 {
     if (wParam == TIMER_DATA_REFRESH)
     {
-        if (m_pServerThread)
+        if (gLogReceiver.working())
         {
-            if (m_pServerThread->IsWorking())
-            {
-                RefreshLog(false);
-            }
-            else
-            {
-                StopLogging(false);
-                Helpers::ErrMessageBox(TEXT("Recording stoped"));
-            }
+            RefreshLog(false);
         }
     }
     return 0;
@@ -262,17 +253,13 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 void CMainFrame::StartLogging()
 {
     SetTimer(TIMER_DATA_REFRESH, TIMER_DATA_REFRESH_INTERVAL);
-    m_pServerThread = new LogReceiver();
-    m_pServerThread->StartWork();
+    gLogReceiver.start();
 }
 
 void CMainFrame::StopLogging(bool bClearArcive, bool closing)
 {
     KillTimer(TIMER_DATA_REFRESH);
-    if (m_pServerThread)
-        m_pServerThread->StopWork();
-    delete m_pServerThread;
-    m_pServerThread = NULL;
+    gLogReceiver.stop();
     if (bClearArcive)
     {
         gArchive.clearArchive(closing);

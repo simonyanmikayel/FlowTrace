@@ -1,15 +1,52 @@
 #pragma once
 #include "WorkerThread.h"
+#include "Archive.h"
 
-class LogReceiver :
-  public WorkerThread
+class NetThread : public WorkerThread
 {
 public:
-  LogReceiver();
-  virtual void Terminate();
-  void Work(LPVOID pWorkParam);
+    virtual void Terminate();
 
-private:
-  SOCKET s;
+protected:
+    SOCKET s;
 };
 
+class UdpThread : public NetThread
+{
+    virtual void Work(LPVOID pWorkParam);
+    char buf[MAX_RECORD_LEN];
+public:
+    UdpThread();
+};
+
+class TcpListenThread : public NetThread
+{
+    virtual void Work(LPVOID pWorkParam);
+public:
+    TcpListenThread();
+};
+
+class TcpReceiveThread : public NetThread
+{
+    virtual void Work(LPVOID pWorkParam);
+    char buf[MAX_NET_BUF + sizeof(NET_PACK_INFO)];
+public:
+    TcpReceiveThread(SOCKET sclientSocket);
+};
+
+class LogReceiver
+{
+public:
+    LogReceiver();
+    void start();
+    void stop();
+    void add(NetThread* pNetThread);
+    void lock() { EnterCriticalSection(&cs); }
+    void unlock() { LeaveCriticalSection(&cs); }
+    bool working() { return m_working; }
+private:
+    bool m_working;
+    CRITICAL_SECTION cs;
+};
+
+extern LogReceiver gLogReceiver;

@@ -13,8 +13,6 @@
 #define	TIMER_DATA_REFRESH 43
 #define	TIMER_DATA_REFRESH_INTERVAL	500
 
-class LogReceiver;
-
 class CMainFrame :
     public CFrameWindowImpl<CMainFrame>,
     public CUpdateUI<CMainFrame>,
@@ -155,8 +153,6 @@ public:
     void UpdateStatusBar();
     void SyncViews();
 private:
-    LogReceiver * m_pServerThread;
-
     //Search support
     void SearchNavigate(WORD wID);
     CToolBarCtrl m_searchbar;
