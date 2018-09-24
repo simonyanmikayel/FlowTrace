@@ -22,15 +22,18 @@ FLOW_NODE* LOG_NODE::getPeer()
 char* FLOW_NODE::getCallSrc(bool fullPath, bool resolve)
 {
     char* src = "";
-    ADDR_INFO *p_call_addr_info = getCallInfo(resolve);
-    if (p_call_addr_info != 0)
+    if (!isJava()) 
     {
-        src = p_call_addr_info->src;
-        if (!fullPath)
+        ADDR_INFO *p_call_addr_info = getCallInfo(resolve);
+        if (p_call_addr_info != 0)
         {
-            char* name = strrchr(src, '/');
-            if (name)
-                src = name + 1;
+            src = p_call_addr_info->src;
+            if (!fullPath)
+            {
+                char* name = strrchr(src, '/');
+                if (name)
+                    src = name + 1;
+            }
         }
     }
     return src;

@@ -60,11 +60,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
     //}
     else if (iSubItem == BACK_TRACE_SRC)
     {
-        if (pNode->isJava())
-        {
-            //cb = pNode->getTraceText(buf, min(max_trace_text, cbBuf));
-        }
-        else if (pNode->isTrace())
+        if (pNode->isTrace())
         {
             cb = pNode->getTraceText(buf, min(max_trace_text, cbBuf));
         }
