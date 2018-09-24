@@ -99,29 +99,40 @@ namespace Helpers
 			int cb = 0;
 			if ((!bShowCallSite || pNode->isTrace()))
 			{
-                if (pNode->isTrace() && (LOG_FLAG_EXCEPTION & pNode->log_flags)) 
+                if (pNode->isTrace()) // && (LOG_FLAG_EXCEPTION & pNode->log_flags)
                 {
                     TRACE_CHANK* pTraceChank = ((TRACE_NODE*)pNode)->getFirestChank();
                     cb = min(pTraceChank->len, MAX_PATH);
                     strncpy_s(src3, pTraceChank->trace, cb);
                     src3[cb] = 0;
-                    //at com.example.testapplication.MainActivity$1.onClick(MainActivity.java:34)
-                    char* at = src3;
-                    while (*at == ' ')
-                        at++;
-                    if (strncmp(at, "at ", 3) == 0) 
+                    
+                    char* at = strstr(src3, "at ");
+                    if (at == 0)
+                        at = strstr(src3, "<- ");
+                    if (at)
                     {
                         at += 3;
                         char* ch = strrchr(at, '(');
                         if (ch)
                         {
                             *ch = 0;
-                            ch = strrchr(ch + 1, ':');
-                            if (ch && strrchr(ch, ')'))
+                            char* java = ch + 1;
+                            char* colon = strrchr(ch + 1, ':');
+                            if (colon && strrchr(colon, ')'))
                             {
-                                line = atoi(ch+1);
-                                if (line)
-                                    src = at;
+                                *colon = 0;
+                                ch = strstr(java, ".java");
+                                if (ch)
+                                {
+                                    *ch = 0;
+                                    ch = strstr(at, java);
+                                    if (ch)
+                                    {
+                                        line = atoi(colon + 1);
+                                        if (line)
+                                            src = at;
+                                    }
+                                }
                             }
                         }
                     }
