@@ -96,6 +96,7 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
         cb = pack->data_len + sizeof(NET_PACK_INFO);
         cb_read = sizeof(NET_PACK_INFO);
         ROW_LOG_REC* rec = rec = (ROW_LOG_REC*)(buf + cb_read);
+        gLogReceiver.lock();
         while (cb_read < cb)
         {
             ATLASSERT(rec->isValid());
@@ -104,17 +105,16 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
                 packError = true;
                 break;
             }
-            gLogReceiver.lock();
             if (!gArchive.append(rec, NULL))//&si_other
             {
                 packError = true;
                 gLogReceiver.unlock();
                 break;
             }
-            gLogReceiver.unlock();
             cb_read += rec->len;
             rec = (ROW_LOG_REC*)(buf + cb_read);
         }
+        gLogReceiver.unlock();
         if (cb_read != pack->data_len + sizeof(NET_PACK_INFO)) {
             packError = true;
             break;
@@ -255,6 +255,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 
     ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(NET_PACK_INFO));
     cb_read = sizeof(NET_PACK_INFO);
+    gLogReceiver.lock();
     while (cb_read < cb)
     {
       ATLASSERT(rec->isValid()); 
@@ -262,16 +263,14 @@ void UdpThread::Work(LPVOID pWorkParam)
       {
         break;
       }
-      gLogReceiver.lock();
       if (!gArchive.append(rec, &si_other))
       {
-          gLogReceiver.unlock();
           break;
       }
-      gLogReceiver.unlock();
       cb_read += rec->len;
       rec = (ROW_LOG_REC*)(buf + cb_read);
     }
+    gLogReceiver.unlock();
   }
   if (IsWorking())
     Helpers::SysErrMessageBox(TEXT("Udp receive failed\nClear log to restart"));
