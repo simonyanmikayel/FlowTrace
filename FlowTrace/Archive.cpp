@@ -519,64 +519,47 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
     if (!pThreadNode)
         return false;
 
+    bool ignore = false;
     if (rec->log_type != LOG_TYPE_TRACE)
     {
-        //bool isEnterFirst = rec->log_type == LOG_INFO_ENTER_FIRST;
-        //if (isEnterFirst)
-        //    rec->log_type = LOG_TYPE_ENTER;
-        //bool isExitLast = rec->log_type == LOG_INFO_EXIT_LAST;
-        //if (isExitLast)
-        //    rec->log_type = LOG_TYPE_EXIT;
+        FLOW_NODE* lastFlowNode = pThreadNode->curentFlow;
+        if (rec->log_type == LOG_TYPE_ENTER)
+        {
+            if (lastFlowNode &&
+                (lastFlowNode->log_flags & LOG_FLAG_INNER_LOG) &&
+                !(rec->log_flags & LOG_FLAG_INNER_LOG) &&
+                (lastFlowNode->log_type == LOG_TYPE_ENTER) &&
+                lastFlowNode->this_fn == rec->this_fn &&
+                !lastFlowNode->peer)
+            {
+                lastFlowNode->fn_line = rec->fn_line;
+                ignore = true;
+            }
+        }
+        else if (rec->log_type == LOG_TYPE_EXIT)
+        {
+            FLOW_NODE* pLastFlow = NULL;
+            if (lastFlowNode &&
+                lastFlowNode->lastChild &&
+                lastFlowNode->lastChild->isFlow())
+            {
+                pLastFlow = (FLOW_NODE*)lastFlowNode->lastChild;
+            }
+            if (pLastFlow &&
+                pLastFlow->peer &&
+                !(pLastFlow->peer->log_flags & LOG_FLAG_INNER_LOG) &&
+                pLastFlow->peer->this_fn == rec->this_fn)
+                //lastFlowNode->fn_line = rec->fn_line;
+            {
+                ignore = true;
+            }
+        }
+    }
+    if (ignore)
+        return true;
 
-        //FLOW_NODE* lastFlowNode = pThreadNode->curentFlow;
-        //bool added = true;
-        //bool addNewRec = (lastFlowNode == NULL || lastFlowNode->peer); // || lastFlowNode->this_fn != rec->call_site
-        //if (rec->log_type == LOG_EMPTY_METHOD_ENTER_EXIT) {
-        //    if (lastFlowNode == NULL || lastFlowNode->peer)
-        //    {
-        //        rec->log_type = LOG_TYPE_ENTER;
-        //        added = added && addFlow(pThreadNode, rec);
-        //        rec->log_type = LOG_TYPE_EXIT;
-        //        added = added && addFlow(pThreadNode, rec);
-        //    }
-        //}
-        //else if (
-        //    (lastFlowNode == NULL || 
-        //    ( lastFlowNode->peer && isEnterFirst) ||
-        //    (!lastFlowNode->peer && isExitLast) //&& lastFlowNode->this_fn == rec->call_site
-        //    ) 
-        //    &&
-        //    (rec->cb_java_call_site && (isEnterFirst || isExitLast)))
-        //{
-        //    lastFlowNode->this_fn == rec->call_site;
-        //    // add a log according
-        //    char buf[sizeof(ROW_LOG_REC) + MAX_JAVA_FUNC_NAME_LEN];
-        //    ROW_LOG_REC* pNewRec = (ROW_LOG_REC*)buf;
-        //    memcpy(pNewRec, rec, sizeof(ROW_LOG_REC));
-        //    pNewRec->log_type = isEnterFirst ? LOG_TYPE_ENTER : LOG_TYPE_EXIT;
-        //    pNewRec->cb_fn_name = min(rec->cb_java_call_site, MAX_JAVA_FUNC_NAME_LEN);
-        //    memcpy(pNewRec->fnName(), rec->trace(), pNewRec->cb_fn_name);
-        //    pNewRec->cb_java_call_site = 0;
-        //    pNewRec->this_fn = rec->call_site;
-        //    pNewRec->call_site = -1;
-        //    pNewRec->fn_line = rec->call_line;
-        //    pNewRec->call_line = -1;
-
-        //    if (isEnterFirst) {
-        //        added = added && addFlow(pThreadNode, pNewRec);
-        //        added = added && addFlow(pThreadNode, rec);
-        //    }
-        //    else {
-        //        added = added && addFlow(pThreadNode, rec);
-        //        added = added && addFlow(pThreadNode, pNewRec);
-        //    }
-        //}
-        //else
-        //{
-        //    added = added && addFlow(pThreadNode, rec);
-        //}
-        //return added;
-
+    if (rec->log_type != LOG_TYPE_TRACE)
+    {
         return addFlow(pThreadNode, rec);
     }
     else

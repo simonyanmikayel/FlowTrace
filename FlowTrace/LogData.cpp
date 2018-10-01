@@ -85,7 +85,12 @@ int LOG_NODE::getTraceText(char* pBuf, int max_cb_trace)
 
 char* INFO_NODE::fnName()
 { 
-    return ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE)); 
+    char* name = ((char*)(this)) + (isFlow() ? sizeof(FLOW_NODE) : sizeof(TRACE_NODE));
+    if (cb_short_fn_name_offset == 0xFFFF)
+    {
+        normilizeFnName(name);
+    }
+    return name;
 }
 
 char* INFO_NODE::moduleName()
@@ -104,9 +109,8 @@ int INFO_NODE::moduleNameLength()
         return threadNode->pAppNode->cb_app_name;
 }
 
-char* INFO_NODE::shortFnName()
+void INFO_NODE::normilizeFnName(char* name)
 {
-    char* name = fnName();
     if (cb_short_fn_name_offset == 0xFFFF)
     {
         cb_short_fn_name_offset = 0;
@@ -115,6 +119,8 @@ char* INFO_NODE::shortFnName()
             int dot1 = 0, dot2 = 0;
             for (int i = 0; i < cb_fn_name; i++)
             {
+                if (name[i] == '/')
+                    name[i] = '.';
                 if (name[i] == '.')
                 {
                     if (dot1 == dot2)
@@ -128,6 +134,15 @@ char* INFO_NODE::shortFnName()
             if (dot1 < dot2)
                 cb_short_fn_name_offset = dot1 + 1;
         }
+    }
+}
+
+char* INFO_NODE::shortFnName()
+{
+    char* name = fnName();
+    if (cb_short_fn_name_offset == 0xFFFF)
+    {
+        normilizeFnName(name);
     }
     return name + cb_short_fn_name_offset;
 }
@@ -156,7 +171,7 @@ void FLOW_NODE::addToTree()
         {
 			while ((void*)lastFlowNode != (void*)threadNode)
 			{
-				if (lastFlowNode->peer == NULL && lastFlowNode->isEnter() && lastFlowNode->this_fn == this_fn && lastFlowNode->call_site == call_site)
+				if (lastFlowNode->peer == NULL && lastFlowNode->isEnter() && lastFlowNode->this_fn == this_fn)// && lastFlowNode->call_site == call_site)
 				{
 					lastFlowNode->peer = this;
 					peer = lastFlowNode;

@@ -25,6 +25,9 @@ typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 #define LOG_FLAG_NEW_LINE 1
 #define LOG_FLAG_JAVA 2
 #define LOG_FLAG_EXCEPTION 4
+#define LOG_FLAG_RUNNABLE_INIT 8
+#define LOG_FLAG_RUNNABLE_RUN 16
+#define LOG_FLAG_INNER_LOG 32
 
 #pragma pack(push,1)
 enum THREAD_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
@@ -189,6 +192,7 @@ struct INFO_NODE : LOG_NODE
     char* moduleName();
     int moduleNameLength();
     char* JavaCallSite() { return fnName() + cb_fn_name + cb_module_name; }
+    void  normilizeFnName(char* name);
     char* shortFnName();
     int   callLine(bool resolve);
 

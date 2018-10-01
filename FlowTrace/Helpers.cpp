@@ -162,6 +162,12 @@ namespace Helpers
                 cb = min(cb, MAX_PATH);
                 strncpy_s(src2, src, cb);
                 src2[cb] = 0;
+                for (int i = 0; i < cb; i++)
+                {
+                    if (src2[i] == '/')
+                        src2[i] = '.';
+                }
+
                 char* dot = strrchr(src2, '.');
                 if (dot)
                     *dot = 0;
