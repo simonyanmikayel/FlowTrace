@@ -1,4 +1,4 @@
-BUG
+BUGs
 
 TIDO
 1. show elipsed time in tree in case if timr column visible
