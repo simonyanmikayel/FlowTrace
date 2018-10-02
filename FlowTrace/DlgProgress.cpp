@@ -245,9 +245,9 @@ void TaskThread::FileSave(WORD cmd)
                 char* log = pInfoNode->getListText(&cb_trace, LOG_COL);
                 rec->cb_trace = cb_trace;
                 int cb_size = rec->size();
-                bool truncate = cb_size > MAX_RECORD_LEN - 10;
+                bool truncate = cb_size > MAX_RECORD_LEN - 128;
                 if (truncate) {
-                    cb_trace -= (cb_size - MAX_RECORD_LEN + 10);
+                    cb_trace -= (cb_size - MAX_RECORD_LEN + 128);
                     rec->cb_trace = cb_trace;
                 }
                 memcpy(rec->trace(), log, rec->cb_trace + 1);
@@ -384,7 +384,7 @@ void TaskThread::FileImport()
         while (ss && IsWorking())
         {
             count++;
-            if (count == 1712)
+            if (count == 23811)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
 			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-"),
