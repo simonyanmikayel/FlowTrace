@@ -175,6 +175,8 @@ void FLOW_NODE::addToTree()
 				{
 					lastFlowNode->peer = this;
 					peer = lastFlowNode;
+                    if (lastFlowNode->fn_line == 0)
+                        lastFlowNode->fn_line = this->fn_line;
 					if (lastFlowNode->parent != threadNode) {
 						threadNode->curentFlow = (FLOW_NODE*)(lastFlowNode->parent);
 					}

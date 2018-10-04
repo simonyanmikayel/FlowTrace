@@ -526,8 +526,8 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
         if (rec->log_type == LOG_TYPE_ENTER)
         {
             if (lastFlowNode &&
-                (lastFlowNode->log_flags & LOG_FLAG_INNER_LOG) &&
-                !(rec->log_flags & LOG_FLAG_INNER_LOG) &&
+                (lastFlowNode->log_flags & LOG_FLAG_OUTER_LOG) &&
+                !(rec->log_flags & LOG_FLAG_OUTER_LOG) &&
                 (lastFlowNode->log_type == LOG_TYPE_ENTER) &&
                 lastFlowNode->this_fn == rec->this_fn &&
                 !lastFlowNode->peer)
@@ -547,7 +547,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
             }
             if (pLastFlow &&
                 pLastFlow->peer &&
-                !(pLastFlow->peer->log_flags & LOG_FLAG_INNER_LOG) &&
+                !(pLastFlow->peer->log_flags & LOG_FLAG_OUTER_LOG) &&
                 pLastFlow->peer->this_fn == rec->this_fn)
                 //lastFlowNode->fn_line = rec->fn_line;
             {
