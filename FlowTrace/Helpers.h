@@ -26,7 +26,7 @@ namespace Helpers
     void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable = false, MENU_ICON ID_ICON = MENU_ICON_NON);
     void OnLButtonDoun(LOG_NODE* pNode, WPARAM wParam, LPARAM lParam);
 	void UpdateStatusBar();
-	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite, bool bCallSiteInContext = false);
+	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite);
 	bool ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
     char* FindFile(char* szDirName, char* szFileName, bool isFile);

@@ -589,24 +589,19 @@ bool LOG_NODE::CanShowInIDE()
 		return gSettings.CanShowInEclipse();
 }
 
-bool TRACE_NODE::IsInContext()
-{
-    LOG_NODE* pContextNode = getSyncNode();
-    return pContextNode == gSyncronizedNode;        
-}
-
 int TRACE_NODE::getCallLine(bool bCallSiteInContext, bool resolve)
 {
     int line = 0;
     if (bCallSiteInContext)
     {
-        if (IsInContext())
+        LOG_NODE* pContextNode = getSyncNode();
+        bool inContext = pContextNode == gSyncronizedNode;
+        if (inContext)
         {
             line = call_line;
         }
         else
         {
-            LOG_NODE* pContextNode = getSyncNode();
             while (pContextNode && pContextNode->parent != gSyncronizedNode)
                 pContextNode = pContextNode->parent;
             if (pContextNode && pContextNode->isFlow())

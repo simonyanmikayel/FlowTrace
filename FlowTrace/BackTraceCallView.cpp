@@ -335,10 +335,6 @@ LRESULT CBackTraceCallView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lPara
     {
         Helpers::ShowInIDE(m_sel.pNode, false);
     }
-    else if (nRet == ID_SHOW_CALL_IN_CONTEXT)
-    {
-        Helpers::ShowInIDE(m_sel.pNode, false, true);
-    }    
     else if (nRet == ID_VIEW_NODE_DATA)
     {
         Helpers::ShowNodeDetails(m_sel.pNode);

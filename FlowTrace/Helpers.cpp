@@ -15,9 +15,9 @@ namespace Helpers
         bool bMbuttonPressed = (GetKeyState(VK_MBUTTON) & 0x8000) != 0;
         if (bCtrlPressed || bMbuttonPressed)
         {
-            if (pNode && !pNode->isSynchronized(gSyncronizedNode))
-                gMainFrame->SyncViews();
-            ShowInIDE(pNode, true, true);
+            //if (pNode && !pNode->isSynchronized(gSyncronizedNode))
+            //    gMainFrame->SyncViews();
+            ShowInIDE(pNode, true);
         }
         else if (bAltPressed)
         {
@@ -77,17 +77,10 @@ namespace Helpers
         return true;
 	}
 
-	void ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite, bool bCallSiteInContext)
+	void ShowInIDE(LOG_NODE* pSelectedNode, bool bShowCallSite)
 	{
 		if (!pSelectedNode || !pSelectedNode->CanShowInIDE() || !pSelectedNode->isInfo())
 			return;
-        if (bCallSiteInContext && pSelectedNode->isFlow())
-        {
-            bCallSiteInContext = false; // functions context always paren function
-            bShowCallSite = true;
-        }
-        if (bCallSiteInContext && !pSelectedNode->isSynchronized(gSyncronizedNode))
-            return;
         bool IsAndroidLog = pSelectedNode->isJava();
 		char* src = 0;
 		int line = 0;
@@ -182,7 +175,7 @@ namespace Helpers
 		}
 		else
 		{
-            FLOW_NODE* flowNode = bCallSiteInContext ? gSyncronizedNode : pSelectedNode->getSyncNode();
+            FLOW_NODE* flowNode = pSelectedNode->getSyncNode();
             if (flowNode)
             {
                 ADDR_INFO* p_addr_info = NULL;
@@ -197,7 +190,7 @@ namespace Helpers
                     line = 0;
                     if (pSelectedNode->isTrace())
                     {
-                        line = ((TRACE_NODE*)pSelectedNode)->getCallLine(bCallSiteInContext, true);
+                        line = ((TRACE_NODE*)pSelectedNode)->call_line;
                     }
                     else
                     {
@@ -493,11 +486,8 @@ namespace Helpers
         disable = (pNode == NULL || !pNode->isInfo());
         AddMenu(hMenu, cMenu, ID_SYNC_VIEWES, _T("Synchronize views\tTab"), disable, MENU_ICON_SYNC);
 
-        disable = (pNode == NULL || !pNode->CanShowInIDE() || (pNode->isTrace() && !pNode->isSynchronized(gSyncronizedNode)));
-        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_CONTEXT, _T("Show Call line in context\tCtrl+Click, Middle Click"), disable, MENU_ICON_CALL_IN_ECLIPSE);
-
         disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo());
-        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_FUNCTION, _T("Show Call line in function"), disable);
+        AddMenu(hMenu, cMenu, ID_SHOW_CALL_IN_FUNCTION, _T("Show Call Line\tCtrl+Click"), disable);
 
         disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo() || pNode->isTrace());
         AddMenu(hMenu, cMenu, ID_SHOW_FUNCTION, _T("Show Function\tAlt+Click"), disable, MENU_ICON_FUNC_IN_ECLIPSE);

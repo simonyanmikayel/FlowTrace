@@ -150,10 +150,6 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         {
             Helpers::ShowInIDE(pNode, false);
         }
-        else if (nRet == ID_SHOW_CALL_IN_CONTEXT)
-        {
-            Helpers::ShowInIDE(pNode, false, true);
-        }
         else if (nRet == ID_VIEW_NODE_DATA)
         {
             Helpers::ShowNodeDetails(pNode);
