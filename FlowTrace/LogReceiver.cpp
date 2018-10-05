@@ -159,7 +159,7 @@ TcpListenThread::TcpListenThread()
     // Setup the TCP listening socket
     iResult = bind(s, result->ai_addr, (int)result->ai_addrlen);
     if (iResult == SOCKET_ERROR) {
-        Helpers::ErrMessageBox(TEXT("bind failed with error: %ld"), WSAGetLastError());
+        Helpers::ErrMessageBox(TEXT("TCT socket bind failed with error: %ld"), WSAGetLastError());
         goto err;
     }
 
@@ -174,8 +174,10 @@ err:
 
 void TcpListenThread::Work(LPVOID pWorkParam)
 {
+    if (s == INVALID_SOCKET)
+        return;
     if (listen(s, SOMAXCONN) == SOCKET_ERROR) {
-        Helpers::ErrMessageBox(TEXT("listen failed with error: %d\n Clear log to restart"), WSAGetLastError());
+        Helpers::ErrMessageBox(TEXT("listen failed with error: %d\nClear log to restart"), WSAGetLastError());
         Terminate();
         return;
     }
@@ -187,7 +189,7 @@ void TcpListenThread::Work(LPVOID pWorkParam)
         if (clientSocket == INVALID_SOCKET) {
             int err = WSAGetLastError();
             if (gLogReceiver.working())
-                Helpers::ErrMessageBox(TEXT("accept failed with error: %d\n Restart application"), WSAGetLastError());
+                Helpers::ErrMessageBox(TEXT("accept failed with error: %d\nClear log to restart"), WSAGetLastError());
             Terminate();
             return;
         }
@@ -203,14 +205,14 @@ UdpThread::UdpThread()
   //Create a socket
   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
   {
-    Helpers::SysErrMessageBox(TEXT("Can not create socket"));
+    Helpers::SysErrMessageBox(TEXT("Can not create socket\nClear log to restart"));
     goto err;
   }
 
   int opt = 1;
   if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt)) < 0)
   {
-    Helpers::SysErrMessageBox(TEXT("setsockopt for SOL_SOCKET failed\n"));
+    Helpers::SysErrMessageBox(TEXT("setsockopt for SOL_SOCKET failed\nClear log to restart"));
     goto err;
   }
 
@@ -223,7 +225,7 @@ UdpThread::UdpThread()
   //Bind
   if (bind(s, (struct sockaddr *)&server, sizeof(server)) == SOCKET_ERROR)
   {
-    Helpers::SysErrMessageBox(TEXT("Bind failed : %d"));
+    Helpers::SysErrMessageBox(TEXT("UDP socket bind failed\nClear log to restart"));
     goto err;
   }
   return;
