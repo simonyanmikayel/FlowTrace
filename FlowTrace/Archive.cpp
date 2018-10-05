@@ -549,7 +549,6 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
                 pLastFlow->peer &&
                 !(pLastFlow->peer->log_flags & LOG_FLAG_OUTER_LOG) &&
                 pLastFlow->peer->this_fn == rec->this_fn)
-                //lastFlowNode->fn_line = rec->fn_line;
             {
                 ignore = true;
             }
