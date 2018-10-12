@@ -269,3 +269,5 @@ Out/Release/*
 !Out/Release/x64
 Out/Release/x64/*
 !Out/Release/x64/FlowTrace.exe
+!Out/Help
+
