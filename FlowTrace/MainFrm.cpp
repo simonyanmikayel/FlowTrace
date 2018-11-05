@@ -708,7 +708,7 @@ void CMainFrame::SearchNavigate(WORD wID)
                                 {
                                     searchInfo.posInCur = -1;
                                     char* log = m_list.getText(searchInfo.curLine, &logLen);
-                                    if (column > 0 && column < logLen)
+                                    if (column > 0 && column <= logLen)
                                     {
                                         char* p = log;
                                         while (NULL != (p = searchInfo.find(p)) && (p - log) < column - (int)searchInfo.cbText)
@@ -754,7 +754,7 @@ void CMainFrame::SearchNavigate(WORD wID)
                             if (i == item)
                             {
                                 char* log = m_list.getText(searchInfo.curLine, &logLen);
-                                if (column > 0 && column < logLen)
+                                if (column > 0 && column <= logLen)
                                 {
                                     char* p = log;
                                     while (NULL != (p = searchInfo.find(p)) && (p - log) < column)

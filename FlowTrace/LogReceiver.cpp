@@ -18,7 +18,7 @@ void LogReceiver::start()
 {
     m_working = true;
     add(new UdpThread());
-    add(new TcpListenThread());
+    //add(new TcpListenThread());
 }
 
 void LogReceiver::stop()
