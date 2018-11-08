@@ -24,6 +24,26 @@ void AddrInfo::Reset()
     lastMuduleInfo = NULL;
 }
 
+void AddModule(CHAR* szModule)
+{
+    if (szModule[0] == 0)
+        return;
+    MuduleInfo* pMuduleInfo = (MuduleInfo*)gArchive.Alloc(sizeof(MuduleInfo), true);
+    size_t cb = strlen(szModule);
+    pMuduleInfo->szModulePath = (char*)gArchive.Alloc((DWORD)cb + 1);
+    memcpy(pMuduleInfo->szModulePath, szModule, cb);
+    pMuduleInfo->szModulePath[cb] = 0;
+    pMuduleInfo->szModuleName = pMuduleInfo->szModulePath;
+    char* slash = strrchr(pMuduleInfo->szModuleName, '\\');
+    if (!slash)
+        slash = strrchr(pMuduleInfo->szModuleName, '/');
+    if (slash)
+        pMuduleInfo->szModuleName = slash + 1;
+
+    pMuduleInfo->pPrev = lastMuduleInfo;
+    lastMuduleInfo = pMuduleInfo;
+}
+
 int CreateModuleList()
 {
     Initialized = true;
@@ -35,23 +55,15 @@ int CreateModuleList()
     while (newLine)
     {
         *newLine = 0;
-        size_t cb = strlen(szModules);
-        MuduleInfo* pMuduleInfo = (MuduleInfo*)gArchive.Alloc(sizeof(MuduleInfo), true);
-        pMuduleInfo->szModulePath = (char*)gArchive.Alloc((DWORD)cb + 1);
-        memcpy(pMuduleInfo->szModulePath, szModules, cb);
-        pMuduleInfo->szModulePath[cb] = 0;
-        pMuduleInfo->szModuleName = pMuduleInfo->szModulePath;
-        char* slash = strrchr(pMuduleInfo->szModuleName, '\\');
-        if (!slash)
-            slash = strrchr(pMuduleInfo->szModuleName, '/');
-        if (slash)
-            pMuduleInfo->szModuleName = slash + 1;
 
-        pMuduleInfo->pPrev = lastMuduleInfo;
-        lastMuduleInfo = pMuduleInfo;
+        AddModule(szModules);
 
         szModules = newLine + 1;
         newLine = strchr(szModules, '\n');
+    }
+    if (gSettings.GetUsePrefModule())
+    {
+        AddModule(gSettings.GetPrefModulePath());
     }
     return 0;
 }

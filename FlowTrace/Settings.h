@@ -54,6 +54,7 @@ public:
     DECL_PROP(DWORD, ShowAppIp);
     DECL_PROP(DWORD, ShowElapsedTime);
     DECL_PROP(DWORD, ResolveAddr);
+    DECL_PROP(DWORD, UsePrefModule);
     DECL_PROP(DWORD, FullSrcPath);
 
     DECL_PROP(int, ColLineNN);
@@ -81,6 +82,7 @@ public:
     DECL_STR_PROP(CHAR, MapOnWin, MAX_PATH);
 	DECL_STR_PROP(CHAR, AndroidStudio, MAX_PATH);
 	DECL_STR_PROP(CHAR, AndroidProject, MAX_PATH);
+    DECL_STR_PROP(CHAR, PrefModulePath, MAX_PATH);
 
 
 private:

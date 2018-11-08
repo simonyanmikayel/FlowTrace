@@ -48,6 +48,7 @@
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
 #define IDC_CHILD_COUNT                 1008
+#define IDC_CHECK_PREFERED_MODULE       1008
 #define IDC_CHECK_USE_PC_TIME           1009
 #define IDC_CALL_ADDR3                  1009
 #define IDC_FN_CALL_LINE                1009
@@ -82,6 +83,7 @@
 #define IDC_EDIT_MAP_ON_WIN             1202
 #define IDC_EDIT1                       1202
 #define IDC_EIDT_INFO                   1202
+#define IDC_EDIT_PREFERED_MODULE        1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
 #define IDC_STATIC_MODULES              1203
 #define IDC_STATIC_MODUL_LST            1203

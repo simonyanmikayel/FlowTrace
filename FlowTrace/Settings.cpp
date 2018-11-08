@@ -52,6 +52,7 @@ LPCTSTR STR_APP_REG_VAL_LinuxHome = _T("LinuxHome");
 LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 LPCTSTR STR_APP_REG_VAL_AndroidStudio = _T("AndroidStudio");
 LPCTSTR STR_APP_REG_VAL_AndroidProject = _T("AndroidProject");
+LPCTSTR STR_APP_REG_VAL_PrefModulePath = _T("PrefModulePath");
 LPCTSTR STR_APP_REG_VAL_ExternalCmd = _T("ExternalCmd");
 LPCTSTR STR_APP_REG_VAL_Modules = _T("Modules");
 
@@ -102,6 +103,7 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
   Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
   Read(STR_APP_REG_VAL_AndroidProject, m_AndroidProject, sizeof(m_AndroidProject), "");
+  Read(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath, sizeof(m_PrefModulePath), "");
 
   //Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
   //Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
@@ -392,6 +394,7 @@ void CSettings::SetInfoHiden(DWORD i) { m_InfoHiden = i; Write(STR_APP_REG_VAL_I
 void CSettings::SetShowAppIp(DWORD i) { m_ShowAppIp = i; Write(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp); }
 void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime); }
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
+void CSettings::SetUsePrefModule(DWORD i) { m_UsePrefModule = i;  }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
 void CSettings::SetEclipsePath(const CHAR* EclipsePath) { int c = _countof(m_EclipsePath); _tcsncpy_s(m_EclipsePath, c, EclipsePath, c - 1); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
@@ -400,6 +403,7 @@ void CSettings::SetLinuxHome(const CHAR* LinuxHome) { int c = _countof(m_LinuxHo
 void CSettings::SetMapOnWin(const CHAR* MapOnWin) { int c = _countof(m_MapOnWin); _tcsncpy_s(m_MapOnWin, c, MapOnWin, c - 1); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m_AndroidStudio); _tcsncpy_s(m_AndroidStudio, c, AndroidStudio, c - 1); m_AndroidStudio[c] = 0; Write(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio); }
 void CSettings::SetAndroidProject(const CHAR* AndroidProject) { int c = _countof(m_AndroidProject); _tcsncpy_s(m_AndroidProject, c, AndroidProject, c - 1); m_AndroidProject[c] = 0; Write(STR_APP_REG_VAL_AndroidProject, m_AndroidProject); }
+void CSettings::SetPrefModulePath(const CHAR* PrefModulePath) { int c = _countof(m_PrefModulePath); _tcsncpy_s(m_PrefModulePath, c, PrefModulePath, c - 1); m_PrefModulePath[c] = 0; Write(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath); }
 
 void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 
