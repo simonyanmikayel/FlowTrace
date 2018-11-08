@@ -152,6 +152,7 @@ public:
     HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }
     void UpdateStatusBar();
     void SyncViews();
+    void SetTitle();
 private:
     //Search support
     void SearchNavigate(WORD wID);

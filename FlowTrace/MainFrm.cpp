@@ -182,6 +182,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
     m_view.ShowStackView(!gSettings.GetInfoHiden());
 
+    SetTitle();
+
     return 0;
 }
 
@@ -320,6 +322,13 @@ LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
     return 0;
 }
 
+void CMainFrame::SetTitle()
+{
+    CHAR pBuf[256];
+    _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%d - %s"), gSettings.GetUdpPort(), TEXT("FlowTrace"));
+    SetWindowText(pBuf);
+}
+
 LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     DWORD udpPort = gSettings.GetUdpPort();
@@ -330,6 +339,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
         {
             StopLogging(false);
             StartLogging();
+            SetTitle();
         }
         m_view.ApplySettings(true);
     }
