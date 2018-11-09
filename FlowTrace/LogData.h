@@ -121,7 +121,8 @@ struct LOG_NODE
     LONG getTimeSec();
     LONG getTimeMSec();
     int   getPid();
-	int   getThreadNN();
+    int   getTid();
+    int   getThreadNN();
     CHAR* getTreeText(int* cBuf = NULL, bool extened = true);
     CHAR* getListText(int* cBuf, LIST_COL col, int iItem = 0);
     int getTreeImage();

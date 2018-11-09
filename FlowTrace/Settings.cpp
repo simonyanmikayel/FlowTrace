@@ -30,6 +30,7 @@ LPCTSTR STR_APP_REG_VAL_ColLineNN = _T("ColLineNN");
 LPCTSTR STR_APP_REG_VAL_ColNN = _T("ColNN");
 LPCTSTR STR_APP_REG_VAL_ColApp = _T("ColApp");
 LPCTSTR STR_APP_REG_VAL_ColPID = _T("ColPID");
+LPCTSTR STR_APP_REG_VAL_ColTID = _T("ColTID");
 LPCTSTR STR_APP_REG_VAL_ColThreadNN = _T("ColThreadNN");
 LPCTSTR STR_APP_REG_VAL_ShowChildCount = _T("ShowChildCount");
 LPCTSTR STR_APP_REG_VAL_ColFunc = _T("ColFunc");
@@ -83,12 +84,14 @@ CRegKeyExt(STR_APP_REG_KEY)
   Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
   Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
   Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
+  m_UsePrefModule = FALSE;
   Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
 
   Read(STR_APP_REG_VAL_ColLineNN, m_ColLineNN);
   Read(STR_APP_REG_VAL_ColNN, m_ColNN);
   Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
   Read(STR_APP_REG_VAL_ColPID, m_ColPID);
+  Read(STR_APP_REG_VAL_ColTID, m_ColTID);
   Read(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN);
   Read(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount);
   Read(STR_APP_REG_VAL_ColFunc, m_ColFunc, 1);
@@ -372,7 +375,8 @@ void CSettings::SetStackSplitterPos(int i) { m_StackSplitterPos = i;  Write(STR_
 void CSettings::SetColLineNN(int i){ m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }
 void CSettings::SetColApp(int i){ m_ColApp = i; Write(STR_APP_REG_VAL_ColApp, m_ColApp); }
-void CSettings::SetColPID(int i){ m_ColPID = i; Write(STR_APP_REG_VAL_ColPID, m_ColPID); }
+void CSettings::SetColPID(int i) { m_ColPID = i; Write(STR_APP_REG_VAL_ColPID, m_ColPID); }
+void CSettings::SetColTID(int i) { m_ColTID = i; Write(STR_APP_REG_VAL_ColTID, m_ColTID); }
 void CSettings::SetColThreadNN(int i) { m_ColThreadNN = i; Write(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN); }
 void CSettings::SetColFunc(int i){ m_ColFunc = i; Write(STR_APP_REG_VAL_ColFunc, m_ColFunc); }
 void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine, m_ColLine); }

@@ -274,11 +274,19 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         {
             cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%s)"), This->ip_address);
         }
+        if (gSettings.GetColPID())
+        {
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), This->pid);
+        }
     }
     else if (isThread())
     {
-		if (gSettings.GetColPID())
-			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
+        if (gSettings.GetColPID() && gSettings.GetColTID())
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
+        else if (gSettings.GetColPID())
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
+        else if (gSettings.GetColTID())
+			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getTid());
 		else
 			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
         if (gSettings.GetShowChildCount())
@@ -373,8 +381,12 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == THREAD_COL)
     {
-		if (gSettings.GetColPID())
-			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d]"), getThreadNN(), getPid());
+        if (gSettings.GetColPID() && gSettings.GetColTID())
+            cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
+        else if (gSettings.GetColPID())
+            cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d]"), getThreadNN(), getPid());
+        else if (gSettings.GetColTID())
+            cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d]"), getThreadNN(), getTid());
 		else
 			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d]"), getThreadNN());
 	}
@@ -479,6 +491,10 @@ LONG LOG_NODE::getTimeMSec()
     return isInfo() ? (((INFO_NODE*)this)->msec) : 0LL;
 }
 int LOG_NODE::getPid()
+{
+    return  isThread() ? ((THREAD_NODE*)this)->pAppNode->pid : (isInfo() ? threadNode->pAppNode->pid : 0);
+}
+int LOG_NODE::getTid()
 { 
 	return  isThread() ? ((THREAD_NODE*)this)->tid : (isInfo() ? threadNode->tid : 0);
 }
