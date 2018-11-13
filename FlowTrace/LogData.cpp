@@ -300,6 +300,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         char* name = This->shortFnName();
         memcpy(pBuf + cb, name, This->cb_fn_name - This->cb_short_fn_name_offset);
         cb += This->cb_fn_name - This->cb_short_fn_name_offset;
+        pBuf[cb] = 0;
         if (extened)
         {
             if (gSettings.GetColNN() && NN)
@@ -312,21 +313,23 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
                 _int64 msec2 = (This->getPeer())->getTimeMSec();
                 cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%lldms)"), (sec2 - sec1) * 1000 + (msec2 - msec1));
             }
-        }
-        if (gSettings.GetColCallAddr())
-        {
-            DWORD p = This->call_site;
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%X)"), p);
-        }
-        if (gSettings.GetFnCallLine())
-        {
-            ADDR_INFO *p_call_addr_info = This->getCallInfo(false);
-            if (p_call_addr_info != 0)
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), p_call_addr_info->line);
+            if (gSettings.GetColCallAddr())
+            {
+                DWORD p = This->call_site;
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%X)"), p);
+            }
+            if (gSettings.GetFnCallLine())
+            {
+                ADDR_INFO *p_call_addr_info = This->getCallInfo(false);
+                if (p_call_addr_info != 0)
+                    cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%d)"), p_call_addr_info->line);
+            }
+            if (gSettings.GetShowChildCount())
+            {
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
+            }
         }
         pBuf[cb] = 0;
-        if (gSettings.GetShowChildCount())
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
     }
     else
     {
