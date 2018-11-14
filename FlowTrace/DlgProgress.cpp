@@ -238,7 +238,12 @@ void TaskThread::FileSave(WORD cmd)
                 memcpy(rec->moduleName(), pInfoNode->moduleName(), rec->cb_module_name);
             memcpy(rec->fnName(), pInfoNode->fnName(), rec->cb_fn_name);
 
-            if (rec->cb_trace)
+            if (pInfoNode->cb_java_call_site && (pInfoNode->log_flags & LOG_FLAG_JAVA))
+            {
+                rec->cb_java_call_site = pInfoNode->cb_java_call_site;
+                memcpy(rec->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
+            }
+            else if (rec->cb_trace)
             {
                 TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
                 int cb_trace;
