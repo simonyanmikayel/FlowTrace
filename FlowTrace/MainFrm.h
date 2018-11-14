@@ -161,6 +161,7 @@ private:
     CEdit             m_searchResult;
     CComboBox           m_searchbox;
     CEdit               m_searchedit;
+    HICON            m_lostIcon;
 
     void StartLogging();
     void ClearLog(bool bRestart);

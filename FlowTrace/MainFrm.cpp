@@ -60,7 +60,7 @@ BOOL CMainFrame::OnIdle()
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     hwndMain = m_hWnd;
-
+    m_lostIcon = LoadIconA(NULL, MAKEINTRESOURCE(32515));
     // create command bar window
     HWND hWndCmdBar = m_CmdBar.Create(m_hWnd, rcDefault, NULL, ATL_SIMPLE_CMDBAR_PANE_STYLE);
     // attach menu
@@ -836,6 +836,7 @@ void CMainFrame::SearchNavigate(WORD wID)
 void CMainFrame::UpdateStatusBar()
 {
     static CHAR pBuf[1024];
+    static DWORD prev_lost = 0;
 
 #ifdef _STATUS_BAR_PARTS    
     _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("Log: %s"), Helpers::str_format_int_grouped(m_tree.GetRecCount()));
@@ -848,12 +849,22 @@ void CMainFrame::UpdateStatusBar()
     ::SendMessage(m_hWndStatusBar, SB_SETTEXT, 3, (LPARAM)pBuf);
 #else
     int cb = 0;
-	if (gArchive.getLost())
-		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), gArchive.getLost());
+    DWORD lost = gArchive.getLost();
+	if (lost)
+		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), lost);
 	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %s mb"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory()/1000000)));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Line: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));
     ::PostMessage(m_hWndStatusBar, SB_SETTEXT, 0, (LPARAM)pBuf);
+
+    if (lost != prev_lost)
+    {
+        if (lost && !prev_lost)
+            ::PostMessage(m_hWndStatusBar, SB_SETICON, 0, (LPARAM)m_lostIcon);
+        else if (!lost)
+            ::PostMessage(m_hWndStatusBar, SB_SETICON, 0, (LPARAM)0);
+        prev_lost = lost;
+    }
 #endif
 }
