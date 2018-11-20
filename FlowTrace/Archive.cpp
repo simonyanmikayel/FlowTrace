@@ -165,7 +165,7 @@ THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, ROW_LOG_REC* p)
     return curThread;
 }
 
-LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
+LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark)
 {
     int cb_fn_name = pLogRec->cb_fn_name;
     char* fnName = pLogRec->fnName();
@@ -191,6 +191,10 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec)
     pNode->call_site = pLogRec->call_site;
     pNode->fn_line = pLogRec->fn_line;
     pNode->call_line = pLogRec->call_line;
+    if (bookmark) {
+        bookmarkNumber++;
+        pNode->bookmark = bookmark;
+    }
 
     pNode->cb_fn_name = cb_fn_name;
     memcpy(pNode->fnName(), fnName, cb_fn_name);
@@ -319,7 +323,7 @@ static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, WO
     return bRet;
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, int bookmark)
 {
     if (prcessed >= pLogRec->cb_trace)
         return NULL;
@@ -439,6 +443,10 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 		pNode->sec = pLogRec->sec;
 		pNode->msec = pLogRec->msec;
 		pNode->call_line = pLogRec->call_line;
+        if (bookmark) {
+            bookmarkNumber++;
+            pNode->bookmark = bookmark;
+        }
 
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
@@ -493,7 +501,7 @@ void Archive::Log(ROW_LOG_REC* rec)
     rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->data);
 }
 
-bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
+bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark)
 {
     if (!rec->isValid())
         return false;
@@ -559,7 +567,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
 
     if (rec->log_type != LOG_TYPE_TRACE)
     {
-        return addFlow(pThreadNode, rec);
+        return addFlow(pThreadNode, rec, bookmark);
     }
     else
     {
@@ -568,7 +576,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport)
         {
             int prcessed0 = prcessed;
             int cb_trace0 = rec->cb_trace;
-            addTrace(pThreadNode, rec, prcessed);
+            addTrace(pThreadNode, rec, prcessed, bookmark);
             if (prcessed0 >= prcessed && cb_trace0 <= rec->cb_trace && prcessed < rec->cb_trace)
             {
                 ATLASSERT(FALSE);

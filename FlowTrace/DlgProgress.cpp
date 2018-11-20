@@ -229,7 +229,7 @@ void TaskThread::FileSave(WORD cmd)
 				rec->fn_line = 0;
 				rec->call_line = p->call_line;
             }
-
+            
             rec->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
             rec->cb_module_name = pInfoNode->cb_module_name;
             rec->cb_fn_name = pInfoNode->cb_fn_name;
@@ -271,11 +271,11 @@ void TaskThread::FileSave(WORD cmd)
 
             rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
 
-            fprintf(m_fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-",
+            fprintf(m_fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-",
                 rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_name, rec->cb_module_name,
 				rec->cb_fn_name, rec->cb_trace, rec->pid, rec->tid,
 				rec->sec, rec->msec, 
-				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line);
+				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, pInfoNode->bookmark);
 
             fwrite(rec->data, rec->cbData() - cbColor, 1, m_fp);
             if (cbColor)
@@ -392,12 +392,13 @@ void TaskThread::FileImport()
             if (count == 23811)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
-			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-"),
+            int bookmark;
+			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-"),
 				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
                 &rec->cb_app_name, &rec->cb_module_name, 
                 &rec->cb_fn_name, &rec->cb_trace, &rec->pid, &rec->tid, &rec->sec, &rec->msec,
-                &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line);
-            ss = (16 == cf);
+                &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line, &bookmark);
+            ss = (17 == cf);
             ss = ss && rec->isValid();
             if (rec->cbData())
                 ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));
@@ -414,7 +415,7 @@ void TaskThread::FileImport()
 
             ss = ss && rec->isValid();
             if (ss)
-                appended = gArchive.append(rec, NULL, true);
+                appended = gArchive.append(rec, NULL, true, bookmark);
             ss = ss && appended;
             if (feof(m_fp))
             {

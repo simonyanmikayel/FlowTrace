@@ -88,7 +88,7 @@ public:
     DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb, bool zero = false) { return (char*)m_pTraceBuf->Alloc(cb, zero); }
-    bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false);
+    bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0);
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     ListedNodes* getListedNodes() { return m_listedNodes; }
@@ -104,8 +104,8 @@ public:
 private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(ROW_LOG_REC* p, APP_NODE* pAppNode);
-    inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec);
-    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed);
+    inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
+    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, int bookmark);
     inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
 
