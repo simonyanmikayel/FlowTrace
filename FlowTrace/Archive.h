@@ -57,8 +57,8 @@ typedef struct
 typedef struct
 {
     int data_len;
-    DWORD term_sec;
-    DWORD term_msec;
+    DWORD pack_nn;
+    DWORD retry_nn;
 }NET_PACK_INFO;
 #pragma pack(pop)
 
@@ -88,7 +88,7 @@ public:
     DWORD getCount();
     LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb, bool zero = false) { return (char*)m_pTraceBuf->Alloc(cb, zero); }
-    bool append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0);
+    int append(ROW_LOG_REC* rec, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     ListedNodes* getListedNodes() { return m_listedNodes; }

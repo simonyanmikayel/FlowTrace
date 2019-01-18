@@ -3,6 +3,7 @@
 #include "Helpers.h"
 #include "Settings.h"
 
+//#define USE_TCP
 LogReceiver gLogReceiver;
 
 static NetThread* pNetThreads[1024];
@@ -18,7 +19,9 @@ void LogReceiver::start()
 {
     m_working = true;
     add(new UdpThread());
-    //add(new TcpListenThread());
+#ifdef USE_TCP
+    add(new TcpListenThread());
+#endif
 }
 
 void LogReceiver::stop()
@@ -249,11 +252,19 @@ void UdpThread::Work(LPVOID pWorkParam)
     {
       break;
     }
-    NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
+	NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
     if (cb != pack->data_len + sizeof(NET_PACK_INFO))
     {
       stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(NET_PACK_INFO));
+	  continue;
     }
+	if (pack->pack_nn) 
+	{
+		if ((sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other))) < 0)
+		{
+			break;
+		}
+	}
 
     ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(NET_PACK_INFO));
     cb_read = sizeof(NET_PACK_INFO);
@@ -265,7 +276,9 @@ void UdpThread::Work(LPVOID pWorkParam)
       {
         break;
       }
-      if (!gArchive.append(rec, &si_other))
+	  int rez = gArchive.append(rec, &si_other, false, 0, pack);
+	  pack->pack_nn = 0; //turn of package checking
+	  if (rez == 0 || rez == 2)
       {
           break;
       }

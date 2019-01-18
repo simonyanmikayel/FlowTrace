@@ -26,7 +26,8 @@ void Archive::onPaused()
 	APP_NODE* pApp = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (pApp)
 	{
-		pApp->lastNN = INFINITE;
+		pApp->lastRecNN = INFINITE;
+		pApp->lastPackNN = INFINITE;
 		pApp = (APP_NODE*)pApp->prevSibling;
 	}
 }
@@ -69,7 +70,9 @@ APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
     pNode->data_type = APP_DATA_TYPE;
     pNode->pid = p->pid;
     pNode->cb_app_name = p->cb_app_name;
-    pNode->lastNN = p->nn;
+	pNode->lastRecNN = INFINITE;
+	pNode->lastPackNN = INFINITE;
+	
 
     memcpy(pNode->appName, p->appName(), p->cb_app_name);
     pNode->appName[pNode->cb_app_name] = 0;
@@ -501,31 +504,61 @@ void Archive::Log(ROW_LOG_REC* rec)
     rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->data);
 }
 
-bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark)
+int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
-    if (!rec->isValid())
-        return false;
+	//Log(rec);
+#ifdef _LOSE_TEST
+	static DWORD archiveNN = INFINITE;
+	static DWORD lstNN = INFINITE;
+	static DWORD lstApp = INFINITE;
+	if (archiveNN != archiveNumber || lstApp != rec->tid)
+	{
+		lstNN = INFINITE;
+		lstApp = rec->tid;
+		m_lost = 0;
+		archiveNN = archiveNumber;
+	}
+	if (lstNN != rec->nn && lstNN != INFINITE && !fromImport)
+	{
+		int lost = (rec->nn - lstNN > 0) ? rec->nn - lstNN : lstNN - rec->nn;
+		m_lost += lost;
+		Helpers::UpdateStatusBar();
+	}
+	lstNN = rec->nn + 1;
+	return true;
+#endif
 
-    //Log(rec);
+	if (!rec->isValid())
+        return 0;
+
 
     APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
-        return false;
+        return 0;
+
+	if (pack && pack->pack_nn)
+	{
+		if (pAppNode->lastPackNN == pack->pack_nn)
+		{
+			return 2;
+		}
+		pAppNode->lastPackNN == pack->pack_nn;
+	}
+
     //if (rec->nn == 110586)
     //    int iiii = 0;
-    DWORD& lastNN = pAppNode->lastNN;
-    if (lastNN != rec->nn && lastNN != INFINITE && !fromImport)
+    if (pAppNode->lastRecNN != rec->nn && pAppNode->lastRecNN != INFINITE && !fromImport)
     {
-		int lost = (rec->nn - lastNN > 0) ? rec->nn - lastNN : lastNN - rec->nn;
+		int lost = (rec->nn > pAppNode->lastRecNN) ? rec->nn - pAppNode->lastRecNN : pAppNode->lastRecNN - rec->nn;
         pAppNode->lost += lost;
 		m_lost += lost;
 		Helpers::UpdateStatusBar();
 	}
-	lastNN = rec->nn + 1;
+	pAppNode->lastRecNN = rec->nn + 1;
 
     THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)
-        return false;
+        return 1;
 
     bool ignore = false;
     if (rec->log_type != LOG_TYPE_TRACE)
@@ -563,11 +596,12 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport,
         }
     }
     if (ignore)
-        return true;
+        return 1;
 
     if (rec->log_type != LOG_TYPE_TRACE)
     {
-        return addFlow(pThreadNode, rec, bookmark);
+        bool ret = addFlow(pThreadNode, rec, bookmark);
+		return ret ? 1 : 0;
     }
     else
     {
@@ -585,7 +619,7 @@ bool Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport,
         }
     }
 
-    return true;
+    return 1;
 }
 
 DWORD Archive::getCount()

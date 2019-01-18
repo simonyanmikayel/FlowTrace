@@ -17,7 +17,8 @@ void WorkerThread::StopWork()
   }
     if (m_hThread)
     {
-        while (m_hThread != 0 && WAIT_TIMEOUT == WaitForSingleObject(m_hThread, 0))
+		int rettryCount = 0;
+		while (rettryCount < 1000 && m_hThread != 0 && WAIT_TIMEOUT == WaitForSingleObject(m_hThread, 0))
         {
             //MSG msg;
             //while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -25,6 +26,7 @@ void WorkerThread::StopWork()
             //    TranslateMessage(&msg);
             //    DispatchMessage(&msg);
             //}
+			//rettryCount++;
             Sleep(0); // alow Worker thread complite its waorks
         }
     }

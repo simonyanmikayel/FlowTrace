@@ -139,8 +139,9 @@ struct APP_NODE : LOG_NODE
 {
     int pid;
 	int threadCount;
-    DWORD lastNN;
-    DWORD lost;
+	DWORD lastRecNN;
+	DWORD lastPackNN;
+	DWORD lost;
     char ip_address[66];
     int cb_app_name;
     int cb_short_app_name_offset;
