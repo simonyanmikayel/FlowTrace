@@ -274,6 +274,7 @@ void UdpThread::Work(LPVOID pWorkParam)
       ATLASSERT(rec->isValid()); 
       if (rec->len > (cb - cb_read) || !rec->isValid())
       {
+		  //Terminate();
         break;
       }
 	  int rez = gArchive.append(rec, &si_other, false, 0, pack);
@@ -287,6 +288,7 @@ void UdpThread::Work(LPVOID pWorkParam)
     }
     gLogReceiver.unlock();
   }
+
   if (IsWorking())
     Helpers::SysErrMessageBox(TEXT("Udp receive failed\nClear log to restart"));
 

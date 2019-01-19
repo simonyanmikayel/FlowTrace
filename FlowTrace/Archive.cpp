@@ -542,7 +542,7 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 		{
 			return 2;
 		}
-		pAppNode->lastPackNN == pack->pack_nn;
+		pAppNode->lastPackNN = pack->pack_nn;
 	}
 
     //if (rec->nn == 110586)
