@@ -271,7 +271,7 @@ void TaskThread::FileSave(WORD cmd)
 
             rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
 
-            fprintf(m_fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-",
+            fprintf(m_fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-",
                 rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_name, rec->cb_module_name,
 				rec->cb_fn_name, rec->cb_trace, rec->pid, rec->tid,
 				rec->sec, rec->msec, 
@@ -393,7 +393,7 @@ void TaskThread::FileImport()
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
             int bookmark;
-			int cf = fscanf_s(m_fp, TEXT("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d-"),
+			int cf = fscanf_s(m_fp, TEXT("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-"),
 				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
                 &rec->cb_app_name, &rec->cb_module_name, 
                 &rec->cb_fn_name, &rec->cb_trace, &rec->pid, &rec->tid, &rec->sec, &rec->msec,
