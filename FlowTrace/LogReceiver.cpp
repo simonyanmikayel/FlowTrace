@@ -3,7 +3,6 @@
 #include "Helpers.h"
 #include "Settings.h"
 
-//#define USE_TCP
 LogReceiver gLogReceiver;
 
 static NetThread* pNetThreads[1024];
@@ -44,6 +43,7 @@ void LogReceiver::add(NetThread* pNetThread)
     {
         pNetThreads[cNetThreads++] = pNetThread;
         pNetThread->StartWork();
+		pNetThread->SetThreadPriority(THREAD_PRIORITY_HIGHEST);
     }
     else
     {
@@ -60,6 +60,7 @@ void NetThread::Terminate()
         closesocket(s0);
 }
 
+#ifdef USE_TCP
 TcpReceiveThread::TcpReceiveThread(SOCKET clientSocket)
 {
     s = clientSocket;
@@ -200,6 +201,7 @@ void TcpListenThread::Work(LPVOID pWorkParam)
         gLogReceiver.add(pTcpReceiveThread);
     }
 }
+#endif //USE_TCP
 
 UdpThread::UdpThread()
 {

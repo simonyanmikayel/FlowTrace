@@ -2,6 +2,8 @@
 #include "WorkerThread.h"
 #include "Archive.h"
 
+//#define USE_TCP
+
 class NetThread : public WorkerThread
 {
 public:
@@ -19,6 +21,8 @@ public:
     UdpThread();
 };
 
+#ifdef USE_TCP
+
 class TcpListenThread : public NetThread
 {
     virtual void Work(LPVOID pWorkParam);
@@ -33,6 +37,8 @@ class TcpReceiveThread : public NetThread
 public:
     TcpReceiveThread(SOCKET sclientSocket);
 };
+
+#endif //USE_TCP
 
 class LogReceiver
 {

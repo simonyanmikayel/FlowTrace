@@ -11,8 +11,7 @@ public:
     virtual void Work(LPVOID pWorkParam) = 0;
     virtual void OnThreadReady();
     virtual void Terminate() = 0;
-protected:
-	int m_priority;
+	void SetThreadPriority(int nPriority);
 private:
     LPVOID m_pWorkParam;
     bool m_bWorking;
