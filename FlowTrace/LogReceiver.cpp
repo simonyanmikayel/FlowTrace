@@ -267,6 +267,8 @@ void UdpThread::Work(LPVOID pWorkParam)
 			break;
 		}
 	}
+	if (pack->data_len == 0)
+		continue;
 
     ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(NET_PACK_INFO));
     cb_read = sizeof(NET_PACK_INFO);
