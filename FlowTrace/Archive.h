@@ -20,7 +20,7 @@ typedef struct
     int len;
     WORD log_type;
     WORD log_flags;
-    int nn;
+    unsigned int nn;
     WORD cb_app_name;
     WORD cb_module_name;
     WORD cb_fn_name;

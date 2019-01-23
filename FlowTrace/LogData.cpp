@@ -360,10 +360,19 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     }
     else if (col == NN_COL)
     {
-        int NN = getNN(); // gArchive.index(this); // getNN();
-        if (NN)
-            cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), NN);
-    }
+		int NN = getNN(); // gArchive.index(this); // getNN();
+#ifdef _NN_TEST
+		int prev_nn = isInfo() ? ((INFO_NODE*)this)->prev_nn : 0;
+		if (NN == prev_nn + 1)
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), NN);
+		else
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d >?"), NN);
+#else
+		if (NN)
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), NN);
+#endif
+		int prev_NN = prevSibling ? prevSibling->getNN() : 0;
+	}
     else if (col == APP_COLL)
     {
         if (isInfo())

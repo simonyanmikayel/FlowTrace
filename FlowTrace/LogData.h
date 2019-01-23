@@ -175,6 +175,9 @@ struct THREAD_NODE : LOG_NODE
 
 struct INFO_NODE : LOG_NODE
 {
+#ifdef _NN_TEST
+	int  prev_nn;
+#endif
     int  nn;
     WORD log_type;
 	WORD log_flags;

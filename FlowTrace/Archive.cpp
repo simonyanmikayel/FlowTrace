@@ -7,6 +7,10 @@
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
 
+#ifdef _NN_TEST
+int  g_prev_nn;
+#endif
+
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
@@ -184,7 +188,10 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
     if (!pNode)
         return nullptr;
 
-    pNode->data_type = FLOW_DATA_TYPE;
+#ifdef _NN_TEST
+	pNode->prev_nn = g_prev_nn;
+#endif
+	pNode->data_type = FLOW_DATA_TYPE;
     pNode->nn = pLogRec->nn;
     pNode->log_type = pLogRec->log_type;
 	pNode->log_flags = pLogRec->log_flags;
@@ -440,7 +447,10 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 
         pNode->data_type = TRACE_DATA_TYPE;
 
-        pNode->nn = pLogRec->nn;
+#ifdef _NN_TEST
+		pNode->prev_nn = g_prev_nn;
+#endif
+		pNode->nn = pLogRec->nn;
         pNode->log_type = pLogRec->log_type;
 		pNode->log_flags = pLogRec->log_flags;
 		pNode->sec = pLogRec->sec;
@@ -549,11 +559,14 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
     //    int iiii = 0;
     if (pAppNode->lastRecNN != rec->nn && pAppNode->lastRecNN != INFINITE && !fromImport)
     {
-		int lost = (rec->nn > pAppNode->lastRecNN) ? rec->nn - pAppNode->lastRecNN : pAppNode->lastRecNN - rec->nn;
+		DWORD lost = (rec->nn > pAppNode->lastRecNN) ? rec->nn - pAppNode->lastRecNN : pAppNode->lastRecNN - rec->nn;
         pAppNode->lost += lost;
 		m_lost += lost;
 		Helpers::UpdateStatusBar();
 	}
+#ifdef _NN_TEST
+	g_prev_nn = pAppNode->lastRecNN - 1;
+#endif
 	pAppNode->lastRecNN = rec->nn + 1;
 
     THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
