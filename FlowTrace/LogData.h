@@ -140,7 +140,7 @@ struct APP_NODE : LOG_NODE
     int pid;
 	int threadCount;
 	DWORD lastRecNN;
-	DWORD lastPackNN;
+	int   lastPackNN;
 	DWORD lost;
     char ip_address[66];
     int cb_app_name;
@@ -177,6 +177,9 @@ struct INFO_NODE : LOG_NODE
 {
 #ifdef _NN_TEST
 	int  prev_nn;
+	int  pack_nn;
+	int  retry_nn;
+	int  buff_nn;
 #endif
     int  nn;
     WORD log_type;

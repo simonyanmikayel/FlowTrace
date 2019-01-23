@@ -57,8 +57,9 @@ typedef struct
 typedef struct
 {
     int data_len;
-    DWORD pack_nn;
-    DWORD retry_nn;
+    int pack_nn;
+	short retry_nn;
+	short buff_nn;
 }NET_PACK_INFO;
 #pragma pack(pop)
 

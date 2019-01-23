@@ -281,9 +281,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 		  //Terminate();
         break;
       }
-	  int rez = gArchive.append(rec, &si_other, false, 0, pack);
-	  pack->pack_nn = 0; //turn of package checking
-	  if (rez == 0 || rez == 2)
+	  if (!gArchive.append(rec, &si_other, false, 0, pack))
       {
           break;
       }

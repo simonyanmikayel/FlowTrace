@@ -9,6 +9,9 @@ DWORD Archive::archiveNumber = 0;
 
 #ifdef _NN_TEST
 int  g_prev_nn;
+int  g_pack_nn;
+int  g_retry_nn;
+int  g_buff_nn;
 #endif
 
 Archive::Archive()
@@ -31,7 +34,7 @@ void Archive::onPaused()
 	while (pApp)
 	{
 		pApp->lastRecNN = INFINITE;
-		pApp->lastPackNN = INFINITE;
+		pApp->lastPackNN = -1;
 		pApp = (APP_NODE*)pApp->prevSibling;
 	}
 }
@@ -75,7 +78,7 @@ APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
     pNode->pid = p->pid;
     pNode->cb_app_name = p->cb_app_name;
 	pNode->lastRecNN = INFINITE;
-	pNode->lastPackNN = INFINITE;
+	pNode->lastPackNN = -1;
 	
 
     memcpy(pNode->appName, p->appName(), p->cb_app_name);
@@ -190,6 +193,9 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
 
 #ifdef _NN_TEST
 	pNode->prev_nn = g_prev_nn;
+	pNode->pack_nn = g_pack_nn;
+	pNode->retry_nn = g_retry_nn;
+	pNode->buff_nn = g_buff_nn;
 #endif
 	pNode->data_type = FLOW_DATA_TYPE;
     pNode->nn = pLogRec->nn;
@@ -449,6 +455,9 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 
 #ifdef _NN_TEST
 		pNode->prev_nn = g_prev_nn;
+		pNode->pack_nn = g_pack_nn;
+		pNode->retry_nn = g_retry_nn;
+		pNode->buff_nn = g_buff_nn;
 #endif
 		pNode->nn = pLogRec->nn;
         pNode->log_type = pLogRec->log_type;
@@ -546,13 +555,14 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
     if (!pAppNode)
         return 0;
 
-	if (pack && pack->pack_nn)
+	if (pack && pack->pack_nn > 0)
 	{
-		if (pAppNode->lastPackNN == pack->pack_nn)
+		if (pack->pack_nn <= pAppNode->lastPackNN)
 		{
-			return 2;
+			return 0;
 		}
 		pAppNode->lastPackNN = pack->pack_nn;
+		pack->pack_nn = -pack->pack_nn; //stop checking package number
 	}
 
     //if (rec->nn == 110586)
@@ -566,6 +576,16 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	}
 #ifdef _NN_TEST
 	g_prev_nn = pAppNode->lastRecNN - 1;
+	if (pack) {
+		g_pack_nn = pack->pack_nn;
+		g_retry_nn = pack->retry_nn;
+		g_buff_nn = pack->buff_nn;
+	}
+	else {
+		g_pack_nn = 0;
+		g_retry_nn = 0;
+		g_buff_nn = 0;
+	}
 #endif
 	pAppNode->lastRecNN = rec->nn + 1;
 
