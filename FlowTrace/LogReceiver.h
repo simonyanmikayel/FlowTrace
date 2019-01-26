@@ -4,6 +4,12 @@
 
 //#define USE_TCP
 
+#ifdef USE_TCP
+#define MAX_NET_BUF 16*1024  //maximum TCP window size in Microsoft Windows 2000 is 17,520 bytes 
+#else
+#define MAX_NET_BUF 16*1024  //max UDP datagam is 65515 Bytes
+#endif
+
 class NetThread : public WorkerThread
 {
 public:
@@ -16,7 +22,7 @@ protected:
 class UdpThread : public NetThread
 {
     virtual void Work(LPVOID pWorkParam);
-    char buf[MAX_RECORD_LEN];
+    char buf[MAX_NET_BUF + sizeof(NET_PACK_INFO)];
 public:
     UdpThread();
 };

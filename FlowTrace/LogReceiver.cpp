@@ -250,7 +250,7 @@ void UdpThread::Work(LPVOID pWorkParam)
   while (true)
   {
     //try to receive data, this is a blocking call
-    if ((cb = recvfrom(s, buf, MAX_RECORD_LEN, 0, (struct sockaddr *) &si_other, &slen)) < 0)
+    if ((cb = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 0)
     {
       break;
     }
