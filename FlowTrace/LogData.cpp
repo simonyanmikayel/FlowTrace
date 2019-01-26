@@ -367,7 +367,7 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
 		int  retry_nn = isInfo() ? ((INFO_NODE*)this)->retry_nn : 0;
 		int  buff_nn = isInfo() ? ((INFO_NODE*)this)->buff_nn : 0;
 		if (NN == prev_nn + 1)
-			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("...%d [prev_nn=%d pack_nn=%d retry_nn=%d buff_nn=%d]"), NN, prev_nn, pack_nn, retry_nn, buff_nn);
+			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("   %d [prev_nn=%d pack_nn=%d retry_nn=%d buff_nn=%d]"), NN, prev_nn, pack_nn, retry_nn, buff_nn);
 		else
 			cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("?> %d [prev_nn=%d pack_nn=%d retry_nn=%d buff_nn=%d]"), NN, prev_nn, pack_nn, retry_nn, buff_nn);
 #else

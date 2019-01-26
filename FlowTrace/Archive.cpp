@@ -575,13 +575,14 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 		Helpers::UpdateStatusBar();
 	}
 #ifdef _NN_TEST
-	g_prev_nn = pAppNode->lastRecNN - 1;
+	g_prev_nn = (pAppNode->lastRecNN != INFINITE) ? (pAppNode->lastRecNN - 1) : (rec->nn - 1);
 	if (pack) {
 		g_pack_nn = pack->pack_nn;
 		g_retry_nn = pack->retry_nn;
-		g_buff_nn = pack->buff_nn;
+		g_buff_nn = pack->buff_nn-1;
 	}
 	else {
+		g_prev_nn = 0;
 		g_pack_nn = 0;
 		g_retry_nn = 0;
 		g_buff_nn = 0;
