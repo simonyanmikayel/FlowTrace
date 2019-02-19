@@ -201,6 +201,7 @@ void TaskThread::FileSave(WORD cmd)
             char szColor[32];
             if (pInfoNode->isFlow())
             {
+				//continue;
                 FLOW_NODE* p = (FLOW_NODE*)pInfoNode;
                 rec->log_type = p->log_type;
 				rec->log_flags = p->log_flags;
@@ -228,6 +229,7 @@ void TaskThread::FileSave(WORD cmd)
                 rec->call_site = 0;
 				rec->fn_line = 0;
 				rec->call_line = p->call_line;
+				rec->cb_trace = p->cb_trace;
             }
             
             rec->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
@@ -237,13 +239,13 @@ void TaskThread::FileSave(WORD cmd)
             if (rec->cb_module_name)
                 memcpy(rec->moduleName(), pInfoNode->moduleName(), rec->cb_module_name);
             memcpy(rec->fnName(), pInfoNode->fnName(), rec->cb_fn_name);
-
+			//gArchive.Log(rec);
             if (pInfoNode->cb_java_call_site && (pInfoNode->log_flags & LOG_FLAG_JAVA))
             {
                 rec->cb_java_call_site = pInfoNode->cb_java_call_site;
                 memcpy(rec->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
             }
-            else if (rec->cb_trace)
+            else //if (rec->cb_trace)
             {
                 TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
                 int cb_trace;

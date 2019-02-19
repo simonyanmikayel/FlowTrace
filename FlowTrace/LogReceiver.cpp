@@ -3,6 +3,8 @@
 #include "Helpers.h"
 #include "Settings.h"
 
+//extern int logcat(int argc, const char** argv);
+
 LogReceiver gLogReceiver;
 
 static NetThread* pNetThreads[1024];
@@ -16,6 +18,7 @@ LogReceiver::LogReceiver()
 
 void LogReceiver::start()
 {
+	//logcat(0, 0);
     m_working = true;
     add(new UdpThread());
 #ifdef USE_TCP
