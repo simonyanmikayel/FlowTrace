@@ -14,44 +14,77 @@ const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 #endif
 
 #pragma pack(push,4)
-typedef struct
+struct LOG_REC_BASE
 {
-    int len;
-    WORD log_type;
-    WORD log_flags;
-    unsigned int nn;
-    WORD cb_app_name;
-    WORD cb_module_name;
-    WORD cb_fn_name;
-    union {
-        WORD cb_trace;
-        WORD cb_java_call_site; // for java we keep here caller class:method
-    };
-    int tid;
-    int pid;
-    DWORD sec;
-    DWORD msec;
-    DWORD this_fn;
-    DWORD call_site;
-    int fn_line;
-    int call_line;
-    char data[1];
+	int len;
+	WORD log_type;
+	WORD log_flags;
+	unsigned int nn;
+	WORD cb_app_name;
+	WORD cb_module_name;
+	WORD cb_fn_name;
+	union {
+		WORD cb_trace;
+		WORD cb_java_call_site; // for java we keep here caller class:method
+	};
+	int tid;
+	int pid;
+	DWORD sec;
+	DWORD msec;
+	DWORD this_fn;
+	DWORD call_site;
+	int fn_line;
+	int call_line;
+};
+#ifdef _USE_ADB
+struct ROW_LOG_REC : LOG_REC_BASE
+{
+	const char* appName() { return p_app_name; }
+	const char* moduleName() { return p_module_name; }
+	const char* fnName() { return p_fn_name; }
+	const char* trace() { return p_trace; }
+	int cbModuleName() { return cb_module_name; }
+	int cbData() { return cb_app_name + cb_module_name + cb_fn_name + cb_trace; }
+	int size() { return sizeof(LOG_REC_BASE) + cbData(); }
+	bool isValid() {
+		int cb_data = cbData();
+		int cb_size = size();
+		return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(ROW_LOG_REC) && cb_size < MAX_RECORD_LEN;
+	}
+	bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
+	bool isTrace() { return log_type == LOG_TYPE_TRACE; }
+	void reset() { ZeroMemory(this, sizeof(ROW_LOG_REC)); resetFT(); }
+	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; p_app_name = p_module_name = p_fn_name = ""; }
+	
+	bool ftChecked; //is adb sent flow trace
+	const char* p_app_name;
+	const char* p_module_name;
+	const char* p_fn_name;
+	const char* p_trace;
+};
+#else
+struct ROW_LOG_REC : LOG_REC_BASE
+{
+	const char* appName() { return data; }
+	const char* moduleName() { return cb_module_name ? (appName() + cb_app_name) : appName(); }
+	const char* fnName() { return moduleName() + cbModuleName(); }
+	const char* trace() { return fnName() + cb_fn_name; }
+	int cbModuleName() { return cb_module_name ? cb_module_name : cb_app_name; }
+	int cbData() { return cb_app_name + cb_module_name + cb_fn_name + cb_trace; }
+	int size() { return sizeof(LOG_REC_BASE) + cbData(); }
+	bool isValid() {
+		int cb_data = cbData();
+		int cb_size = size();
+		return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(ROW_LOG_REC) && cb_size < MAX_RECORD_LEN;
+	}
+	bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
+	bool isTrace() { return log_type == LOG_TYPE_TRACE; }
 
-    char* appName() { return data; }
-    char* moduleName() { return cb_module_name ? (appName() + cb_app_name) : appName(); }
-    char* fnName() { return moduleName() + cbModuleName(); }
-    char* trace() { return fnName() + cb_fn_name; }
-    int cbModuleName() { return cb_module_name ? cb_module_name : cb_app_name; }
-    int cbData() { return cb_app_name + cb_module_name + cb_fn_name + cb_trace; }
-    int size() { return sizeof(ROW_LOG_REC) + cbData(); }
-    bool isValid() {
-        int cb_data = cbData();
-        int cb_size = size();
-        return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(ROW_LOG_REC) && cb_size < MAX_RECORD_LEN;
-    }
-    bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
-    bool isTrace() { return log_type == LOG_TYPE_TRACE; }
-}ROW_LOG_REC;
+private:
+	char data[1];
+
+};
+#endif //_USE_ADB
 
 typedef struct
 {
@@ -59,6 +92,8 @@ typedef struct
     int pack_nn;
 	short retry_nn;
 	short buff_nn;
+	short retry_delay;
+	short retry_count;
 }NET_PACK_INFO;
 #pragma pack(pop)
 
@@ -100,6 +135,7 @@ public:
     size_t UsedMemory();
     DWORD getLost() { return m_lost; }
     void Log(ROW_LOG_REC* rec);
+	bool setAppName(int pid, char* szName, int cbName);
 
 private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
@@ -108,7 +144,6 @@ private:
     inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, int bookmark);
     inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
-
     DWORD m_lost;
     static DWORD archiveNumber;
     BYTE bookmarkNumber;

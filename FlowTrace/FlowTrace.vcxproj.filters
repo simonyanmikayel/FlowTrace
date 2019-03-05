@@ -90,6 +90,12 @@
     <ClInclude Include="AddrInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LogReceiverNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogReceiverAdb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="LogReceiver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -167,7 +173,10 @@
     <ClCompile Include="AddrInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogReceiver.cpp">
+    <ClCompile Include="LogReceiverNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogReceiverAdb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

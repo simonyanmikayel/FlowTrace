@@ -257,7 +257,7 @@ void CFontPreviewCombo::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
     HFONT hf = (HFONT)dc.SelectFont(hFont);
     CSize sz;
     dc.GetTextExtent(csFontName, csFontName.GetLength(), &sz);
-    m_iMaxNameWidth = max(m_iMaxNameWidth, sz.cx);
+    m_iMaxNameWidth = max((long)m_iMaxNameWidth, sz.cx);
     dc.SelectFont(hf);
 
     // measure sample in cur font
@@ -265,7 +265,7 @@ void CFontPreviewCombo::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
     if (hf)
     {
       dc.GetTextExtent(m_csSample, m_csSample.GetLength(), &sz);
-      m_iMaxSampleWidth = max(m_iMaxSampleWidth, sz.cx);
+      m_iMaxSampleWidth = max((long)m_iMaxSampleWidth, sz.cx);
       dc.SelectFont(hf);
     }
   }

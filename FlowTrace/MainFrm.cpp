@@ -10,13 +10,13 @@
 #include "MainFrm.h"
 #include "Settings.h"
 #include "Archive.h"
-#include "LogReceiver.h"
 #include "DlgSettings.h"
 #include "DlgDetailes.h"
 #include "DlgProgress.h"
 #include "SearchInfo.h"
 #include "DlgSnapshots.h"
 #include "DlgModules.h"
+#include "LogReceiver.h"
 
 HWND       hwndMain;
 WNDPROC oldEditProc;
@@ -45,8 +45,8 @@ BOOL CMainFrame::OnIdle()
     UIEnable(ID_SEARCH_LAST, searchInfo.total); //  && (searchInfo.cur + 1 != searchInfo.total)
     UIEnable(ID_SEARCH_REFRESH, 1);
     UIEnable(ID_SEARCH_CLEAR, 1);
-    UIEnable(ID_VIEW_PAUSERECORDING, gLogReceiver.working());
-    UIEnable(ID_VIEW_STARTRECORDIG, !gLogReceiver.working());
+    UIEnable(ID_VIEW_PAUSERECORDING, gpLogReceiver->working());
+    UIEnable(ID_VIEW_STARTRECORDIG, !gpLogReceiver->working());
     UIEnable(ID_EDIT_SELECTALL, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_FIND32798, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_COPY, m_list.HasSelection() || ::GetFocus() == m_tree.m_hWnd);
@@ -155,6 +155,10 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
         ////////////////  
     }
 
+#ifndef _USE_ADB
+	m_searchbar.HideButton(ID_VIEW_RESETLOG);
+#endif //_USE_ADB
+
     SizeSimpleReBarBands();
 
     CreateSimpleStatusBar();
@@ -244,7 +248,7 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 {
     if (wParam == TIMER_DATA_REFRESH)
     {
-        if (gLogReceiver.working())
+        if (gpLogReceiver->working())
         {
             RefreshLog(false);
         }
@@ -252,16 +256,16 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
     return 0;
 }
 
-void CMainFrame::StartLogging()
+void CMainFrame::StartLogging(bool reset)
 {
     SetTimer(TIMER_DATA_REFRESH, TIMER_DATA_REFRESH_INTERVAL);
-    gLogReceiver.start();
+    gpLogReceiver->start(reset);
 }
 
 void CMainFrame::StopLogging(bool bClearArcive, bool closing)
 {
     KillTimer(TIMER_DATA_REFRESH);
-    gLogReceiver.stop();
+    gpLogReceiver->stop();
     if (bClearArcive)
     {
         gArchive.clearArchive(closing);
@@ -498,6 +502,12 @@ void CMainFrame::SyncViews()
     m_view.SyncViews();
 }
 
+void CMainFrame::RedrawViews()
+{
+	m_list.Invalidate(FALSE);
+	m_tree.Invalidate(FALSE);
+}
+
 LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     SyncViews();
@@ -532,13 +542,19 @@ LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
     return 0;
 }
 
-void CMainFrame::ClearLog(bool bRestart)
+LRESULT CMainFrame::OnResetLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    StopLogging(true);
+	ClearLog(true, true);
+	return 0;
+}
+
+void CMainFrame::ClearLog(bool bRestart, bool reset)
+{
+    StopLogging(true, false);
     m_view.ClearLog();
     searchInfo.ClearSearchResults();
     if (bRestart)
-        StartLogging();
+        StartLogging(reset);
 }
 
 LRESULT CALLBACK subEditProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)

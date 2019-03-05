@@ -151,6 +151,9 @@ typedef std::wstring tstring;
 typedef std::string tstring;
 #endif
 
+#undef min
+#undef max
+
 //#pragma warning(disable:4996) //This function or variable may be unsafe
 
 //////////////////////////////////////////////////////////////////////////////

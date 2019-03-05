@@ -42,7 +42,7 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
     int cb = 0;
     if (iSubItem == BACK_TRACE_FN)
     {
-        cb = min(pNode->cb_fn_name, cbBuf);
+        cb = min((int)pNode->cb_fn_name, cbBuf);
         if (cb != 0)
         {
             memcpy(buf, pNode->fnName(), cb);

@@ -75,6 +75,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_VIEW_CLEARLOG
     BUTTON      ID_VIEW_RUN_EXTERNAL_CMD
+    BUTTON      ID_VIEW_RESETLOG
 END
 
 
@@ -143,8 +144,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Start Recordig",              ID_VIEW_STARTRECORDIG
         MENUITEM "Pause Recording",             ID_VIEW_PAUSERECORDING
-        MENUITEM "Clear Log\tCtrl+K",           ID_VIEW_CLEARLOG
-        MENUITEM SEPARATOR
+	MENUITEM "Clear Log\tCtrl+K", ID_VIEW_CLEARLOG
+	MENUITEM "Reset Log\tCtrl+R", ID_VIEW_RESETLOG
+	MENUITEM SEPARATOR
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
@@ -406,6 +408,9 @@ BEGIN
     VK_TAB,         ID_SYNC_VIEWES,         VIRTKEY, NOINVERT
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, CONTROL, NOINVERT
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
+	"R", ID_VIEW_RESETLOG, VIRTKEY, CONTROL, NOINVERT
+	"R", ID_VIEW_RESETLOG, VIRTKEY, SHIFT, CONTROL, NOINVERT
+		
     "N",            ID_VIEW_STARTNEWSNAPSHOT, VIRTKEY, CONTROL, NOINVERT
 END
 
@@ -507,6 +512,7 @@ BEGIN
     ID_VIEW_DETAILES        "Set view detailes\nSet view detailes"
     ID_VIEW_SETTINGS        "Application settings\nApplication settings"
     ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"
+	ID_VIEW_RESETLOG        "Reset Log\nReset Log  (Ctrl+R)"
     ID_SYNC_VIEWES          "Synchronize views\nSynchronize views  (Tab)"
     ID_EDIT_SELECTALL       "Select all traces\nSelect all traces"
 END

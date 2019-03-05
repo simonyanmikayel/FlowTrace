@@ -6,18 +6,29 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlowTrace", "FlowTrace\FlowTrace.vcxproj", "{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D} = {AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}
+		{EC80A096-1C37-420C-9EE3-4CEE83531663} = {EC80A096-1C37-420C-9EE3-4CEE83531663}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "addr2line", "addr2line\addr2line.vcxproj", "{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Logcat", "Logcat\Logcat.vcxproj", "{EC80A096-1C37-420C-9EE3-4CEE83531663}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		DbgAdb|x64 = DbgAdb|x64
+		DbgAdb|x86 = DbgAdb|x86
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		RlsAdb|x64 = RlsAdb|x64
+		RlsAdb|x86 = RlsAdb|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.DbgAdb|x64.ActiveCfg = DbgAdb|x64
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.DbgAdb|x64.Build.0 = DbgAdb|x64
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.DbgAdb|x86.ActiveCfg = DbgAdb|Win32
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.DbgAdb|x86.Build.0 = DbgAdb|Win32
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Debug|x64.ActiveCfg = Debug|x64
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Debug|x64.Build.0 = Debug|x64
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Debug|x86.ActiveCfg = Debug|Win32
@@ -26,6 +37,14 @@ Global
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Release|x64.Build.0 = Release|x64
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Release|x86.ActiveCfg = Release|Win32
 		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.Release|x86.Build.0 = Release|Win32
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.RlsAdb|x64.ActiveCfg = RlsAdb|x64
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.RlsAdb|x64.Build.0 = RlsAdb|x64
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.RlsAdb|x86.ActiveCfg = RlsAdb|Win32
+		{F83F6EC9-1312-4A9C-A547-0FAFCE5AA4AF}.RlsAdb|x86.Build.0 = RlsAdb|Win32
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.DbgAdb|x64.ActiveCfg = DbgAdb|x64
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.DbgAdb|x64.Build.0 = DbgAdb|x64
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.DbgAdb|x86.ActiveCfg = DbgAdb|Win32
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.DbgAdb|x86.Build.0 = DbgAdb|Win32
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Debug|x64.ActiveCfg = Debug|x64
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Debug|x64.Build.0 = Debug|x64
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Debug|x86.ActiveCfg = Debug|Win32
@@ -34,6 +53,26 @@ Global
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Release|x64.Build.0 = Release|x64
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Release|x86.ActiveCfg = Release|Win32
 		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.Release|x86.Build.0 = Release|Win32
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.RlsAdb|x64.ActiveCfg = RlsAdb|x64
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.RlsAdb|x64.Build.0 = RlsAdb|x64
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.RlsAdb|x86.ActiveCfg = RlsAdb|Win32
+		{AC677C2C-90F4-4F84-9D52-6CEBFE61E84D}.RlsAdb|x86.Build.0 = RlsAdb|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.DbgAdb|x64.ActiveCfg = Debug|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.DbgAdb|x64.Build.0 = Debug|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.DbgAdb|x86.ActiveCfg = Debug|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.DbgAdb|x86.Build.0 = Debug|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Debug|x64.ActiveCfg = Debug|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Debug|x64.Build.0 = Debug|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Debug|x86.ActiveCfg = Debug|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Debug|x86.Build.0 = Debug|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Release|x64.ActiveCfg = Release|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Release|x64.Build.0 = Release|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Release|x86.ActiveCfg = Release|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.Release|x86.Build.0 = Release|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.RlsAdb|x64.ActiveCfg = Release|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.RlsAdb|x64.Build.0 = Release|x64
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.RlsAdb|x86.ActiveCfg = Release|Win32
+		{EC80A096-1C37-420C-9EE3-4CEE83531663}.RlsAdb|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

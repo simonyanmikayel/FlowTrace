@@ -1,6 +1,8 @@
 #pragma once
 #include "Buffer.h"
 
+#define MAX_APP_NAME 128
+
 class Archive;
 struct LOG_NODE;
 struct ROOT_NODE;
@@ -145,7 +147,7 @@ struct APP_NODE : LOG_NODE
     char ip_address[66];
     int cb_app_name;
     int cb_short_app_name_offset;
-    char appName[1];
+    char appName[MAX_APP_NAME + 1];
 };
 
 struct THREAD_NODE : LOG_NODE

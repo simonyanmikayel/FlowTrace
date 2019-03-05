@@ -70,18 +70,22 @@ size_t Archive::UsedMemory()
 
 APP_NODE* Archive::addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 {
-    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE) + p->cb_app_name + 1, true);
+    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE), true);
     if (!pNode)
         return nullptr;
-
+	const char* appName = p->appName();
+	WORD cb_app_name = p->cb_app_name;
+	if (cb_app_name == 0) {
+		cb_app_name = 1;
+		appName = "?";
+	}
     pNode->data_type = APP_DATA_TYPE;
     pNode->pid = p->pid;
-    pNode->cb_app_name = p->cb_app_name;
+    pNode->cb_app_name = std::min(cb_app_name, (WORD)MAX_APP_NAME);
 	pNode->lastRecNN = INFINITE;
 	pNode->lastPackNN = -1;
 	
-
-    memcpy(pNode->appName, p->appName(), p->cb_app_name);
+    memcpy(pNode->appName, appName, pNode->cb_app_name);
     pNode->appName[pNode->cb_app_name] = 0;
     char* dotdot = strrchr(pNode->appName, ':');
     if (dotdot) {
@@ -125,6 +129,29 @@ THREAD_NODE* Archive::addThread(ROW_LOG_REC* p, APP_NODE* pAppNode)
     pNode->checked = 1;
 
     return pNode;
+}
+
+bool Archive::setAppName(int pid, char* szName, int cbName)
+{
+	char* appName = szName;
+	WORD cb_app_name = cbName;
+	if (cbName == 1 && appName[0] == '?') {
+		cb_app_name = 2;
+		appName = "??";
+	}
+	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
+	while (app)
+	{
+		if ((app->pid == pid) && app->cb_app_name == 1 && app->appName[0] == '?') {
+			cbName = std::min(cbName, MAX_APP_NAME);
+			memcpy(app->appName, szName, cbName);
+			app->appName[cbName] = 0;
+			app->cb_app_name = cbName;
+			return true;
+		}
+		app = (APP_NODE*)app->prevSibling;
+	}
+	return false;
 }
 
 APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
@@ -178,7 +205,7 @@ THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, ROW_LOG_REC* p)
 LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark)
 {
     int cb_fn_name = pLogRec->cb_fn_name;
-    char* fnName = pLogRec->fnName();
+    const char* fnName = pLogRec->fnName();
     if (fnName[0] == '^')
     {
         fnName++;
@@ -186,6 +213,11 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
     }
     if (0 == (pLogRec->log_flags & LOG_FLAG_JAVA))
         pLogRec->cb_java_call_site = 0;
+	else {
+		const char* trace = pLogRec->trace();
+		while (pLogRec->cb_java_call_site &&  (trace[pLogRec->cb_java_call_site - 1] == '\r' || trace[pLogRec->cb_java_call_site - 1] == '\n'))
+			pLogRec->cb_java_call_site--;
+	}
 
     FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogRec->cb_module_name + pLogRec->cb_java_call_site + 1, true);
     if (!pNode)
@@ -441,7 +473,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
     {
         //add new trace
         int cb_fn_name = pLogRec->cb_fn_name;
-        char* fnName = pLogRec->fnName();
+        const char* fnName = pLogRec->fnName();
         if (fnName[0] == '^')
         {
             fnName++;
@@ -520,7 +552,7 @@ void Archive::Log(ROW_LOG_REC* rec)
     rec->len, rec->log_type, rec->log_flags, rec->nn,
     rec->cb_app_name, rec->cb_module_name, rec->cb_fn_name, rec->cb_trace,
     rec->pid, rec->tid, rec->sec, rec->msec,
-    rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->data);
+    rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, rec->appName());
 }
 
 int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
@@ -567,12 +599,14 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 
     //if (rec->nn == 110586)
     //    int iiii = 0;
-    if (pAppNode->lastRecNN != rec->nn && pAppNode->lastRecNN != INFINITE && !fromImport)
+    if (rec->nn && pAppNode->lastRecNN != INFINITE && !fromImport)
     {
-		DWORD lost = (rec->nn > pAppNode->lastRecNN) ? rec->nn - pAppNode->lastRecNN : pAppNode->lastRecNN - rec->nn;
-        pAppNode->lost += lost;
-		m_lost += lost;
-		Helpers::UpdateStatusBar();
+		if ((pAppNode->lastRecNN != rec->nn - 1) && (pAppNode->lastRecNN != rec->nn)) {
+			DWORD lost = (rec->nn > pAppNode->lastRecNN) ? rec->nn - pAppNode->lastRecNN : pAppNode->lastRecNN - rec->nn;
+			pAppNode->lost += lost;
+			m_lost += lost;
+			Helpers::UpdateStatusBar();
+		}
 	}
 #ifdef _NN_TEST
 	g_prev_nn = (pAppNode->lastRecNN != INFINITE) ? (pAppNode->lastRecNN - 1) : (rec->nn - 1);
@@ -588,7 +622,8 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 		g_buff_nn = 0;
 	}
 #endif
-	pAppNode->lastRecNN = rec->nn + 1;
+	if (rec->nn)
+		pAppNode->lastRecNN = rec->nn;
 
     THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)

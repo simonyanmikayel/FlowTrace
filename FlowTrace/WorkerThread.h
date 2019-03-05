@@ -9,8 +9,8 @@ public:
     void StartWork(LPVOID pWorkParam = 0);
     void StopWork();
     virtual void Work(LPVOID pWorkParam) = 0;
-    virtual void OnThreadReady();
     virtual void Terminate() = 0;
+	DWORD SleepThread(DWORD  dwMilliseconds);
 	void SetThreadPriority(int nPriority);
 private:
     LPVOID m_pWorkParam;
@@ -18,6 +18,7 @@ private:
     HANDLE m_hTreadEvent;
     HANDLE m_hThread;
     DWORD m_dwTID;
+	void Cleanup();
     static DWORD WINAPI ThreadFunk(LPVOID lpParameter);
 };
 

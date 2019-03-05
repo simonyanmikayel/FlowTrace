@@ -3,7 +3,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
 #include "Helpers.h"
 #include "LogListView.h"
 #include "LogTreeView.h"
@@ -73,7 +72,8 @@ public:
         COMMAND_ID_HANDLER(ID_VIEW_PAUSERECORDING, OnPauseRecording)
         COMMAND_ID_HANDLER(ID_VIEW_STARTRECORDIG, OnStartRecording)
         COMMAND_ID_HANDLER(ID_VIEW_CLEARLOG, OnClearLog)
-        COMMAND_ID_HANDLER(ID_EDIT_COPY, onCopy)
+		COMMAND_ID_HANDLER(ID_VIEW_RESETLOG, OnResetLog)
+		COMMAND_ID_HANDLER(ID_EDIT_COPY, onCopy)
         COMMAND_ID_HANDLER(ID_EDIT_SELECTALL, onSelectAll)
         MESSAGE_HANDLER(WM_INPORT_TASK, OnImportTask);
     MESSAGE_HANDLER(WM_UPDATE_FILTER, onUpdateFilter)
@@ -130,6 +130,7 @@ public:
     LRESULT OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnResetLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT onSelectAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnImportTask(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
@@ -152,6 +153,7 @@ public:
     HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }
     void UpdateStatusBar();
     void SyncViews();
+	void RedrawViews();
     void SetTitle();
 private:
     //Search support
@@ -163,8 +165,8 @@ private:
     CEdit               m_searchedit;
     HICON            m_lostIcon;
 
-    void StartLogging();
-    void ClearLog(bool bRestart);
+    void StartLogging(bool reset = false);
+    void ClearLog(bool bRestart, bool reset = false);
     void StopLogging(bool bClearArcive, bool closing = false);
     void SearchRefresh(WORD wID);
     void RefreshLog(bool showAll);

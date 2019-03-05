@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="adb">
+      <UniqueIdentifier>{700fc90e-39b5-428b-ba06-58509bea7f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="adb\adb">
+      <UniqueIdentifier>{81f7e3c5-8622-4958-bfbe-951166406509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="adb\client">
+      <UniqueIdentifier>{366f778d-2dc8-4cc9-be28-2263815fd039}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="adb\sysdeps">
+      <UniqueIdentifier>{42e615a4-c9b2-4b88-a940-e956ff3be87f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libcrypto_utils">
+      <UniqueIdentifier>{667fc96d-ba1e-4806-871b-c9b0a59c236f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{a790a368-e05a-4922-81db-a6d0ea0c712d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="adb\client\commandline.cpp">
+      <Filter>adb\client</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\adb_unique_fd.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\sysdeps_win32.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="base\logging.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\stringprintf.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\strings.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\transport.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\client\adb_client.cpp">
+      <Filter>adb\client</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\adb_utils.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\shell_service_protocol.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\adb_trace.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="base\errors_windows.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\utf8.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\file.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\threads.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\adb.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\sysdeps\errno.cpp">
+      <Filter>adb\sysdeps</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\adb_io.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="adb\socket_spec.cpp">
+      <Filter>adb\adb</Filter>
+    </ClCompile>
+    <ClCompile Include="base\parsenetaddress.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

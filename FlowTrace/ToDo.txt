@@ -1,5 +1,3 @@
-BUGs
 
-TIDO
-1. show elipsed time in tree in case if timr column visible
-2. Show NN in tree if NN column visible
+
+add in descrition: make sure adb installed and path of adb.exe in PATH environment variables

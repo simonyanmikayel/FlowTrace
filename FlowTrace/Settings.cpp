@@ -236,10 +236,10 @@ void CSettings::RestoreWindPos(HWND hWnd)
       RECT rcScreen;
       SystemParametersInfo(SPI_GETWORKAREA, 0, &rcScreen, 0);
 
-      cx = min(rcScreen.right, cx);
-      cy = min(rcScreen.bottom, cy);
-      x = max(0, min(x, rcScreen.right - cx));
-      y = max(0, min(y, rcScreen.bottom - cy));
+      cx = min(rcScreen.right, (LONG)cx);
+      cy = min(rcScreen.bottom, (LONG)cy);
+      x = max(0L, min((LONG)x, rcScreen.right - cx));
+      y = max(0L, min((LONG)y, rcScreen.bottom - cy));
     }
 
     ::SetWindowPos(hWnd, 0, x, y, cx, cy, SWP_NOZORDER);
@@ -304,7 +304,7 @@ static CHAR szModuls[MAX_MODULES + 1];
 void CSettings::SetModules(const CHAR* szList)
 {
     size_t n = _tcslen(szList);
-    n = min(MAX_MODULES, n);
+    n = min((size_t)MAX_MODULES, n);
     memcpy(szModuls, szList, n);
     szModuls[n] = 0;
     Write(STR_APP_REG_VAL_Modules, szModuls);
@@ -326,7 +326,7 @@ static CHAR searchList[MAX_SEARCH_LIST + 1];
 void CSettings::SetSearchList(CHAR* szList)
 {
   size_t n = _tcslen(szList);
-  n = min(MAX_SEARCH_LIST, n);
+  n = min((size_t)MAX_SEARCH_LIST, n);
   memcpy(searchList, szList, n);
   searchList[n] = 0;
   Write(STR_APP_REG_VAL_SEARCH_LIST, searchList);

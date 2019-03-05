@@ -926,7 +926,7 @@ void CLogListView::SetColumnLen(LIST_COL col, int len)
 	{
 		RECT rc;
 		GetClientRect(&rc);
-		len = max(rc.right + 16, len);
+		len = max(rc.right + 16, (long)len);
 	}
 	//stdlog("len = %d col = %d m_ColLen = %d\n", len, col, m_ColLen[col]);
 	int iSubItem = getSubItem(col);

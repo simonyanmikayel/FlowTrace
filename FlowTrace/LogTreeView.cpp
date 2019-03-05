@@ -336,7 +336,7 @@ void CLogTreeView::SetColumnLen(int len)
 {
     RECT rc;
     GetClientRect(&rc);
-    len = max(rc.right, len) + 16;
+    len = max(rc.right, (long)len) + 16;
     if (m_colWidth < len)
     {
         //stdlog("m_colWidth %d len %d col %drc.right %d\n", m_colWidth, len, col, rc.right);

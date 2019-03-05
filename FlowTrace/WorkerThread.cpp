@@ -22,8 +22,12 @@ void WorkerThread::StopWork()
   }
     if (m_hThread)
     {
+		SetEvent(m_hTreadEvent);
+		CloseHandle(m_hTreadEvent);
 		int rettryCount = 0;
-		while (rettryCount < 1000 && m_hThread != 0 && WAIT_TIMEOUT == WaitForSingleObject(m_hThread, 0))
+		DWORD dwRes = 0;
+		while (rettryCount < 500 && m_hThread != 0 && 
+			WAIT_TIMEOUT == (dwRes = WaitForSingleObject(m_hThread, 10)))
         {
             //MSG msg;
             //while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -31,10 +35,20 @@ void WorkerThread::StopWork()
             //    TranslateMessage(&msg);
             //    DispatchMessage(&msg);
             //}
-			//rettryCount++;
-            Sleep(0); // alow Worker thread complite its waorks
+			rettryCount++;
         }
-    }
+		if (dwRes == WAIT_TIMEOUT) {
+			TerminateThread(m_hThread, 0);
+			Cleanup();
+		}
+	}
+}
+
+void WorkerThread::Cleanup()
+{
+	m_bWorking = false;
+	CloseHandle(m_hThread);
+	m_hThread = NULL;
 }
 
 void WorkerThread::StartWork(LPVOID pWorkParam /*=0*/)
@@ -46,7 +60,6 @@ void WorkerThread::StartWork(LPVOID pWorkParam /*=0*/)
     m_hThread = CreateThread(0, 0, ThreadFunk, this, 0, &m_dwTID);
 	int i = GetThreadPriority(m_hThread);
     WaitForSingleObject(m_hTreadEvent, INFINITE);
-    CloseHandle(m_hTreadEvent);
 }
 
 DWORD WINAPI WorkerThread::ThreadFunk(LPVOID lpParameter)
@@ -58,15 +71,13 @@ DWORD WINAPI WorkerThread::ThreadFunk(LPVOID lpParameter)
     SetEvent(This->m_hTreadEvent);
     This->Work(This->m_pWorkParam);
 
-    This->m_bWorking = false;
-    CloseHandle(This->m_hThread);
-    This->m_hThread = NULL;
-
+    This->Cleanup();
     return 0;
 }
 
-void WorkerThread::OnThreadReady()
+
+DWORD WorkerThread::SleepThread(DWORD  dwMilliseconds)
 {
-  SetEvent(m_hTreadEvent);
+	return WaitForSingleObject(m_hTreadEvent, dwMilliseconds);
 }
 

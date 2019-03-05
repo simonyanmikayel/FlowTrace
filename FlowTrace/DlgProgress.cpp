@@ -235,15 +235,15 @@ void TaskThread::FileSave(WORD cmd)
             rec->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
             rec->cb_module_name = pInfoNode->cb_module_name;
             rec->cb_fn_name = pInfoNode->cb_fn_name;
-            memcpy(rec->appName(), pInfoNode->threadNode->pAppNode->appName, rec->cb_app_name);
+            memcpy((void*)rec->appName(), pInfoNode->threadNode->pAppNode->appName, rec->cb_app_name);
             if (rec->cb_module_name)
-                memcpy(rec->moduleName(), pInfoNode->moduleName(), rec->cb_module_name);
-            memcpy(rec->fnName(), pInfoNode->fnName(), rec->cb_fn_name);
+                memcpy((void*)rec->moduleName(), pInfoNode->moduleName(), rec->cb_module_name);
+            memcpy((void*)rec->fnName(), pInfoNode->fnName(), rec->cb_fn_name);
 			//gArchive.Log(rec);
             if (pInfoNode->cb_java_call_site && (pInfoNode->log_flags & LOG_FLAG_JAVA))
             {
                 rec->cb_java_call_site = pInfoNode->cb_java_call_site;
-                memcpy(rec->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
+                memcpy((void*)rec->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
             }
             else //if (rec->cb_trace)
             {
@@ -257,9 +257,9 @@ void TaskThread::FileSave(WORD cmd)
                     cb_trace -= (cb_size - MAX_RECORD_LEN + 128);
                     rec->cb_trace = cb_trace;
                 }
-                memcpy(rec->trace(), log, rec->cb_trace + 1);
+                memcpy((void*)rec->trace(), log, rec->cb_trace + 1);
                 if (truncate) {
-                    memcpy(rec->trace() + rec->cb_trace, "...", 3);
+                    memcpy((void*)(rec->trace() + rec->cb_trace), "...", 3);
                     rec->cb_trace += 3;
                 }
                 if (p->color)
@@ -279,7 +279,7 @@ void TaskThread::FileSave(WORD cmd)
 				rec->sec, rec->msec, 
 				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, pInfoNode->bookmark);
 
-            fwrite(rec->data, rec->cbData() - cbColor, 1, m_fp);
+            //!!fwrite(rec->data, rec->cbData() - cbColor, 1, m_fp);
             if (cbColor)
                 fwrite(szColor, cbColor, 1, m_fp);
             fwrite("\n", 1, 1, m_fp);
@@ -341,16 +341,16 @@ void TaskThread::FileImport()
         rec1->cb_fn_name = (WORD)strlen(fnName);
         rec1->this_fn = 0x19800;
         rec1->call_site = 0x199F4;
-        memcpy(rec1->appName(), appName, rec1->cb_app_name);
-        memcpy(rec1->moduleName(), moduleName, rec1->cb_module_name);
-        memcpy(rec1->fnName(), fnName, rec1->cb_fn_name);
+        memcpy((void*)rec1->appName(), appName, rec1->cb_app_name);
+        memcpy((void*)rec1->moduleName(), moduleName, rec1->cb_module_name);
+        memcpy((void*)rec1->fnName(), fnName, rec1->cb_fn_name);
         rec1->len = rec1->size();
 
         ROW_LOG_REC* rec2 = (ROW_LOG_REC*)log_buf[1];
         memcpy(rec2, rec1, rec1->len);
         rec2->log_type = LOG_TYPE_TRACE;
         rec2->cb_trace = (WORD)strlen(trace);
-        memcpy(rec2->trace(), trace, rec2->cb_trace);
+        memcpy((void*)rec2->trace(), trace, rec2->cb_trace);
         rec2->len = rec2->size();
 
         ROW_LOG_REC* rec3 = (ROW_LOG_REC*)log_buf[2];
@@ -394,7 +394,7 @@ void TaskThread::FileImport()
             if (count == 23811)
                 count = count;
             ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
-            int bookmark;
+            int bookmark; 
 			int cf = fscanf_s(m_fp, TEXT("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-"),
 				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
                 &rec->cb_app_name, &rec->cb_module_name, 
@@ -402,17 +402,17 @@ void TaskThread::FileImport()
                 &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line, &bookmark);
             ss = (17 == cf);
             ss = ss && rec->isValid();
-            if (rec->cbData())
-                ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));
+			//!! if (rec->cbData())
+				//!! ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));
             if (ss)
             {
                 if (rec->isTrace())
                 {
-                    rec->data[rec->cbData()] = '\n';
+					//!! rec->data[rec->cbData()] = '\n';
                     rec->cb_trace++;
                     rec->len++;
                 }
-                rec->data[rec->cbData()] = 0;
+				//!! rec->data[rec->cbData()] = 0;
             }
 
             ss = ss && rec->isValid();
