@@ -274,7 +274,9 @@ void UdpThread::Work(LPVOID pWorkParam)
 			stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(NET_PACK_INFO));
 			continue;
 		}
-		if (pack->pack_nn && pack->retry_count)
+		if (!pack->retry_count)
+			pack->pack_nn = 0;//turn of packet checking
+		if (pack->pack_nn)
 		{
 			if ((sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other))) < 0)
 			{
