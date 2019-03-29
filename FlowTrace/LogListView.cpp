@@ -1166,14 +1166,17 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		endChar = cbText;
 	endChar = cbText;
 
-	DWORD textColor, bkColor, selBkColor, selColor, serachColor, curSerachColor, infoBkColor, infoTextColor, curBkColor;
+	DWORD textColor, bkColor, selBkColor, selColor, serachColor, curSerachColor, infoBkColor, infoTextColorAndroid, infoTextColorNatve, curBkColor;
 	selColor = gSettings.SelectionTxtColor();
 	selBkColor = gSettings.SelectionBkColor(GetFocus() == m_hWnd);
-	textColor = gSettings.LogListTxtColor();
-	bkColor = gSettings.LogListBkColor();
-	serachColor = gSettings.SerachColor();
+	DWORD textColor_0 = gSettings.LogListTxtColor();
+	DWORD bkColor_0 = gSettings.LogListBkColor();
+	textColor = textColor_0;
+	bkColor = bkColor_0;
+	serachColor = bkColor_0;
 	curSerachColor = gSettings.CurSerachColor();
-	infoTextColor = gSettings.InfoTextColor();
+	infoTextColorNatve = gSettings.InfoTextColorNative();
+	infoTextColorAndroid = gSettings.InfoTextColorAndroid();
 	infoBkColor = gSettings.LogListBkColor();
 
 #ifdef _USE_MEMDC
@@ -1197,9 +1200,14 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
 	if (col == LOG_COL)
 	{
+		textColor = textColor_0;
+		bkColor = bkColor_0;
 		if (pNode->isTrace())
 		{
-			gSettings.SetConsoleColor(((TRACE_NODE*)pNode)->color, textColor, bkColor);
+			bool color_is_set = false;
+			color_is_set = gSettings.SetTraceSeverity((UDP_LOG_Severity)((TRACE_NODE*)pNode)->severity, textColor, bkColor);
+			if ( !color_is_set && ((TRACE_NODE*)pNode)->color)
+				gSettings.SetTraceColor(((TRACE_NODE*)pNode)->color, textColor, bkColor);
 		}
 
 #define bSearched  1
@@ -1311,7 +1319,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 					if (curBkColor != infoBkColor)
 						::SetTextColor(hMemDC, selColor);
 					else if (pNode->isFlow() || (oldFlag  & bNotTrace))
-						::SetTextColor(hMemDC, infoTextColor);
+						::SetTextColor(hMemDC, pNode->isJava() ? infoTextColorAndroid : infoTextColorNatve);
 					else
 						::SetTextColor(hMemDC, textColor);
 

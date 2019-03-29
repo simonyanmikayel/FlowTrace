@@ -7,6 +7,15 @@
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
 #define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
 
+typedef enum {
+	UDP_LOG_FATAL,
+	UDP_LOG_ERROR,
+	UDP_LOG_WARNING,
+	UDP_LOG_INFO,
+	UDP_LOG_DEBUG,
+	UDP_LOG_COMMON,
+} UDP_LOG_Severity;
+
 class CSettings : public CRegKeyExt
 {
 public:
@@ -15,8 +24,9 @@ public:
 
     void RestoreWindPos(HWND hWnd);
     void SaveWindPos(HWND hWnd);
-    void SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkColor);
-    void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
+	bool SetTraceColor(int color, DWORD& textColor, DWORD& bkColor);
+	bool SetTraceSeverity(UDP_LOG_Severity severity, DWORD& textColor, DWORD& bkColor);
+	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
     bool CheckUIFont(HDC hdc);
 
     void SetModules(const CHAR* szList);
@@ -29,8 +39,9 @@ public:
     DWORD LogListTxtColor();
     DWORD SerachColor();
     DWORD CurSerachColor();
-    DWORD InfoTextColor();
-    bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
+	DWORD InfoTextColorNative();
+	DWORD InfoTextColorAndroid();
+	bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
 	bool CanShowInAndroidStudio() { return *GetAndroidStudio() != 0 && *GetAndroidProject() != 0; }
 
     DECL_PROP(int, VertSplitterPos);

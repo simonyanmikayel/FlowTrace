@@ -155,11 +155,8 @@ struct THREAD_NODE : LOG_NODE
     APP_NODE* pAppNode;
     FLOW_NODE* curentFlow;
     TRACE_NODE* latestTrace;
-    int emptLineColor;
     int tid;
     int threadNN;
-    char COLOR_BUF[10];
-    int  cb_color_buf;
 
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {
@@ -184,8 +181,8 @@ struct INFO_NODE : LOG_NODE
 	int  buff_nn;
 #endif
     int  nn;
-    WORD log_type;
-	WORD log_flags;
+    BYTE log_type;
+	BYTE log_flags;
     WORD cb_fn_name;
     WORD cb_short_fn_name_offset;
     WORD cb_module_name;
@@ -242,8 +239,9 @@ struct TRACE_CHANK
 
 struct TRACE_NODE : INFO_NODE
 {
-    BYTE color;
-    TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name + cb_module_name); }
+	BYTE color;
+	BYTE severity;
+	TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name + cb_module_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
     int getCallLine(bool bCallSiteInContext, bool resolve);
 };

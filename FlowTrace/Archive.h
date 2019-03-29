@@ -17,8 +17,10 @@ const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 struct LOG_REC_BASE
 {
 	int len;
-	WORD log_type;
-	WORD log_flags;
+	BYTE log_type;
+	BYTE log_flags;
+	BYTE color;
+	BYTE severity;
 	unsigned int nn;
 	WORD cb_app_name;
 	WORD cb_module_name;
@@ -141,7 +143,7 @@ private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(ROW_LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
-    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, int bookmark);
+    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
     inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
     DWORD m_lost;

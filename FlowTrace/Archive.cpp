@@ -268,207 +268,156 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
 
 }
 
-static int getCollor(char* pBuf, int &iSkip, int cb)
+//static int getCollor(char* pBuf, int &iSkip, int cb)
+//{
+//    int color = 0;
+//    if (iSkip < cb && isdigit(pBuf[iSkip]))
+//    {
+//        color = pBuf[iSkip] - '0';
+//        iSkip++;
+//        if (iSkip < cb && isdigit(pBuf[iSkip]))
+//        {
+//            color = (10 * color) + (pBuf[iSkip] - '0');
+//            iSkip++;
+//        }
+//    }
+//    return color;
+//}
+//
+//static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, WORD &cb_trace, int& color)
+//{
+//    char* pBuf = pThreadNode->COLOR_BUF;
+//    bool bRet = false;
+//    if (pTrace[i] == '\033')
+//    {
+//        pThreadNode->cb_color_buf = 0;
+//    }
+//    else if (pThreadNode->cb_color_buf == 0)
+//    {
+//        // no color in buffer and in trace
+//        return false;
+//    }
+//    bool reset_buffer = false;
+//    int cb_color_old = pThreadNode->cb_color_buf;
+//    int cb_color = min(cb_trace - i, (int)sizeof(pThreadNode->COLOR_BUF) - pThreadNode->cb_color_buf - 1);
+//    if (cb_color <= 0)
+//    {
+//        pThreadNode->cb_color_buf = 0;
+//        return false;
+//    }
+//    memcpy(pBuf + pThreadNode->cb_color_buf, pTrace + i, cb_color);
+//    pThreadNode->cb_color_buf += cb_color;
+//    pBuf[pThreadNode->cb_color_buf] = 0;
+//
+//    int iSkip = 0, color1 = 0, color2 = 0;
+//    if (pBuf[0] == '\033' && pBuf[1] == '[')
+//    {
+//        iSkip = 2;
+//        color1 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
+//        if (pBuf[iSkip] == ';')
+//        {
+//            iSkip++;
+//            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
+//        }
+//        if (pBuf[iSkip] == ';') //getting third color as color2
+//        {
+//            iSkip++;
+//            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
+//        }
+//
+//        if (iSkip < pThreadNode->cb_color_buf && pBuf[iSkip] == 'm')
+//        {
+//            iSkip++;
+//            bRet = true;
+//        }
+//    }
+//
+//    if (iSkip - cb_color_old != cb_trace - i)
+//    {
+//        reset_buffer = true; //we have data after collor, so will wait for new one
+//    }
+//
+//    if (iSkip)
+//    {
+//        iSkip -= cb_color_old;
+//        if (iSkip > 0)
+//        {
+//            if (cb_trace - i - iSkip >= 0)
+//            {
+//                memmove(pTrace + i, pTrace + i + iSkip, cb_trace - i - iSkip);
+//                cb_trace -= iSkip;
+//            }
+//            else
+//            {
+//                ATLASSERT(FALSE);
+//                reset_buffer = true;
+//                bRet = false;
+//            }
+//        }
+//    }
+//
+//    if (bRet)
+//    {
+//        if (!color)
+//            color = color1 ? color1 : color2;
+//        reset_buffer = true;
+//    }
+//
+//    if (reset_buffer)
+//    {
+//        pThreadNode->cb_color_buf = 0;
+//    }
+//
+//    return bRet;
+//}
+
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark)
 {
-    int color = 0;
-    if (iSkip < cb && isdigit(pBuf[iSkip]))
-    {
-        color = pBuf[iSkip] - '0';
-        iSkip++;
-        if (iSkip < cb && isdigit(pBuf[iSkip]))
-        {
-            color = (10 * color) + (pBuf[iSkip] - '0');
-            iSkip++;
-        }
-    }
-    return color;
-}
-
-static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, WORD &cb_trace, int& color)
-{
-    char* pBuf = pThreadNode->COLOR_BUF;
-    bool bRet = false;
-    if (pTrace[i] == '\033')
-    {
-        pThreadNode->cb_color_buf = 0;
-    }
-    else if (pThreadNode->cb_color_buf == 0)
-    {
-        // no color in buffer and in trace
-        return false;
-    }
-    bool reset_buffer = false;
-    int cb_color_old = pThreadNode->cb_color_buf;
-    int cb_color = min(cb_trace - i, (int)sizeof(pThreadNode->COLOR_BUF) - pThreadNode->cb_color_buf - 1);
-    if (cb_color <= 0)
-    {
-        pThreadNode->cb_color_buf = 0;
-        return false;
-    }
-    memcpy(pBuf + pThreadNode->cb_color_buf, pTrace + i, cb_color);
-    pThreadNode->cb_color_buf += cb_color;
-    pBuf[pThreadNode->cb_color_buf] = 0;
-
-    int iSkip = 0, color1 = 0, color2 = 0;
-    if (pBuf[0] == '\033' && pBuf[1] == '[')
-    {
-        iSkip = 2;
-        color1 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-        if (pBuf[iSkip] == ';')
-        {
-            iSkip++;
-            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-        }
-        if (pBuf[iSkip] == ';') //getting third color as color2
-        {
-            iSkip++;
-            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-        }
-
-        if (iSkip < pThreadNode->cb_color_buf && pBuf[iSkip] == 'm')
-        {
-            iSkip++;
-            bRet = true;
-        }
-    }
-
-    if (iSkip - cb_color_old != cb_trace - i)
-    {
-        reset_buffer = true; //we have data after collor, so will wait for new one
-    }
-
-    if (iSkip)
-    {
-        iSkip -= cb_color_old;
-        if (iSkip > 0)
-        {
-            if (cb_trace - i - iSkip >= 0)
-            {
-                memmove(pTrace + i, pTrace + i + iSkip, cb_trace - i - iSkip);
-                cb_trace -= iSkip;
-            }
-            else
-            {
-                ATLASSERT(FALSE);
-                reset_buffer = true;
-                bRet = false;
-            }
-        }
-    }
-
-    if (bRet)
-    {
-        if (!color)
-            color = color1 ? color1 : color2;
-        reset_buffer = true;
-    }
-
-    if (reset_buffer)
-    {
-        pThreadNode->cb_color_buf = 0;
-    }
-
-    return bRet;
-}
-
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int& prcessed, int bookmark)
-{
-    if (prcessed >= pLogRec->cb_trace)
-        return NULL;
-
-    bool endsWithNewLine = false;
     unsigned char* pTrace = (unsigned char*)pLogRec->trace();
+	int cb_trace = pLogRec->cb_trace;
+	bool endsWithNewLine = (pLogRec->log_flags & LOG_FLAG_NEW_LINE);
+	//bool endsWithNewLine = cb_trace && pTrace[cb_trace - 1] == '\n';
+	//if (endsWithNewLine)
+	//	cb_trace--;
 #ifdef _DEBUG
     //if (221 == pLogRec->call_line)
-    if (0 != strstr((char*)pTrace, "tsc.c;3145"))
-        int k = 0;
+    //if (0 != strstr((char*)pTrace, "tsc.c;3145"))
+    //    int k = 0;
 #endif
-    int i = prcessed;
-    int cWhite = 0;
-    int color = 0;
-    setCollor(pThreadNode, pTrace, i, pLogRec->cb_trace, color);
-    for (; i < pLogRec->cb_trace; i++)
-    {
-        if (pTrace[i] == '\033')
-        {
-            if (setCollor(pThreadNode, pTrace, i, pLogRec->cb_trace, color))
-            {
-                i--;
-                continue;
-            }
-        }
-
-        if (pTrace[i] == '\n')
-        {
-            i++;
-            break;
-        }
-        //remove contraol c
-        if (pTrace[i] < ' ')
-        {
-            cWhite++;
-            pTrace[i] = ' ';
-        }
-    }
-    endsWithNewLine = (i > 0 && pTrace[i - 1] == '\n');
-    i -= prcessed;
-    if (i < 0)
-    {
-        ATLASSERT(FALSE);
-        i = 0;
-    }
-    int cb = (endsWithNewLine && i > 0) ? (i - 1) : i;
-
-    //do not add blank lines
-    if (cb == cWhite)
-    {
-        if (pThreadNode->latestTrace && endsWithNewLine)
-            pThreadNode->latestTrace->hasNewLine = 1;
-        if (!pThreadNode->emptLineColor && color)
-            pThreadNode->emptLineColor = color;
-        prcessed += i;
-        return NULL;
-    }
-
-    if (pThreadNode->emptLineColor && !color)
-    {
-        color = pThreadNode->emptLineColor;
-    }
-    pThreadNode->emptLineColor = 0;
 
     bool newChank = false;
-    // check if we need append to previous trace
-    if (pThreadNode->latestTrace) // && (pThreadNode->latestTrace->parent == pThreadNode->curentFlow)
+    // check if we can append to previous trace
+    if (pThreadNode->latestTrace)
     {
         if (pThreadNode->latestTrace->hasNewLine == 0)
         {
-            if (pThreadNode->latestTrace->cb_trace + cb < MAX_TRCAE_LEN)
+            if (pThreadNode->latestTrace->cb_trace + cb_trace < MAX_TRCAE_LEN)
                 newChank = true;
             else
                 pThreadNode->latestTrace->hasNewLine = 1;
         }
         if (endsWithNewLine && newChank)
             pThreadNode->latestTrace->hasNewLine = 1;
-        if (cb == 0 && pLogRec->call_line == pThreadNode->latestTrace->call_line)
+        if (cb_trace == 0 && pLogRec->call_line == pThreadNode->latestTrace->call_line)
             newChank = true;
     }
 
     if (newChank)
     {
-        if (cb)
-        {
-            TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
-            pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb);
-            if (!pLastChank->next_chank)
-                return nullptr;
-            TRACE_CHANK* pChank = pLastChank->next_chank;
-            pChank->len = cb;
-            pChank->next_chank = 0;
-            memcpy(pChank->trace, pLogRec->trace() + prcessed, cb);
-            pChank->trace[cb] = 0;
-            pThreadNode->latestTrace->cb_trace += cb;
-        }
-    }
+		if (cb_trace > 0)
+		{
+			TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
+			pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
+			if (!pLastChank->next_chank)
+				return nullptr;
+			TRACE_CHANK* pChank = pLastChank->next_chank;
+			pChank->len = cb_trace;
+			pChank->next_chank = 0;
+			memcpy(pChank->trace, pLogRec->trace(), cb_trace);
+			pChank->trace[cb_trace] = 0;
+			pThreadNode->latestTrace->cb_trace += cb_trace;
+		}
+	}
     else
     {
         //add new trace
@@ -479,7 +428,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
             fnName++;
             cb_fn_name--;
         }
-        TRACE_NODE* pNode = (TRACE_NODE*)m_pNodes->Add(sizeof(TRACE_NODE) + cb_fn_name + pLogRec->cb_module_name + sizeof(TRACE_CHANK) + cb, true);
+        TRACE_NODE* pNode = (TRACE_NODE*)m_pNodes->Add(sizeof(TRACE_NODE) + cb_fn_name + pLogRec->cb_module_name + sizeof(TRACE_CHANK) + cb_trace, true);
         if (!pNode)
             return nullptr;
 
@@ -491,6 +440,8 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 		pNode->retry_nn = g_retry_nn;
 		pNode->buff_nn = g_buff_nn;
 #endif
+		pNode->color = pLogRec->color;
+		pNode->severity = pLogRec->severity;
 		pNode->nn = pLogRec->nn;
         pNode->log_type = pLogRec->log_type;
 		pNode->log_flags = pLogRec->log_flags;
@@ -513,10 +464,10 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
         }
 
         TRACE_CHANK* pChank = pNode->getFirestChank();
-        pChank->len = cb;
+        pChank->len = cb_trace;
         pChank->next_chank = 0;
-        memcpy(pChank->trace, pLogRec->trace() + prcessed, cb);
-        pChank->trace[cb] = 0;
+        memcpy(pChank->trace, pLogRec->trace(), cb_trace);
+        pChank->trace[cb_trace] = 0;
 
         pNode->threadNode = pThreadNode;
         if (endsWithNewLine)
@@ -533,13 +484,13 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int&
 
         pThreadNode->latestTrace = pNode;
     }
+	//at this point latestTrace is not null.
+	if (!pThreadNode->latestTrace->color)
+		pThreadNode->latestTrace->color = pLogRec->color;
+	if (!pThreadNode->latestTrace->severity)
+		pThreadNode->latestTrace->severity = pLogRec->severity;
 
-    //update other fieds
-    if (!pThreadNode->latestTrace->color)
-        pThreadNode->latestTrace->color = color;
-
-    prcessed += i;
-    pThreadNode->latestTrace->lengthCalculated = 0;
+	pThreadNode->latestTrace->lengthCalculated = 0;
     return pThreadNode->latestTrace;
 }
 
@@ -582,16 +533,18 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	if (!rec->isValid())
         return 0;
 
+	//if (rec->log_flags & LOG_FLAG_JAVA)
+	//	return 1;
 
     APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
-        return 0;
+        return 1;
 
 	if (pack && pack->pack_nn > 0)
 	{
 		if (pack->pack_nn <= pAppNode->lastPackNN)
 		{
-			return 0;
+			return 1;
 		}
 		pAppNode->lastPackNN = pack->pack_nn;
 		pack->pack_nn = -pack->pack_nn; //stop checking package number
@@ -674,19 +627,8 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
     }
     else
     {
-        int prcessed = 0;
-        while (prcessed < rec->cb_trace)
-        {
-            int prcessed0 = prcessed;
-            int cb_trace0 = rec->cb_trace;
-            addTrace(pThreadNode, rec, prcessed, bookmark);
-            if (prcessed0 >= prcessed && cb_trace0 <= rec->cb_trace && prcessed < rec->cb_trace)
-            {
-                ATLASSERT(FALSE);
-                break;
-            }
-        }
-    }
+		addTrace(pThreadNode, rec, bookmark);
+	}
 
     return 1;
 }

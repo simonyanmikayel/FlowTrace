@@ -262,11 +262,7 @@ void TaskThread::FileSave(WORD cmd)
                     memcpy((void*)(rec->trace() + rec->cb_trace), "...", 3);
                     rec->cb_trace += 3;
                 }
-                if (p->color)
-                {
-                    cbColor = sprintf_s(szColor, _countof(szColor), "\033[0;%dm", p->color);
-                    rec->cb_trace += cbColor;
-                }
+				//TODO set colors
                 if (rec->cb_trace > 2000)
                     i = i;
             }

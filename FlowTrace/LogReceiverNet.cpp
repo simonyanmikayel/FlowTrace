@@ -267,7 +267,15 @@ void UdpThread::Work(LPVOID pWorkParam)
 				ack_retry_count--;
 				continue;
 			}
-			break;
+			int err = WSAGetLastError();
+			if (err == WSAECONNRESET) {
+				//On a UDP - datagram socket this error indicates a previous send operation resulted in an ICMP Port Unreachable message.
+				//stdlog("WSAECONNRESET\n");
+				continue;
+			}
+			else {
+				break;
+			}
 		}
 		if (cb != pack->data_len + sizeof(NET_PACK_INFO))
 		{

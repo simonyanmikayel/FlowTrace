@@ -5,15 +5,15 @@
 CSettings gSettings;
 
 // registry keys and values
-LPCTSTR STR_APP_REG_KEY				=_T("Software\\TermianlTools\\FlowTrace");
-LPCTSTR STR_APP_REG_VAL_WINDOWPOS	=_T("WindowPos");
+LPCTSTR STR_APP_REG_KEY = _T("Software\\TermianlTools\\FlowTrace");
+LPCTSTR STR_APP_REG_VAL_WINDOWPOS = _T("WindowPos");
 LPCTSTR STR_APP_REG_VAL_VERT_SPLITTER_POS = _T("VertSplitterPos");
 LPCTSTR STR_APP_REG_VAL_HORZ_SPLITTER_POS = _T("HorzSplitterPos");
 LPCTSTR STR_APP_REG_VAL_STACK_SPLITTER_POS = _T("StackSplitterPos");
 
-LPCTSTR STR_APP_REG_VAL_FONTNAME	=_T("FontName_1");
-LPCTSTR STR_APP_REG_VAL_FONTWIDTH =_T("FontWeight");
-LPCTSTR STR_APP_REG_VAL_FONTSIZE =_T("FontSize");
+LPCTSTR STR_APP_REG_VAL_FONTNAME = _T("FontName_1");
+LPCTSTR STR_APP_REG_VAL_FONTWIDTH = _T("FontWeight");
+LPCTSTR STR_APP_REG_VAL_FONTSIZE = _T("FontSize");
 //LPCTSTR STR_APP_REG_VAL_BK_COLOR = _T("BkColor");
 //LPCTSTR STR_APP_REG_VAL_TEXT_COLOR = _T("TextColor");
 //LPCTSTR STR_APP_REG_VAL_INFO_TEXT_COLOR = _T("InfoTextColor");
@@ -71,317 +71,356 @@ LPCTSTR STR_APP_REG_VAL_Modules = _T("Modules");
 
 static CHAR* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsolata
 
-CSettings::CSettings() : 
-CRegKeyExt(STR_APP_REG_KEY)
-, m_Font(NULL)
+CSettings::CSettings() :
+	CRegKeyExt(STR_APP_REG_KEY)
+	, m_Font(NULL)
 {
-  Read(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos, 50);
-  Read(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos, 50);
-  Read(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos, 50);
-  Read(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden, TRUE);
-  Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
-  Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
-  Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
-  Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
-  Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
-  m_UsePrefModule = FALSE;
-  Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
+	Read(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos, 50);
+	Read(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos, 50);
+	Read(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos, 50);
+	Read(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden, TRUE);
+	Read(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden, FALSE);
+	Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
+	Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
+	Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
+	Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
+	m_UsePrefModule = FALSE;
+	Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
 
-  Read(STR_APP_REG_VAL_ColLineNN, m_ColLineNN);
-  Read(STR_APP_REG_VAL_ColNN, m_ColNN);
-  Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
-  Read(STR_APP_REG_VAL_ColPID, m_ColPID);
-  Read(STR_APP_REG_VAL_ColTID, m_ColTID);
-  Read(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN);
-  Read(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount);
-  Read(STR_APP_REG_VAL_ColFunc, m_ColFunc, 1);
-  Read(STR_APP_REG_VAL_ColLine, m_ColLine, 1);
-  Read(STR_APP_REG_VAL_ColTime, m_ColTime);
-  Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
-  Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
+	Read(STR_APP_REG_VAL_ColLineNN, m_ColLineNN);
+	Read(STR_APP_REG_VAL_ColNN, m_ColNN);
+	Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
+	Read(STR_APP_REG_VAL_ColPID, m_ColPID);
+	Read(STR_APP_REG_VAL_ColTID, m_ColTID);
+	Read(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN);
+	Read(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount);
+	Read(STR_APP_REG_VAL_ColFunc, m_ColFunc, 1);
+	Read(STR_APP_REG_VAL_ColLine, m_ColLine, 1);
+	Read(STR_APP_REG_VAL_ColTime, m_ColTime);
+	Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
+	Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
 
-  Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
-  Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");
-  Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
-  Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
-  Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
-  Read(STR_APP_REG_VAL_AndroidProject, m_AndroidProject, sizeof(m_AndroidProject), "");
-  Read(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath, sizeof(m_PrefModulePath), "");
+	Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
+	Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");
+	Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
+	Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
+	Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
+	Read(STR_APP_REG_VAL_AndroidProject, m_AndroidProject, sizeof(m_AndroidProject), "");
+	Read(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath, sizeof(m_PrefModulePath), "");
 
-  //Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
-  //Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
-  //Read(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor, DefInfoTextColor);
-  //Read(STR_APP_REG_VAL_SEL_COLOR, m_SelColor, DefSelColor);
-  //Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefSyncColor);
-  //Read(STR_APP_REG_VAL_SYNC_COLOR, m_BkSelColor, DefSyncColor);
-  //Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefBkSelColor);
-  //Read(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor, DefSerachColor);
-  //Read(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor, DefCurSerachColor);
+	//Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
+	//Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
+	//Read(STR_APP_REG_VAL_INFO_TEXT_COLOR, m_InfoTextColor, DefInfoTextColor);
+	//Read(STR_APP_REG_VAL_SEL_COLOR, m_SelColor, DefSelColor);
+	//Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefSyncColor);
+	//Read(STR_APP_REG_VAL_SYNC_COLOR, m_BkSelColor, DefSyncColor);
+	//Read(STR_APP_REG_VAL_BK_SEL_COLOR, m_BkSelColor, DefBkSelColor);
+	//Read(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor, DefSerachColor);
+	//Read(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor, DefCurSerachColor);
 
-  Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
+	Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
 
 	InitFont();
 }
 
 bool CSettings::CheckUIFont(HDC hdc)
 {
-  bool ok = true;
-  return ok;
+	bool ok = true;
+	return ok;
 }
 
 CSettings::~CSettings()
 {
 	DeleteFont();
-  RemoveFontMemResourceEx(m_resourceFonthandle);
+	RemoveFontMemResourceEx(m_resourceFonthandle);
 }
 
 void CSettings::AddDefaultFont()
 {
-  HINSTANCE hResInstance = _Module.m_hInst;
+	HINSTANCE hResInstance = _Module.m_hInst;
 
-  HRSRC res = FindResource(hResInstance, MAKEINTRESOURCE(IDR_FONT1), _T("FONTS"));
-  if (res)
-  {
-    HGLOBAL mem = LoadResource(hResInstance, res);
-    void *data = LockResource(mem);
-    DWORD len = SizeofResource(hResInstance, res);
+	HRSRC res = FindResource(hResInstance, MAKEINTRESOURCE(IDR_FONT1), _T("FONTS"));
+	if (res)
+	{
+		HGLOBAL mem = LoadResource(hResInstance, res);
+		void *data = LockResource(mem);
+		DWORD len = SizeofResource(hResInstance, res);
 
-    DWORD nFonts;
-    m_resourceFonthandle = AddFontMemResourceEx(
-      data,       // font resource
-      len,       // number of bytes in font resource 
-      NULL,          // Reserved. Must be 0.
-      &nFonts      // number of fonts installed
-    );
-  }
+		DWORD nFonts;
+		m_resourceFonthandle = AddFontMemResourceEx(
+			data,       // font resource
+			len,       // number of bytes in font resource 
+			NULL,          // Reserved. Must be 0.
+			&nFonts      // number of fonts installed
+		);
+	}
 }
 
 void CSettings::InitFont()
 {
-  DeleteFont();
+	DeleteFont();
 
-  ZeroMemory(&m_logFont, sizeof(LOGFONT));
+	ZeroMemory(&m_logFont, sizeof(LOGFONT));
 
-  Read(STR_APP_REG_VAL_FONTNAME, m_logFont.lfFaceName, LF_FACESIZE, DEF_FONT_NAME);
-  Read(STR_APP_REG_VAL_FONTWIDTH, m_logFont.lfWeight, FW_NORMAL);
-  Read(STR_APP_REG_VAL_FONTSIZE, m_FontSize, DefFontSize);
+	Read(STR_APP_REG_VAL_FONTNAME, m_logFont.lfFaceName, LF_FACESIZE, DEF_FONT_NAME);
+	Read(STR_APP_REG_VAL_FONTWIDTH, m_logFont.lfWeight, FW_NORMAL);
+	Read(STR_APP_REG_VAL_FONTSIZE, m_FontSize, DefFontSize);
 
-  m_FontName = m_logFont.lfFaceName;
-  m_FontWeight = m_logFont.lfWeight;
+	m_FontName = m_logFont.lfFaceName;
+	m_FontWeight = m_logFont.lfWeight;
 
-  if (m_FontSize <= 4) m_FontSize = DefFontSize;
+	if (m_FontSize <= 4) m_FontSize = DefFontSize;
 
-  m_logFont.lfWeight = (m_logFont.lfWeight <= FW_MEDIUM) ? FW_NORMAL : FW_BOLD;
+	m_logFont.lfWeight = (m_logFont.lfWeight <= FW_MEDIUM) ? FW_NORMAL : FW_BOLD;
 
-  HDC hdc = CreateIC(TEXT("DISPLAY"), NULL, NULL, NULL);
-  m_logFont.lfHeight = -MulDiv(m_FontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
-  m_logFont.lfQuality = CLEARTYPE_NATURAL_QUALITY; //ANTIALIASED_QUALITY
+	HDC hdc = CreateIC(TEXT("DISPLAY"), NULL, NULL, NULL);
+	m_logFont.lfHeight = -MulDiv(m_FontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+	m_logFont.lfQuality = CLEARTYPE_NATURAL_QUALITY; //ANTIALIASED_QUALITY
 
-  m_Font = CreateFontIndirect(&m_logFont);
+	m_Font = CreateFontIndirect(&m_logFont);
 
-  TEXTMETRIC  tm;
-  SelectObject(hdc, m_Font);
-  GetTextMetrics(hdc, &tm);
-  m_FontHeight = tm.tmHeight + tm.tmExternalLeading;
-  m_FontWidth = tm.tmAveCharWidth;
+	TEXTMETRIC  tm;
+	SelectObject(hdc, m_Font);
+	GetTextMetrics(hdc, &tm);
+	m_FontHeight = tm.tmHeight + tm.tmExternalLeading;
+	m_FontWidth = tm.tmAveCharWidth;
 
-  DeleteDC(hdc);
+	DeleteDC(hdc);
 }
 
 void CSettings::SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG fontSize)
 {
-  Write(STR_APP_REG_VAL_FONTNAME, lfFaceName);
-  Write(STR_APP_REG_VAL_FONTWIDTH, lfWeight);
-  Write(STR_APP_REG_VAL_FONTSIZE, fontSize);
-  InitFont();
+	Write(STR_APP_REG_VAL_FONTNAME, lfFaceName);
+	Write(STR_APP_REG_VAL_FONTWIDTH, lfWeight);
+	Write(STR_APP_REG_VAL_FONTSIZE, fontSize);
+	InitFont();
 }
 
 void CSettings::DeleteFont()
 {
-  if (m_Font){
-    DeleteObject(m_Font);
-    m_Font = NULL;
-  }
+	if (m_Font) {
+		DeleteObject(m_Font);
+		m_Font = NULL;
+	}
 }
 
 void CSettings::RestoreWindPos(HWND hWnd)
 {
-  WINDOWPLACEMENT wpl;
-  if (Read(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl))){
-    RECT rcWnd = wpl.rcNormalPosition;
-    int cx, cy, x, y;
-    cx = rcWnd.right - rcWnd.left;
-    cy = rcWnd.bottom - rcWnd.top;
-    x = rcWnd.left;
-    y = rcWnd.top;
+	WINDOWPLACEMENT wpl;
+	if (Read(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl))) {
+		RECT rcWnd = wpl.rcNormalPosition;
+		int cx, cy, x, y;
+		cx = rcWnd.right - rcWnd.left;
+		cy = rcWnd.bottom - rcWnd.top;
+		x = rcWnd.left;
+		y = rcWnd.top;
 
-    // Get the monitor info
-    MONITORINFO monInfo;
-    HMONITOR hMonitor = ::MonitorFromPoint(CPoint(x, y), MONITOR_DEFAULTTONEAREST);
-    monInfo.cbSize = sizeof(MONITORINFO);
-    if (::GetMonitorInfo(hMonitor, &monInfo))
-    {
-      // Adjust for work area
-      x += monInfo.rcWork.left - monInfo.rcMonitor.left;
-      y += monInfo.rcWork.top - monInfo.rcMonitor.top;
-      // Ensure top left point is on screen
-      if (CRect(monInfo.rcWork).PtInRect(CPoint(x, y)) == FALSE)
-      {
-        x = monInfo.rcWork.left;
-        y = monInfo.rcWork.top;
-      }
-    }
-    else
-    {
-      RECT rcScreen;
-      SystemParametersInfo(SPI_GETWORKAREA, 0, &rcScreen, 0);
+		// Get the monitor info
+		MONITORINFO monInfo;
+		HMONITOR hMonitor = ::MonitorFromPoint(CPoint(x, y), MONITOR_DEFAULTTONEAREST);
+		monInfo.cbSize = sizeof(MONITORINFO);
+		if (::GetMonitorInfo(hMonitor, &monInfo))
+		{
+			// Adjust for work area
+			x += monInfo.rcWork.left - monInfo.rcMonitor.left;
+			y += monInfo.rcWork.top - monInfo.rcMonitor.top;
+			// Ensure top left point is on screen
+			if (CRect(monInfo.rcWork).PtInRect(CPoint(x, y)) == FALSE)
+			{
+				x = monInfo.rcWork.left;
+				y = monInfo.rcWork.top;
+			}
+		}
+		else
+		{
+			RECT rcScreen;
+			SystemParametersInfo(SPI_GETWORKAREA, 0, &rcScreen, 0);
 
-      cx = min(rcScreen.right, (LONG)cx);
-      cy = min(rcScreen.bottom, (LONG)cy);
-      x = max(0L, min((LONG)x, rcScreen.right - cx));
-      y = max(0L, min((LONG)y, rcScreen.bottom - cy));
-    }
+			cx = min(rcScreen.right, (LONG)cx);
+			cy = min(rcScreen.bottom, (LONG)cy);
+			x = max(0L, min((LONG)x, rcScreen.right - cx));
+			y = max(0L, min((LONG)y, rcScreen.bottom - cy));
+		}
 
-    ::SetWindowPos(hWnd, 0, x, y, cx, cy, SWP_NOZORDER);
+		::SetWindowPos(hWnd, 0, x, y, cx, cy, SWP_NOZORDER);
 
-    if (wpl.flags & WPF_RESTORETOMAXIMIZED)
-    {
-      //::ShowWindow(hWnd, SW_SHOWMAXIMIZED);
-      ::PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-    }
-  }
+		if (wpl.flags & WPF_RESTORETOMAXIMIZED)
+		{
+			//::ShowWindow(hWnd, SW_SHOWMAXIMIZED);
+			::PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+		}
+	}
 }
 
 void CSettings::SaveWindPos(HWND hWnd)
 {
-  WINDOWPLACEMENT wpl = { sizeof(WINDOWPLACEMENT) };
-  if (::GetWindowPlacement(hWnd, &wpl))
-    Write(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl));
+	WINDOWPLACEMENT wpl = { sizeof(WINDOWPLACEMENT) };
+	if (::GetWindowPlacement(hWnd, &wpl))
+		Write(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl));
 }
 
-void CSettings::SetConsoleColor(int consoleColor, DWORD& textColor, DWORD& bkColor)
+bool CSettings::SetTraceSeverity(UDP_LOG_Severity severity, DWORD& textColor, DWORD& bkColor)
 {
-  if (consoleColor)
-  {
-    if (consoleColor == 30)
-      textColor = RGB(0, 0, 0);//30	Black
-    else if (consoleColor == 31)
-      textColor = RGB(255, 0, 0);//31	Red
-    else if (consoleColor == 32)
-      textColor = RGB(0, 255, 0);//32	Green
-    else if (consoleColor == 33)
-      textColor = RGB(255, 255, 0);//33	Yellow
-    else if (consoleColor == 34)
-      textColor = RGB(0, 0, 255);//34	Blue
-    else if (consoleColor == 35)
-      textColor = RGB(255, 0, 255);//35	Magenta
-    else if (consoleColor == 36)
-      textColor = RGB(0, 255, 255);//36	Cyan
-    else if (consoleColor == 37)
-      textColor = RGB(128, 128, 128);//37	Light gray
-
-    else if (consoleColor == 40)
-      bkColor = RGB(0, 0, 0);//40	Black
-    else if (consoleColor == 41)
-      bkColor = RGB(255, 0, 0);//41	Red
-    else if (consoleColor == 42)
-      bkColor = RGB(0, 255, 0);//42	Green
-    else if (consoleColor == 43)
-      bkColor = RGB(255, 255, 0);//43	Yellow
-    else if (consoleColor == 44)
-      bkColor = RGB(0, 0, 255);//44	Blue
-    else if (consoleColor == 45)
-      bkColor = RGB(255, 0, 255);//45	Magenta
-    else if (consoleColor == 46)
-      bkColor = RGB(0, 255, 255);//46	Cyan
-    else //if (consoleColor == 47)
-      bkColor = RGB(128, 128, 128);//47	Light gray
-  }
+	bool ret = true;
+	switch (severity)
+	{
+	case UDP_LOG_FATAL:
+	case UDP_LOG_ERROR:
+		textColor = RGB(255, 0, 0);//31	Red
+		break;
+	case UDP_LOG_WARNING:
+		textColor = RGB(255, 255, 0);//33	Yellow
+		break;
+	case UDP_LOG_INFO:
+		textColor = RGB(0, 255, 0);//32	Green
+		break;
+	default:
+		ret = false;
+	}
+	return ret;
 }
 
-static const int MAX_MODULES = 16*256;
+bool CSettings::SetTraceColor(int color, DWORD& textColor, DWORD& bkColor)
+{
+	bool ret = true;
+	//return ret;
+	if (color >= 30 && color <= 37)
+	{
+		ret = true;
+		if (color == 30) {
+			textColor = RGB(0, 0, 0);//30	Black
+			bkColor = RGB(255, 255, 255);
+		}
+		else if (color == 31)
+			textColor = RGB(255, 0, 0);//31	Red
+		else if (color == 32)
+			textColor = RGB(0, 255, 0);//32	Green
+		else if (color == 33)
+			textColor = RGB(255, 255, 0);//33	Yellow
+		else if (color == 34)
+			textColor = RGB(0, 0, 255);//34	Blue
+		else if (color == 35)
+			textColor = RGB(255, 0, 255);//35	Magenta
+		else if (color == 36)
+			textColor = RGB(0, 255, 255);//36	Cyan
+		else if (color == 37)
+			textColor = RGB(128, 128, 128);//37	Light gray
+	}
+	else if (color >= 40 && color <= 47)
+	{
+		if (color == 40) {
+			bkColor = RGB(0, 0, 0);//40	Black
+			textColor = RGB(255, 255, 255);
+		}
+		else if (color == 41)
+			textColor = RGB(255, 0, 0);//41	Red
+		else if (color == 42)
+			textColor = RGB(0, 255, 0);//42	Green
+		else if (color == 43)
+			textColor = RGB(255, 255, 0);//43	Yellow
+		else if (color == 44)
+			textColor = RGB(0, 0, 255);//44	Blue
+		else if (color == 45)
+			textColor = RGB(255, 0, 255);//45	Magenta
+		else if (color == 46)
+			textColor = RGB(0, 255, 255);//46	Cyan
+		else if (color == 47)
+			textColor = RGB(128, 128, 128);//47	Light gray
+	}
+	else
+	{
+		ret = false;
+	}
+	return ret;
+}
+
+static const int MAX_MODULES = 16 * 256;
 static CHAR szModuls[MAX_MODULES + 1];
 void CSettings::SetModules(const CHAR* szList)
 {
-    size_t n = _tcslen(szList);
-    n = min((size_t)MAX_MODULES, n);
-    memcpy(szModuls, szList, n);
-    szModuls[n] = 0;
-    Write(STR_APP_REG_VAL_Modules, szModuls);
+	size_t n = _tcslen(szList);
+	n = min((size_t)MAX_MODULES, n);
+	memcpy(szModuls, szList, n);
+	szModuls[n] = 0;
+	Write(STR_APP_REG_VAL_Modules, szModuls);
 }
 CHAR* CSettings::GetModules()
 {
 #ifdef _DEBUG
-    //ZeroMemory(szModuls, sizeof(szModuls));
+	//ZeroMemory(szModuls, sizeof(szModuls));
 #endif
-    if (!Read(STR_APP_REG_VAL_Modules, szModuls, MAX_MODULES))
-    {
-        szModuls[0] = 0;
-    }
-    return szModuls;
+	if (!Read(STR_APP_REG_VAL_Modules, szModuls, MAX_MODULES))
+	{
+		szModuls[0] = 0;
+	}
+	return szModuls;
 }
 
 static const int MAX_SEARCH_LIST = 255;
 static CHAR searchList[MAX_SEARCH_LIST + 1];
 void CSettings::SetSearchList(CHAR* szList)
 {
-  size_t n = _tcslen(szList);
-  n = min((size_t)MAX_SEARCH_LIST, n);
-  memcpy(searchList, szList, n);
-  searchList[n] = 0;
-  Write(STR_APP_REG_VAL_SEARCH_LIST, searchList);
+	size_t n = _tcslen(szList);
+	n = min((size_t)MAX_SEARCH_LIST, n);
+	memcpy(searchList, szList, n);
+	searchList[n] = 0;
+	Write(STR_APP_REG_VAL_SEARCH_LIST, searchList);
 }
 CHAR* CSettings::GetSearchList()
 {
-    if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
-    {
-        searchList[0] = 0;
-    }
-    return searchList;
+	if (!Read(STR_APP_REG_VAL_SEARCH_LIST, searchList, MAX_SEARCH_LIST))
+	{
+		searchList[0] = 0;
+	}
+	return searchList;
 }
-DWORD CSettings::InfoTextColor()
+DWORD CSettings::InfoTextColorNative()
 {
-  return RGB(128, 128, 128);
+	return RGB(192, 192, 192);
+}
+DWORD CSettings::InfoTextColorAndroid()
+{
+	return RGB(128, 128, 128);
 }
 DWORD CSettings::SerachColor()
 {
-  return RGB(0xA0, 0xA9, 0x3d);
+	return RGB(0xA0, 0xA9, 0x3d);
 }
 DWORD CSettings::CurSerachColor()
 {
-  return RGB(64, 128, 64);
+	return RGB(64, 128, 64);
 }
 DWORD CSettings::LogListTxtColor()
 {
-  return RGB(176, 176, 176);
+	return RGB(176, 176, 176);
 }
 DWORD CSettings::LogListBkColor()
 {
-  return RGB(0, 0, 0);
+	return RGB(0, 0, 0);
 }
 DWORD CSettings::SelectionTxtColor()
 {
-  return RGB(255, 255, 255);
+	return RGB(255, 255, 255);
 }
 DWORD CSettings::SelectionBkColor(bool haveFocus)
 {
-  return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
+	return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
 }
 
 void CSettings::SetVertSplitterPos(int i) { m_VertSplitterPos = i;  Write(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos); }
 void CSettings::SetHorzSplitterPos(int i) { m_HorzSplitterPos = i;  Write(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos); }
 void CSettings::SetStackSplitterPos(int i) { m_StackSplitterPos = i;  Write(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos); }
 
-void CSettings::SetColLineNN(int i){ m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
+void CSettings::SetColLineNN(int i) { m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }
-void CSettings::SetColApp(int i){ m_ColApp = i; Write(STR_APP_REG_VAL_ColApp, m_ColApp); }
+void CSettings::SetColApp(int i) { m_ColApp = i; Write(STR_APP_REG_VAL_ColApp, m_ColApp); }
 void CSettings::SetColPID(int i) { m_ColPID = i; Write(STR_APP_REG_VAL_ColPID, m_ColPID); }
 void CSettings::SetColTID(int i) { m_ColTID = i; Write(STR_APP_REG_VAL_ColTID, m_ColTID); }
 void CSettings::SetColThreadNN(int i) { m_ColThreadNN = i; Write(STR_APP_REG_VAL_ColThreadNN, m_ColThreadNN); }
-void CSettings::SetColFunc(int i){ m_ColFunc = i; Write(STR_APP_REG_VAL_ColFunc, m_ColFunc); }
-void CSettings::SetColLine(int i){ m_ColLine = i; Write(STR_APP_REG_VAL_ColLine, m_ColLine); }
-void CSettings::SetColTime(int i){ m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
-void CSettings::SetColCallAddr(int i){ m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
+void CSettings::SetColFunc(int i) { m_ColFunc = i; Write(STR_APP_REG_VAL_ColFunc, m_ColFunc); }
+void CSettings::SetColLine(int i) { m_ColLine = i; Write(STR_APP_REG_VAL_ColLine, m_ColLine); }
+void CSettings::SetColTime(int i) { m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
+void CSettings::SetColCallAddr(int i) { m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
 void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount); }
 
@@ -392,13 +431,13 @@ void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_R
 //void CSettings::SetSerachColor(DWORD i){ m_SerachColor = i; Write(STR_APP_REG_VAL_SEARCH_COLOR, m_SerachColor); }
 //void CSettings::SetCurSerachColor(DWORD i){ m_CurSerachColor = i; Write(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor); }
 
-void CSettings::SetFlowTracesHiden(DWORD i){ m_FlowTracesHiden = i; Write(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden); }
-void CSettings::SetTreeViewHiden(DWORD i){ m_TreeViewHiden = i; Write(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden); }
+void CSettings::SetFlowTracesHiden(DWORD i) { m_FlowTracesHiden = i; Write(STR_APP_REG_VAL_FLOW_TRACE_HIGEN, m_FlowTracesHiden); }
+void CSettings::SetTreeViewHiden(DWORD i) { m_TreeViewHiden = i; Write(STR_APP_REG_VAL_TREE_VIEW_HIDEN, m_TreeViewHiden); }
 void CSettings::SetInfoHiden(DWORD i) { m_InfoHiden = i; Write(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden); }
 void CSettings::SetShowAppIp(DWORD i) { m_ShowAppIp = i; Write(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp); }
 void CSettings::SetShowElapsedTime(DWORD i) { m_ShowElapsedTime = i; Write(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime); }
 void CSettings::SetResolveAddr(DWORD i) { m_ResolveAddr = i; Write(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr); }
-void CSettings::SetUsePrefModule(DWORD i) { m_UsePrefModule = i;  }
+void CSettings::SetUsePrefModule(DWORD i) { m_UsePrefModule = i; }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
 void CSettings::SetEclipsePath(const CHAR* EclipsePath) { int c = _countof(m_EclipsePath); _tcsncpy_s(m_EclipsePath, c, EclipsePath, c - 1); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
@@ -409,7 +448,7 @@ void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m
 void CSettings::SetAndroidProject(const CHAR* AndroidProject) { int c = _countof(m_AndroidProject); _tcsncpy_s(m_AndroidProject, c, AndroidProject, c - 1); m_AndroidProject[c] = 0; Write(STR_APP_REG_VAL_AndroidProject, m_AndroidProject); }
 void CSettings::SetPrefModulePath(const CHAR* PrefModulePath) { int c = _countof(m_PrefModulePath); _tcsncpy_s(m_PrefModulePath, c, PrefModulePath, c - 1); m_PrefModulePath[c] = 0; Write(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath); }
 
-void CSettings::SetUdpPort(DWORD i){ m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
+void CSettings::SetUdpPort(DWORD i) { m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 
 
 
