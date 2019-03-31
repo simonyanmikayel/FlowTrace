@@ -328,49 +328,51 @@ void TaskThread::FileImport()
         char* appName = "app_name";
         char* moduleName = "libAppSel.so";
         char* fnName = "fn_name";
-        char* trace= "trace\n";
+        char* trace= "trace";
 
-        ROW_LOG_REC* rec1 = (ROW_LOG_REC*)log_buf[0];
-        rec1->log_type = LOG_TYPE_ENTER;
-        rec1->cb_app_name = (WORD)strlen(appName);
-        rec1->cb_module_name = (WORD)strlen(moduleName);
-        rec1->cb_fn_name = (WORD)strlen(fnName);
-        rec1->this_fn = 0x19800;
-        rec1->call_site = 0x199F4;
-        memcpy((void*)rec1->appName(), appName, rec1->cb_app_name);
-        memcpy((void*)rec1->moduleName(), moduleName, rec1->cb_module_name);
-        memcpy((void*)rec1->fnName(), fnName, rec1->cb_fn_name);
-        rec1->len = rec1->size();
+        ROW_LOG_REC* recEnter = (ROW_LOG_REC*)log_buf[0];
+        recEnter->log_type = LOG_TYPE_ENTER;
+        recEnter->cb_app_name = (WORD)strlen(appName);
+        recEnter->cb_module_name = (WORD)strlen(moduleName);
+        recEnter->cb_fn_name = (WORD)strlen(fnName);
+        recEnter->this_fn = 0x19800;
+        recEnter->call_site = 0x199F4;
+        memcpy((void*)recEnter->appName(), appName, recEnter->cb_app_name);
+        memcpy((void*)recEnter->moduleName(), moduleName, recEnter->cb_module_name);
+        memcpy((void*)recEnter->fnName(), fnName, recEnter->cb_fn_name);
+        recEnter->len = recEnter->size();
 
-        ROW_LOG_REC* rec2 = (ROW_LOG_REC*)log_buf[1];
-        memcpy(rec2, rec1, rec1->len);
-        rec2->log_type = LOG_TYPE_TRACE;
-        rec2->cb_trace = (WORD)strlen(trace);
-        memcpy((void*)rec2->trace(), trace, rec2->cb_trace);
-        rec2->len = rec2->size();
+        ROW_LOG_REC* recTrace = (ROW_LOG_REC*)log_buf[1];
+        memcpy(recTrace, recEnter, recEnter->len);
+        recTrace->log_type = LOG_TYPE_TRACE;
+		recTrace->log_flags |= LOG_FLAG_NEW_LINE;
+		recTrace->severity = UDP_LOG_COMMON;
+        recTrace->cb_trace = (WORD)strlen(trace);
+        memcpy((void*)recTrace->trace(), trace, recTrace->cb_trace);
+        recTrace->len = recTrace->size();
 
-        ROW_LOG_REC* rec3 = (ROW_LOG_REC*)log_buf[2];
-        memcpy(rec3, rec1, rec1->len);
-        rec3->log_type = LOG_TYPE_EXIT;
+        ROW_LOG_REC* recExit = (ROW_LOG_REC*)log_buf[2];
+        memcpy(recExit, recEnter, recEnter->len);
+        recExit->log_type = LOG_TYPE_EXIT;
 
-        ss = ss && rec1->isValid();
-        ss = ss && rec2->isValid();
-        ss = ss && rec3->isValid();
+        ss = ss && recEnter->isValid();
+        ss = ss && recTrace->isValid();
+        ss = ss && recExit->isValid();
         int nn = 0;
         for (DWORD j = 0; ss && j < m_count && IsWorking(); j++)
         {
             m_progress = j;
             for (int i = 0; i < cRecursion; i++)
             {
-                rec1->nn = ++nn;
-                ss = ss && gArchive.append(rec1);
-                rec2->nn = ++nn;
-                ss = ss && gArchive.append(rec2);
+                recEnter->nn = ++nn;
+                ss = ss && gArchive.append(recEnter);
+                recTrace->nn = ++nn;
+                ss = ss && gArchive.append(recTrace);
             }
             for (int i = 0; i < cRecursion; i++)
             {
-                rec3->nn = ++nn;
-                ss = ss && gArchive.append(rec3);
+                recExit->nn = ++nn;
+                ss = ss && gArchive.append(recExit);
             }
         }
     }

@@ -239,7 +239,7 @@ err:
 
 void UdpThread::Work(LPVOID pWorkParam)
 {
-	int slen, cb, cb_read;
+	int slen, cb_recv, cb_parced;
 	struct sockaddr_in si_other;
 	slen = sizeof(si_other);
 	NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
@@ -257,11 +257,9 @@ void UdpThread::Work(LPVOID pWorkParam)
 		}
 
 		//try to receive data, this is a blocking call
-		if ((cb = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 0)
+		if ((cb_recv = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 0)
 		{
 			if (ack_retry_count) {
-				if (pack->pack_nn < 0)
-					pack->pack_nn = -pack->pack_nn;
 				//stdlog("retry ack %d\n", pack->pack_nn);
 				sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other));
 				ack_retry_count--;
@@ -277,9 +275,9 @@ void UdpThread::Work(LPVOID pWorkParam)
 				break;
 			}
 		}
-		if (cb != pack->data_len + sizeof(NET_PACK_INFO))
+		if (cb_recv != pack->data_len + sizeof(NET_PACK_INFO))
 		{
-			stdlog("incompleate package received %d %d\n", cb, pack->data_len + sizeof(NET_PACK_INFO));
+			stdlog("incompleate package received %d %d\n", cb_recv, pack->data_len + sizeof(NET_PACK_INFO));
 			continue;
 		}
 		if (!pack->retry_count)
@@ -298,12 +296,12 @@ void UdpThread::Work(LPVOID pWorkParam)
 			continue;
 
 		ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(NET_PACK_INFO));
-		cb_read = sizeof(NET_PACK_INFO);
+		cb_parced = sizeof(NET_PACK_INFO);
 		gLogReceiverNet.lock();
-		while (cb_read < cb)
+		while (cb_parced < cb_recv)
 		{
 			ATLASSERT(rec->isValid());
-			if (rec->len > (cb - cb_read) || !rec->isValid())
+			if (rec->len > (cb_recv - cb_parced) || !rec->isValid())
 			{
 				//Terminate();
 				break;
@@ -312,8 +310,8 @@ void UdpThread::Work(LPVOID pWorkParam)
 			{
 				break;
 			}
-			cb_read += rec->len;
-			rec = (ROW_LOG_REC*)(buf + cb_read);
+			cb_parced += rec->len;
+			rec = (ROW_LOG_REC*)(buf + cb_parced);
 		}
 		gLogReceiverNet.unlock();
 	}

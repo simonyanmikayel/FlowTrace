@@ -193,8 +193,12 @@ struct INFO_NODE : LOG_NODE
     int call_line;
     DWORD sec;
     DWORD msec;
-    bool isEnter() { return log_type == LOG_TYPE_ENTER; }
-    bool isTrace() { return log_type == LOG_TYPE_TRACE; }
+    bool isEnter() { 
+		return log_type == LOG_TYPE_ENTER; 
+	}
+    bool isTrace() { 
+		return log_type == LOG_TYPE_TRACE; 
+	}
     char* fnName();
     char* moduleName();
     int moduleNameLength();

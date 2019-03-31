@@ -19,7 +19,7 @@ struct LOG_REC_BASE
 	int len;
 	BYTE log_type;
 	BYTE log_flags;
-	BYTE color;
+	BYTE unused;
 	BYTE severity;
 	unsigned int nn;
 	WORD cb_app_name;
@@ -92,10 +92,10 @@ typedef struct
 {
     int data_len;
     int pack_nn;
-	short retry_nn;
-	short buff_nn;
-	short retry_delay;
-	short retry_count;
+	int retry_nn;
+	int buff_nn;
+	int retry_delay;
+	int retry_count;
 }NET_PACK_INFO;
 #pragma pack(pop)
 
@@ -143,8 +143,9 @@ private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(ROW_LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
-    inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
-    inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
+	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
+	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsigned char* trace, int cb_trace, int color, bool endsWithNewLine, int bookmark);
+	inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
     DWORD m_lost;
     static DWORD archiveNumber;
