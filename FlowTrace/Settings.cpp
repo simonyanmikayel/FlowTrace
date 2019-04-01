@@ -287,11 +287,12 @@ bool CSettings::SetTraceColor(int color, DWORD& textColor, DWORD& bkColor)
 	if (color >= 30 && color <= 37)
 	{
 		ret = true;
-		if (color == 30) {
-			textColor = RGB(0, 0, 0);//30	Black
-			bkColor = RGB(255, 255, 255);
-		}
-		else if (color == 31)
+		//if (color == 30) {
+		//	textColor = RGB(0, 0, 0);//30	Black
+		//	bkColor = RGB(255, 255, 255);
+		//}
+		//else 
+		if (color == 31)
 			textColor = RGB(255, 0, 0);//31	Red
 		else if (color == 32)
 			textColor = RGB(0, 255, 0);//32	Green
@@ -308,11 +309,12 @@ bool CSettings::SetTraceColor(int color, DWORD& textColor, DWORD& bkColor)
 	}
 	else if (color >= 40 && color <= 47)
 	{
-		if (color == 40) {
-			bkColor = RGB(0, 0, 0);//40	Black
-			textColor = RGB(255, 255, 255);
-		}
-		else if (color == 41)
+		//if (color == 40) {
+		//	bkColor = RGB(0, 0, 0);//40	Black
+		//	textColor = RGB(255, 255, 255);
+		//}
+		//else 
+		if (color == 41)
 			textColor = RGB(255, 0, 0);//41	Red
 		else if (color == 42)
 			textColor = RGB(0, 255, 0);//42	Green
@@ -376,11 +378,11 @@ CHAR* CSettings::GetSearchList()
 }
 DWORD CSettings::InfoTextColorNative()
 {
-	return RGB(192, 192, 192);
+	return RGB(128, 128, 128);
 }
 DWORD CSettings::InfoTextColorAndroid()
 {
-	return RGB(128, 128, 128);
+	return RGB(140,100,80);
 }
 DWORD CSettings::SerachColor()
 {

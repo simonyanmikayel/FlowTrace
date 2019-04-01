@@ -7,6 +7,8 @@
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(ROW_LOG_REC))
 struct ListedNodes;
 
+#define PARCE_COLOR
+
 #ifdef _BUILD_X64
 const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
 #else
@@ -19,7 +21,7 @@ struct LOG_REC_BASE
 	int len;
 	BYTE log_type;
 	BYTE log_flags;
-	BYTE unused;
+	BYTE color;
 	BYTE severity;
 	unsigned int nn;
 	WORD cb_app_name;
@@ -143,10 +145,12 @@ private:
     inline APP_NODE* addApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(ROW_LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
+	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsigned char* trace, int cb_trace, int color, int bookmark);
+#ifdef PARCE_COLOR
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark);
-	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsigned char* trace, int cb_trace, int color, bool endsWithNewLine, int bookmark);
+#endif //PARCE_COLOR
 	inline APP_NODE*   getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other);
-    inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
+	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, ROW_LOG_REC* p);
     DWORD m_lost;
     static DWORD archiveNumber;
     BYTE bookmarkNumber;

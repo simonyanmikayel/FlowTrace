@@ -821,9 +821,15 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
         ::SetBkMode(hdc, OPAQUE);
     }
 
-    TextOut(hdc, left, top, szText, cbText);
+	if (pNode->isJava()) {
+			::SetTextColor(hdc, RGB(100,50,20));
+	}
+	else {
+		::SetTextColor(hdc, RGB(0, 0, 0));
+	}
+	TextOut(hdc, left, top, szText, cbText);
 
-    if (m_pSelectedNode == pNode)
+	if (m_pSelectedNode == pNode)
     {
         if (GetFocus() == m_hWnd)
         {
