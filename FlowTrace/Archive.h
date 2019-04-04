@@ -7,7 +7,7 @@
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(ROW_LOG_REC))
 struct ListedNodes;
 
-#define PARCE_COLOR
+//#define PARCE_COLOR
 
 #ifdef _BUILD_X64
 const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
@@ -22,7 +22,7 @@ struct LOG_REC_BASE
 	BYTE log_type;
 	BYTE log_flags;
 	BYTE color;
-	BYTE severity;
+	BYTE priority;
 	unsigned int nn;
 	WORD cb_app_name;
 	WORD cb_module_name;

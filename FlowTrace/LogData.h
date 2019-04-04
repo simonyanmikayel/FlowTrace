@@ -245,7 +245,7 @@ struct TRACE_CHANK
 struct TRACE_NODE : INFO_NODE
 {
 	BYTE color;
-	BYTE severity;
+	BYTE priority;
 	TRACE_CHANK* getFirestChank() { return (TRACE_CHANK*)(fnName() + cb_fn_name + cb_module_name); }
     TRACE_CHANK* getLastChank() { TRACE_CHANK* p = getFirestChank(); while (p->next_chank) p = p->next_chank; return p; }
     int getCallLine(bool bCallSiteInContext, bool resolve);

@@ -182,10 +182,9 @@ APP_NODE* Archive::getApp(ROW_LOG_REC* p, sockaddr_in *p_si_other)
 
 THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, ROW_LOG_REC* p)
 {
-    if (curThread && curThread->tid == p->tid)
+    if (curThread && curThread->tid == p->tid && pAppNode->pid == p->tid)
         return curThread;
 
-    curThread = NULL;
     curThread = (THREAD_NODE*)pAppNode->lastChild;
     while (curThread)
     {
@@ -373,7 +372,7 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
 
 LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsigned char* trace, int cb_trace, int color, int bookmark)
 {
-	bool endsWithNewLine = (trace[cb_trace - 1] == '\n');
+	bool endsWithNewLine = (trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
 		cb_trace--;
 #ifdef _DEBUG
@@ -438,7 +437,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsi
 		pNode->buff_nn = g_buff_nn;
 #endif
 		pNode->color = color;
-		pNode->severity = pLogRec->severity;
+		pNode->priority = pLogRec->priority;
 		pNode->nn = pLogRec->nn;
         pNode->log_type = pLogRec->log_type;
 		pNode->log_flags = pLogRec->log_flags;
@@ -484,8 +483,8 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsi
 	//at this point latestTrace is not null.
 	if (!pThreadNode->latestTrace->color)
 		pThreadNode->latestTrace->color = color;
-	if (!pThreadNode->latestTrace->severity)
-		pThreadNode->latestTrace->severity = pLogRec->severity;
+	if (pThreadNode->latestTrace->priority != 0)
+		pThreadNode->latestTrace->priority = pLogRec->priority;
 
 	pThreadNode->latestTrace->lengthCalculated = 0;
     return pThreadNode->latestTrace;
@@ -617,7 +616,8 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	//if (rec->log_flags & LOG_FLAG_JAVA)
 	//	return 1;
 
-    APP_NODE* pAppNode = getApp(rec, p_si_other);
+//	static APP_NODE* curApp0 = curApp;
+	APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
         return 1;
 
@@ -709,7 +709,13 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
     {
 		pNode = addFlow(pThreadNode, rec, bookmark);
 	}
-    return pNode != nullptr;
+	//if (rec->log_type == LOG_TYPE_TRACE)//if (curApp0 != curApp)
+	//{
+	//	stdlog("curApp %p, pThreadNode %p, pNode %p nodePid %d recPid %d nodeTid %d recTid %d\n", 
+	//		curApp, pThreadNode, pNode, pNode->getPid(), rec->pid, pNode->getTid(), rec->tid);
+	//	curApp0 = curApp;
+	//}
+	return pNode != nullptr;
 }
 
 DWORD Archive::getCount()

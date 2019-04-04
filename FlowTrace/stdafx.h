@@ -159,4 +159,4 @@ typedef std::string tstring;
 //////////////////////////////////////////////////////////////////////////////
 //#define _AUTO_TEST
 //#define _LOSE_TEST
-#define _NN_TEST
+//#define _NN_TEST

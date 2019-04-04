@@ -346,7 +346,7 @@ void TaskThread::FileImport()
         memcpy(recTrace, recEnter, recEnter->len);
         recTrace->log_type = LOG_TYPE_TRACE;
 		recTrace->log_flags |= LOG_FLAG_NEW_LINE;
-		recTrace->severity = UDP_LOG_COMMON;
+		recTrace->priority = 0;
         recTrace->cb_trace = (WORD)strlen(trace);
         memcpy((void*)recTrace->trace(), trace, recTrace->cb_trace);
         recTrace->len = recTrace->size();

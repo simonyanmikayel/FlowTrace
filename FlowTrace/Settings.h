@@ -7,14 +7,27 @@
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
 #define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
 
-typedef enum {
-	UDP_LOG_FATAL,
-	UDP_LOG_ERROR,
-	UDP_LOG_WARNING,
-	UDP_LOG_INFO,
-	UDP_LOG_DEBUG,
-	UDP_LOG_COMMON,
-} UDP_LOG_Severity;
+// same as android_LogPriority
+typedef enum _flow_LogPriority {
+	/** For internal use only.  */
+	FLOW_LOG_UNKNOWN = 0,
+	/** The default priority, for internal use only.  */
+	FLOW_LOG_DEFAULT, /* only for SetMinPriority() */
+	/** Verbose logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_VERBOSE,
+	/** Debug logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_DEBUG,
+	/** Informational logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_INFO,
+	/** Warning logging. For use with recoverable failures. */
+	FLOW_LOG_WARN,
+	/** Error logging. For use with unrecoverable failures. */
+	FLOW_LOG_ERROR,
+	/** Fatal logging. For use when aborting. */
+	FLOW_LOG_FATAL,
+	/** For internal use only.  */
+	FLOW_LOG_SILENT, /* only for SetMinPriority(); must be last */
+} flow_LogPriority;
 
 class CSettings : public CRegKeyExt
 {
@@ -25,7 +38,7 @@ public:
     void RestoreWindPos(HWND hWnd);
     void SaveWindPos(HWND hWnd);
 	bool SetTraceColor(int color, DWORD& textColor, DWORD& bkColor);
-	bool SetTraceSeverity(UDP_LOG_Severity severity, DWORD& textColor, DWORD& bkColor);
+	bool SetTracePriority(flow_LogPriority priority, DWORD& textColor, DWORD& bkColor);
 	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
     bool CheckUIFont(HDC hdc);
 

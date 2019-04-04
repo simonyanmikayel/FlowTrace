@@ -259,19 +259,19 @@ void CSettings::SaveWindPos(HWND hWnd)
 		Write(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl));
 }
 
-bool CSettings::SetTraceSeverity(UDP_LOG_Severity severity, DWORD& textColor, DWORD& bkColor)
+bool CSettings::SetTracePriority(flow_LogPriority priority, DWORD& textColor, DWORD& bkColor)
 {
 	bool ret = true;
-	switch (severity)
+	switch (priority)
 	{
-	case UDP_LOG_FATAL:
-	case UDP_LOG_ERROR:
+	case FLOW_LOG_ERROR:
+	case FLOW_LOG_FATAL:
 		textColor = RGB(255, 0, 0);//31	Red
 		break;
-	case UDP_LOG_WARNING:
+	case FLOW_LOG_WARN:
 		textColor = RGB(255, 255, 0);//33	Yellow
 		break;
-	case UDP_LOG_INFO:
+	case FLOW_LOG_INFO:
 		textColor = RGB(0, 255, 0);//32	Green
 		break;
 	default:

@@ -232,7 +232,14 @@ namespace Helpers
 			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_site: %X\r\n", pFlowNode->call_site);
             if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "fn_line: %d\r\n", pFlowNode->fn_line);
         }
-
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "----------------------\r\n");
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "getApp: %p threadNode: %p\r\n", pNode->getApp() , pNode->threadNode);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "----------------------\r\n");
+		LOG_NODE* pNode0 = pNode;
+		while (pNode0) {
+			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "[ %p ]", pNode0);
+			pNode0 = pNode0->parent;
+		}
 		buf[cMax] = 0;
 		DlgInfo dlg(buf);
 		dlg.DoModal();
