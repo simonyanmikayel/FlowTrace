@@ -61,10 +61,6 @@ int CreateModuleList()
         szModules = newLine + 1;
         newLine = strchr(szModules, '\n');
     }
-    if (gSettings.GetUsePrefModule())
-    {
-        AddModule(gSettings.GetPrefModulePath());
-    }
     return 0;
 }
 

@@ -106,7 +106,6 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
 	Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
 	Read(STR_APP_REG_VAL_AndroidProject, m_AndroidProject, sizeof(m_AndroidProject), "");
-	Read(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath, sizeof(m_PrefModulePath), "");
 
 	//Read(STR_APP_REG_VAL_BK_COLOR, m_BkColor, DefBkColor);
 	//Read(STR_APP_REG_VAL_TEXT_COLOR, m_TextColor, DefTextColor);
@@ -448,7 +447,6 @@ void CSettings::SetLinuxHome(const CHAR* LinuxHome) { int c = _countof(m_LinuxHo
 void CSettings::SetMapOnWin(const CHAR* MapOnWin) { int c = _countof(m_MapOnWin); _tcsncpy_s(m_MapOnWin, c, MapOnWin, c - 1); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m_AndroidStudio); _tcsncpy_s(m_AndroidStudio, c, AndroidStudio, c - 1); m_AndroidStudio[c] = 0; Write(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio); }
 void CSettings::SetAndroidProject(const CHAR* AndroidProject) { int c = _countof(m_AndroidProject); _tcsncpy_s(m_AndroidProject, c, AndroidProject, c - 1); m_AndroidProject[c] = 0; Write(STR_APP_REG_VAL_AndroidProject, m_AndroidProject); }
-void CSettings::SetPrefModulePath(const CHAR* PrefModulePath) { int c = _countof(m_PrefModulePath); _tcsncpy_s(m_PrefModulePath, c, PrefModulePath, c - 1); m_PrefModulePath[c] = 0; Write(STR_APP_REG_VAL_PrefModulePath, m_PrefModulePath); }
 
 void CSettings::SetUdpPort(DWORD i) { m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
 

@@ -267,111 +267,13 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int b
 
 }
 
-//static int getCollor(char* pBuf, int &iSkip, int cb)
-//{
-//    int color = 0;
-//    if (iSkip < cb && isdigit(pBuf[iSkip]))
-//    {
-//        color = pBuf[iSkip] - '0';
-//        iSkip++;
-//        if (iSkip < cb && isdigit(pBuf[iSkip]))
-//        {
-//            color = (10 * color) + (pBuf[iSkip] - '0');
-//            iSkip++;
-//        }
-//    }
-//    return color;
-//}
-//
-//static bool setCollor(THREAD_NODE* pThreadNode, unsigned char* pTrace, int i, WORD &cb_trace, int& color)
-//{
-//    char* pBuf = pThreadNode->COLOR_BUF;
-//    bool bRet = false;
-//    if (pTrace[i] == '\033')
-//    {
-//        pThreadNode->cb_color_buf = 0;
-//    }
-//    else if (pThreadNode->cb_color_buf == 0)
-//    {
-//        // no color in buffer and in trace
-//        return false;
-//    }
-//    bool reset_buffer = false;
-//    int cb_color_old = pThreadNode->cb_color_buf;
-//    int cb_color = min(cb_trace - i, (int)sizeof(pThreadNode->COLOR_BUF) - pThreadNode->cb_color_buf - 1);
-//    if (cb_color <= 0)
-//    {
-//        pThreadNode->cb_color_buf = 0;
-//        return false;
-//    }
-//    memcpy(pBuf + pThreadNode->cb_color_buf, pTrace + i, cb_color);
-//    pThreadNode->cb_color_buf += cb_color;
-//    pBuf[pThreadNode->cb_color_buf] = 0;
-//
-//    int iSkip = 0, color1 = 0, color2 = 0;
-//    if (pBuf[0] == '\033' && pBuf[1] == '[')
-//    {
-//        iSkip = 2;
-//        color1 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-//        if (pBuf[iSkip] == ';')
-//        {
-//            iSkip++;
-//            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-//        }
-//        if (pBuf[iSkip] == ';') //getting third color as color2
-//        {
-//            iSkip++;
-//            color2 = getCollor(pBuf, iSkip, pThreadNode->cb_color_buf);
-//        }
-//
-//        if (iSkip < pThreadNode->cb_color_buf && pBuf[iSkip] == 'm')
-//        {
-//            iSkip++;
-//            bRet = true;
-//        }
-//    }
-//
-//    if (iSkip - cb_color_old != cb_trace - i)
-//    {
-//        reset_buffer = true; //we have data after collor, so will wait for new one
-//    }
-//
-//    if (iSkip)
-//    {
-//        iSkip -= cb_color_old;
-//        if (iSkip > 0)
-//        {
-//            if (cb_trace - i - iSkip >= 0)
-//            {
-//                memmove(pTrace + i, pTrace + i + iSkip, cb_trace - i - iSkip);
-//                cb_trace -= iSkip;
-//            }
-//            else
-//            {
-//                ATLASSERT(FALSE);
-//                reset_buffer = true;
-//                bRet = false;
-//            }
-//        }
-//    }
-//
-//    if (bRet)
-//    {
-//        if (!color)
-//            color = color1 ? color1 : color2;
-//        reset_buffer = true;
-//    }
-//
-//    if (reset_buffer)
-//    {
-//        pThreadNode->cb_color_buf = 0;
-//    }
-//
-//    return bRet;
-//}
-
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsigned char* trace, int cb_trace, int color, int bookmark)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark)
 {
+	unsigned char* trace = (unsigned char*)pLogRec->trace();
+	BYTE color = pLogRec->color;
+	int cb_trace = pLogRec->cb_trace;
+	trace[cb_trace] = 0;
+
 	bool endsWithNewLine = (trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
 		cb_trace--;
@@ -489,90 +391,6 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, unsi
 	pThreadNode->latestTrace->lengthCalculated = 0;
     return pThreadNode->latestTrace;
 }
-
-static inline int parceCollor(unsigned char* pBuf, int *iSkip)
-{
-	int color = 0;
-	if (isdigit(pBuf[*iSkip]))
-	{
-		color = pBuf[*iSkip] - '0';
-		(*iSkip)++;
-		if (isdigit(pBuf[*iSkip]))
-		{
-			color = (10 * color) + (pBuf[*iSkip] - '0');
-			(*iSkip)++;
-		}
-		if (!((color >= 30 && color <= 37) || (color >= 40 && color <= 47)))
-			color = 0;
-	}	return color;
-}
-
-#ifdef PARCE_COLOR
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int bookmark)
-{
-	int i, send_pos = 0;
-	int trace_color = 0;
-	int old_color = 0;
-	unsigned char* trace = (unsigned char*)pLogRec->trace();
-	int cb_trace = pLogRec->cb_trace;
-	LOG_NODE* pNode = nullptr;
-
-	trace[cb_trace] = 0;
-	if(pLogRec->log_flags & LOG_FLAG_COLOR_PARCED)
-		return addTrace(pThreadNode, pLogRec, trace, cb_trace, pLogRec->color, bookmark);
-
-	// find colors and new lines
-	for (i = 0; i < cb_trace; i++)
-	{
-		if (trace[i] == '\n' || trace[i] == '\r')
-		{
-			trace[i] = '\n';
-			if (i > send_pos) {
-				old_color = trace_color;
-				pNode = addTrace(pThreadNode, pLogRec, &trace[send_pos], i - send_pos + 1, trace_color, bookmark);
-			}
-			while (trace[i + 1] == '\n' || trace[i + 1] == '\r')
-				i++;
-			send_pos = i + 1;
-		}
-		if (trace[i] == '\033' && trace[i + 1] == '[')
-		{
-			int j = i;
-			int c1 = 0, c2 = 0, c3 = 0;
-			trace[i] = '['; //for testing
-			i += 2;
-			c1 = parceCollor(trace + i, &i);
-			if (trace[i] == ';')
-			{
-				i++;
-				c2 = parceCollor(trace + i, &i);
-			}
-			if (trace[i] == ';')
-			{
-				i++;
-				c3 = parceCollor(trace + i, &i);
-			}
-			if (trace[i] == 'm')
-			{
-				if (!trace_color) trace_color = c1;
-				if (!trace_color) trace_color = c2;
-				if (!trace_color) trace_color = c3;
-			}
-			if (j > send_pos) {
-				old_color = trace_color;
-				pNode = addTrace(pThreadNode, pLogRec, &trace[send_pos], j - send_pos, trace_color, bookmark);
-			}
-			send_pos = i + 1;
-		}
-	}
-	if ((i > send_pos) || (old_color != trace_color))
-	{
-		pNode = addTrace(pThreadNode, pLogRec, &trace[send_pos], i - send_pos, trace_color, bookmark);
-	}
-
-	return pNode;
-}
-#endif //PARCE_COLOR
 
 void Archive::Log(ROW_LOG_REC* rec)
 {
@@ -697,13 +515,7 @@ int Archive::append(ROW_LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	LOG_NODE* pNode = nullptr;
     if (rec->log_type == LOG_TYPE_TRACE)
     {
-#ifdef PARCE_COLOR
-		addTrace(pThreadNode, rec, bookmark);
-#else
-		unsigned char* trace = (unsigned char*)rec->trace();
-		trace[rec->cb_trace] = 0;
-		pNode = addTrace(pThreadNode, rec, trace, rec->cb_trace, rec->color, bookmark);
-#endif //PARCE_COLOR
+		pNode = addTrace(pThreadNode, rec, bookmark);
 	}
     else
     {

@@ -9,12 +9,8 @@ LRESULT DlgModules::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 {
     m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
     m_staticModulList.Attach(GetDlgItem(IDC_STATIC_MODUL_LST));
-    m_UsePrefModule.Attach(GetDlgItem(IDC_CHECK_PREFERED_MODULE));
-    m_PrefModulePath.Attach(GetDlgItem(IDC_EDIT_PREFERED_MODULE));
 
     m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
-    m_UsePrefModule.SetCheck(gSettings.GetUsePrefModule() ? BST_CHECKED : BST_UNCHECKED);
-    m_PrefModulePath.SetWindowText(gSettings.GetPrefModulePath());
 
 
     CRect rc;
@@ -70,12 +66,6 @@ LRESULT DlgModules::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
             }
         }
         gSettings.SetModules(strModules.c_str());
-
-        gSettings.SetUsePrefModule(m_UsePrefModule.GetCheck());
-        CString strPrefModulePath;
-        m_PrefModulePath.GetWindowText(strPrefModulePath);
-        gSettings.SetPrefModulePath(strPrefModulePath.GetString());
-
     }
 	EndDialog(wID);
 	return 0;

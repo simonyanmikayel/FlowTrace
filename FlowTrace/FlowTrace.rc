@@ -144,9 +144,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Start Recordig",              ID_VIEW_STARTRECORDIG
         MENUITEM "Pause Recording",             ID_VIEW_PAUSERECORDING
-	MENUITEM "Clear Log\tCtrl+K", ID_VIEW_CLEARLOG
-	MENUITEM "Reset Log\tCtrl+R", ID_VIEW_RESETLOG
-	MENUITEM SEPARATOR
+        MENUITEM "Clear Log\tCtrl+K",           ID_VIEW_CLEARLOG
+        MENUITEM "Reset Log\tCtrl+R",           ID_VIEW_RESETLOG
+        MENUITEM SEPARATOR
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
@@ -309,15 +309,12 @@ FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,200,301,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,254,301,50,14
-    GROUPBOX        "Static",IDC_STATIC_MODUL_LST,7,34,297,228
+    GROUPBOX        "Static",IDC_STATIC_MODUL_LST,7,34,297,261
     CONTROL         "Resolve function call lines",IDC_CHECK_RESOLVE_ADDR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,99,10
     PUSHBUTTON      "Add (Ins.)",IDC_BUTTON_ADD,137,16,50,14
     PUSHBUTTON      "Edit (Click)",IDC_BUTTON_EDIT,195,16,50,14
     PUSHBUTTON      "Delete (Del.)",IDC_BUTTON_DEL,253,16,50,14
-    CONTROL         "Use preferred module path",IDC_CHECK_PREFERED_MODULE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,264,96,10
-    EDITTEXT        IDC_EDIT_PREFERED_MODULE,7,280,297,14,ES_AUTOHSCROLL
 END
 
 
@@ -408,9 +405,8 @@ BEGIN
     VK_TAB,         ID_SYNC_VIEWES,         VIRTKEY, NOINVERT
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, CONTROL, NOINVERT
     "K",            ID_VIEW_CLEARLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
-	"R", ID_VIEW_RESETLOG, VIRTKEY, CONTROL, NOINVERT
-	"R", ID_VIEW_RESETLOG, VIRTKEY, SHIFT, CONTROL, NOINVERT
-		
+    "R",            ID_VIEW_RESETLOG,       VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_VIEW_RESETLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
     "N",            ID_VIEW_STARTNEWSNAPSHOT, VIRTKEY, CONTROL, NOINVERT
 END
 
@@ -512,9 +508,13 @@ BEGIN
     ID_VIEW_DETAILES        "Set view detailes\nSet view detailes"
     ID_VIEW_SETTINGS        "Application settings\nApplication settings"
     ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"
-	ID_VIEW_RESETLOG        "Reset Log\nReset Log  (Ctrl+R)"
     ID_SYNC_VIEWES          "Synchronize views\nSynchronize views  (Tab)"
     ID_EDIT_SELECTALL       "Select all traces\nSelect all traces"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_RESETLOG        "Reset Log\nReset Log  (Ctrl+R)"
 END
 
 STRINGTABLE
