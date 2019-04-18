@@ -236,6 +236,11 @@ UdpThread::UdpThread()
 err:
 	Terminate();
 }
+bool Unreachable() {
+	//On a UDP - datagram socket this error indicates a previous send operation resulted in an ICMP Port Unreachable message.
+	int err = WSAGetLastError();
+	return (err == WSAECONNRESET);
+}
 
 void UdpThread::Work(LPVOID pWorkParam)
 {
@@ -250,7 +255,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 	//keep listening for data
 	while (true)
 	{
-		DWORD dwTimeout = ack_retry_count ? 20 : INFINITE;
+		DWORD dwTimeout = ack_retry_count > 0 ? dwAckTimeout : INFINITE;
 		if (dwLastTimeout != dwTimeout) {
 			setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&dwTimeout, sizeof(DWORD));
 			dwLastTimeout = dwTimeout;
@@ -265,10 +270,8 @@ void UdpThread::Work(LPVOID pWorkParam)
 				ack_retry_count--;
 				continue;
 			}
-			int err = WSAGetLastError();
-			if (err == WSAECONNRESET) {
-				//On a UDP - datagram socket this error indicates a previous send operation resulted in an ICMP Port Unreachable message.
-				//stdlog("WSAECONNRESET\n");
+			if (Unreachable()) {
+				ack_retry_count = 0;
 				continue;
 			}
 			else {
@@ -286,7 +289,13 @@ void UdpThread::Work(LPVOID pWorkParam)
 		{
 			if ((sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other))) < 0)
 			{
-				break;
+				if (Unreachable()) {
+					ack_retry_count = 0;
+					continue;
+				}
+				else {
+					break;
+				}
 			}
 			//stdlog("received pack %d\n", pack->pack_nn);
 			ack_retry_count = pack->retry_count - 1;
