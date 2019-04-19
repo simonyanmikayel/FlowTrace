@@ -272,11 +272,12 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int 
 	unsigned char* trace = (unsigned char*)pLogRec->trace();
 	BYTE color = pLogRec->color;
 	int cb_trace = pLogRec->cb_trace;
-	trace[cb_trace] = 0;
 
-	bool endsWithNewLine = (trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
+	bool endsWithNewLine = (cb_trace > 0 && trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
 		cb_trace--;
+	trace[cb_trace] = 0;
+	stdlog("cb: %d color: %d %s\n", cb_trace, color, trace);
 #ifdef _DEBUG
     //if (221 == pLogRec->call_line)
     //if (0 != strstr((char*)trace, "tsc.c;3145"))
