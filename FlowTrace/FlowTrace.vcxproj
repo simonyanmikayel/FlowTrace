@@ -308,6 +308,7 @@
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="AddrInfo.h" />
     <ClInclude Include="Archive.h" />
+    <ClInclude Include="Archive_temp.h" />
     <ClInclude Include="BackTraceCallView.h" />
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />

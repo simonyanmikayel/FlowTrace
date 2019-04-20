@@ -242,34 +242,40 @@ bool Unreachable() {
 	return (err == WSAECONNRESET);
 }
 
+//#define _USE_RETRY_COUNT
 void UdpThread::Work(LPVOID pWorkParam)
 {
 	int slen, cb_recv, cb_parced;
 	struct sockaddr_in si_other;
 	slen = sizeof(si_other);
 	NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
-
 	int ack_retry_count = 0;
+#ifdef _USE_RETRY_COUNT
 	DWORD dwLastTimeout = INFINITE;
 	DWORD dwAckTimeout = INFINITE;
+#endif //_USE_RETRY_COUNT
 	//keep listening for data
 	while (true)
 	{
+#ifdef _USE_RETRY_COUNT
 		DWORD dwTimeout = ack_retry_count > 0 ? dwAckTimeout : INFINITE;
 		if (dwLastTimeout != dwTimeout) {
 			setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&dwTimeout, sizeof(DWORD));
 			dwLastTimeout = dwTimeout;
 		}
+#endif //_USE_RETRY_COUNT
 
 		//try to receive data, this is a blocking call
 		if ((cb_recv = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 0)
 		{
+#ifdef _USE_RETRY_COUNT
 			if (ack_retry_count) {
 				//stdlog("retry ack %d\n", pack->pack_nn);
 				sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other));
 				ack_retry_count--;
 				continue;
 			}
+#endif //_USE_RETRY_COUNT
 			if (Unreachable()) {
 				ack_retry_count = 0;
 				continue;
@@ -293,13 +299,16 @@ void UdpThread::Work(LPVOID pWorkParam)
 					ack_retry_count = 0;
 					continue;
 				}
-				else {
+				else 
+				{
 					break;
 				}
 			}
 			//stdlog("received pack %d\n", pack->pack_nn);
+#ifdef _USE_RETRY_COUNT
 			ack_retry_count = pack->retry_count - 1;
 			dwAckTimeout = pack->retry_delay / 1000;
+#endif //_USE_RETRY_COUNT
 		}
 		if (pack->data_len == 0)
 			continue;

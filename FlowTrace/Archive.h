@@ -37,7 +37,7 @@ struct LOG_REC_BASE
 	DWORD call_site;
 	int fn_line;
 	int call_line;
-};
+}; 
 #ifdef _USE_ADB
 struct ROW_LOG_REC : LOG_REC_BASE
 {

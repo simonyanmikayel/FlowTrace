@@ -277,7 +277,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, ROW_LOG_REC *pLogRec, int 
 	if (endsWithNewLine)
 		cb_trace--;
 	trace[cb_trace] = 0;
-	stdlog("cb: %d color: %d %s\n", cb_trace, color, trace);
+	//stdlog("cb: %d color: %d %s\n", cb_trace, color, trace);
 #ifdef _DEBUG
     //if (221 == pLogRec->call_line)
     //if (0 != strstr((char*)trace, "tsc.c;3145"))
