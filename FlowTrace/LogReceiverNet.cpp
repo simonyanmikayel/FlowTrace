@@ -1,12 +1,8 @@
 #include "stdafx.h"
 
-#ifndef _USE_ADB
 #include "LogReceiverNet.h"
 #include "Helpers.h"
 #include "Settings.h"
-
-LogReceiverNet gLogReceiverNet;
-LogReceiver* gpLogReceiver = &gLogReceiverNet;
 
 static NetThread* pNetThreads[1024];
 static int cNetThreads = 0;
@@ -14,7 +10,6 @@ static int cNetThreads = 0;
 void LogReceiverNet::start(bool reset)
 {
 	//logcat(0, 0);
-	m_working = true;
 	add(new UdpThread());
 #ifdef USE_TCP
 	add(new TcpListenThread());
@@ -23,21 +18,17 @@ void LogReceiverNet::start(bool reset)
 
 void LogReceiverNet::stop()
 {
-	lock();
-	m_working = false;
 	for (int i = 0; i < cNetThreads; i++)
 	{
 		pNetThreads[i]->StopWork();
 		delete pNetThreads[i];
 	}
 	cNetThreads = 0;
-	unlock();
 }
 
 void LogReceiverNet::add(NetThread* pNetThread)
 {
-	lock();
-	if (m_working && (cNetThreads < _countof(pNetThreads)))
+	if (gLogReceiver.working() && (cNetThreads < _countof(pNetThreads)))
 	{
 		pNetThreads[cNetThreads++] = pNetThread;
 		pNetThread->StartWork();
@@ -47,7 +38,6 @@ void LogReceiverNet::add(NetThread* pNetThread)
 	{
 		delete pNetThread;
 	}
-	unlock();
 }
 
 void NetThread::Terminate()
@@ -184,7 +174,7 @@ void TcpListenThread::Work(LPVOID pWorkParam)
 		return;
 	}
 	//keep listening for connection
-	while (gLogReceiverNet.working())
+	while (gLogReceiver.working())
 	{
 		// Accept a client socket
 		SOCKET clientSocket = accept(s, NULL, NULL);
@@ -313,25 +303,24 @@ void UdpThread::Work(LPVOID pWorkParam)
 		if (pack->data_len == 0)
 			continue;
 
-		ROW_LOG_REC* rec = (ROW_LOG_REC*)(buf + sizeof(NET_PACK_INFO));
+		LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)(buf + sizeof(NET_PACK_INFO));
 		cb_parced = sizeof(NET_PACK_INFO);
-		gLogReceiverNet.lock();
+		gLogReceiver.lock();
 		while (cb_parced < cb_recv)
 		{
-			ATLASSERT(rec->isValid());
-			if (rec->len > (cb_recv - cb_parced) || !rec->isValid())
+			if (pLogData->len > (cb_recv - cb_parced))
 			{
 				//Terminate();
 				break;
 			}
-			if (!gArchive.append(rec, &si_other, false, 0, pack))
+			if (!gArchive.append(pLogData, &si_other, false, 0, pack))
 			{
 				break;
 			}
-			cb_parced += rec->len;
-			rec = (ROW_LOG_REC*)(buf + cb_parced);
+			cb_parced += pLogData->len;
+			pLogData = (LOG_REC_NET_DATA*)(buf + cb_parced);
 		}
-		gLogReceiverNet.unlock();
+		gLogReceiver.unlock();
 	}
 
 	if (IsWorking())
@@ -339,4 +328,3 @@ void UdpThread::Work(LPVOID pWorkParam)
 
 	Terminate();
 }
-#endif //_USE_ADB

@@ -38,6 +38,7 @@ LPCTSTR STR_APP_REG_VAL_ColLine = _T("ColLine");
 LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
 LPCTSTR STR_APP_REG_VAL_ColCallAddr = _T("ColCallAddr");
 LPCTSTR STR_APP_REG_VAL_FnCallLine = _T("FnCallLine");
+LPCTSTR STR_APP_REG_VAL_UseAdb = _T("UseAdb");
 
 LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
 LPCTSTR STR_APP_REG_VAL_TREE_VIEW_HIDEN = _T("TreeViewHiden");
@@ -99,6 +100,7 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_ColTime, m_ColTime);
 	Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 	Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
+	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 1);
 
 	Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
 	Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");
@@ -423,6 +425,7 @@ void CSettings::SetColLine(int i) { m_ColLine = i; Write(STR_APP_REG_VAL_ColLine
 void CSettings::SetColTime(int i) { m_ColTime = i; Write(STR_APP_REG_VAL_ColTime, m_ColTime); }
 void CSettings::SetColCallAddr(int i) { m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
+void CSettings::SetUseAdb(int i) { m_UseAdb = i; Write(STR_APP_REG_VAL_UseAdb, m_UseAdb); }
 void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount); }
 
 //void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }

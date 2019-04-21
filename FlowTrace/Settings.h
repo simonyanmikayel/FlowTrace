@@ -63,7 +63,7 @@ public:
     DECL_PROP(HFONT, Font);
     DECL_PROP(int, FontHeight);
     DECL_PROP(int, FontWidth);
-    //DECL_PROP(DWORD, TextColor);
+	//DECL_PROP(DWORD, TextColor);
     //DECL_PROP(DWORD, InfoTextColor);
     //DECL_PROP(DWORD, BkColor);
     //DECL_PROP(DWORD, SelColor);
@@ -93,6 +93,7 @@ public:
     DECL_PROP(int, ColTime);
     DECL_PROP(int, ColCallAddr);
     DECL_PROP(int, FnCallLine);
+	DECL_PROP(int, UseAdb);
 
     DECL_PROP(DWORD, UdpPort);
 

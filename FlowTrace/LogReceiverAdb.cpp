@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#ifdef _USE_ADB
-
 //#define _READ_LOCAL
 //#define _WRITE_LOCAL
 //#define _DEBUG_BUF
@@ -14,15 +12,12 @@
 static FILE *testLogFile;
 static FILE *testPsFile;
 #endif
-LogReceiverAdb gLogReceiverAdb;
-LogReceiver* gpLogReceiver = &gLogReceiverAdb;
 static bool resetAtStart;
 
 void LogReceiverAdb::start(bool reset)
 {
 	//logcat(0, 0);
 	resetAtStart = reset;
-	m_working = true;
 	logcatLogThread.StartWork();
 	logcatLogThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	psThread.StartWork();
@@ -31,11 +26,8 @@ void LogReceiverAdb::start(bool reset)
 
 void LogReceiverAdb::stop()
 {
-	lock();
-	m_working = false;
 	logcatLogThread.StopWork();
 	psThread.StopWork();
-	unlock();
 }
 
 void PsThread::Terminate()
@@ -112,7 +104,7 @@ void LOG_PARCER::parce(const char* szLog, int cbLog)
 }
 
 static LOG_PARCER ft("<~*~>"); //for flow trace data
-static ROW_LOG_REC adbRec;
+static LOG_REC_ADB_DATA adbRec;
 
 static inline int NextMetaDataDigit(char* buf, int buf_size, int &i, bool& ok)
 {
@@ -131,10 +123,10 @@ static inline int NextMetaDataDigit(char* buf, int buf_size, int &i, bool& ok)
 
 static bool ParceFtData()
 {
-	ROW_LOG_REC rec;
+	LOG_REC_ADB_DATA rec;
 	rec.reset();
 	//Size Prefix: hC-single-byte character hd-short int
-	int c = sscanf_s(ft.buf, "<~ %hd %hd %d %hd %hd %hd %d %u %u %d - ",
+	int c = sscanf_s(ft.buf, "<~ %hhd %hhd %d %hd %hd %hd %d %u %u %d - ",
 		&rec.log_type, &rec.log_flags, &rec.nn, &rec.cb_app_name, &rec.cb_module_name,
 		&rec.cb_fn_name, &rec.this_fn, &rec.call_site, &rec.fn_line, &rec.call_line);
 
@@ -165,8 +157,10 @@ static void TraceLog(const char* szLog, int cbLog)
 	if (cbLog) {
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = cbLog;
-		adbRec.len = sizeof(ROW_LOG_REC) + adbRec.cbData();
+		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
+		gLogReceiver.lock();
 		gArchive.append(&adbRec);
+		gLogReceiver.unlock();
 	}
 }
 
@@ -219,7 +213,7 @@ static bool ParceMetaData()
 {
 	bool ok = true;
 	int i = 0;
-	ROW_LOG_REC rec;
+	LOG_REC_ADB_DATA rec;
 	rec.reset();
 	int unused1 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
 	int unused2 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
@@ -261,7 +255,7 @@ bool LogcatStreamCallback::HundleStream(const char* szLog, int cbLog)
 	return true;
 #endif
 	//return;
-	while (cbLog && gLogReceiverAdb.working()) {
+	while (cbLog && gLogReceiver.working()) {
 		mt.parce(szLog, cbLog);
 		int start = (int)(mt.dataStart - szLog);
 		int end = (int)(mt.dataEnd - szLog);
@@ -284,7 +278,7 @@ bool LogcatStreamCallback::HundleStream(const char* szLog, int cbLog)
 	//DWORD dwTick = GetTickCount();
 	//stdlog("<-%d - %d\n", cbLog0, dwTick-gdwLastPrintTick);
 	//gdwLastPrintTick = dwTick;
-	return gLogReceiverAdb.working();
+	return gLogReceiver.working();
 }
 
 //tcp.port=5037
@@ -356,7 +350,7 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 	//stdlog("->%d\n", cbLog);
 	//stdlog("\x1%s", szLog);
 	//return true;
-	while (cbLog && (cPsInfo < maxPsInfo) && gLogReceiverAdb.working()) {
+	while (cbLog && (cPsInfo < maxPsInfo) && gLogReceiver.working()) {
 		ps.parce(szLog, cbLog);
 		int start = (int)(ps.dataStart - szLog);
 		int end = (int)(ps.dataEnd - szLog);
@@ -394,7 +388,7 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 		cbLog -= end;
 	}
 
-	return (cPsInfo < maxPsInfo) && gLogReceiverAdb.working();
+	return (cPsInfo < maxPsInfo) && gLogReceiver.working();
 }
 
 static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
@@ -452,5 +446,3 @@ void PsThread::Work(LPVOID pWorkParam)
 	testPsFile = 0;
 #endif
 }
-
-#endif //_USE_ADB

@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef _USE_ADB
-
 #include "..\Logcat\adb\client\adb_commandline.h"
 #include "LogReceiver.h"
 #include "WorkerThread.h"
@@ -58,13 +56,14 @@ protected:
 	PsStreamCallback streamCallback;
 };
 
-class LogReceiverAdb : public LogReceiver
+class LogReceiverAdb
 {
-	virtual void start(bool reset);
-	virtual void stop();
+public:
+	void start(bool reset);
+	void stop();
 protected:
 	LogcatLogThread logcatLogThread;
 	PsThread psThread;
 };
 
-#endif //_USE_ADB
+extern LogReceiverAdb gLogReceiverAdb;

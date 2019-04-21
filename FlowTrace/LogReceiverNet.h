@@ -1,7 +1,5 @@
 #pragma once
 
-#ifndef _USE_ADB
-
 #include "LogReceiver.h"
 #include "WorkerThread.h"
 #include "Archive.h"
@@ -50,11 +48,13 @@ public:
 
 #endif //USE_TCP
 
-class LogReceiverNet : public LogReceiver
+class LogReceiverNet
 {
-	virtual void start(bool reset);
-	virtual void stop();
+public:
+	void start(bool reset);
+	void stop();
+protected:
 	void add(NetThread* pNetThread);
 };
 
-#endif //_USE_ADB
+extern LogReceiverNet gLogReceiverNet;

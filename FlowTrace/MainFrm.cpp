@@ -45,8 +45,8 @@ BOOL CMainFrame::OnIdle()
     UIEnable(ID_SEARCH_LAST, searchInfo.total); //  && (searchInfo.cur + 1 != searchInfo.total)
     UIEnable(ID_SEARCH_REFRESH, 1);
     UIEnable(ID_SEARCH_CLEAR, 1);
-    UIEnable(ID_VIEW_PAUSERECORDING, gpLogReceiver->working());
-    UIEnable(ID_VIEW_STARTRECORDIG, !gpLogReceiver->working());
+    UIEnable(ID_VIEW_PAUSERECORDING, gLogReceiver.working());
+    UIEnable(ID_VIEW_STARTRECORDIG, !gLogReceiver.working());
     UIEnable(ID_EDIT_SELECTALL, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_FIND32798, !gArchive.IsEmpty());
     UIEnable(ID_EDIT_COPY, m_list.HasSelection() || ::GetFocus() == m_tree.m_hWnd);
@@ -155,9 +155,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
         ////////////////  
     }
 
-#ifndef _USE_ADB
-	m_searchbar.HideButton(ID_VIEW_RESETLOG);
-#endif //_USE_ADB
+	if (!gSettings.GetUseAdb())
+		m_searchbar.HideButton(ID_VIEW_RESETLOG);
 
     SizeSimpleReBarBands();
 
@@ -248,7 +247,7 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 {
     if (wParam == TIMER_DATA_REFRESH)
     {
-        if (gpLogReceiver->working())
+        if (gLogReceiver.working())
         {
             RefreshLog(false);
         }
@@ -259,13 +258,13 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 void CMainFrame::StartLogging(bool reset)
 {
     SetTimer(TIMER_DATA_REFRESH, TIMER_DATA_REFRESH_INTERVAL);
-    gpLogReceiver->start(reset);
+    gLogReceiver.start(reset);
 }
 
 void CMainFrame::StopLogging(bool bClearArcive, bool closing)
 {
     KillTimer(TIMER_DATA_REFRESH);
-    gpLogReceiver->stop();
+    gLogReceiver.stop();
     if (bClearArcive)
     {
         gArchive.clearArchive(closing);

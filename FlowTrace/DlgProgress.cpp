@@ -184,7 +184,7 @@ void TaskThread::FileSave(WORD cmd)
     m_count = isExport ? gArchive.getCount() : gArchive.getListedNodes()->Count();
 
     char buf[MAX_RECORD_LEN];
-    ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
+    LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)buf;
 
     for (DWORD i = 0; (i < m_count) && IsWorking(); i++, m_progress++)
     {
@@ -203,79 +203,79 @@ void TaskThread::FileSave(WORD cmd)
             {
 				//continue;
                 FLOW_NODE* p = (FLOW_NODE*)pInfoNode;
-                rec->log_type = p->log_type;
-				rec->log_flags = p->log_flags;
-				rec->nn = p->nn;
-                rec->sec = p->sec;
-                rec->msec = p->msec;
-                rec->tid = pInfoNode->threadNode->tid;
-                rec->pid = pInfoNode->threadNode->pAppNode->pid;
-                rec->this_fn = p->this_fn;
-                rec->call_site = p->call_site;
-				rec->fn_line = p->fn_line;
-				rec->call_line = p->call_line;
+                pLogData->log_type = p->log_type;
+				pLogData->log_flags = p->log_flags;
+				pLogData->nn = p->nn;
+                pLogData->sec = p->sec;
+                pLogData->msec = p->msec;
+                pLogData->tid = pInfoNode->threadNode->tid;
+                pLogData->pid = pInfoNode->threadNode->pAppNode->pid;
+                pLogData->this_fn = p->this_fn;
+                pLogData->call_site = p->call_site;
+				pLogData->fn_line = p->fn_line;
+				pLogData->call_line = p->call_line;
             }
             else
             {
                 TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
-                rec->log_type = p->log_type;
-				rec->log_flags = p->log_flags;
-				rec->nn = p->nn;
-                rec->sec = p->sec;
-                rec->msec = p->msec;
-                rec->tid = pInfoNode->threadNode->tid;
-                rec->pid = pInfoNode->threadNode->pAppNode->pid;
-                rec->this_fn = 0;
-                rec->call_site = 0;
-				rec->fn_line = 0;
-				rec->call_line = p->call_line;
-				rec->cb_trace = p->cb_trace;
+                pLogData->log_type = p->log_type;
+				pLogData->log_flags = p->log_flags;
+				pLogData->nn = p->nn;
+                pLogData->sec = p->sec;
+                pLogData->msec = p->msec;
+                pLogData->tid = pInfoNode->threadNode->tid;
+                pLogData->pid = pInfoNode->threadNode->pAppNode->pid;
+                pLogData->this_fn = 0;
+                pLogData->call_site = 0;
+				pLogData->fn_line = 0;
+				pLogData->call_line = p->call_line;
+				pLogData->cb_trace = p->cb_trace;
             }
             
-            rec->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
-            rec->cb_module_name = pInfoNode->cb_module_name;
-            rec->cb_fn_name = pInfoNode->cb_fn_name;
-            memcpy((void*)rec->appName(), pInfoNode->threadNode->pAppNode->appName, rec->cb_app_name);
-            if (rec->cb_module_name)
-                memcpy((void*)rec->moduleName(), pInfoNode->moduleName(), rec->cb_module_name);
-            memcpy((void*)rec->fnName(), pInfoNode->fnName(), rec->cb_fn_name);
-			//gArchive.Log(rec);
+            pLogData->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
+            pLogData->cb_module_name = pInfoNode->cb_module_name;
+            pLogData->cb_fn_name = pInfoNode->cb_fn_name;
+            memcpy((void*)pLogData->appName(), pInfoNode->threadNode->pAppNode->appName, pLogData->cb_app_name);
+            if (pLogData->cb_module_name)
+                memcpy((void*)pLogData->moduleName(), pInfoNode->moduleName(), pLogData->cb_module_name);
+            memcpy((void*)pLogData->fnName(), pInfoNode->fnName(), pLogData->cb_fn_name);
+			//gArchive.Log(pLogData);
             if (pInfoNode->cb_java_call_site && (pInfoNode->log_flags & LOG_FLAG_JAVA))
             {
-                rec->cb_java_call_site = pInfoNode->cb_java_call_site;
-                memcpy((void*)rec->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
+                pLogData->cb_java_call_site = pInfoNode->cb_java_call_site;
+                memcpy((void*)pLogData->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
             }
-            else //if (rec->cb_trace)
+            else //if (pLogData->cb_trace)
             {
                 TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
                 int cb_trace;
                 char* log = pInfoNode->getListText(&cb_trace, LOG_COL);
-                rec->cb_trace = cb_trace;
-                int cb_size = rec->size();
+                pLogData->cb_trace = cb_trace;
+                int cb_size = pLogData->size();
                 bool truncate = cb_size > MAX_RECORD_LEN - 128;
                 if (truncate) {
                     cb_trace -= (cb_size - MAX_RECORD_LEN + 128);
-                    rec->cb_trace = cb_trace;
+                    pLogData->cb_trace = cb_trace;
                 }
-                memcpy((void*)rec->trace(), log, rec->cb_trace + 1);
+                memcpy((void*)pLogData->trace(), log, pLogData->cb_trace + 1);
                 if (truncate) {
-                    memcpy((void*)(rec->trace() + rec->cb_trace), "...", 3);
-                    rec->cb_trace += 3;
+                    memcpy((void*)(pLogData->trace() + pLogData->cb_trace), "...", 3);
+                    pLogData->cb_trace += 3;
                 }
 				//TODO set colors
-                if (rec->cb_trace > 2000)
+                if (pLogData->cb_trace > 2000)
                     i = i;
             }
 
-            rec->len = sizeof(ROW_LOG_REC) + rec->cbData();
+            pLogData->len = sizeof(LOG_REC_NET_DATA) + pLogData->cbData();
 
             fprintf(m_fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-",
-                rec->len, rec->log_type, rec->log_flags, rec->nn, rec->cb_app_name, rec->cb_module_name,
-				rec->cb_fn_name, rec->cb_trace, rec->pid, rec->tid,
-				rec->sec, rec->msec, 
-				rec->this_fn, rec->call_site, rec->fn_line, rec->call_line, pInfoNode->bookmark);
+                pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->nn, pLogData->cb_app_name, pLogData->cb_module_name,
+				pLogData->cb_fn_name, pLogData->cb_trace, pLogData->pid, pLogData->tid,
+				pLogData->sec, pLogData->msec, 
+				pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pInfoNode->bookmark);
 
-            //!!fwrite(rec->data, rec->cbData() - cbColor, 1, m_fp);
+            //!!fwrite(pLogData->data, pLogData->cbData() - cbColor, 1, m_fp);
             if (cbColor)
                 fwrite(szColor, cbColor, 1, m_fp);
             fwrite("\n", 1, 1, m_fp);
@@ -330,7 +330,7 @@ void TaskThread::FileImport()
         char* fnName = "fn_name";
         char* trace= "trace";
 
-        ROW_LOG_REC* recEnter = (ROW_LOG_REC*)log_buf[0];
+        LOG_REC_NET_DATA* recEnter = (LOG_REC_NET_DATA*)log_buf[0];
         recEnter->log_type = LOG_TYPE_ENTER;
         recEnter->cb_app_name = (WORD)strlen(appName);
         recEnter->cb_module_name = (WORD)strlen(moduleName);
@@ -342,7 +342,7 @@ void TaskThread::FileImport()
         memcpy((void*)recEnter->fnName(), fnName, recEnter->cb_fn_name);
         recEnter->len = recEnter->size();
 
-        ROW_LOG_REC* recTrace = (ROW_LOG_REC*)log_buf[1];
+        LOG_REC_NET_DATA* recTrace = (LOG_REC_NET_DATA*)log_buf[1];
         memcpy(recTrace, recEnter, recEnter->len);
         recTrace->log_type = LOG_TYPE_TRACE;
 		recTrace->log_flags |= LOG_FLAG_NEW_LINE;
@@ -351,7 +351,7 @@ void TaskThread::FileImport()
         memcpy((void*)recTrace->trace(), trace, recTrace->cb_trace);
         recTrace->len = recTrace->size();
 
-        ROW_LOG_REC* recExit = (ROW_LOG_REC*)log_buf[2];
+        LOG_REC_NET_DATA* recExit = (LOG_REC_NET_DATA*)log_buf[2];
         memcpy(recExit, recEnter, recEnter->len);
         recExit->log_type = LOG_TYPE_EXIT;
 
@@ -391,31 +391,31 @@ void TaskThread::FileImport()
             count++;
             if (count == 23811)
                 count = count;
-            ROW_LOG_REC* rec = (ROW_LOG_REC*)buf;
+            LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)buf;
             int bookmark; 
 			int cf = fscanf_s(m_fp, TEXT("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-"),
-				&rec->len, &rec->log_type, &rec->log_flags, &rec->nn, 
-                &rec->cb_app_name, &rec->cb_module_name, 
-                &rec->cb_fn_name, &rec->cb_trace, &rec->pid, &rec->tid, &rec->sec, &rec->msec,
-                &rec->this_fn, &rec->call_site, &rec->fn_line, &rec->call_line, &bookmark);
+				&pLogData->len, &pLogData->log_type, &pLogData->log_flags, &pLogData->nn, 
+                &pLogData->cb_app_name, &pLogData->cb_module_name, 
+                &pLogData->cb_fn_name, &pLogData->cb_trace, &pLogData->pid, &pLogData->tid, &pLogData->sec, &pLogData->msec,
+                &pLogData->this_fn, &pLogData->call_site, &pLogData->fn_line, &pLogData->call_line, &bookmark);
             ss = (17 == cf);
-            ss = ss && rec->isValid();
-			//!! if (rec->cbData())
-				//!! ss = ss && (1 == fread(rec->data, rec->cbData(), 1, m_fp));
+            ss = ss && pLogData->isValid();
+			//!! if (pLogData->cbData())
+				//!! ss = ss && (1 == fread(pLogData->data, pLogData->cbData(), 1, m_fp));
             if (ss)
             {
-                if (rec->isTrace())
+                if (pLogData->isTrace())
                 {
-					//!! rec->data[rec->cbData()] = '\n';
-                    rec->cb_trace++;
-                    rec->len++;
+					//!! pLogData->data[pLogData->cbData()] = '\n';
+                    pLogData->cb_trace++;
+                    pLogData->len++;
                 }
-				//!! rec->data[rec->cbData()] = 0;
+				//!! pLogData->data[pLogData->cbData()] = 0;
             }
 
-            ss = ss && rec->isValid();
+            ss = ss && pLogData->isValid();
             if (ss)
-                appended = gArchive.append(rec, NULL, true, bookmark);
+                appended = gArchive.append(pLogData, NULL, true, bookmark);
             ss = ss && appended;
             if (feof(m_fp))
             {
