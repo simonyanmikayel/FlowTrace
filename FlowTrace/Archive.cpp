@@ -305,7 +305,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
             else
                 pThreadNode->latestTrace->hasNewLine = 1;
         }
-        if (endsWithNewLine && newChank)
+        if (endsWithNewLine)
             pThreadNode->latestTrace->hasNewLine = 1;
         if (cb_trace == 0 && pLogData->call_line == pThreadNode->latestTrace->call_line)
             newChank = true;
