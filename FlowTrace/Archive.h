@@ -20,7 +20,7 @@ struct LOG_REC_BASE_DATA
 	int len;
 	BYTE log_type;
 	BYTE log_flags;
-	BYTE color;
+	BYTE reserved;
 	BYTE priority;
 	unsigned int nn;
 	WORD cb_app_name;
@@ -178,6 +178,7 @@ private:
     inline THREAD_NODE* addThread(LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark);
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark);
+	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName, BYTE color);
 	inline APP_NODE*   getApp(LOG_REC* p, sockaddr_in *p_si_other);
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);
     DWORD m_lost;

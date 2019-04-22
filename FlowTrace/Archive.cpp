@@ -274,13 +274,9 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookm
 
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName, BYTE color)
 {
-	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
-	unsigned char* trace = (unsigned char*)pLogRec->trace();
 	unsigned char last_char;
-	BYTE color = pLogData->color;
-	int cb_trace = pLogData->cb_trace;
 
 	bool endsWithNewLine = (cb_trace > 0 && trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
@@ -307,31 +303,29 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
         }
         if (endsWithNewLine)
             pThreadNode->latestTrace->hasNewLine = 1;
-        if (cb_trace == 0 && pLogData->call_line == pThreadNode->latestTrace->call_line)
-            newChank = true;
     }
 
-    if (newChank)
+	if (cb_trace == 0)
+	{
+		//do nothing
+	}
+    else if (newChank)
     {
-		if (cb_trace > 0)
-		{
-			TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
-			pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
-			if (!pLastChank->next_chank)
-				return nullptr;
-			TRACE_CHANK* pChank = pLastChank->next_chank;
-			pChank->len = cb_trace;
-			pChank->next_chank = 0;
-			memcpy(pChank->trace, trace, cb_trace);
-			pChank->trace[cb_trace] = 0;
-			pThreadNode->latestTrace->cb_trace += cb_trace;
-		}
+		TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
+		pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
+		if (!pLastChank->next_chank)
+			return nullptr;
+		TRACE_CHANK* pChank = pLastChank->next_chank;
+		pChank->len = cb_trace;
+		pChank->next_chank = 0;
+		memcpy(pChank->trace, trace, cb_trace);
+		pChank->trace[cb_trace] = 0;
+		pThreadNode->latestTrace->cb_trace += cb_trace;
 	}
     else
     {
         //add new trace
         int cb_fn_name = pLogData->cb_fn_name;
-        const char* fnName = pLogRec->fnName();
         if (fnName[0] == '^')
         {
             fnName++;
@@ -369,7 +363,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
         if (pLogData->cb_module_name)
         {
             pNode->cb_module_name = pLogData->cb_module_name;
-            memcpy(pNode->fnName() + cb_fn_name, pLogRec->moduleName(), pNode->cb_module_name);
+            memcpy(pNode->fnName() + cb_fn_name, moduleName, pNode->cb_module_name);
         }
 
         TRACE_CHANK* pChank = pNode->getFirestChank();
@@ -398,11 +392,22 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 		pThreadNode->latestTrace->color = color;
 	if (pThreadNode->latestTrace->priority != 0)
 		pThreadNode->latestTrace->priority = pLogData->priority;
-
-	pThreadNode->latestTrace->lengthCalculated = 0;
+	if (cb_trace)
+		pThreadNode->latestTrace->lengthCalculated = 0;
 	trace[cb_trace] = last_char;
 
     return pThreadNode->latestTrace;
+}
+
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark)
+{
+	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
+	const char* fnName = pLogRec->fnName();
+	const char* moduleName = pLogRec->moduleName();
+	int cb_trace = pLogData->cb_trace;
+	char* trace = (char*)pLogRec->trace();
+	BYTE color = 0;
+	return addTrace(pThreadNode, pLogData, bookmark, trace, cb_trace, fnName, moduleName, color);
 }
 
 void Archive::Log(LOG_REC* rec)
