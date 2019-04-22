@@ -57,4 +57,3 @@ protected:
 	void add(NetThread* pNetThread);
 };
 
-extern LogReceiverNet gLogReceiverNet;

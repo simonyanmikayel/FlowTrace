@@ -4,6 +4,7 @@
 #include "Helpers.h"
 #include "Settings.h"
 
+LogReceiverNet gLogReceiverNet;
 static NetThread* pNetThreads[1024];
 static int cNetThreads = 0;
 

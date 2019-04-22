@@ -12,6 +12,8 @@
 static FILE *testLogFile;
 static FILE *testPsFile;
 #endif
+
+LogReceiverAdb gLogReceiverAdb;
 static bool resetAtStart;
 
 void LogReceiverAdb::start(bool reset)
@@ -49,7 +51,7 @@ struct LOG_PARCER {
 	bool compeated() { 
 		return cb >= maxPos && !pending();
 	}
-	void reset() { cb = pos = 0; buf[0] = 0; }
+	void reset() { cb = pos = 0; buf[0] = 0; buf[buf_size];  }
 	void parce(const char* szLog, int cbLog);
 
 	static const int buf_size = 512;
@@ -103,7 +105,6 @@ void LOG_PARCER::parce(const char* szLog, int cbLog)
 	buf[cb] = 0;
 }
 
-static LOG_PARCER ft("<~*~>"); //for flow trace data
 static LOG_REC_ADB_DATA adbRec;
 
 static inline int NextMetaDataDigit(char* buf, int buf_size, int &i, bool& ok)
@@ -121,6 +122,9 @@ static inline int NextMetaDataDigit(char* buf, int buf_size, int &i, bool& ok)
 	return ret;
 }
 
+//#define _USE_FT
+#ifdef _USE_FT
+static LOG_PARCER ft("<~*~>"); //for flow trace data
 static bool ParceFtData()
 {
 	LOG_REC_ADB_DATA rec;
@@ -150,18 +154,39 @@ static bool ParceFtData()
 
 	return true;
 }
+#endif //_USE_FT
 
-static void TraceLog(const char* szLog, int cbLog)
+static void TraceChank(const char* szLog, int cbLog)
 {
-	//TODO do not trace trailing \r\n in flow node
-	if (cbLog) {
+	if (cbLog)
+	{
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
-		gLogReceiver.lock();
 		gArchive.append(&adbRec);
-		gLogReceiver.unlock();
 	}
+}
+
+static void TraceLog(const char* szLog, int cbLog)
+{
+	gLogReceiver.lock();
+	int i = 0;
+	for (; i < cbLog; i++)
+	{
+		if (szLog[i] == '\n' || szLog[i] == '\r')
+		{
+			//char c = szLog[i];
+			//((char*)szLog)[i] = '\n';
+			TraceChank(szLog, i + 1);
+			//((char*)szLog)[i] = c;
+			for (; i < cbLog && (szLog[i] == '\n' || szLog[i] == '\r'); i++)
+				;
+			szLog += i;
+			cbLog -= i;
+			i = 0;
+		}
+	}
+	TraceChank(szLog, cbLog);
 }
 
 static void WriteLog(const char* szLog, int cbLog)
@@ -176,6 +201,8 @@ static void WriteLog(const char* szLog, int cbLog)
 	bbb[cbLog] = 0;
 	cbLog = cbLog;
 #endif
+
+#ifdef _USE_FT
 	if ((!adbRec.ftChecked && adbRec.pid && adbRec.tid) || (ft.pending())) {
 		if (!adbRec.ftChecked)
 			ft.reset();
@@ -204,17 +231,18 @@ static void WriteLog(const char* szLog, int cbLog)
 	else {
 		TraceLog(szLog, cbLog);
 	}
+#else 
+	TraceLog(szLog, cbLog);
+#endif //_USE_FT
 }
 // test on "\r\n[\r\n\x1b[0m\r\n\r\n[ 03-02 20:27:03.803 14375:14375 D/FLOW_TRACE ]\r\n"
-// metadata example: [ 02-22 16:39:05.830   775:  865 D/ft ]
+// metadata example: [ 02-22 16:39:05.830   775:  865 D/TAG ]
 static LOG_PARCER mt("\r\n[ *]\r\n"); //for adb metadara
 
 static bool ParceMetaData()
 {
 	bool ok = true;
 	int i = 0;
-	LOG_REC_ADB_DATA rec;
-	rec.reset();
 	int unused1 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
 	int unused2 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
 	int h = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
@@ -224,12 +252,26 @@ static bool ParceMetaData()
 	int pid = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
 	int tid = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
 	if (ok && pid && tid) {
-		//replace cur log info
-		rec.pid = pid;
-		rec.tid = tid;
-		rec.sec = 3600 * h + 60 * m + s;
-		rec.msec = ms;
-		adbRec = rec;
+		adbRec.reset();
+		adbRec.pid = pid;
+		adbRec.tid = tid;
+		adbRec.sec = Helpers::GetSec(h , m, s);// 3600 * h + 60 * m + s;
+		adbRec.msec = ms;
+		int cb_fn_name = mt.cb - i - 5;
+		if (i > 0 && cb_fn_name > 0 || cb_fn_name < 512 - i)
+		{
+			memcpy(adbRec.tag, mt.buf + i + 1, cb_fn_name);
+			adbRec.cb_fn_name = cb_fn_name;
+			adbRec.p_fn_name = adbRec.tag;
+			if (adbRec.tag[0] == 'E')
+				adbRec.priority = FLOW_LOG_ERROR;
+			else if (adbRec.tag[0] == 'I')
+				adbRec.priority = FLOW_LOG_INFO;
+			else if (adbRec.tag[0] == 'D')
+				adbRec.priority = FLOW_LOG_DEBUG;
+			else if (adbRec.tag[0] == 'D')
+				adbRec.priority = FLOW_LOG_WARN;
+		}
 	}
 
 	return ok;
@@ -238,7 +280,9 @@ static bool ParceMetaData()
 static inline void ResetLog()
 {
 	mt.reset();
+#ifdef _USE_FT
 	ft.reset();
+#endif //_USE_FT
 	adbRec.reset();
 }
 

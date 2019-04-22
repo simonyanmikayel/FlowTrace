@@ -278,12 +278,14 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 {
 	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
 	unsigned char* trace = (unsigned char*)pLogRec->trace();
+	unsigned char last_char;
 	BYTE color = pLogData->color;
 	int cb_trace = pLogData->cb_trace;
 
 	bool endsWithNewLine = (cb_trace > 0 && trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
 		cb_trace--;
+	last_char = trace[cb_trace];
 	trace[cb_trace] = 0;
 	//stdlog("cb: %d color: %d %s\n", cb_trace, color, trace);
 #ifdef _DEBUG
@@ -398,6 +400,8 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 		pThreadNode->latestTrace->priority = pLogData->priority;
 
 	pThreadNode->latestTrace->lengthCalculated = 0;
+	trace[cb_trace] = last_char;
+
     return pThreadNode->latestTrace;
 }
 
@@ -497,7 +501,8 @@ int Archive::append(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int 
 		g_buff_nn = pack->buff_nn-1;
 	}
 #endif
-	pAppNode->lastRecNN = pLogData->nn;
+	if (pLogData->nn)
+		pAppNode->lastRecNN = pLogData->nn;
 	
 	THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)

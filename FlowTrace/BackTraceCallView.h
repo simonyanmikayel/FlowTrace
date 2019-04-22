@@ -3,7 +3,7 @@
 #include "Archive.h"
 #include "Helpers.h"
 
-#define MAX_BACK_TRACE 512
+#define MAX_BACK_TRACE 8*1024
 enum BACK_TRACE_COL { BACK_TRACE_FN, BACK_TRACE_LINE, BACK_TRACE_SRC, BACK_TRACE_LAST_COL };//BACK_TRACE_LNK_CALL, BACK_TRACE_LNK_FUNC, 
 
 class CFlowTraceView;

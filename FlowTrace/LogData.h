@@ -31,6 +31,29 @@ typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE } ROW_LOG_TYPE;
 #define LOG_FLAG_RUNNABLE_RUN 16
 #define LOG_FLAG_OUTER_LOG 32
 #define LOG_FLAG_COLOR_PARCED 64
+#define LOG_FLAG_ADB 128
+
+// same as android_LogPriority
+typedef enum _flow_LogPriority {
+	/** For internal use only.  */
+	FLOW_LOG_UNKNOWN = 0,
+	/** The default priority, for internal use only.  */
+	FLOW_LOG_DEFAULT, /* only for SetMinPriority() */
+	/** Verbose logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_VERBOSE,
+	/** Debug logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_DEBUG,
+	/** Informational logging. Should typically be disabled for a release apk. */
+	FLOW_LOG_INFO,
+	/** Warning logging. For use with recoverable failures. */
+	FLOW_LOG_WARN,
+	/** Error logging. For use with unrecoverable failures. */
+	FLOW_LOG_ERROR,
+	/** Fatal logging. For use when aborting. */
+	FLOW_LOG_FATAL,
+	/** For internal use only.  */
+	FLOW_LOG_SILENT, /* only for SetMinPriority(); must be last */
+} flow_LogPriority;
 
 #pragma pack(push,1)
 enum THREAD_NODE_CHILD { ROOT_CHILD, LATEST_CHILD };
@@ -68,7 +91,8 @@ struct LOG_NODE
     int cExpanded;
     int posInTree;
     int lineSearchPos;
-    LOG_NODE* nextChankMarker;
+	BYTE log_flags;
+	LOG_NODE* nextChankMarker;
     LOG_NODE* nextChank;
 
     LOG_DATA_TYPE data_type;
@@ -80,7 +104,7 @@ struct LOG_NODE
     bool isFlow() { return data_type == FLOW_DATA_TYPE; }
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
-    bool isJava();
+	bool isJava() { return (log_flags & LOG_FLAG_JAVA) || (log_flags & LOG_FLAG_ADB); }
     bool CanShowInIDE();
 
     void CalcLines();
@@ -151,6 +175,67 @@ struct APP_NODE : LOG_NODE
     char appName[MAX_APP_NAME + 1];
 };
 
+struct INFO_NODE : LOG_NODE
+{
+#ifdef _NN_TEST
+	int  prev_nn;
+	int  pack_nn;
+	int  retry_nn;
+	int  buff_nn;
+#endif
+	int  nn;
+	BYTE log_type;
+	WORD cb_fn_name;
+	WORD cb_short_fn_name_offset;
+	WORD cb_module_name;
+	union {
+		WORD cb_trace;
+		WORD cb_java_call_site; // for java we keep here caller class:method
+	};
+	int call_line;
+	DWORD sec;
+	DWORD msec;
+	bool isEnter() {
+		return log_type == LOG_TYPE_ENTER;
+	}
+	bool isTrace() {
+		return log_type == LOG_TYPE_TRACE;
+	}
+	char* fnName();
+	char* moduleName();
+	int moduleNameLength();
+	char* JavaCallSite() { return fnName() + cb_fn_name + cb_module_name; }
+	void  normilizeFnName(char* name);
+	char* shortFnName();
+	int   callLine(bool resolve);
+
+	//int cb_actual_module_name;
+	//int cb_short_module_name_offset;
+	//
+	//char modulePath[MAX_PATH + 1];
+	//char moduleName[1];
+
+};
+
+struct FLOW_NODE : INFO_NODE
+{
+	friend class AddrInfo;
+
+	FLOW_NODE* peer;
+	DWORD this_fn;
+	DWORD call_site;
+	int fn_line;
+private:
+	ADDR_INFO *p_func_info;
+	ADDR_INFO *p_call_info;
+public:
+	ADDR_INFO *getFuncInfo(bool resolve);
+	ADDR_INFO *getCallInfo(bool resolve);
+	bool isOpenEnter() { return isEnter() && peer == 0; }
+	void addToTree();
+	char* getCallSrc(bool fullPath, bool resolve);
+};
+
 struct THREAD_NODE : LOG_NODE
 {
     APP_NODE* pAppNode;
@@ -162,8 +247,11 @@ struct THREAD_NODE : LOG_NODE
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {
         LOG_NODE* pParent = NULL;
-        if (type == ROOT_CHILD)
-            pParent = this;
+		if (type == ROOT_CHILD)
+		{
+			pParent = this;
+			log_flags = pNode->log_flags;
+		}
         else
             pParent = (LOG_NODE*)curentFlow;
         ATLASSERT(pParent != NULL);
@@ -171,68 +259,6 @@ struct THREAD_NODE : LOG_NODE
         curentFlow = pNode;
     }
     bool isHiden() { return hiden || pAppNode->hiden; }
-};
-
-struct INFO_NODE : LOG_NODE
-{
-#ifdef _NN_TEST
-	int  prev_nn;
-	int  pack_nn;
-	int  retry_nn;
-	int  buff_nn;
-#endif
-    int  nn;
-    BYTE log_type;
-	BYTE log_flags;
-    WORD cb_fn_name;
-    WORD cb_short_fn_name_offset;
-    WORD cb_module_name;
-    union {
-        WORD cb_trace;
-        WORD cb_java_call_site; // for java we keep here caller class:method
-    };
-    int call_line;
-    DWORD sec;
-    DWORD msec;
-    bool isEnter() { 
-		return log_type == LOG_TYPE_ENTER; 
-	}
-    bool isTrace() { 
-		return log_type == LOG_TYPE_TRACE; 
-	}
-    char* fnName();
-    char* moduleName();
-    int moduleNameLength();
-    char* JavaCallSite() { return fnName() + cb_fn_name + cb_module_name; }
-    void  normilizeFnName(char* name);
-    char* shortFnName();
-    int   callLine(bool resolve);
-
-    //int cb_actual_module_name;
-    //int cb_short_module_name_offset;
-    //
-    //char modulePath[MAX_PATH + 1];
-    //char moduleName[1];
-
-};
-
-struct FLOW_NODE : INFO_NODE
-{
-    friend class AddrInfo;
-
-    FLOW_NODE* peer;
-    DWORD this_fn;
-    DWORD call_site;
-    int fn_line;
-private:
-    ADDR_INFO *p_func_info;
-    ADDR_INFO *p_call_info;
-public:
-    ADDR_INFO *getFuncInfo(bool resolve);
-    ADDR_INFO *getCallInfo(bool resolve);
-    bool isOpenEnter() { return isEnter() && peer == 0; }
-    void addToTree();
-    char* getCallSrc(bool fullPath, bool resolve);
 };
 
 struct TRACE_CHANK

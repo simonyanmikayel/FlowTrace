@@ -2,6 +2,7 @@
 
 #include "LogData.h"
 
+#define MAX_JAVA_TAG_NAME_LEN 500
 #define MAX_JAVA_FUNC_NAME_LEN 1200
 #define MAX_TRCAE_LEN (1024*2)
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(LOG_REC_BASE_DATA))
@@ -68,13 +69,14 @@ struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
 	const char* trace() { return p_trace; }
 	int cbModuleName() { return cb_module_name; }
 	void reset() { ZeroMemory(this, sizeof(*this)); resetFT(); }
-	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; p_app_name = p_module_name = p_fn_name = ""; }
+	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_app_name = p_module_name = p_fn_name = ""; }
 
 	bool ftChecked; //is adb sent flow trace
 	const char* p_app_name;
 	const char* p_module_name;
 	const char* p_fn_name;
 	const char* p_trace;
+	char tag[MAX_JAVA_TAG_NAME_LEN];
 };
 
 struct LOG_REC

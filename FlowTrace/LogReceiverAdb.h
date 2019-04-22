@@ -66,4 +66,3 @@ protected:
 	PsThread psThread;
 };
 
-extern LogReceiverAdb gLogReceiverAdb;

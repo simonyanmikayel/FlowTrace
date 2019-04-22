@@ -3,21 +3,21 @@
 #include "LogReceiverNet.h"
 
 LogReceiver gLogReceiver;
-LogReceiverAdb gLogReceiverAdb;
-LogReceiverNet gLogReceiverNet;
+extern LogReceiverAdb gLogReceiverAdb;
+extern LogReceiverNet gLogReceiverNet;
 
 void LogReceiver::start(bool reset)
 {
 	m_working = true;
-	//gLogReceiverAdb.start(reset);
+	gLogReceiverAdb.start(reset);
 	gLogReceiverNet.start(reset);
 }
 
 void LogReceiver::stop()
 {
-	lock();
+	//lock();
 	m_working = false;
 	gLogReceiverAdb.stop();
 	gLogReceiverNet.stop();
-	unlock();
+	//unlock();
 }

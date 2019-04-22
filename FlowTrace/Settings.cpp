@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Settings.h"
 #include "resource.h"
+#include "LogData.h"
 
 CSettings gSettings;
 
@@ -260,7 +261,7 @@ void CSettings::SaveWindPos(HWND hWnd)
 		Write(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl));
 }
 
-bool CSettings::SetTracePriority(flow_LogPriority priority, DWORD& textColor, DWORD& bkColor)
+bool CSettings::SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor)
 {
 	bool ret = true;
 	switch (priority)

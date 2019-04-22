@@ -476,6 +476,24 @@ namespace Helpers
 		sec = (DWORD)(mktime(&local));
 	}
 
+	DWORD  GetSec(int hour, int min, int sec)
+	{
+		SYSTEMTIME st;
+		GetLocalTime(&st);
+
+		tm local;
+		memset(&local, 0, sizeof(local));
+		local.tm_year = st.wYear - 1900;
+		local.tm_mon = st.wMonth - 1;
+		local.tm_mday = st.wDay;
+		local.tm_wday = st.wDayOfWeek;
+		local.tm_hour = hour;// st.wHour;
+		local.tm_min = min;  // st.wMinute;
+		local.tm_sec = sec;  // st.wSecond;
+
+		return (DWORD)(mktime(&local));
+	}
+
     void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable, MENU_ICON ID_ICON)
     {
         DWORD dwFlags;

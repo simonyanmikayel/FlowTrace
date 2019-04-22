@@ -21,6 +21,7 @@ namespace Helpers
 	CHAR* find_str(const CHAR *phaystack, const CHAR *pneedle, int bMatchCase);
 	CHAR* str_format_int_grouped(__int64 num);
 	void GetTime(DWORD &sec, DWORD& msec);
+	DWORD  GetSec(int hour, int min, int sec);
 	void SetMenuIcon(HMENU hMenu, UINT item, MENU_ICON icon);
 	void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu);
     void AddMenu(HMENU hMenu, int& cMenu, int ID_MENU, LPCTCH str, bool disable = false, MENU_ICON ID_ICON = MENU_ICON_NON);

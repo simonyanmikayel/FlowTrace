@@ -240,7 +240,7 @@ FLOW_NODE* LOG_NODE::getSyncNode()
             pNode = pNode->parent;
         }
     }
-    if (pNode && pNode->isFlow())
+    if (pNode && pNode->isFlow() || pNode->isThread())
         return (FLOW_NODE*)pNode;
     else
         return NULL;
@@ -604,10 +604,6 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     } while (pNode0 != pNode);
     //stdlog("CollapseExpandAll %d\n", GetTickCount());
     CalcLines();
-}
-bool LOG_NODE::isJava() 
-{ 
-	return isInfo() && ((INFO_NODE*)this)->log_flags & LOG_FLAG_JAVA; 
 }
 
 bool LOG_NODE::CanShowInIDE()
