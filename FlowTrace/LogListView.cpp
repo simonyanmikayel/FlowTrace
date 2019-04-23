@@ -7,7 +7,6 @@
 #include "MainFrm.h"
 
 static const int TEXT_MARGIN = 8;
-enum ICON_TYPE { ICON_BOOKMARK, ICON_MAX };//ICON_SYNC, ICON_BACK_TRACE, 
 extern HWND       hwndMain;
 
 static int ICON_INDEX_LIST_ENTER;
@@ -15,6 +14,8 @@ static int ICON_INDEX_LIST_EXIT;
 static int ICON_INDEX_LIST_TRACE_SEL;
 static int ICON_INDEX_BOOKMARK;
 static int ICON_INDEX_SYNC;
+
+static bool NcDrawn = false;
 
 CLogListView::CLogListView(CFlowTraceView* pView)
 	: m_pView(pView)
@@ -53,6 +54,7 @@ void CLogListView::ClearColumnInfo()
 		m_ColLen[i] = ICON_LEN + TEXT_MARGIN;
 	}
 	m_lengthCalculated++;
+	DrawNc();
 }
 
 void LOG_SELECTION::print()
@@ -407,7 +409,7 @@ void CLogListView::UpdateCaret()
 	if (!m_hasCaret)
 		return;
 
-	int x = ICON_MAX * ICON_LEN + TEXT_MARGIN;
+	int x = TEXT_MARGIN;
 	int y = 0;
 
 	if (GetItemCount())
@@ -579,7 +581,7 @@ LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM
 		return 0;
 
 	int xPos = GET_X_LPARAM(lParam);
-	if (xPos < ICON_MAX * ICON_LEN + TEXT_MARGIN)
+	if (xPos < TEXT_MARGIN)
 		return 0;
 
 
@@ -662,6 +664,18 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	}
 
 	return 0;
+}
+
+LRESULT CLogListView::OnNcCalcSize(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
+{
+	LRESULT lr = DefWindowProcW(m_hWnd, uMsg, wParam, lParam);
+	if (wParam)
+	{
+		NCCALCSIZE_PARAMS* ncp = (NCCALCSIZE_PARAMS*)lParam;
+		ncp->rgrc[0].left += 100;
+	}
+	bHandled = TRUE;
+	return lr;
 }
 
 LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
@@ -831,18 +845,12 @@ bool CLogListView::UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM l
 	LVHITTESTINFO ht = { 0 };
 	ht.pt.x = xPos;
 	ht.pt.y = yPos;
+	ht.iItem = -1;
 	SubItemHitTest(&ht);
 	//stdlog("xPos = %d yPos = %d flags = %d ht.iItem = %d\n", xPos, yPos, ht.flags, ht.iItem);
-	if ((LVHT_ONITEM & ht.flags) && (ht.iItem >= 0))
+	if ((ht.iItem >= 0)) //&& (LVHT_ONITEM & ht.flags)
 	{
 		LIST_COL col = m_ColType[ht.iSubItem];
-
-		if (col == ICON_COL)
-		{
-			//if (ICON_BOOKMARK == (xPos / ICON_LEN))
-			ToggleBookmark(ht.iItem);
-			return false;
-		}
 
 		CRect itemRect;
 		GetSubItemRect(ht.iItem, m_LogCol, LVIR_LABEL, &itemRect);
@@ -928,8 +936,8 @@ void CLogListView::SetColumnLen(LIST_COL col, int len)
 		GetClientRect(&rc);
 		len = max(rc.right + 16, (long)len);
 	}
-	//stdlog("len = %d col = %d m_ColLen = %d\n", len, col, m_ColLen[col]);
 	int iSubItem = getSubItem(col);
+	//stdlog("iSubItem = %d len = %d col = %d m_ColLen = %d\n", iSubItem, len, col, m_ColLen[col]);
 	if (m_ColLen[col] < len)
 	{
 		m_ColLen[col] = len;
@@ -970,7 +978,7 @@ void CLogListView::RefreshList(bool redraw)
 
 void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)
 {
-	if (col == ICON_COL || col == LOG_COL)
+	if (col == LOG_COL)
 	{
 		InsertColumn(m_cColumns, szHeader, LVCFMT_LEFT, m_ColLen[col], 0, -1, -1);
 		m_ColSubItem[col] = m_cColumns;
@@ -987,11 +995,8 @@ void CLogListView::SetColumns()
 
 	ClearColumnInfo();
 
-	if (m_cColumns == 0)
-		AddColumn(_T(""), ICON_COL);
-
-	m_cColumns = 1;
-	m_cActualColumns = 1;
+	m_cColumns = 0;
+	m_cActualColumns = 0;
 
 	if (gSettings.GetColLineNN())
 		AddColumn(_T("Line"), LINE_NN_COL);
@@ -1005,13 +1010,136 @@ void CLogListView::SetColumns()
 		AddColumn(_T("Time"), TIME_COL);
 	if (gSettings.GetColFunc())
 		AddColumn(_T("Function"), FUNC_COL);
-	if (gSettings.GetColLine())
-		AddColumn(_T("Line"), CALL_LINE_COL);
 
-	//Log alwayse lastt
+	//Log always last
 	AddColumn(_T("Trace"), LOG_COL);
 
 	m_LogCol = m_cColumns - 1;
+}
+
+void CLogListView::DrawNcItem(int iItem, HDC hdc, RECT* rcItem, LOG_NODE* pNode)
+{
+	char tmp[500];
+
+	SelectObject(hdc, gSettings.GetFont());
+	int c = sprintf_s(tmp, "%d", iItem + 1);
+	TextOut(hdc, 0, rcItem->top, tmp, c);
+}
+
+void CLogListView::DrawNc()
+{
+	NcDrawn = true;
+	if (!::IsWindow(m_hWnd))
+		return;
+
+	DWORD fg = RGB(32, 32, 32);
+	DWORD bg = RGB(128, 128, 128);
+	HBRUSH nc_color;
+
+	nc_color = CreateSolidBrush(bg);
+
+	HDC hdc = GetWindowDC();
+	::SetTextColor(hdc, fg);
+
+	RECT rc;
+	GetWindowRect(&rc);
+	rc.bottom = rc.bottom - rc.top;
+	rc.top = 0;
+	rc.left = 0;
+	rc.right = 100;
+
+	FillRect(hdc, &rc, nc_color);
+
+	//WM_UPDATE_NC
+	LVHITTESTINFO ht = { 0 };
+	ht.pt.x = 1;
+	ht.pt.y = 1;
+	ht.iItem = -1;
+	SubItemHitTest(&ht);
+	//stdlog("flags = %d ht.iItem = %d\n", ht.flags, ht.iItem);
+	if (ht.iItem < 0)
+		return;
+	int iRow = 0;
+	int iItem = ht.iItem;
+	RECT rcItem;
+	while (GetItemRect(iItem, &rcItem, LVIR_BOUNDS))
+	{
+		LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
+		if (!pNode)
+			break;
+
+		DrawNcItem(iItem, hdc, &rcItem, pNode);
+
+		iItem++;
+		iRow++;
+	}
+
+	//int iRow = 0;
+	//while (iRow < maxNcItem && DrawNcItem(iRow, hdc, &rc))
+	//	iRow++;
+
+	//on click
+	//if (col == ICON_COL)
+	//{
+	//	//if (ICON_BOOKMARK == (xPos / ICON_LEN))
+	//	ToggleBookmark(ht.iItem);
+	//	return false;
+	//}
+
+	/*
+		if (col == ICON_COL)
+	{
+		int y = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - ICON_LEN / 2;
+		int x = rcItem.left + ICON_BOOKMARK * ICON_LEN;
+
+		if (pNode && pNode->isSynchronized(gSyncronizedNode))
+		{
+			ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_TRACE_SEL, hdc, x, y, ILD_NORMAL);
+		}
+		if (pNode->bookmark)
+		{
+			ImageList_Draw(m_hListImageList, ICON_INDEX_BOOKMARK, hdc, x, y, ILD_NORMAL);
+			TCHAR szText[20];
+			int cbText = sprintf_s(szText, "%d", pNode->bookmark);
+			SIZE  textSize;
+			//stdlog("szText [%s] %d %d \n", szText, cbText, strlen(szText));
+			GetTextExtentExPoint(hdc, szText, cbText, 0, NULL, NULL, &textSize);
+
+			int y1 = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - textSize.cy / 2;
+			int x1 = rcItem.left + ICON_BOOKMARK * ICON_LEN + ICON_LEN /2- textSize.cx / 2;
+			::SetTextColor(hdc, RGB(64,128,255));
+			TextOut(hdc, x1, y1, szText, cbText);
+		}
+		if (pNode->isFlow())
+		{
+			if (((FLOW_NODE*)pNode)->isEnter())
+				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_ENTER, hdc, x, y, ILD_NORMAL);
+			else
+				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_EXIT, hdc, x, y, ILD_NORMAL);
+		}
+		return;
+	}
+
+	*/
+
+	ReleaseDC(hdc);
+}
+
+LRESULT CLogListView::OnUpdateNc(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
+{
+	DrawNc();
+	bHandled = TRUE;
+	return 0;
+
+}
+
+LRESULT CLogListView::OnNcPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
+{
+	LRESULT lr = DefWindowProcW(m_hWnd, uMsg, wParam, lParam);
+	DrawNc();
+	bHandled = TRUE;
+	return lr;
+
 }
 
 LRESULT CLogListView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL & bHandled)
@@ -1049,11 +1177,17 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 		ATLASSERT(0);
 		return;
 	}
+
+	if (NcDrawn)
+	{
+		NcDrawn = !NcDrawn;
+		PostMessage(WM_UPDATE_NC);
+	}
+
 	if (pNode->lengthCalculated != m_lengthCalculated)
 	{
 		pNode->lengthCalculated = m_lengthCalculated;
 		//calculate lengths of all columns
-		SetColumnLen(m_ColType[0], ICON_MAX * ICON_LEN);
 		SIZE size;
 		//for (int i = 1; i < m_cColumns; i++)
 		{
@@ -1063,7 +1197,7 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 			if (cbText)
 				GetTextExtentPoint32(hdc, szText, cbText, &size);
 			SetColumnLen(LOG_COL, size.cx + (2 * TEXT_MARGIN));
-			//stdlog("\t iItem i %d %d size.cx %d %s\n", iItem, i, size.cx, szText1);
+			//stdlog("\t iItem i %d size.cx %d %s\n", iItem, size.cx, szText);
 		}
 	}
 }
@@ -1076,39 +1210,6 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	if (!pNode)
 	{
 		ATLASSERT(0);
-		return;
-	}
-
-	if (col == ICON_COL)
-	{
-		int y = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - ICON_LEN / 2;
-		int x = rcItem.left + ICON_BOOKMARK * ICON_LEN;
-
-		if (pNode && pNode->isSynchronized(gSyncronizedNode))
-		{
-			ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_TRACE_SEL, hdc, x, y, ILD_NORMAL);
-		}
-		if (pNode->bookmark)
-		{
-			ImageList_Draw(m_hListImageList, ICON_INDEX_BOOKMARK, hdc, x, y, ILD_NORMAL);
-			TCHAR szText[20];
-			int cbText = sprintf_s(szText, "%d", pNode->bookmark);
-			SIZE  textSize;
-			//stdlog("szText [%s] %d %d \n", szText, cbText, strlen(szText));
-			GetTextExtentExPoint(hdc, szText, cbText, 0, NULL, NULL, &textSize);
-
-			int y1 = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - textSize.cy / 2;
-			int x1 = rcItem.left + ICON_BOOKMARK * ICON_LEN + ICON_LEN /2- textSize.cx / 2;
-			::SetTextColor(hdc, RGB(64,128,255));
-			TextOut(hdc, x1, y1, szText, cbText);
-		}
-		if (pNode->isFlow())
-		{
-			if (((FLOW_NODE*)pNode)->isEnter())
-				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_ENTER, hdc, x, y, ILD_NORMAL);
-			else
-				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_EXIT, hdc, x, y, ILD_NORMAL);
-		}
 		return;
 	}
 
@@ -1397,7 +1498,7 @@ CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 
 	cb = 0;
 	bool funcColFound = false;
-	for (int i = 1; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
+	for (int i = 0; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
 	{
 		if (onlyTraces && LOG_COL != m_ActualColType[i])
 			continue;

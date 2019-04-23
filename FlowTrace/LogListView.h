@@ -48,6 +48,9 @@ public:
 	BEGIN_MSG_MAP(CLogListView)
 		//MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
 		MSG_WM_SIZE(OnSize)
+		MESSAGE_HANDLER(WM_UPDATE_NC, OnUpdateNc)
+		MESSAGE_HANDLER(WM_NCPAINT, OnNcPaint)
+		MESSAGE_HANDLER(WM_NCCALCSIZE, OnNcCalcSize)
 		MESSAGE_HANDLER(WM_SETFOCUS, OnSetFocus)
 		MESSAGE_HANDLER(WM_KILLFOCUS, OnKillFocus)
         MESSAGE_HANDLER(WM_MBUTTONDOWN, OnMButtonDown)
@@ -61,7 +64,10 @@ public:
 	END_MSG_MAP()
 
 	void OnSize(UINT nType, CSize size);
+	LRESULT OnUpdateNc(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
+	LRESULT OnNcPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
+	LRESULT OnNcCalcSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
     LRESULT OnMButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
@@ -108,6 +114,8 @@ private:
 	bool UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool IsWordChar(char c) { return (0 != isalnum(c)) || c == '_'; }
 	void ToggleBookmark(DWORD item);
+	void DrawNcItem(int iItem, HDC hdc, RECT* rcItem, LOG_NODE* pNode);
+	void DrawNc();
 
 	LIST_COL m_ColType[MAX_COL];
 	LIST_COL m_ActualColType[MAX_COL];
