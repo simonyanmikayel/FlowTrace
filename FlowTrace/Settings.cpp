@@ -101,7 +101,7 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_ColTime, m_ColTime);
 	Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 	Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
-	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 1);
+	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 0);
 
 	Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
 	Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");

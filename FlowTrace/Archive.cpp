@@ -305,7 +305,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 
     if (newChank)
     {
-		if (cb_trace == 0)
+		if (cb_trace > 0)
 		{
 			TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
 			pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);

@@ -228,7 +228,7 @@ BEGIN
     LTEXT           "UDP Listen Port:",IDC_STATIC,198,30,53,8
     CONTROL         "Show full source path in call stack",IDC_CHECK_FULL_SRC_PATH,
                     "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,51,71,123,10
-    GROUPBOX        "Call Stack Options",IDC_STATIC,16,26,167,151
+    GROUPBOX        "Call Stack Options",IDC_STATIC,16,57,167,120
     LTEXT           "Linux home path",IDC_STATIC,23,113,54,8
     LTEXT           "Map on windows",IDC_STATIC,116,113,54,8
     EDITTEXT        IDC_EDIT_LINUX_HOME,21,122,81,14,ES_AUTOHSCROLL
@@ -243,6 +243,7 @@ BEGIN
     LTEXT           "Andoid Studio path",IDC_STATIC,25,142,61,8
     EDITTEXT        IDC_EDIT_ANDROID_PROJECT,20,175,156,14,ES_AUTOHSCROLL
     LTEXT           "Android project path",IDC_STATIC,25,166,66,8
+    CONTROL         "Get Logcat Logs",IDC_CHECK_USE_ADB,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,21,20,64,10
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 261

@@ -155,7 +155,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
         ////////////////  
     }
 
-	if (!gSettings.GetUseAdb())
+	//if (!gSettings.GetUseAdb())
 		m_searchbar.HideButton(ID_VIEW_RESETLOG);
 
     SizeSimpleReBarBands();
@@ -537,7 +537,7 @@ LRESULT CMainFrame::OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    ClearLog(true);
+    ClearLog(true, true);
     return 0;
 }
 

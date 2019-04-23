@@ -62,6 +62,8 @@
 #define IDC_CHECK_FULL_SRC_PATH         1024
 #define IDC_BUTTON_ADD                  1025
 #define IDC_CHECK_UDATE_STACK_VIEW      1025
+#define IDC_CHECK_FULL_SRC_PATH2        1025
+#define IDC_CHECK_USE_ADB               1025
 #define IDC_CHECK_SHOW_APP_IP           1026
 #define IDC_CHECK_ECLIPSE_ON_WIN        1026
 #define IDC_NN2                         1027

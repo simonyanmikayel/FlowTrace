@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Settings.h"
 #include "LogReceiverAdb.h"
 #include "LogReceiverNet.h"
 
@@ -9,15 +10,16 @@ extern LogReceiverNet gLogReceiverNet;
 void LogReceiver::start(bool reset)
 {
 	m_working = true;
-	gLogReceiverAdb.start(reset);
 	gLogReceiverNet.start(reset);
+	if (gSettings.GetUseAdb())
+		gLogReceiverAdb.start(reset);
 }
 
 void LogReceiver::stop()
 {
 	//lock();
 	m_working = false;
-	gLogReceiverAdb.stop();
 	gLogReceiverNet.stop();
+	gLogReceiverAdb.stop();
 	//unlock();
 }

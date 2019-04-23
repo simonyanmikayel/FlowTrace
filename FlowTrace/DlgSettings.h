@@ -32,6 +32,7 @@ public:
   CButton m_btnFont;
   CButton m_btnReset;
   CButton m_FullSrcPath;
+  CButton m_UseAdb;
   CEdit   m_edtEclipsePath;
   CEdit   m_edtExternalCmd;
   CEdit   m_edtLinuxHome;
