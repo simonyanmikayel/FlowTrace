@@ -274,15 +274,12 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookm
 
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName, BYTE color)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName)
 {
-	unsigned char last_char;
-
 	bool endsWithNewLine = (cb_trace > 0 && trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
 		cb_trace--;
-	last_char = trace[cb_trace];
-	trace[cb_trace] = 0;
+
 	//stdlog("cb: %d color: %d %s\n", cb_trace, color, trace);
 #ifdef _DEBUG
     //if (221 == pLogData->call_line)
@@ -300,27 +297,27 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
                 newChank = true;
             else
                 pThreadNode->latestTrace->hasNewLine = 1;
-        }
-        if (endsWithNewLine)
-            pThreadNode->latestTrace->hasNewLine = 1;
+
+			if (endsWithNewLine)
+				pThreadNode->latestTrace->hasNewLine = 1;
+		}
     }
 
-	if (cb_trace == 0)
-	{
-		//do nothing
-	}
-    else if (newChank)
+    if (newChank)
     {
-		TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
-		pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
-		if (!pLastChank->next_chank)
-			return nullptr;
-		TRACE_CHANK* pChank = pLastChank->next_chank;
-		pChank->len = cb_trace;
-		pChank->next_chank = 0;
-		memcpy(pChank->trace, trace, cb_trace);
-		pChank->trace[cb_trace] = 0;
-		pThreadNode->latestTrace->cb_trace += cb_trace;
+		if (cb_trace == 0)
+		{
+			TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
+			pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
+			if (!pLastChank->next_chank)
+				return nullptr;
+			TRACE_CHANK* pChank = pLastChank->next_chank;
+			pChank->len = cb_trace;
+			pChank->next_chank = 0;
+			memcpy(pChank->trace, trace, cb_trace);
+			pChank->trace[cb_trace] = 0;
+			pThreadNode->latestTrace->cb_trace += cb_trace;
+		}
 	}
     else
     {
@@ -343,7 +340,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 		pNode->retry_nn = g_retry_nn;
 		pNode->buff_nn = g_buff_nn;
 #endif
-		pNode->color = color;
+		pNode->color = pLogData->color;
 		pNode->priority = pLogData->priority;
 		pNode->nn = pLogData->nn;
         pNode->log_type = pLogData->log_type;
@@ -389,14 +386,31 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
     }
 	//at this point latestTrace is not null.
 	if (!pThreadNode->latestTrace->color)
-		pThreadNode->latestTrace->color = color;
+		pThreadNode->latestTrace->color = pLogData->color;
 	if (pThreadNode->latestTrace->priority != 0)
 		pThreadNode->latestTrace->priority = pLogData->priority;
 	if (cb_trace)
 		pThreadNode->latestTrace->lengthCalculated = 0;
-	trace[cb_trace] = last_char;
 
     return pThreadNode->latestTrace;
+}
+
+static inline int parceCollor(char** c)
+{
+	int color = 0;
+	if (isdigit(**c))
+	{
+		color = (**c) - '0';
+		(*c)++;
+		if (isdigit(**c))
+		{
+			color = (10 * color) + ((**c) - '0');
+			(*c)++;
+		}
+		if (!((color >= 30 && color <= 37) || (color >= 40 && color <= 47)))
+			color = 0;
+	}
+	return color;
 }
 
 LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark)
@@ -406,8 +420,72 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	const char* moduleName = pLogRec->moduleName();
 	int cb_trace = pLogData->cb_trace;
 	char* trace = (char*)pLogRec->trace();
-	BYTE color = 0;
-	return addTrace(pThreadNode, pLogData, bookmark, trace, cb_trace, fnName, moduleName, color);
+	char last_char = trace[cb_trace];
+	trace[cb_trace] = 0;
+	LOG_NODE* pNode = nullptr;
+
+#define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName)
+
+	int old_color = pLogData->color;
+	char *start = trace;
+	char *end = trace;
+	while (*end) {
+		while (*(end) >= ' ')
+			end++;
+		if (*end == '\n' || *end == '\r') {
+			old_color = pLogData->color;
+			ADD_TRACE(end - start + 1, start);
+			while (*end == '\n' || *end == '\r')
+				end++;
+			start = end;
+		}
+		else if (*end == '\t') {
+			ADD_TRACE(end - start, start);
+			ADD_TRACE(4, "    ");
+			end++;
+			start = end;
+		}
+		else if (*end == '\033' && *(end + 1) == '[') {
+			int c1 = 0, c2 = 0, c3 = 0;
+			char* colorPos = end;
+			end += 2;
+			c1 = parceCollor(&end);
+			if (*end == ';') {
+				end++;
+				c2 = parceCollor(&end);
+			}
+			if (*end == ';') {
+				end++;
+				c3 = parceCollor(&end);
+			}
+			if (*end == 'm')
+			{
+				end++;
+				if (!pLogData->color) pLogData->color = c1;
+				if (!pLogData->color) pLogData->color = c2;
+				if (!pLogData->color) pLogData->color = c3;
+			}
+			if (colorPos > start) {
+				ADD_TRACE(colorPos - start, start);
+			}
+			old_color = pLogData->color;
+			start = end;
+		}
+		else if (*end) { //*end < ' '
+			end++;
+		}
+	}
+	if (end > start)
+	{
+		ADD_TRACE(end - start, start);
+	}
+	else if (old_color != pLogData->color) {
+		ADD_TRACE(0, end);
+	}
+
+	trace[cb_trace] = last_char;
+	return pNode;
+
 }
 
 void Archive::Log(LOG_REC* rec)

@@ -156,37 +156,17 @@ static bool ParceFtData()
 }
 #endif //_USE_FT
 
-static void TraceChank(const char* szLog, int cbLog)
+static void TraceLog(const char* szLog, int cbLog)
 {
 	if (cbLog)
 	{
+		gLogReceiver.lock();
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
 		gArchive.append(&adbRec);
+		gLogReceiver.unlock();
 	}
-}
-
-static void TraceLog(const char* szLog, int cbLog)
-{
-	gLogReceiver.lock();
-	int i = 0;
-	for (; i < cbLog; i++)
-	{
-		if (szLog[i] == '\n' || szLog[i] == '\r')
-		{
-			//char c = szLog[i];
-			//((char*)szLog)[i] = '\n';
-			TraceChank(szLog, i + 1);
-			//((char*)szLog)[i] = c;
-			for (; i < cbLog && (szLog[i] == '\n' || szLog[i] == '\r'); i++)
-				;
-			szLog += i;
-			cbLog -= i;
-			i = 0;
-		}
-	}
-	TraceChank(szLog, cbLog);
 }
 
 static void WriteLog(const char* szLog, int cbLog)
