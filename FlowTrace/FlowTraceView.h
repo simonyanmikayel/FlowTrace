@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Archive.h"
-#include "LogListView.h"
+#include "LogListFrame.h"
 #include "LogTreeView.h"
 #include "BackTraceView.h"
 
@@ -15,7 +15,7 @@ public:
 	DECLARE_WND_CLASS(NULL)
 
 
-  CFlowTraceView();
+    CFlowTraceView();
 	BOOL PreTranslateMessage(MSG* pMsg);
 
 	BEGIN_MSG_MAP(CFlowTraceView)
@@ -24,7 +24,6 @@ public:
     MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
     MESSAGE_HANDLER(WM_WINDOWPOSCHANGING, OnPositionChanging)
 
-    NOTIFY_CODE_HANDLER(LVN_ENDSCROLL, OnLvnEndScroll)
     NOTIFY_CODE_HANDLER(NM_CUSTOMDRAW, OnCustomDraw)
   END_MSG_MAP()
 
@@ -32,7 +31,6 @@ public:
   LRESULT OnNotify(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
   LRESULT OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-  LRESULT OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
   void SyncViews();
@@ -52,6 +50,7 @@ private:
   CSplitterWindow m_wndVertSplitter;
   CSplitterWindow m_wndHorzSplitter;
   CLogTreeView    m_wndTreeView;
-  CLogListView    m_wndListView;
+  CLogListFrame    m_wndListFrame;
+  CLogListView     &m_wndListView;
   CBackTraceView  m_wndBackTraceView;
 };

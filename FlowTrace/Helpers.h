@@ -12,6 +12,8 @@ extern FLOW_NODE*  gSyncronizedNode;
 #define WM_UPDATE_BACK_TRACE           WM_USER + 1004
 #define WM_UPDATE_NC                   WM_USER + 1005
 static const int ICON_LEN = 16;
+static const int TEXT_MARGIN = 8;
+static const int INFO_TEXT_MARGIN = 4;
 static const int ICON_OFFSET = 16 + 4;
 enum MENU_ICON { MENU_ICON_NON = -1, MENU_ICON_SYNC, MENU_ICON_FUNC_IN_ECLIPSE, MENU_ICON_CALL_IN_ECLIPSE, MENU_ICON_MAX };
 namespace Helpers

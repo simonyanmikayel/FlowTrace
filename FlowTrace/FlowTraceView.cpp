@@ -11,9 +11,10 @@
 FLOW_NODE*  gSyncronizedNode = NULL;
 
 CFlowTraceView::CFlowTraceView()
-	: m_wndListView(this)
+	: m_wndListFrame(this)
 	, m_wndTreeView(this)
 	, m_wndBackTraceView(this)
+	, m_wndListView(m_wndListFrame.listView())
 {
 
 }
@@ -41,9 +42,8 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
 		dwStyle |= WS_VISIBLE;
 	m_wndBackTraceView.Create(m_wndHorzSplitter, rcDefault, NULL, dwStyle, 0);
 
-	m_wndListView.Create(m_wndVertSplitter, rcDefault, NULL,
-		WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN |
-		LVS_REPORT | LVS_AUTOARRANGE | LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_OWNERDATA | LVS_NOCOLUMNHEADER,
+	m_wndListFrame.Create(m_wndVertSplitter, rcDefault, NULL,
+		WS_CHILD | WS_BORDER | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 		0);
 
 	m_wndTreeView.Create(m_wndVertSplitter, rcDefault, NULL,
@@ -54,8 +54,11 @@ LRESULT CFlowTraceView::OnCreate(LPCREATESTRUCT lpcs)
 	m_wndHorzSplitter.SetSplitterPanes(m_wndVertSplitter, m_wndBackTraceView);
 	m_wndHorzSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetHorzSplitterPos())), false);
 
-	m_wndVertSplitter.SetSplitterPanes(m_wndTreeView, m_wndListView);
+	m_wndVertSplitter.SetSplitterPanes(m_wndTreeView, m_wndListFrame);
 	m_wndVertSplitter.SetSplitterPosPct(max(10, min(90, gSettings.GetVertSplitterPos())), false);
+
+	m_wndHorzSplitter.m_bFullDrag = false;
+	m_wndVertSplitter.m_bFullDrag = false;
 
 	ApplySettings(true);
 
@@ -72,12 +75,7 @@ void CFlowTraceView::ApplySettings(bool fontChanged)
 	m_wndTreeView.ApplySettings(fontChanged);
 	m_wndListView.ApplySettings(fontChanged);
 	m_wndBackTraceView.ApplySettings(fontChanged);
-}
-
-LRESULT CFlowTraceView::OnLvnEndScroll(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/)
-{
-	m_wndListView.UpdateCaret();
-	return 0;
+	Gdi::ApplySettings(fontChanged);
 }
 
 void CFlowTraceView::ShowBackTrace(LOG_NODE* pSelectedNode)
@@ -156,25 +154,6 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
 		}
 		return CDRF_DODEFAULT;
 	}
-	else if (pnmh->hwndFrom == m_wndListView)
-	{
-		LPNMLVCUSTOMDRAW pNMLVCD = (LPNMLVCUSTOMDRAW)pnmh;
-		switch (pNMLVCD->nmcd.dwDrawStage)
-		{
-		case CDDS_PREPAINT:
-			return CDRF_NOTIFYSUBITEMDRAW;          // ask for subitem notifications.
-		case CDDS_ITEMPREPAINT:
-			m_wndListView.ItemPrePaint((int)(pNMLVCD->nmcd.dwItemSpec), pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
-			return CDRF_NOTIFYSUBITEMDRAW;
-		case CDDS_ITEMPREPAINT | CDDS_SUBITEM: // recd when CDRF_NOTIFYSUBITEMDRAW is returned in
-		{                                    // response to CDDS_ITEMPREPAINT.
-			m_wndListView.DrawSubItem((int)(pNMLVCD->nmcd.dwItemSpec), pNMLVCD->iSubItem, pNMLVCD->nmcd.hdc, pNMLVCD->nmcd.rc);
-			return CDRF_SKIPDEFAULT;
-		}
-		break;
-		}
-		return CDRF_DODEFAULT;
-	}
 	return CDRF_DODEFAULT;
 }
 
@@ -187,7 +166,7 @@ void CFlowTraceView::SyncViews()
 	{
 		pNode = m_wndTreeView.GetSelectedNode();
 	}
-	else if (hwnd == m_wndListView)
+	else if (hwnd == m_wndListView.m_hWnd)
 	{
 		int iItem = m_wndListView.getSelectionItem();
 		fromList = true;
@@ -210,10 +189,10 @@ void CFlowTraceView::SyncViews()
             gSyncronizedNode = pFlowNode;
             m_wndTreeView.EnsureNodeVisible(pFlowNode, false);
             if (!fromList)
-                m_wndListView.ShowFirstSyncronised(true);
+				m_wndListView.ShowFirstSyncronised(true);
             ShowBackTrace(pFlowNode);
 
-            m_wndListView.Invalidate();
+			m_wndListView.Invalidate();
             m_wndTreeView.Invalidate();
             m_wndBackTraceView.m_wndCallFuncView.Invalidate();
             m_wndBackTraceView.m_wndCallStackView.Invalidate();

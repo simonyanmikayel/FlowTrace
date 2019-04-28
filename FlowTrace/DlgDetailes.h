@@ -11,7 +11,6 @@ public:
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
   END_MSG_MAP()
 
-  CButton m_chkLineNN;
   CButton m_chkNN;
   CButton m_chkApp;
   CButton m_chkPID;

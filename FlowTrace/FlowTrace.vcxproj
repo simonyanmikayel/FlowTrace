@@ -316,8 +316,11 @@
     <ClInclude Include="DlgModules.h" />
     <ClInclude Include="FlowTraceView.h" />
     <ClInclude Include="FontPreviewCombo.h" />
+    <ClInclude Include="GDI.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="LogData.h" />
+    <ClInclude Include="LogListFrame.h" />
+    <ClInclude Include="LogListInfo.h" />
     <ClInclude Include="LogListView.h" />
     <ClInclude Include="LogReceiver.h" />
     <ClInclude Include="LogReceiverAdb.h" />
@@ -346,8 +349,11 @@
     <ClCompile Include="FlowTrace.cpp" />
     <ClCompile Include="FlowTraceView.cpp" />
     <ClCompile Include="FontPreviewCombo.cpp" />
+    <ClCompile Include="GDI.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="LogData.cpp" />
+    <ClCompile Include="LogListFrame.cpp" />
+    <ClCompile Include="LogListInfo.cpp" />
     <ClCompile Include="LogListView.cpp" />
     <ClCompile Include="LogReceiver.cpp" />
     <ClCompile Include="LogReceiverAdb.cpp" />

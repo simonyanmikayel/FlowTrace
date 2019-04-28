@@ -177,10 +177,6 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     pLoop->AddMessageFilter(this);
     pLoop->AddIdleHandler(this);
 
-    gSettings.RestoreWindPos(m_hWnd);
-
-    StartLogging();
-
     m_view.ShowStackView(!gSettings.GetInfoHiden());
     m_view.ShowTreeView(!gSettings.GetTreeViewHiden());
     m_view.ShowStackView(!gSettings.GetInfoHiden());
@@ -193,18 +189,13 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
     //DlgProgress dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
-    static bool autoDone = false;
-#ifdef _AUTO_TEST
-    if (!autoDone && wParam != WA_INACTIVE)
+    static bool activated = false;
+    if (!activated && wParam != WA_INACTIVE)
     {
-        autoDone = true;
-        DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
-    }
-#endif
-    if (!autoDone && wParam != WA_INACTIVE)
-    {
-        autoDone = true;
-        //DlgModules dlg;
+		activated = true;
+		gSettings.RestoreWindPos(m_hWnd);
+		StartLogging();
+		//DlgModules dlg;
         //dlg.DoModal();
     }
 
@@ -247,7 +238,16 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 {
     if (wParam == TIMER_DATA_REFRESH)
     {
-        if (gLogReceiver.working())
+#ifdef _AUTO_TEST
+		static boolean autoDone = false;
+		if (!autoDone && wParam != WA_INACTIVE)
+		{
+			autoDone = true;
+			DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+			return 0;
+		}
+#endif
+		if (gLogReceiver.working())
         {
             RefreshLog(false);
         }
@@ -452,13 +452,19 @@ LRESULT CMainFrame::OnShowHideFlowTraces(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
 
 LRESULT CMainFrame::OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    StartLogging();
+#ifdef _AUTO_TEST
+	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+#endif
+	StartLogging();
     return 0;
 }
 
 LRESULT CMainFrame::OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    StopLogging(false);
+#ifdef _AUTO_TEST
+	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+#endif
+	StopLogging(false);
     return 0;
 }
 
@@ -478,10 +484,13 @@ LRESULT CMainFrame::onCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
     return 0;
 }
 
-LRESULT CMainFrame::OnImportTask(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnImportTask(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-    if (wParam == 0)
-        ClearLog(false);
+	if (wParam == 0)
+	{
+		if (!lParam)
+			ClearLog(false);
+	}
     else
     {
         RefreshLog(true);

@@ -354,11 +354,7 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
     cb = 0;
     pBuf[0] = 0;
 
-    if (col == LINE_NN_COL)
-    {
-        cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("%d"), iItem + 1);
-    }
-    else if (col == NN_COL)
+    if (col == NN_COL)
     {
 		int NN = getNN(); // gArchive.index(this); // getNN();
 #ifdef _NN_TEST

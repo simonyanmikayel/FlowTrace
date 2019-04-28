@@ -822,10 +822,10 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
     }
 
 	if (pNode->isJava()) {
-			::SetTextColor(hdc, RGB(100,50,20));
+			::SetTextColor(hdc, gSettings.InfoTextColorNative());
 	}
 	else {
-		::SetTextColor(hdc, RGB(0, 0, 0));
+		::SetTextColor(hdc, gSettings.InfoTextColorNative());
 	}
 	TextOut(hdc, left, top, szText, cbText);
 
@@ -834,7 +834,7 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
         if (GetFocus() == m_hWnd)
         {
             CBrush brush2;
-            brush2.CreateSolidBrush(gSettings.SelectionBkColor(GetFocus() == m_hWnd));
+            brush2.CreateSolidBrush(gSettings.SelectionBkColor());
             FrameRect(hdc, &rcFrame, brush2);
         }
         else

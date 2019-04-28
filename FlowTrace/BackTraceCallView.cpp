@@ -261,7 +261,7 @@ void CBackTraceCallView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcIt
         if (GetFocus() == m_hWnd)
         {
             CBrush brush2;
-            brush2.CreateSolidBrush(gSettings.SelectionBkColor(true));
+            brush2.CreateSolidBrush(gSettings.SelectionBkColor());
             FrameRect(hdc, &rcText, brush2);
         }
         else

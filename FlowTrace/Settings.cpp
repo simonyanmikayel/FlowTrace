@@ -27,7 +27,6 @@ LPCTSTR STR_APP_REG_VAL_SEARCH_LIST = _T("SearchList");
 
 LPCTSTR STR_APP_REG_VAL_UDP_PORT = _T("UdpPort");
 
-LPCTSTR STR_APP_REG_VAL_ColLineNN = _T("ColLineNN");
 LPCTSTR STR_APP_REG_VAL_ColNN = _T("ColNN");
 LPCTSTR STR_APP_REG_VAL_ColApp = _T("ColApp");
 LPCTSTR STR_APP_REG_VAL_ColPID = _T("ColPID");
@@ -89,7 +88,6 @@ CSettings::CSettings() :
 	m_UsePrefModule = FALSE;
 	Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
 
-	Read(STR_APP_REG_VAL_ColLineNN, m_ColLineNN);
 	Read(STR_APP_REG_VAL_ColNN, m_ColNN);
 	Read(STR_APP_REG_VAL_ColApp, m_ColApp, 1);
 	Read(STR_APP_REG_VAL_ColPID, m_ColPID);
@@ -123,12 +121,6 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
 
 	InitFont();
-}
-
-bool CSettings::CheckUIFont(HDC hdc)
-{
-	bool ok = true;
-	return ok;
 }
 
 CSettings::~CSettings()
@@ -378,13 +370,17 @@ CHAR* CSettings::GetSearchList()
 	}
 	return searchList;
 }
-DWORD CSettings::InfoTextColorNative()
+DWORD CSettings::InfoTextColor()
 {
 	return RGB(128, 128, 128);
 }
+DWORD CSettings::InfoTextColorNative()
+{
+	return RGB(0, 0, 0);
+}
 DWORD CSettings::InfoTextColorAndroid()
 {
-	return RGB(140,100,80);
+	return RGB(180, 140, 10);
 }
 DWORD CSettings::SerachColor()
 {
@@ -402,20 +398,23 @@ DWORD CSettings::LogListBkColor()
 {
 	return RGB(0, 0, 0);
 }
+DWORD CSettings::LogListInfoBkColor()
+{
+	return RGB(240, 240, 240);
+}
 DWORD CSettings::SelectionTxtColor()
 {
 	return RGB(255, 255, 255);
 }
-DWORD CSettings::SelectionBkColor(bool haveFocus)
+DWORD CSettings::SelectionBkColor()
 {
-	return haveFocus ? RGB(64, 122, 255) : RGB(64, 122, 255);
+	return RGB(64, 122, 255);
 }
 
 void CSettings::SetVertSplitterPos(int i) { m_VertSplitterPos = i;  Write(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos); }
 void CSettings::SetHorzSplitterPos(int i) { m_HorzSplitterPos = i;  Write(STR_APP_REG_VAL_HORZ_SPLITTER_POS, m_HorzSplitterPos); }
 void CSettings::SetStackSplitterPos(int i) { m_StackSplitterPos = i;  Write(STR_APP_REG_VAL_STACK_SPLITTER_POS, m_StackSplitterPos); }
 
-void CSettings::SetColLineNN(int i) { m_ColLineNN = i;  Write(STR_APP_REG_VAL_ColLineNN, m_ColLineNN); }
 void CSettings::SetColNN(int i) { m_ColNN = i;  Write(STR_APP_REG_VAL_ColNN, m_ColNN); }
 void CSettings::SetColApp(int i) { m_ColApp = i; Write(STR_APP_REG_VAL_ColApp, m_ColApp); }
 void CSettings::SetColPID(int i) { m_ColPID = i; Write(STR_APP_REG_VAL_ColPID, m_ColPID); }

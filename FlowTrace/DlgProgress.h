@@ -6,7 +6,7 @@ class TaskThread :
   public WorkerThread
 {
 public:
-  TaskThread(WORD cmd, LPSTR lpstrFile);
+  TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu);
   ~TaskThread ();
   virtual void Terminate();
   void Work(LPVOID pWorkParam);
@@ -50,5 +50,6 @@ public:
   CProgressBarCtrl m_ctrlProgress;
   TaskThread* m_pTaskThread;
   WORD m_cmd;
+  bool m_isAuto;
 
 };

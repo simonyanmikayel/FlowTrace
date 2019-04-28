@@ -7,7 +7,6 @@ LRESULT DlgDetailes::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 {
   CenterWindow(GetParent());
 
-  m_chkLineNN.Attach(GetDlgItem(IDC_LINE_NN));
   m_chkNN.Attach(GetDlgItem(IDC_NN));
   m_chkApp.Attach(GetDlgItem(IDC_APP));
   m_chkPID.Attach(GetDlgItem(IDC_PID));
@@ -22,7 +21,6 @@ LRESULT DlgDetailes::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_ShowElapsedTime.Attach(GetDlgItem(IDC_CHECK_SHOW_ELAPSED_TIME));
   m_chkChildCount.Attach(GetDlgItem(IDC_CHILD_COUNT));
 
-  m_chkLineNN.SetCheck(gSettings.GetColLineNN());
   m_chkNN.SetCheck(gSettings.GetColNN());
   m_chkApp.SetCheck(gSettings.GetColApp());
   m_chkPID.SetCheck(gSettings.GetColPID());
@@ -44,7 +42,6 @@ LRESULT DlgDetailes::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 {
   if (wID == IDOK)
   {
-    gSettings.SetColLineNN(m_chkLineNN.GetCheck());
     gSettings.SetColNN(m_chkNN.GetCheck());
     gSettings.SetColApp(m_chkApp.GetCheck());
     gSettings.SetColPID(m_chkPID.GetCheck());

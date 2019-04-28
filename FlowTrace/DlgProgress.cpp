@@ -11,7 +11,8 @@
 DlgProgress::DlgProgress(WORD cmd, LPSTR lpstrFile)
 {
     m_cmd = cmd;
-    m_pTaskThread = new TaskThread(cmd, lpstrFile);
+	m_isAuto = lpstrFile && strcmp("auto", lpstrFile) == 0;
+	m_pTaskThread = new TaskThread(cmd, lpstrFile, m_isAuto);
 }
 
 
@@ -29,7 +30,7 @@ LRESULT DlgProgress::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
     }
 
     if (m_cmd == ID_FILE_IMPORT)
-        ::SendMessage(hwndMain, WM_INPORT_TASK, 0, 0);
+        ::SendMessage(hwndMain, WM_INPORT_TASK, 0, m_isAuto);
     m_pTaskThread->StartWork(NULL);
     SetTimer(1, 2000);
 
@@ -88,13 +89,14 @@ void DlgProgress::End(int wID)
 }
 
 ///////////////////////////////////////////////////
-TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile)
+TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
 {
     m_cmd = cmd;
     m_isOK = false;
     m_fp = NULL;
     m_progress = 0;
     m_count = 1;
+	m_isAuto = isAotu;
 
     if (lpstrFile == 0)
     {
@@ -121,31 +123,23 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile)
         m_strFile = lpstrFile;
     }
 
-    m_isAuto = false;
-    if (!m_strFile.IsEmpty())
+    if (!m_strFile.IsEmpty() && !m_isAuto)
     {
-        if (m_strFile == "auto")
-        {
-            m_isAuto = true;
-        }
-        else
-        {
-            if (m_cmd == ID_FILE_IMPORT)
-            {
-                if (0 != fopen_s(&m_fp, m_strFile, "r")) {
-                    Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFile);
-                    m_fp = NULL;
-                }
-            }
-            else
-            {
-                if (0 != fopen_s(&m_fp, m_strFile, "w")) {
-                    Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFile);
-                    m_fp = NULL;
-                }
-            }
-        }
-    }
+		if (m_cmd == ID_FILE_IMPORT)
+		{
+			if (0 != fopen_s(&m_fp, m_strFile, "r")) {
+				Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFile);
+				m_fp = NULL;
+			}
+		}
+		else
+		{
+			if (0 != fopen_s(&m_fp, m_strFile, "w")) {
+				Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFile);
+				m_fp = NULL;
+			}
+		}
+	}
     m_isOK = m_isAuto || (m_fp != NULL);
 
 }
@@ -316,11 +310,11 @@ void TaskThread::FileImport()
     if (m_isAuto)
     {
 #ifdef _BUILD_X64 
-        m_count = 3;// 16LL * 1024 * 1024;// 128000000;
+        m_count = 4;// 16LL * 1024 * 1024;// 128000000;
 #else
         m_count = 3;// 16LL * 1024 * 1024;// 12800000;
 #endif
-        int cRecursion = 3;//10
+        int cRecursion = 2;//10
         int ii = 0;
         bool ss = true;
         char log_buf[3][1024];
@@ -328,7 +322,7 @@ void TaskThread::FileImport()
         char* appName = "app_name";
         char* moduleName = "libAppSel.so";
         char* fnName = "fn_name";
-        char* trace= "trace";
+        char* trace= "trace1 trace2 trace3 trace4 trace5 trace6 trace7 trace8 trace9 trace10\n";
 
         LOG_REC_NET_DATA* recEnter = (LOG_REC_NET_DATA*)log_buf[0];
         recEnter->log_type = LOG_TYPE_ENTER;

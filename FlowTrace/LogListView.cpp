@@ -1,60 +1,38 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "LogListView.h"
-#include "FlowTraceView.h"
+#include "LogListFrame.h"
 #include "Settings.h"
 #include "SearchInfo.h"
 #include "MainFrm.h"
 
-static const int TEXT_MARGIN = 8;
 extern HWND       hwndMain;
 
-static int ICON_INDEX_LIST_ENTER;
-static int ICON_INDEX_LIST_EXIT;
-static int ICON_INDEX_LIST_TRACE_SEL;
-static int ICON_INDEX_BOOKMARK;
-static int ICON_INDEX_SYNC;
-
-static bool NcDrawn = false;
-
-CLogListView::CLogListView(CFlowTraceView* pView)
-	: m_pView(pView)
+CLogListView::CLogListView(CLogListFrame *pPareent, CFlowTraceView* pView, CLogListInfo* pListInfo)
+	: m_pPareent(pPareent)
+	, m_pFlowTraceView(pView)
+	, m_pListInfo(pListInfo)
 	, m_hasCaret(false)
 	, m_IsCupture(false)
-	, m_cColumns(0)
 	, m_cActualColumns(0)
 	, m_lengthCalculated(1)
 	, m_recCount(0)
 	, m_curBookmark(0)
+	, m_ColLen(0)
 
 {
 	ClearColumnInfo();
-	m_hdc = CreateCompatibleDC(NULL);// CreateIC(TEXT("DISPLAY"), NULL, NULL, NULL);
-
-	m_hListImageList = ImageList_Create(16, 16, ILC_MASK, 1, 0);
-	ICON_INDEX_LIST_ENTER = ImageList_AddIcon(m_hListImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_LIST_ENTER)));
-	ICON_INDEX_LIST_EXIT = ImageList_AddIcon(m_hListImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_LIST_EXIT)));
-	ICON_INDEX_LIST_TRACE_SEL = ImageList_AddIcon(m_hListImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_LIST_TRACE_SEL)));
-	ICON_INDEX_BOOKMARK = ImageList_AddIcon(m_hListImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_BOOKMARK)));
-	ICON_INDEX_SYNC = ImageList_AddIcon(m_hListImageList, LoadIcon(_Module.get_m_hInst(), MAKEINTRESOURCE(IDI_ICON_SYNC)));
 }
 
 CLogListView::~CLogListView()
 {
-	DeleteDC(m_hdc);
 }
 
 void CLogListView::ClearColumnInfo()
 {
-	ZeroMemory(m_ColType, sizeof(m_ColType));
-	ZeroMemory(m_ActualColType, sizeof(m_ActualColType));
-	ZeroMemory(m_ColSubItem, sizeof(m_ColSubItem));
-	for (int i = 0; i < MAX_COL; i++)
-	{
-		m_ColLen[i] = ICON_LEN + TEXT_MARGIN;
-	}
+	ZeroMemory(m_DetailType, sizeof(m_DetailType));
+	m_ColLen = 0;
 	m_lengthCalculated++;
-	DrawNc();
 }
 
 void LOG_SELECTION::print()
@@ -261,7 +239,7 @@ void CLogListView::Redraw(int nFirst, int nLast)
 	if (nFirst < 0)
 		nFirst = 0;
 	if (nLast < 0)
-		nLast = GetItemCount();
+		nLast = m_recCount;
 
 	RedrawItems(nFirst, nLast);
 	//UpdateWindow();
@@ -330,17 +308,16 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
 	ShowItem(iItem, false, false);
 
 	SIZE size1, size2;
-	GetTextExtentPoint32(m_hdc, log, startChar, &size1);
-	GetTextExtentPoint32(m_hdc, log, endChar, &size2);
+	GetTextExtentPoint32(memDC, log, startChar, &size1);
+	GetTextExtentPoint32(memDC, log, endChar, &size2);
 
 	RECT rcClient, rcItem;
 	GetClientRect(&rcClient);
-	ListView_GetSubItemRect(m_hWnd, iItem, m_LogCol, LVIR_BOUNDS, &rcItem);
+	ListView_GetSubItemRect(m_hWnd, iItem, 0, LVIR_BOUNDS, &rcItem);
 
 	SCROLLINFO si;
 	si.fMask = SIF_RANGE | SIF_POS;
 	GetScrollInfo(SB_HORZ, &si);
-	//stdlog("size1.cx %d size2.cx %d si.nPos = %d si.nMax = %d rcClient.right = %d \n", size1.cx, size2.cx, si.nPos, rcClient.right, si.nMax);
 	SIZE size = { 0, 0 };
 	if (size1.cx < si.nPos)
 	{
@@ -356,7 +333,7 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
 
 void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
 {
-	for (DWORD i = 0; i < m_recCount; i++)
+	for (int i = 0; i < m_recCount; i++)
 	{
 		if (gArchive.getListedNodes()->getNode(i)->isSynchronized(gSyncronizedNode))
 		{
@@ -369,7 +346,7 @@ void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
 
 void CLogListView::ShowNode(LOG_NODE* pNode, bool scrollToMiddle)
 {
-	for (DWORD i = 0; i < m_recCount; i++)
+	for (int i = 0; i < m_recCount; i++)
 	{
 		if (pNode == gArchive.getListedNodes()->getNode(i))
 		{
@@ -412,11 +389,11 @@ void CLogListView::UpdateCaret()
 	int x = TEXT_MARGIN;
 	int y = 0;
 
-	if (GetItemCount())
+	if (m_recCount)
 	{
 		RECT itemRect;
 		int curItem = m_ListSelection.CurItem();
-		if (GetSubItemRect(curItem, m_LogCol, LVIR_LABEL, &itemRect))
+		if (GetSubItemRect(curItem, 0, LVIR_LABEL, &itemRect))
 		{
 			RECT viewRect;
 			GetViewRect(&viewRect);
@@ -428,7 +405,7 @@ void CLogListView::UpdateCaret()
 			if (cb > cbText)
 				cb = cbText;
 			SIZE  size;
-			GetTextExtentPoint32(m_hdc, szText, cb, &size);
+			GetTextExtentPoint32(memDC, szText, cb, &size);
 			x = itemRect.left + size.cx + TEXT_MARGIN;
 			//STDLOG("cb = %d x = %d y = %d iItem = %d itemRect l = %d r = %d t = %d b = %d\n", cb, x, y, curItem, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
 
@@ -446,7 +423,7 @@ LRESULT CLogListView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
 	bool bShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 	bool bCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
 
-	if (!GetItemCount())
+	if (!m_recCount)
 		return 0;
 	int cbCurText;
 	char* szText = getText(m_ListSelection.CurItem(), &cbCurText);
@@ -577,12 +554,12 @@ LRESULT CLogListView::OnKeyUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bH
 
 LRESULT CLogListView::OnLButtonDblClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL & bHandled)
 {
-	if (!GetItemCount())
+	if (!m_recCount)
 		return 0;
 
 	int xPos = GET_X_LPARAM(lParam);
 	if (xPos < TEXT_MARGIN)
-		return 0;
+		xPos = TEXT_MARGIN;
 
 
 	int cbCurText;
@@ -648,7 +625,7 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	}
 	else if (nRet == ID_SYNC_VIEWES)
 	{
-		m_pView->SyncViews();
+		m_pFlowTraceView->SyncViews();
 	}
 	else if (nRet == ID_SHOW_CALL_IN_FUNCTION)
 	{
@@ -664,18 +641,6 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	}
 
 	return 0;
-}
-
-LRESULT CLogListView::OnNcCalcSize(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
-{
-	LRESULT lr = DefWindowProcW(m_hWnd, uMsg, wParam, lParam);
-	if (wParam)
-	{
-		NCCALCSIZE_PARAMS* ncp = (NCCALCSIZE_PARAMS*)lParam;
-		ncp->rgrc[0].left += 100;
-	}
-	bHandled = TRUE;
-	return lr;
 }
 
 LRESULT CLogListView::OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
@@ -850,74 +815,68 @@ bool CLogListView::UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM l
 	//stdlog("xPos = %d yPos = %d flags = %d ht.iItem = %d\n", xPos, yPos, ht.flags, ht.iItem);
 	if ((ht.iItem >= 0)) //&& (LVHT_ONITEM & ht.flags)
 	{
-		LIST_COL col = m_ColType[ht.iSubItem];
-
 		CRect itemRect;
-		GetSubItemRect(ht.iItem, m_LogCol, LVIR_LABEL, &itemRect);
+		GetSubItemRect(ht.iItem, 0, LVIR_LABEL, &itemRect);
 		//stdlog("xPos = %d itemRect l = %d r = %d t = %d b = %d\n", xPos, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
-		if (xPos >= itemRect.left)
+		if (xPos < itemRect.left)
 		{
-			int logLen;
-			char* log = getText(ht.iItem, &logLen);
-			int nFit = 0;
-			if (logLen)
-			{
-				int nMaxExtent = xPos - itemRect.left - TEXT_MARGIN;
-				int cb = logLen;
-				SIZE  size;
-				GetTextExtentExPoint(m_hdc, log, cb, nMaxExtent, &nFit, NULL, &size);
-				if (nFit < logLen)
-				{
-					SIZE  size1, size2;
-					GetTextExtentPoint32(m_hdc, log, nFit, &size1);
-					GetTextExtentPoint32(m_hdc, log, nFit + 1, &size2);
-					if (nMaxExtent > (size2.cx + size1.cx) / 2)
-						nFit++;
-				}
-				//stdlog("iChar = %d iCharMax = %d nFit = %d\n", iChar, iCharMax, nFit);
-			}
-
-			if (uMsg == WM_RBUTTONDOWN)
-			{
-				if (m_ListSelection.InSelection(ht.iItem, nFit))
-					return false;
-			}
-
-			MoveSelectionEx(ht.iItem, nFit, (uMsg == WM_MOUSEMOVE) || (0 != (wParam & MK_SHIFT)));
-			if (!m_IsCupture && (wParam & MK_LBUTTON))
-			{
-				m_IsCupture = true;
-				SetCapture();
-			}
-			return true;
+			xPos = itemRect.left;
 		}
+		int logLen;
+		char* log = getText(ht.iItem, &logLen);
+		int nFit = 0;
+		if (logLen)
+		{
+			int nMaxExtent = xPos - itemRect.left - TEXT_MARGIN;
+			int cb = logLen;
+			SIZE  size;
+			GetTextExtentExPoint(memDC, log, cb, nMaxExtent, &nFit, NULL, &size);
+			if (nFit < logLen)
+			{
+				SIZE  size1, size2;
+				GetTextExtentPoint32(memDC, log, nFit, &size1);
+				GetTextExtentPoint32(memDC, log, nFit + 1, &size2);
+				if (nMaxExtent > (size2.cx + size1.cx) / 2)
+					nFit++;
+			}
+			//stdlog("iChar = %d iCharMax = %d nFit = %d\n", iChar, iCharMax, nFit);
+		}
+
+		if (uMsg == WM_RBUTTONDOWN)
+		{
+			if (m_ListSelection.InSelection(ht.iItem, nFit))
+				return false;
+		}
+
+		MoveSelectionEx(ht.iItem, nFit, (uMsg == WM_MOUSEMOVE) || (0 != (wParam & MK_SHIFT)));
+		if (!m_IsCupture && (wParam & MK_LBUTTON))
+		{
+			m_IsCupture = true;
+			SetCapture();
+		}
+		return true;
 	}
 	return false;
 }
 
 void CLogListView::ApplySettings(bool fontChanged)
 {
+	m_pListInfo->ApplySettings(fontChanged);
 	if (fontChanged)
 	{
-		SelectObject(m_hdc, gSettings.GetFont());
 		SetFont(gSettings.GetFont());
-		if (!gSettings.CheckUIFont(m_hdc))
-		{
-			SelectObject(m_hdc, gSettings.GetFont());
-			SetFont(gSettings.GetFont());
-		}
+		SelectObject(memDC, gSettings.GetFont());
 	}
 	SetBkColor(gSettings.LogListBkColor());
-	//SetTextBkColor(gSettings.LogListBkColor());
-	//SetTextColor(gSettings.LogListTxtColor());
+	memDC.SetBkColor(gSettings.LogListBkColor());
 	SetColumns();
-	//PostMessage(WM_SET_LIST_COLUNS, 0, 0);
 }
 
 void CLogListView::Clear()
 {
-	if (GetItemCount())
+	if (m_recCount)
 	{
+		m_pListInfo->SetRecCount(0);
 		SetItemCountEx(0, 0);
 		DeleteAllItems();
 		m_recCount = 0;
@@ -928,32 +887,28 @@ void CLogListView::Clear()
 	}
 }
 
-void CLogListView::SetColumnLen(LIST_COL col, int len)
+void CLogListView::SetColumnLen(int len)
 {
-	if (LOG_COL == col)
+	RECT rc;
+	GetClientRect(&rc);
+	len = max(rc.right + 16, (long)len);
+	if (m_ColLen < len)
 	{
-		RECT rc;
-		GetClientRect(&rc);
-		len = max(rc.right + 16, (long)len);
-	}
-	int iSubItem = getSubItem(col);
-	//stdlog("iSubItem = %d len = %d col = %d m_ColLen = %d\n", iSubItem, len, col, m_ColLen[col]);
-	if (m_ColLen[col] < len)
-	{
-		m_ColLen[col] = len;
-		SetColumnWidth(iSubItem, m_ColLen[col]);
+		//stdlog("iSubItem = %d len = %d col = %d m_ColLen = %d\n", iSubItem, len, col, m_ColLen[col]);
+		m_ColLen = len;
+		SetColumnWidth(0, m_ColLen);
 	}
 }
 
 void CLogListView::OnSize(UINT nType, CSize size)
 {
-	SetColumnLen(LOG_COL, 2 * TEXT_MARGIN);
+	SetColumnLen(0);
 }
 
 void CLogListView::RefreshList(bool redraw)
 {
-	DWORD newCount = gArchive.getListedNodes()->Count();
-	if (newCount)
+	int newCount = (int)gArchive.getListedNodes()->Count();
+	if (newCount > 0)
 	{
 		if (newCount == m_recCount && (!redraw))
 			return;
@@ -961,6 +916,7 @@ void CLogListView::RefreshList(bool redraw)
 			Clear();
 		int oldRecCount = m_recCount;
 		m_recCount = newCount;
+		m_pListInfo->SetRecCount(newCount);
 		SetItemCountEx(m_recCount, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 		Update(newCount - 1);
 		int curItem = m_ListSelection.CurItem();
@@ -976,196 +932,48 @@ void CLogListView::RefreshList(bool redraw)
 	Helpers::UpdateStatusBar();
 }
 
-void CLogListView::AddColumn(CHAR* szHeader, LIST_COL col)
-{
-	if (col == LOG_COL)
-	{
-		InsertColumn(m_cColumns, szHeader, LVCFMT_LEFT, m_ColLen[col], 0, -1, -1);
-		m_ColSubItem[col] = m_cColumns;
-		m_ColType[m_cColumns] = col;
-		m_cColumns++;
-	}
-	m_ActualColType[m_cActualColumns++] = col;
-}
-
 void CLogListView::SetColumns()
 {
-	for (int i = m_cColumns - 1; i > 0; i--)
-		DeleteColumn(i);
+	DeleteColumn(0);
+	InsertColumn(0, "", LVCFMT_LEFT);
 
 	ClearColumnInfo();
 
-	m_cColumns = 0;
 	m_cActualColumns = 0;
 
-	if (gSettings.GetColLineNN())
-		AddColumn(_T("Line"), LINE_NN_COL);
 	if (gSettings.GetColNN())
-		AddColumn(_T("NN"), NN_COL);
+		m_DetailType[m_cActualColumns++] = NN_COL;
 	if (gSettings.GetColApp())
-		AddColumn(_T("App"), APP_COLL);
+		m_DetailType[m_cActualColumns++] = APP_COLL;
 	if (gSettings.GetColPID() || gSettings.GetColTID() || gSettings.GetColThreadNN())
-		AddColumn(_T("TID"), THREAD_COL);
+		m_DetailType[m_cActualColumns++] = THREAD_COL;
 	if (gSettings.GetColTime())
-		AddColumn(_T("Time"), TIME_COL);
+		m_DetailType[m_cActualColumns++] = TIME_COL;
 	if (gSettings.GetColFunc())
-		AddColumn(_T("Function"), FUNC_COL);
+		m_DetailType[m_cActualColumns++] = FUNC_COL;
 
-	//Log always last
-	AddColumn(_T("Trace"), LOG_COL);
-
-	m_LogCol = m_cColumns - 1;
-}
-
-void CLogListView::DrawNcItem(int iItem, HDC hdc, RECT* rcItem, LOG_NODE* pNode)
-{
-	char tmp[500];
-
-	SelectObject(hdc, gSettings.GetFont());
-	int c = sprintf_s(tmp, "%d", iItem + 1);
-	TextOut(hdc, 0, rcItem->top, tmp, c);
-}
-
-void CLogListView::DrawNc()
-{
-	NcDrawn = true;
-	if (!::IsWindow(m_hWnd))
-		return;
-
-	DWORD fg = RGB(32, 32, 32);
-	DWORD bg = RGB(128, 128, 128);
-	HBRUSH nc_color;
-
-	nc_color = CreateSolidBrush(bg);
-
-	HDC hdc = GetWindowDC();
-	::SetTextColor(hdc, fg);
-
-	RECT rc;
-	GetWindowRect(&rc);
-	rc.bottom = rc.bottom - rc.top;
-	rc.top = 0;
-	rc.left = 0;
-	rc.right = 100;
-
-	FillRect(hdc, &rc, nc_color);
-
-	//WM_UPDATE_NC
-	LVHITTESTINFO ht = { 0 };
-	ht.pt.x = 1;
-	ht.pt.y = 1;
-	ht.iItem = -1;
-	SubItemHitTest(&ht);
-	//stdlog("flags = %d ht.iItem = %d\n", ht.flags, ht.iItem);
-	if (ht.iItem < 0)
-		return;
-	int iRow = 0;
-	int iItem = ht.iItem;
-	RECT rcItem;
-	while (GetItemRect(iItem, &rcItem, LVIR_BOUNDS))
-	{
-		LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
-		if (!pNode)
-			break;
-
-		DrawNcItem(iItem, hdc, &rcItem, pNode);
-
-		iItem++;
-		iRow++;
-	}
-
-	//int iRow = 0;
-	//while (iRow < maxNcItem && DrawNcItem(iRow, hdc, &rc))
-	//	iRow++;
-
-	//on click
-	//if (col == ICON_COL)
-	//{
-	//	//if (ICON_BOOKMARK == (xPos / ICON_LEN))
-	//	ToggleBookmark(ht.iItem);
-	//	return false;
-	//}
-
-	/*
-		if (col == ICON_COL)
-	{
-		int y = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - ICON_LEN / 2;
-		int x = rcItem.left + ICON_BOOKMARK * ICON_LEN;
-
-		if (pNode && pNode->isSynchronized(gSyncronizedNode))
-		{
-			ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_TRACE_SEL, hdc, x, y, ILD_NORMAL);
-		}
-		if (pNode->bookmark)
-		{
-			ImageList_Draw(m_hListImageList, ICON_INDEX_BOOKMARK, hdc, x, y, ILD_NORMAL);
-			TCHAR szText[20];
-			int cbText = sprintf_s(szText, "%d", pNode->bookmark);
-			SIZE  textSize;
-			//stdlog("szText [%s] %d %d \n", szText, cbText, strlen(szText));
-			GetTextExtentExPoint(hdc, szText, cbText, 0, NULL, NULL, &textSize);
-
-			int y1 = rcItem.top + (rcItem.bottom - rcItem.top) / 2 - textSize.cy / 2;
-			int x1 = rcItem.left + ICON_BOOKMARK * ICON_LEN + ICON_LEN /2- textSize.cx / 2;
-			::SetTextColor(hdc, RGB(64,128,255));
-			TextOut(hdc, x1, y1, szText, cbText);
-		}
-		if (pNode->isFlow())
-		{
-			if (((FLOW_NODE*)pNode)->isEnter())
-				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_ENTER, hdc, x, y, ILD_NORMAL);
-			else
-				ImageList_Draw(m_hListImageList, ICON_INDEX_LIST_EXIT, hdc, x, y, ILD_NORMAL);
-		}
-		return;
-	}
-
-	*/
-
-	ReleaseDC(hdc);
-}
-
-LRESULT CLogListView::OnUpdateNc(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & bHandled)
-{
-	DrawNc();
-	bHandled = TRUE;
-	return 0;
-
-}
-
-LRESULT CLogListView::OnNcPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
-{
-	LRESULT lr = DefWindowProcW(m_hWnd, uMsg, wParam, lParam);
-	DrawNc();
-	bHandled = TRUE;
-	return lr;
-
+	m_DetailType[m_cActualColumns++] = LOG_COL;
+	//TODO m_pListInfo
 }
 
 LRESULT CLogListView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL & bHandled)
 {
-	//bHandled = false;  return 0; // no handled
+	//bHandled = false;  return 0; 
+	RECT rcItem = {0,0,0,0}, rcEraze;
+	GetClientRect(&rcEraze);
 
-	CClientDC dc(m_hWnd);
-	RECT rcItem, rcClient;
-	GetClientRect(&rcClient);
-	RECT rcErase = rcClient;
-	int count = GetItemCount();
-	if (count > 0)
+	int nLast = GetTopIndex() + GetCountPerPage() - 1;
+	if (m_recCount && nLast > 0)
 	{
-		int top = GetTopIndex();
-		GetItemRect(top, &rcItem, LVIR_BOUNDS);
-		int cy = (rcItem.bottom - rcItem.top);
-		while ((top < count - 1) && (rcErase.top + cy) < rcErase.bottom)
-		{
-			rcErase.top += cy;
-		}
+		if (nLast >= m_recCount)
+			nLast = m_recCount - 1;
+		GetItemRect(nLast, &rcItem, LVIR_BOUNDS);
+		if (rcItem.bottom <= rcEraze.bottom)
+			rcEraze.top = rcItem.bottom;
 	}
-	if (rcErase.top < rcErase.bottom)
-		dc.FillSolidRect(&rcErase, gSettings.LogListBkColor());
-
-	//stdlog("iItemRect \tl = %d \tr = %d \tt = %d \tb = %d\n", rcItem.left, rcItem.right, rcItem.top, rcItem.bottom);
-	//stdlog(" \trcClient \tl = %d \tr = %d \tt = %d \tb = %d\n", rcClient.left, rcClient.right, rcClient.top, rcClient.bottom);
+	::FillRect((HDC)wParam, &rcEraze, memDC.m_bkBrush);
+	m_pListInfo->Invalidate();
+	//stdlog(" nLast=%d l=%d r=%d t=%d b=%d\n", nLast, rcEraze.left, rcEraze.right, rcEraze.top, rcEraze.bottom);
 	return 1; // handled
 }
 
@@ -1176,12 +984,6 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 	{
 		ATLASSERT(0);
 		return;
-	}
-
-	if (NcDrawn)
-	{
-		NcDrawn = !NcDrawn;
-		PostMessage(WM_UPDATE_NC);
 	}
 
 	if (pNode->lengthCalculated != m_lengthCalculated)
@@ -1196,16 +998,14 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 			char* szText = getText(iItem, &cbText);
 			if (cbText)
 				GetTextExtentPoint32(hdc, szText, cbText, &size);
-			SetColumnLen(LOG_COL, size.cx + (2 * TEXT_MARGIN));
+			SetColumnLen(size.cx + 3 * TEXT_MARGIN);
 			//stdlog("\t iItem i %d size.cx %d %s\n", iItem, size.cx, szText);
 		}
 	}
 }
 
-//#define _USE_MEMDC
 void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 {
-	LIST_COL col = getGolumn(iSubItem);
 	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 	if (!pNode)
 	{
@@ -1215,91 +1015,52 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
 	RECT rcClient;
 	GetClientRect(&rcClient);
-
-	//CClientDC dc(m_hWnd);
-	//hdc = dc.m_hDC;
-	//ListView_GetSubItemRect(m_hWnd, iItem, m_LogCol, LVIR_BOUNDS, &rcItem);
-	//stdlog("%d \tiItemRect \tl = %d \tr = %d \tt = %d \tb = %d\n", iItem, rcItem.left, rcItem.right, rcItem.top, rcItem.bottom);
-	//stdlog(" \trcClient \tl = %d \tr = %d \tt = %d \tb = %d\n", rcClient.left, rcClient.right, rcClient.top, rcClient.bottom);
-	//return;
-
-	rcItem.left += TEXT_MARGIN;
-	rcItem.right -= TEXT_MARGIN;
-
 	int cx = rcClient.right - rcClient.left;
-	if (rcItem.left > 0)
-		cx -= rcItem.left;
-	if (cx > (rcItem.right - rcItem.left))
-		cx = (rcItem.right - rcItem.left);
+	int cy = rcItem.bottom - rcItem.top;
+	memDC.CreateCompatibleBitmap(hdc, cx, cy);
+	memDC.EraseBackground();
+	memDC.SetBkMode(OPAQUE);
 
-	if (cx <= 0)
-		return;
-
-	int x = 0;
-	if (rcItem.left < 0)
-		x = -rcItem.left;
 
 	int cbText, cbInfo;
 	char* szText = getText(iItem, &cbText, false, &cbInfo);
 
-	//stdlog("iItem %d iSubItem %d col %d %s \n", iItem, iSubItem, col, szText);
+	int  textPoint = rcItem.left + TEXT_MARGIN;
+	int startChar = 0;
 
-	int startChar = 0, endChar = 0;
-	SIZE  size, textSize;
-	//stdlog("szText [%s] %d %d \n", szText, cbText, strlen(szText));
-	GetTextExtentExPoint(hdc, szText, cbText, x, &startChar, NULL, &textSize);
-	if (x <= 0)
-	{
-		startChar = 0;
-	}
-	GetTextExtentExPoint(hdc, szText + startChar, cbText - startChar, cx, &endChar, NULL, &size);
-	GetTextExtentPoint32(hdc, szText, startChar, &size);
-#ifdef _USE_MEMDC
-	POINT  textPoint = { 0, 0 };
-#else
-	POINT  textPoint = { 0, rcItem.top };
-#endif
-	if (size.cx < x)
-		textPoint.x -= (x - size.cx);
-	endChar += startChar;
-	endChar += 10;
-	if (endChar > cbText)
-		endChar = cbText;
-	endChar = cbText;
+	//if (rcItem.left < 0)
+	//{
+	//	int x = -rcItem.left;
+	//	// startChar is number of characters which fit in x
+	//	SIZE  textSizeUnused;
+	//	GetTextExtentExPoint(memDC, szText, cbText, x, &startChar, NULL, &textSizeUnused);
+	//	if (startChar > 0)
+	//	{
+	//		SIZE  size;
+	//		GetTextExtentPoint32(memDC, szText, startChar, &size);
+	//		if (size.cx < x)
+	//			textPoint -= (x - size.cx);
+	//	}
+	//	else
+	//	{
+	//		textPoint -= x;
+	//	}
+	//}
 
-	DWORD textColor, bkColor, selBkColor, selColor, serachColor, curSerachColor, infoBkColor, infoTextColorAndroid, infoTextColorNatve, curBkColor;
+	//stdlog("iItem %d textPoint %d startChar %d left %d\n", iItem, textPoint, startChar, rcItem.left);
+
+	DWORD textColor, bkColor, selBkColor, selColor, serachColor, curSerachColor, infoBkColor, infoTextColor, curBkColor;
 	selColor = gSettings.SelectionTxtColor();
-	selBkColor = gSettings.SelectionBkColor(GetFocus() == m_hWnd);
+	selBkColor = gSettings.SelectionBkColor();
 	DWORD textColor_0 = gSettings.LogListTxtColor();
 	DWORD bkColor_0 = gSettings.LogListBkColor();
 	textColor = textColor_0;
 	bkColor = bkColor_0;
 	serachColor = bkColor_0;
 	curSerachColor = gSettings.CurSerachColor();
-	infoTextColorNatve = gSettings.InfoTextColorNative();
-	infoTextColorAndroid = gSettings.InfoTextColorAndroid();
+	infoTextColor = gSettings.InfoTextColor();
 	infoBkColor = gSettings.LogListBkColor();
 
-#ifdef _USE_MEMDC
-	HDC hMemDC = ::CreateCompatibleDC(hdc);
-	SelectObject(hMemDC, gSettings.GetFont());
-	RECT rcMemDC = { 0, 0, cx, rcItem.bottom - rcItem.top };
-	HBITMAP hBmp = ::CreateCompatibleBitmap(hdc, rcMemDC.right - rcMemDC.left, rcMemDC.bottom - rcMemDC.top);
-	HBITMAP oldBmp = (HBITMAP)::SelectObject(hMemDC, hBmp);
-	HBRUSH hbr = ::CreateSolidBrush(bkColor);
-	::FillRect(hMemDC, &rcMemDC, hbr);
-	::DeleteObject(hbr);
-#else
-	HDC hMemDC = hdc;
-	if (rcItem.left > 0)
-		textPoint.x += rcItem.left;
-#endif
-	COLORREF old_textColor = ::GetTextColor(hdc);
-	COLORREF old_bkColor = ::GetBkColor(hdc);
-	int old_bkMode = ::GetBkMode(hdc);
-	::SetBkMode(hMemDC, OPAQUE);
-
-	if (col == LOG_COL)
 	{
 		textColor = textColor_0;
 		bkColor = bkColor_0;
@@ -1307,7 +1068,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		{
 			bool color_is_set = false;
 			color_is_set = gSettings.SetTracePriority((flow_LogPriority)((TRACE_NODE*)pNode)->priority, textColor, bkColor);
-			if ( !color_is_set && ((TRACE_NODE*)pNode)->color)
+			if (!color_is_set && ((TRACE_NODE*)pNode)->color)
 				gSettings.SetTraceColor(((TRACE_NODE*)pNode)->color, textColor, bkColor);
 		}
 
@@ -1321,7 +1082,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		char* curSearch = szText;
 		char* nextSearch = curSearch;
 		int searchPos = 0;
-		while (curChar < endChar)
+		while (curChar < cbText)
 		{
 			BYTE curFlag = 0;
 			if (curSearch && pNode->isInfo())
@@ -1393,9 +1154,9 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 			}
 			//if (iItem == 3)stdlog("oldFlag %d, curFlag %d curChar %d \n", oldFlag, curFlag, curChar);
 
-			if (oldFlag != curFlag || curChar == (endChar - 1))
+			if (oldFlag != curFlag || curChar == (cbText - 1))
 			{
-				if (oldFlag == curFlag && curChar == (endChar - 1))
+				if (oldFlag == curFlag && curChar == (cbText - 1))
 				{
 					curChar++;
 				}
@@ -1415,32 +1176,31 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 					{
 						curBkColor = selBkColor;
 					}
-					::SetBkColor(hMemDC, curBkColor);
+					::SetBkColor(memDC, curBkColor);
 
 					if (curBkColor != infoBkColor)
-						::SetTextColor(hMemDC, selColor);
+						::SetTextColor(memDC, selColor);
 					else if (pNode->isFlow() || (oldFlag  & bNotTrace))
-						::SetTextColor(hMemDC, pNode->isJava() ? infoTextColorAndroid : infoTextColorNatve);
+						::SetTextColor(memDC, infoTextColor);
 					else
-						::SetTextColor(hMemDC, textColor);
-
-
+						::SetTextColor(memDC, textColor);
 
 					if ((oldFlag & bSelected) || (oldFlag & bcurSearch) || (oldFlag & bSearched))
 					{
-						::SetTextColor(hMemDC, selColor);
+						::SetTextColor(memDC, selColor);
 					}
 
-					//if (iItem == 3)stdlog("prevChar %d, curChar %d endChar %d\n", prevChar, curChar, endChar);
-					TextOut(hMemDC, textPoint.x, textPoint.y, szText + prevChar, curChar - prevChar);
-					GetTextExtentPoint32(hMemDC, szText + prevChar, curChar - prevChar, &size);
-					textPoint.x += size.cx;
+					//if (iItem == 3)stdlog("prevChar %d, curChar %d cbText %d\n", prevChar, curChar, cbText);
+					TextOut(memDC, textPoint, 0, szText + prevChar, curChar - prevChar);
+					SIZE size;
+					GetTextExtentPoint32(memDC, szText + prevChar, curChar - prevChar, &size);
+					textPoint += size.cx;
 					prevChar = curChar;
 					oldFlag = curFlag;
-					if (curChar == (endChar - 1))
+					if (curChar == (cbText - 1))
 					{
 						prevChar = curChar;
-						curChar = endChar;
+						curChar = cbText;
 						goto again;
 					}
 				}
@@ -1452,32 +1212,16 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
 		if (iItem == m_ListSelection.CurItem())
 		{
-			RECT rcText = { rcItem.left - 5, rcItem.top, rcItem.right + 5, rcItem.bottom };
-			if (GetFocus() == m_hWnd)
-			{
-				CBrush brush2;
-				brush2.CreateSolidBrush(gSettings.SelectionBkColor(true));
-				FrameRect(hdc, &rcText, brush2);
-			}
-			else
-			{
-				DrawFocusRect(hdc, &rcText);
-			}
+			RECT rc = { -1, 0, cx+2, cy };
+			FrameRect(memDC, &rc, Gdi::SelectionBrush);
+			//DrawFocusRect(memDC, &rc);
 		}
 
 	}
 
-#ifdef _USE_MEMDC
-	::BitBlt(hdc, rcItem.left > 0 ? rcItem.left : 0, rcItem.top, cx, rcItem.bottom - rcItem.top, hMemDC, 0, 0, SRCCOPY);
-	::SelectObject(hMemDC, oldBmp);
-	DeleteObject(hBmp);
-	DeleteDC(hMemDC);
-#else
-	::SetTextColor(hdc, old_textColor);
-	::SetBkColor(hdc, old_bkColor);
-	::SetBkMode(hdc, old_bkMode);
-#endif
-	}
+	::BitBlt(hdc, 0, rcItem.top, cx, cy, memDC, 0, 0, SRCCOPY);
+
+}
 
 CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
@@ -1500,14 +1244,14 @@ CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 	bool funcColFound = false;
 	for (int i = 0; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
 	{
-		if (onlyTraces && LOG_COL != m_ActualColType[i])
+		if (onlyTraces && LOG_COL != m_DetailType[i])
 			continue;
-		if (FUNC_COL == m_ActualColType[i])
+		if (FUNC_COL == m_DetailType[i])
 			funcColFound = true;
-		if (funcColFound && pNode->isFlow() && LOG_COL == m_ActualColType[i])
+		if (funcColFound && pNode->isFlow() && LOG_COL == m_DetailType[i])
 			break;
 		int c;
-		CHAR* p = pNode->getListText(&c, m_ActualColType[i], iItem);
+		CHAR* p = pNode->getListText(&c, m_DetailType[i], iItem);
 		if (c + cb >= MAX_BUF_LEN)
 			c = MAX_BUF_LEN - cb;
 		memcpy(pBuf + cb, p, c);

@@ -2,8 +2,11 @@
 
 #include "Archive.h"
 #include "Helpers.h"
+#include "GDI.h"
 
 class CFlowTraceView;
+class CLogListInfo;
+class CLogListFrame;
 
 struct SEL_POINT
 {
@@ -38,19 +41,15 @@ private:
 	SEL_POINT start, end, cur;
 };
 
-
 class CLogListView : public CWindowImpl< CLogListView, CListViewCtrl>
 {
 public:
-	CLogListView(CFlowTraceView* pView);
+	CLogListView(CLogListFrame *pPareent, CFlowTraceView* pFlowTraceView, CLogListInfo* pListInfo);
 	~CLogListView();
 
 	BEGIN_MSG_MAP(CLogListView)
-		//MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
 		MSG_WM_SIZE(OnSize)
-		MESSAGE_HANDLER(WM_UPDATE_NC, OnUpdateNc)
-		MESSAGE_HANDLER(WM_NCPAINT, OnNcPaint)
-		MESSAGE_HANDLER(WM_NCCALCSIZE, OnNcCalcSize)
+		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
 		MESSAGE_HANDLER(WM_SETFOCUS, OnSetFocus)
 		MESSAGE_HANDLER(WM_KILLFOCUS, OnKillFocus)
         MESSAGE_HANDLER(WM_MBUTTONDOWN, OnMButtonDown)
@@ -64,10 +63,7 @@ public:
 	END_MSG_MAP()
 
 	void OnSize(UINT nType, CSize size);
-	LRESULT OnUpdateNc(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
-	LRESULT OnNcPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
-	LRESULT OnNcCalcSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
     LRESULT OnMButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
@@ -84,8 +80,6 @@ public:
 	void RefreshList(bool redraw);
 	void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
 	void ItemPrePaint(int iItem, HDC hdc, RECT rc);
-	LIST_COL getGolumn(int iSubItem) { return (LIST_COL)m_ColType[iSubItem]; }
-	int getSubItem(LIST_COL col) { return m_ColSubItem[col]; }
 	void UpdateCaret();
 	bool HasSelection();
 	LOG_NODE* GetSynkNode();
@@ -103,35 +97,31 @@ public:
 	void SelLogSelection() { m_ListSelection.SelLogSelection(); }
 	void OnBookmarks(WORD wID);
 	DWORD GetRecCount() { return m_recCount; }
+	void ToggleBookmark(DWORD item);
+	bool UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 private:
 
 	void SetColumns();
-	void SetColumnLen(LIST_COL col, int len);
+	void SetColumnLen(int len);
 	void MoveSelectionToEnd(bool extend);
 	void ClearColumnInfo();
-	void AddColumn(CHAR* szHeader, LIST_COL col);
-	bool UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	bool IsWordChar(char c) { return (0 != isalnum(c)) || c == '_'; }
-	void ToggleBookmark(DWORD item);
-	void DrawNcItem(int iItem, HDC hdc, RECT* rcItem, LOG_NODE* pNode);
-	void DrawNc();
 
 	LIST_COL m_ColType[MAX_COL];
-	LIST_COL m_ActualColType[MAX_COL];
-	int m_ColSubItem[MAX_COL];
-	int m_ColLen[MAX_COL];
-	int m_cColumns, m_cActualColumns;
-	int m_LogCol;
+	LIST_COL m_DetailType[MAX_COL];
+	int m_ColLen;
+	int m_cActualColumns;
 	bool m_hasCaret;
 	bool m_IsCupture;
-	CFlowTraceView* m_pView;
-	HDC m_hdc;
-	HIMAGELIST m_hListImageList;
+	CFlowTraceView* m_pFlowTraceView;
+	CLogListFrame *m_pPareent;
+	CLogListInfo* m_pListInfo;
 	int m_lengthCalculated;
-	DWORD m_recCount;
+	int m_recCount;
 	int m_curBookmark;
 	LOG_SELECTION m_ListSelection;
+	MemDC memDC;
 };
 
 

@@ -20,18 +20,19 @@ public:
 	bool SetTraceColor(int color, DWORD& textColor, DWORD& bkColor);
 	bool SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor);
 	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
-    bool CheckUIFont(HDC hdc);
 
     void SetModules(const CHAR* szList);
     CHAR* GetModules();
     void SetSearchList(CHAR* szList);
     CHAR* GetSearchList();
-    DWORD SelectionBkColor(bool haveFocus);
+    DWORD SelectionBkColor();
     DWORD SelectionTxtColor();
     DWORD LogListBkColor();
+	DWORD LogListInfoBkColor();
     DWORD LogListTxtColor();
     DWORD SerachColor();
     DWORD CurSerachColor();
+	DWORD InfoTextColor();
 	DWORD InfoTextColorNative();
 	DWORD InfoTextColorAndroid();
 	bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
@@ -61,7 +62,6 @@ public:
     DECL_PROP(DWORD, UsePrefModule);
     DECL_PROP(DWORD, FullSrcPath);
 
-    DECL_PROP(int, ColLineNN);
     DECL_PROP(int, ColNN);
     DECL_PROP(int, ColApp);
     DECL_PROP(int, ColPID);
