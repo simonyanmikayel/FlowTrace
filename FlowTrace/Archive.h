@@ -173,7 +173,7 @@ public:
 	int append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 
 private:
-	int append(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);
+	int appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);
 	inline APP_NODE* addApp(LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark);

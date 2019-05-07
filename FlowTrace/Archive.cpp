@@ -507,7 +507,7 @@ int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fr
 	ATLASSERT(rec.isValid());
 	if (!rec.isValid())
 		return 0;
-	return append(&rec, p_si_other, fromImport, bookmark, pack);
+	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
 }
 
 int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
@@ -516,10 +516,10 @@ int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fr
 	ATLASSERT(rec.isValid());
 	if (!rec.isValid())
 		return 0;
-	return append(&rec, p_si_other, fromImport, bookmark, pack);
+	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
 }
 
-int Archive::append(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
+int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_BASE_DATA* pLogData = rec->getLogData();
 	//Log(rec);
@@ -543,9 +543,6 @@ int Archive::append(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int 
 	lstNN = pLogData->nn + 1;
 	return true;
 #endif
-
-	if (!rec->isValid())
-        return 0;
 
 	//if (pLogData->log_flags & LOG_FLAG_JAVA)
 	//	return 1;
