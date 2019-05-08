@@ -175,7 +175,7 @@ void TaskThread::FileSave(WORD cmd)
 {
     bool isExport = (cmd == ID_FILE_EXPORT);
 
-    m_count = isExport ? gArchive.getCount() : gArchive.getListedNodes()->Count();
+    m_count = isExport ? gArchive.getNodeCount() : gArchive.getListedNodes()->Count();
 
     char buf[MAX_RECORD_LEN];
     LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)buf;

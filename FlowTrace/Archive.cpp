@@ -17,7 +17,8 @@ int  g_buff_nn;
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
-    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 256 * 2 * 1024 * 1024);
+    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE / 2, 256 * 2 * 1024 * 1024);
+	//m_pRecBuf = new MemBuf(MAX_BUF_SIZE / 2, 256 * 2 * 1024 * 1024);
     m_listedNodes = new ListedNodes();
     clearArchive();
 }
@@ -46,18 +47,21 @@ void Archive::clearArchive(bool closing)
 	m_lost = 0;
     curApp = 0;
     curThread = 0;
-    gArchive.getSNAPSHOT().clear();
 
     delete m_pNodes;
+	//delete m_pRecords;
     m_pNodes = nullptr;
+	//m_pRecords = nullptr;
     m_rootNode = nullptr;
     m_pTraceBuf->Free();
+	//m_pRecBuf->Free();
     m_listedNodes->Free();
     AddrInfo::Reset();
     if (!closing)
     {
-        m_pNodes = new PtrArray<LOG_NODE>(m_pTraceBuf);
-        m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
+		m_pNodes = new PtrArray<LOG_NODE>(m_pTraceBuf);
+		//m_pRecords = new PtrArray<LOG_REC_BASE_DATA>(m_pRecBuf);
+		m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
         m_rootNode->data_type = ROOT_DATA_TYPE;
         ATLASSERT(m_pNodes && m_rootNode);
     }
@@ -65,7 +69,7 @@ void Archive::clearArchive(bool closing)
 
 size_t Archive::UsedMemory() 
 {
-    return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); 
+    return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); // + m_pRecBuf->UsedMemory()
 }
 
 APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
@@ -420,9 +424,10 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	const char* moduleName = pLogRec->moduleName();
 	int cb_trace = pLogData->cb_trace;
 	char* trace = (char*)pLogRec->trace();
+	LOG_NODE* pNode = nullptr;
+#ifdef PARCE_COLOR
 	char last_char = trace[cb_trace];
 	trace[cb_trace] = 0;
-	LOG_NODE* pNode = nullptr;
 
 #define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName)
 
@@ -484,6 +489,9 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	}
 
 	trace[cb_trace] = last_char;
+#else
+	pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName);
+#endif //PARCE_COLOR
 	return pNode;
 
 }
@@ -504,18 +512,20 @@ void Archive::Log(LOG_REC* rec)
 int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_ADB rec(pLogData);
-	ATLASSERT(rec.isValid());
-	if (!rec.isValid())
+	if (!rec.isValid()) {
+		ATLASSERT(0);
 		return 0;
+	}
 	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
 }
 
 int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_NET rec(pLogData);
-	ATLASSERT(rec.isValid());
-	if (!rec.isValid())
+	if (!rec.isValid()) {
+		ATLASSERT(0);
 		return 0;
+	}
 	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
 }
 
@@ -644,47 +654,24 @@ int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, i
 	return pNode != nullptr;
 }
 
-DWORD Archive::getCount()
-{
-    return m_pNodes ? m_pNodes->Count() : 0;
-}
-
 void ListedNodes::updateList(BOOL flowTraceHiden)
 {
-    DWORD count = gArchive.getCount();
-    for (DWORD i = archiveCount; i < count; i++)
-    {
-        addNode(gArchive.getNode(i), flowTraceHiden);
-    }
-    archiveCount = count;
+	DWORD count = gArchive.getNodeCount();
+	for (DWORD i = archiveCount; i < count; i++)
+	{
+		addNode(gArchive.getNode(i), flowTraceHiden);
+	}
+	archiveCount = count;
 }
 
 void ListedNodes::applyFilter(BOOL flowTraceHiden)
 {
     Free();
-    archiveCount = gArchive.getCount();
+    archiveCount = gArchive.getNodeCount();
     //stdlog("%u\n", GetTickCount());
     for (DWORD i = 0; i < archiveCount; i++)
     {
         addNode(gArchive.getNode(i), flowTraceHiden);
     }
     //stdlog("%u\n", GetTickCount());
-}
-
-void SNAPSHOT::update()
-{
-    first = 0, last = INFINITE;
-    if (curSnapShot)
-    {
-        if (curSnapShot == 1)
-        {
-            size_t c = snapShots.size();
-            first = snapShots[c - 1].pos;
-        }
-        else
-        {
-            first = (curSnapShot == 2) ? 0 : snapShots[curSnapShot - 3].pos;
-            last = snapShots[curSnapShot - 2].pos;
-        }
-    }
 }

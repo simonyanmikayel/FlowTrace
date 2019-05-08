@@ -131,21 +131,6 @@ typedef struct
 }NET_PACK_INFO;
 #pragma pack(pop)
 
-struct SNAPSHOT_INFO
-{
-    int pos;
-    CHAR descr[32];
-};
-
-struct SNAPSHOT
-{
-    void clear() { curSnapShot = 0;  snapShots.clear(); update(); }
-    void update();
-    int curSnapShot;
-    std::vector<SNAPSHOT_INFO> snapShots;
-    DWORD first, last;
-};
-
 class Archive
 {
 public:
@@ -154,14 +139,14 @@ public:
 
     void clearArchive(bool closing = false);
     void onPaused();
-    DWORD getCount();
-    LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
+	DWORD getNodeCount() { return m_pNodes ? m_pNodes->Count() : 0; }
+	//DWORD getRecCount() { return m_pRecords ? m_pRecords->Count() : 0; }
+	LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb, bool zero = false) { return (char*)m_pTraceBuf->Alloc(cb, zero); }
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
     DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     ListedNodes* getListedNodes() { return m_listedNodes; }
     ROOT_NODE* getRootNode() { return m_rootNode; }
-    SNAPSHOT& getSNAPSHOT() { return m_snapshot; }
     static DWORD getArchiveNumber() { return archiveNumber; }
     BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
     BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
@@ -171,6 +156,7 @@ public:
 	bool setAppName(int pid, char* szName, int cbName);
 	int append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	int append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
+	//void updateNodes();
 
 private:
 	int appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);
@@ -186,11 +172,12 @@ private:
     BYTE bookmarkNumber;
     APP_NODE* curApp;
     THREAD_NODE* curThread;
-    SNAPSHOT m_snapshot;
     ListedNodes* m_listedNodes;
     ROOT_NODE* m_rootNode;
-    MemBuf* m_pTraceBuf;
-    PtrArray<LOG_NODE>* m_pNodes;
+	MemBuf* m_pTraceBuf;
+	//MemBuf* m_pRecBuf;
+	PtrArray<LOG_NODE>* m_pNodes;
+	//PtrArray<LOG_REC_BASE_DATA>* m_pRecords;
 };
 
 struct ListedNodes
@@ -200,35 +187,35 @@ struct ListedNodes
         m_pListBuf = new MemBuf(MAX_BUF_SIZE, 64 * 1024 * 1024);
     }
     ~ListedNodes() {
-        delete m_pNodes;
+        delete m_pListNodes;
         delete m_pListBuf;
     }
     LOG_NODE* getNode(DWORD i) {
-        return m_pNodes->Get(i);
+        return m_pListNodes->Get(i);
     }
     void Free()
     {
         m_pListBuf->Free();
-        delete m_pNodes;
+        delete m_pListNodes;
         archiveCount = 0;
-        m_pNodes = new PtrArray<LOG_NODE>(m_pListBuf);
+        m_pListNodes = new PtrArray<LOG_NODE>(m_pListBuf);
     }
     size_t UsedMemory() {
         return m_pListBuf->UsedMemory();
     }
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
         DWORD64 ndx = gArchive.index(pNode);
-        if (ndx >= gArchive.getSNAPSHOT().first && ndx <= gArchive.getSNAPSHOT().last && pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
+        if (pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
         {
-            m_pNodes->AddPtr(pNode);
+            m_pListNodes->AddPtr(pNode);
         }
     }
-    DWORD Count() { return m_pNodes->Count(); }
+    DWORD Count() { return m_pListNodes->Count(); }
     void applyFilter(BOOL flowTraceHiden);
-    void updateList(BOOL flowTraceHiden);
+	void updateList(BOOL flowTraceHiden);
 private:
     DWORD archiveCount;
-    PtrArray<LOG_NODE>* m_pNodes;
+    PtrArray<LOG_NODE>* m_pListNodes;
     MemBuf* m_pListBuf;
 };
 

@@ -105,7 +105,7 @@ void CBackTraceCallView::UpdateBackTrace(LOG_NODE* pSelectedNode, bool bNested)
         {
             pNode = pNode->parent;
         }
-        DWORD count = gArchive.getCount();
+        DWORD count = gArchive.getNodeCount();
         LOG_NODE* pArchivedNode;
         for (DWORD i = 0; i < count && c_nodes < MAX_BACK_TRACE; i++)
         {

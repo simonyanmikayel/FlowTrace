@@ -195,7 +195,7 @@ void CLogTreeView::CopySelection()
 
 void CLogTreeView::RefreshTree(bool showAll)
 {
-    DWORD newCount = gArchive.getCount();
+    DWORD newCount = gArchive.getNodeCount();
     if (newCount <= 1)
         return;//only root node
 

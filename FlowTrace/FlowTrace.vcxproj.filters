@@ -78,9 +78,6 @@
     <ClInclude Include="DlgSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DlgSnapshots.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DlgInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,9 +165,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgSettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgSnapshots.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgInfo.cpp">

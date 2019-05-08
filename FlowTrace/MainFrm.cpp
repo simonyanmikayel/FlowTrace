@@ -14,7 +14,6 @@
 #include "DlgDetailes.h"
 #include "DlgProgress.h"
 #include "SearchInfo.h"
-#include "DlgSnapshots.h"
 #include "DlgModules.h"
 #include "LogReceiver.h"
 
@@ -229,6 +228,7 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 
 void CMainFrame::RefreshLog(bool showAll)
 {
+	//gArchive.updateNodes();
     gArchive.getListedNodes()->updateList(gSettings.GetFlowTracesHiden());
     m_tree.RefreshTree(showAll);
     m_list.RefreshList(false);
@@ -525,22 +525,6 @@ LRESULT CMainFrame::OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     m_searchedit.SetFocus();
-    return 0;
-}
-
-LRESULT CMainFrame::OnTakeSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    DlgSnapshots dlg;
-    if (IDOK == dlg.DoModal())
-        ::SendMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
-    return 0;
-}
-
-LRESULT CMainFrame::OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    DlgSnapshots dlg;
-    if (dlg.AddSnapshot("", true))
-        ::SendMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
     return 0;
 }
 
@@ -876,7 +860,7 @@ void CMainFrame::UpdateStatusBar()
     DWORD lost = gArchive.getLost();
 	if (lost)
 		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), lost);
-	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getCount()));
+	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getNodeCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Memory: %s mb"), Helpers::str_format_int_grouped((LONG_PTR)(gArchive.UsedMemory()/1000000)));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Listed: %s"), Helpers::str_format_int_grouped(m_list.GetRecCount()));
     cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("   Line: %s"), Helpers::str_format_int_grouped(m_list.getSelectionItem() + 1));

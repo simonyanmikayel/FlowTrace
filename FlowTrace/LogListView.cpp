@@ -982,7 +982,7 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 	if (!pNode)
 	{
-		ATLASSERT(0);
+		//ATLASSERT(0);
 		return;
 	}
 
@@ -1009,7 +1009,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 	if (!pNode)
 	{
-		ATLASSERT(0);
+		//ATLASSERT(0);
 		return;
 	}
 

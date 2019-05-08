@@ -24,7 +24,6 @@
 #define IDI_ICON_NODE_UNCHECKE          527
 #define IDI_ICON_EMPTY1                 528
 #define IDI_ICON_BOOKMARK               528
-#define IDD_SNAPSHOTS                   529
 #define IDI_ICON_SYNC                   529
 #define IDR_FONT1                       530
 #define IDB_TTF_BMP                     531
@@ -55,7 +54,6 @@
 #define IDC_CALL_LINE                   1020
 #define IDC_CHECK_USE_PC_TIME2          1021
 #define IDC_CHECK_COMPACT_VIEW          1022
-#define IDC_LIST_SNAPSHOTS              1023
 #define IDC_CHECK_RESOLVE_ADDR          1023
 #define IDC_FUNC_NAME                   1024
 #define IDC_CHECK_COMPACT_VIEW3         1024
@@ -71,7 +69,6 @@
 #define IDC_CHECK_SHOW_ELAPSED_TIME     1027
 #define IDC_LINE_NN                     1028
 #define IDC_LIST2                       1029
-#define IDC_EDIT_COMMENT                1040
 #define IDC_COMBO1                      1041
 #define IDC_COMBO_FONTS                 1042
 #define IDC_COMBO_FONT_SIZE             1043
@@ -136,8 +133,6 @@
 #define ID_BOOKMARKS_PREVIOUSBOOKMARK   32821
 #define ID_BOOKMARKS_CLEARBOOKMARKS     32822
 #define ID_BOOKMARKS_TOGGLE             32823
-#define ID_VIEW_TAKESNAPSHOT            32826
-#define ID_VIEW_STARTNEWSNAPSHOT        32828
 #define ID_EDIT_COPY_ALL                32829
 #define ID_EDIT_COPY_TRACES             32830
 #define ID_CALL_STACK                   32831

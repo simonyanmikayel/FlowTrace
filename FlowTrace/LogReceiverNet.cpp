@@ -210,6 +210,20 @@ UdpThread::UdpThread()
 		goto err;
 	}
 
+	//int           iSize, iVal, ret;
+	//iSize = sizeof(iVal);
+	//ret = getsockopt(s, SOL_SOCKET, SO_MAX_MSG_SIZE, (char *)&iVal, &iSize);
+	//if (ret == SOCKET_ERROR)
+	//{
+	//	int err = WSAGetLastError();
+	//}
+
+	//int const buff_size = 1024 * 1024;
+	//if (setsockopt(s, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<char const *>(&buff_size), sizeof(buff_size)) < 0)
+	//{
+	//	int err = WSAGetLastError();
+	//}
+
 	//Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = INADDR_ANY;
@@ -239,7 +253,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 	int slen, cb_recv, cb_parced;
 	struct sockaddr_in si_other;
 	slen = sizeof(si_other);
-	NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
+	
 	int ack_retry_count = 0;
 #ifdef _USE_RETRY_COUNT
 	DWORD dwLastTimeout = INFINITE;
@@ -257,7 +271,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 #endif //_USE_RETRY_COUNT
 
 		//try to receive data, this is a blocking call
-		if ((cb_recv = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 0)
+		if ((cb_recv = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 4)
 		{
 #ifdef _USE_RETRY_COUNT
 			if (ack_retry_count) {
@@ -275,6 +289,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 				break;
 			}
 		}
+		NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
 		if (cb_recv != pack->data_len + sizeof(NET_PACK_INFO))
 		{
 			stdlog("incompleate package received %d %d\n", cb_recv, pack->data_len + sizeof(NET_PACK_INFO));
@@ -302,7 +317,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 #endif //_USE_RETRY_COUNT
 		}
 		if (pack->data_len == 0)
-			continue;
+			continue; //ping packet
 
 		LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)(buf + sizeof(NET_PACK_INFO));
 		cb_parced = sizeof(NET_PACK_INFO);
