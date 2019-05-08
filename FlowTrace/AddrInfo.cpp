@@ -69,8 +69,13 @@ MuduleInfo* GetMuduleInfo(FLOW_NODE* flowNode)
     MuduleInfo* pMuduleInfo = lastMuduleInfo;
     while (pMuduleInfo) 
     {
-        if (pMuduleInfo->szModuleName && 0 == _strnicmp(flowNode->moduleName(), pMuduleInfo->szModuleName, flowNode->moduleNameLength()))
-            break;
+		if (pMuduleInfo->szModuleName) {
+			char* moduleName = flowNode->moduleName();
+			int moduleNameLength = std::max(flowNode->moduleNameLength(), (int)strlen(pMuduleInfo->szModuleName));
+			if (0 == _strnicmp(moduleName, pMuduleInfo->szModuleName, moduleNameLength)) {
+				break;
+			}
+		}
         pMuduleInfo = pMuduleInfo->pPrev;
     }
     return pMuduleInfo;

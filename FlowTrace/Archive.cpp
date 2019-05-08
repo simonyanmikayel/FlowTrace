@@ -17,7 +17,7 @@ int  g_buff_nn;
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
-    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE / 2, 256 * 2 * 1024 * 1024);
+    m_pTraceBuf = new MemBuf(MAX_BUF_SIZE, 256 * 2 * 1024 * 1024);
 	//m_pRecBuf = new MemBuf(MAX_BUF_SIZE / 2, 256 * 2 * 1024 * 1024);
     m_listedNodes = new ListedNodes();
     clearArchive();
