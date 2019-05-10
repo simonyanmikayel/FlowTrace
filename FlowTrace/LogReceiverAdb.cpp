@@ -315,10 +315,12 @@ adb logcat -g
 static const char* cmdLogcatClear[]{ "logcat", "-c" };
 //static const char* cmdStartServer[]{ "start-server" };
 //-v long: Display all metadata fields and separate messages with blank lines.
-//adb logcat -v long FlowTrace:D *:S
+//adb logcat -v long FLOW_TRACE:* *:S
+//adb logcat -v long FLOW_TRACE:S
 //adb logcat -v long -f d:\temp\log.txt
-//static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:*", "*:S" };
-static const char* cmdLogcatLog[]{ "logcat", "-v", "long" };
+//static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:*", "*:S" }; //show only FLOW_TRACE tag
+static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:S" }; //hide FLOW_TRACE tag
+//static const char* cmdLogcatLog[]{ "logcat", "-v", "long" };
 void LogcatLogThread::Work(LPVOID pWorkParam)
 {
 #if defined(_WRITE_LOCAL)
