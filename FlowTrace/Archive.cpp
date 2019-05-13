@@ -102,16 +102,6 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
         *dotdot = ':'; //restore
     }    
 
-    if (p_si_other)
-    {
-        char* str_ip = inet_ntoa(p_si_other->sin_addr);
-        if (str_ip)
-        {
-            strncpy_s(pNode->ip_address, sizeof(pNode->ip_address), str_ip, sizeof(pNode->ip_address) - 1);
-            pNode->ip_address[sizeof(pNode->ip_address) - 1] = 0;
-        }
-    }
-
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
@@ -183,6 +173,20 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
         curApp = addApp(p, p_si_other);
         //curApp->getData()->Log();
     }
+
+	if (curApp && p_si_other && !curApp->ip_address[0])
+	{
+		char* str_ip = inet_ntoa(p_si_other->sin_addr);
+		if (str_ip)
+		{
+			strncpy_s(curApp->ip_address, sizeof(curApp->ip_address), str_ip, sizeof(curApp->ip_address) - 1);
+			curApp->ip_address[sizeof(curApp->ip_address) - 1] = 0;
+		}
+		else
+		{
+			curApp->ip_address[0] = '?';
+		}
+	}
 
     return curApp;
 }
