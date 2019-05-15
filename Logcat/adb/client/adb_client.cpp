@@ -263,8 +263,8 @@ static int orig_adb_connect(const std::string& service, std::string* error) {
         if (version != ADB_SERVER_VERSION) {
             fprintf(stderr, "adb server version (%d) doesn't match this client (%d); killing...\n",
                     version, ADB_SERVER_VERSION);
-            adb_kill_server();
-			return -1;
+   //         adb_kill_server();
+			//return -1;
 			//!!TODO!! goto start_server;
         }
 #endif
