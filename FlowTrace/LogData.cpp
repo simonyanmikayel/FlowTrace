@@ -377,16 +377,18 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
         if (isInfo())
         {
             INFO_NODE* This = (INFO_NODE*)this;
-            APP_NODE* pAppNode = This->threadNode->pAppNode;
-            memcpy(pBuf, pAppNode->appName + pAppNode->cb_short_app_name_offset, pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset);
-            cb += pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset;
             if (This->cb_module_name)
             {
-                pBuf[cb++] = ':';
                 char* name = This->moduleName();
                 memcpy(pBuf + cb, This->moduleName(), This->cb_module_name);
                 cb += This->cb_module_name;
             }
+			else
+			{
+				APP_NODE* pAppNode = This->threadNode->pAppNode;
+				memcpy(pBuf, pAppNode->appName + pAppNode->cb_short_app_name_offset, pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset);
+				cb += pAppNode->cb_app_name - pAppNode->cb_short_app_name_offset;
+			}
             pBuf[cb] = 0;
         }
     }
