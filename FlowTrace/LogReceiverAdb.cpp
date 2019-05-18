@@ -21,9 +21,9 @@ void LogReceiverAdb::start(bool reset)
 	//logcat(0, 0);
 	resetAtStart = reset;
 	logcatLogThread.StartWork();
-	logcatLogThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
+	//logcatLogThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	psThread.StartWork();
-	psThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);//THREAD_PRIORITY_LOWEST
+	//psThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);//THREAD_PRIORITY_LOWEST
 }
 
 void LogReceiverAdb::stop()

@@ -21,7 +21,7 @@ public:
 		return status;
 	}
 
-	char local_buffer[512]; //4*512
+	char local_buffer[4*512]; //4*512
 	int GetBufSize() { return sizeof(local_buffer); };
 	char* GetBuf() { return local_buffer; };
 
