@@ -429,73 +429,76 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	int cb_trace = pLogData->cb_trace;
 	char* trace = (char*)pLogRec->trace();
 	LOG_NODE* pNode = nullptr;
-#ifdef PARCE_COLOR
-	char last_char = trace[cb_trace];
-	trace[cb_trace] = 0;
+	if (pLogRec->getLogData()->log_flags & LOG_FLAG_COLOR_PARCED)
+	{
+		pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName);
+	}
+	else
+	{
+		char last_char = trace[cb_trace];
+		trace[cb_trace] = 0;
 
 #define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName)
 
-	int old_color = pLogData->color;
-	char *start = trace;
-	char *end = trace;
-	while (*end) {
-		while (*(end) >= ' ')
-			end++;
-		if (*end == '\n' || *end == '\r') {
-			old_color = pLogData->color;
-			ADD_TRACE(end - start + 1, start);
-			while (*end == '\n' || *end == '\r')
+		int old_color = pLogData->color;
+		char *start = trace;
+		char *end = trace;
+		while (*end) {
+			while (*(end) >= ' ')
 				end++;
-			start = end;
+			if (*end == '\n' || *end == '\r') {
+				old_color = pLogData->color;
+				ADD_TRACE(end - start + 1, start);
+				while (*end == '\n' || *end == '\r')
+					end++;
+				start = end;
+			}
+			else if (*end == '\t') {
+				ADD_TRACE(end - start, start);
+				ADD_TRACE(4, "    ");
+				end++;
+				start = end;
+			}
+			else if (*end == '\033' && *(end + 1) == '[') {
+				int c1 = 0, c2 = 0, c3 = 0;
+				char* colorPos = end;
+				end += 2;
+				c1 = parceCollor(&end);
+				if (*end == ';') {
+					end++;
+					c2 = parceCollor(&end);
+				}
+				if (*end == ';') {
+					end++;
+					c3 = parceCollor(&end);
+				}
+				if (*end == 'm')
+				{
+					end++;
+					if (!pLogData->color) pLogData->color = c1;
+					if (!pLogData->color) pLogData->color = c2;
+					if (!pLogData->color) pLogData->color = c3;
+				}
+				if (colorPos > start) {
+					ADD_TRACE(colorPos - start, start);
+				}
+				old_color = pLogData->color;
+				start = end;
+			}
+			else if (*end) { //*end < ' '
+				end++;
+			}
 		}
-		else if (*end == '\t') {
+		if (end > start)
+		{
 			ADD_TRACE(end - start, start);
-			ADD_TRACE(4, "    ");
-			end++;
-			start = end;
 		}
-		else if (*end == '\033' && *(end + 1) == '[') {
-			int c1 = 0, c2 = 0, c3 = 0;
-			char* colorPos = end;
-			end += 2;
-			c1 = parceCollor(&end);
-			if (*end == ';') {
-				end++;
-				c2 = parceCollor(&end);
-			}
-			if (*end == ';') {
-				end++;
-				c3 = parceCollor(&end);
-			}
-			if (*end == 'm')
-			{
-				end++;
-				if (!pLogData->color) pLogData->color = c1;
-				if (!pLogData->color) pLogData->color = c2;
-				if (!pLogData->color) pLogData->color = c3;
-			}
-			if (colorPos > start) {
-				ADD_TRACE(colorPos - start, start);
-			}
-			old_color = pLogData->color;
-			start = end;
+		else if (old_color != pLogData->color) {
+			ADD_TRACE(0, end);
 		}
-		else if (*end) { //*end < ' '
-			end++;
-		}
-	}
-	if (end > start)
-	{
-		ADD_TRACE(end - start, start);
-	}
-	else if (old_color != pLogData->color) {
-		ADD_TRACE(0, end);
-	}
 
-	trace[cb_trace] = last_char;
-#else
-	pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName);
-#endif //PARCE_COLOR
+		trace[cb_trace] = last_char;
+	}
 	return pNode;
 
 }
