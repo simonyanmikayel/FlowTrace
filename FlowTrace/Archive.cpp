@@ -453,12 +453,6 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 					end++;
 				start = end;
 			}
-			else if (*end == '\t') {
-				ADD_TRACE(end - start, start);
-				ADD_TRACE(4, "    ");
-				end++;
-				start = end;
-			}
 			else if (*end == '\033' && *(end + 1) == '[') {
 				int c1 = 0, c2 = 0, c3 = 0;
 				char* colorPos = end;
@@ -485,7 +479,15 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 				old_color = pLogData->color;
 				start = end;
 			}
-			else if (*end) { //*end < ' '
+			else if (*end) {
+				if (*end < ' ') {
+					if (*end == '\t') {
+						*end = ' ';
+					}
+					else {
+						*end = '?';
+					}
+				}
 				end++;
 			}
 		}
