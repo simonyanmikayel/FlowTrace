@@ -27,6 +27,14 @@ void LogReceiverNet::stop()
 	cNetThreads = 0;
 }
 
+void LogReceiverNet::purgePackets()
+{
+	for (int i = 0; i < cNetThreads; i++)
+	{
+		pNetThreads[i]->purgePackets();
+	}
+}
+
 void LogReceiverNet::add(NetThread* pNetThread)
 {
 	if (gLogReceiver.working() && (cNetThreads < _countof(pNetThreads)))
@@ -58,7 +66,6 @@ TcpReceiveThread::TcpReceiveThread(SOCKET clientSocket)
 void TcpReceiveThread::Work(LPVOID pWorkParam)
 {
 	int slen, cb, cb_read;
-	struct sockaddr_in si_other;
 	bool packError = false;
 	slen = sizeof(si_other);
 	//TODO resolve si_other
@@ -194,6 +201,10 @@ void TcpListenThread::Work(LPVOID pWorkParam)
 
 UdpThread::UdpThread()
 {
+	curBuf = 0;
+	havePacket = false;
+	isOK = true;
+
 	struct sockaddr_in server;
 
 	//Create a socket
@@ -250,8 +261,7 @@ bool Unreachable() {
 //#define _USE_RETRY_COUNT
 void UdpThread::Work(LPVOID pWorkParam)
 {
-	int slen, cb_recv, cb_parced;
-	struct sockaddr_in si_other;
+	int slen, cb_recv;
 	slen = sizeof(si_other);
 	
 	int ack_retry_count = 0;
@@ -271,7 +281,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 #endif //_USE_RETRY_COUNT
 
 		//try to receive data, this is a blocking call
-		if ((cb_recv = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &si_other, &slen)) < 4)
+		if ((cb_recv = recvfrom(s, netBuf[curBuf], sizeof(netBuf[0]), 0, (struct sockaddr *) &si_other, &slen)) < 4)
 		{
 #ifdef _USE_RETRY_COUNT
 			if (ack_retry_count) {
@@ -289,7 +299,7 @@ void UdpThread::Work(LPVOID pWorkParam)
 				break;
 			}
 		}
-		NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
+		NET_PACK_INFO* pack = (NET_PACK_INFO*)netBuf[curBuf];
 		if (cb_recv != pack->data_len + sizeof(NET_PACK_INFO))
 		{
 			stdlog("incompleate package received %d %d\n", cb_recv, pack->data_len + sizeof(NET_PACK_INFO));
@@ -319,28 +329,62 @@ void UdpThread::Work(LPVOID pWorkParam)
 		if (pack->data_len == 0)
 			continue; //ping packet
 
-		LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)(buf + sizeof(NET_PACK_INFO));
-		cb_parced = sizeof(NET_PACK_INFO);
-		gLogReceiver.lock();
-		while (cb_parced < cb_recv)
+		havePacket = true;
+		BOOL locked = gLogReceiver.tryLock();
+		if (!locked && (curBuf < NET_BUF_COUNT - 1))
 		{
-			if (pLogData->len > (cb_recv - cb_parced))
-			{
-				//Terminate();
-				break;
-			}
-			if (!gArchive.append(pLogData, &si_other, false, 0, pack))
-			{
-				break;
-			}
-			cb_parced += pLogData->len;
-			pLogData = (LOG_REC_NET_DATA*)(buf + cb_parced);
+			curBuf++;
 		}
-		gLogReceiver.unlock();
+		else
+		{
+			if (!locked)
+				gLogReceiver.lock();
+			purgePackets();
+			gLogReceiver.unlock();
+		}
+		if (!isOK)
+			break;
 	}
 
 	if (IsWorking())
 		Helpers::SysErrMessageBox(TEXT("Udp receive failed\nClear log to restart"));
 
 	Terminate();
+}
+
+void UdpThread::purgePackets()
+{
+	if (havePacket && isOK)
+	{
+		for (int i = 0; isOK && i <= curBuf; i++)
+			isOK = appendBuf(netBuf[i]);
+		curBuf = 0;
+	}
+	havePacket = false;
+}
+
+bool UdpThread::appendBuf(char* buf)
+{
+	NET_PACK_INFO* pack = (NET_PACK_INFO*)buf;
+	int cb_recv = pack->data_len + sizeof(NET_PACK_INFO);
+	int cb_parced = sizeof(NET_PACK_INFO);
+	LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)(((char*)pack) + sizeof(NET_PACK_INFO));
+
+	bool ss = true;
+	while (cb_parced < cb_recv)
+	{		
+		if (pLogData->len > (cb_recv - cb_parced))
+		{
+			ss = false;
+			break;
+		}
+		if (!gArchive.append(pLogData, &si_other, false, 0, pack))
+		{
+			ss = false;
+			break;
+		}
+		cb_parced += pLogData->len;
+		pLogData = (LOG_REC_NET_DATA*)(buf + cb_parced);
+	}
+	return ss;
 }

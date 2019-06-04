@@ -161,6 +161,7 @@ static void TraceLog(const char* szLog, int cbLog)
 	if (cbLog)
 	{
 		gLogReceiver.lock();
+		//gLogReceiver.purgePackets();
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
@@ -238,9 +239,17 @@ static bool ParceMetaData()
 		adbRec.sec = Helpers::GetSec(h , m, s);// 3600 * h + 60 * m + s;
 		adbRec.msec = ms;
 		int cb_fn_name = mt.cb - i - 5;
-		if (i > 0 && cb_fn_name > 0 || cb_fn_name < 512 - i)
+		if (i > 0 && cb_fn_name > 0 && cb_fn_name < MAX_JAVA_TAG_NAME_LEN - 2)
 		{
+			//if (0 != strstr(mt.buf + i + 1, "V/Lap"))
+			//{
+			//	i = i;
+			//}
 			memcpy(adbRec.tag, mt.buf + i + 1, cb_fn_name);
+			while (cb_fn_name > 2 && adbRec.tag[cb_fn_name - 1] == ' ')
+				cb_fn_name--;
+			adbRec.tag[cb_fn_name] = ':';
+			adbRec.tag[++cb_fn_name] = 0;
 			adbRec.cb_fn_name = cb_fn_name;
 			adbRec.p_fn_name = adbRec.tag;
 			if (adbRec.tag[0] == 'E')

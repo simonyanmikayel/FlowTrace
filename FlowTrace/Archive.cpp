@@ -311,21 +311,24 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 		}
     }
 
+	if (cb_trace <= 0)
+	{
+		ATLASSERT(cb_trace == 0);
+		return pThreadNode->latestTrace;
+	}
+
     if (newChank)
     {
-		if (cb_trace > 0)
-		{
-			TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
-			pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
-			if (!pLastChank->next_chank)
-				return nullptr;
-			TRACE_CHANK* pChank = pLastChank->next_chank;
-			pChank->len = cb_trace;
-			pChank->next_chank = 0;
-			memcpy(pChank->trace, trace, cb_trace);
-			pChank->trace[cb_trace] = 0;
-			pThreadNode->latestTrace->cb_trace += cb_trace;
-		}
+		TRACE_CHANK* pLastChank = pThreadNode->latestTrace->getLastChank();
+		pLastChank->next_chank = (TRACE_CHANK*)Alloc(sizeof(TRACE_CHANK) + cb_trace);
+		if (!pLastChank->next_chank)
+			return nullptr;
+		TRACE_CHANK* pChank = pLastChank->next_chank;
+		pChank->len = cb_trace;
+		pChank->next_chank = 0;
+		memcpy(pChank->trace, trace, cb_trace);
+		pChank->trace[cb_trace] = 0;
+		pThreadNode->latestTrace->cb_trace += cb_trace;
 	}
     else
     {
@@ -525,7 +528,8 @@ int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fr
 		ATLASSERT(0);
 		return 0;
 	}
-	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	return 1;
 }
 
 int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
@@ -535,10 +539,11 @@ int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fr
 		ATLASSERT(0);
 		return 0;
 	}
-	return appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	return 1;
 }
 
-int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
+void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_BASE_DATA* pLogData = rec->getLogData();
 	//Log(rec);
@@ -564,18 +569,18 @@ int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, i
 #endif
 
 	//if (pLogData->log_flags & LOG_FLAG_JAVA)
-	//	return 1;
+	//	return;
 
 //	static APP_NODE* curApp0 = curApp;
 	APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
-        return 1;
+        return;
 
 	if (pack && pack->pack_nn > 0)
 	{
 		if (pack->pack_nn <= pAppNode->lastPackNN)
 		{
-			return 1;
+			return;
 		}
 		pAppNode->lastPackNN = pack->pack_nn;
 		pack->pack_nn = -pack->pack_nn; //stop checking package number
@@ -605,7 +610,7 @@ int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, i
 	
 	THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)
-        return 1;
+		return;
 
     bool ignore = false;
     if (pLogData->log_type != LOG_TYPE_TRACE && (pLogData->log_flags & LOG_FLAG_JAVA))
@@ -643,7 +648,7 @@ int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, i
         }
     }
     if (ignore)
-        return 1;
+		return;
 
 	LOG_NODE* pNode = nullptr;
     if (pLogData->log_type == LOG_TYPE_TRACE)
@@ -660,7 +665,6 @@ int Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, i
 	//		curApp, pThreadNode, pNode, pNode->getPid(), pLogData->pid, pNode->getTid(), pLogData->tid);
 	//	curApp0 = curApp;
 	//}
-	return pNode != nullptr;
 }
 
 void ListedNodes::updateList(BOOL flowTraceHiden)

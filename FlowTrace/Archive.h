@@ -69,7 +69,7 @@ struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
 	const char* trace() { return p_trace; }
 	int cbModuleName() { return cb_module_name; }
 	void reset() { ZeroMemory(this, sizeof(*this)); resetFT(); }
-	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_app_name = p_module_name = p_fn_name = ""; }
+	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
 
 	bool ftChecked; //is adb sent flow trace
 	const char* p_app_name;
@@ -159,7 +159,7 @@ public:
 	//void updateNodes();
 
 private:
-	int appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);
+	void appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);
 	inline APP_NODE* addApp(LOG_REC* p, sockaddr_in *p_si_other);
     inline THREAD_NODE* addThread(LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark);

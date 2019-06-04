@@ -1017,6 +1017,9 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	GetClientRect(&rcClient);
 	int cx = rcClient.right - rcClient.left;
 	int cy = rcItem.bottom - rcItem.top;
+	if (!(cx && cy))
+		return;
+
 	memDC.CreateCompatibleBitmap(hdc, cx, cy);
 	memDC.EraseBackground();
 	memDC.SetBkMode(OPAQUE);

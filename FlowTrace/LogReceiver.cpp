@@ -23,3 +23,8 @@ void LogReceiver::stop()
 	gLogReceiverAdb.stop();
 	//unlock();
 }
+
+void LogReceiver::purgePackets()
+{
+	gLogReceiverNet.purgePackets();
+}
