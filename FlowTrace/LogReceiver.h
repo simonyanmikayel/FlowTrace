@@ -10,7 +10,6 @@ public:
 	void lock() { EnterCriticalSection(&cs); }
 	void unlock() {  LeaveCriticalSection(&cs); }
 	bool working() { return m_working; }
-	void purgePackets();
 private:
 	bool m_working;
 	CRITICAL_SECTION cs;

@@ -161,7 +161,6 @@ static void TraceLog(const char* szLog, int cbLog)
 	if (cbLog)
 	{
 		gLogReceiver.lock();
-		//gLogReceiver.purgePackets();
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();

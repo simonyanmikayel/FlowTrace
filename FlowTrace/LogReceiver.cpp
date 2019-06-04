@@ -24,7 +24,3 @@ void LogReceiver::stop()
 	//unlock();
 }
 
-void LogReceiver::purgePackets()
-{
-	gLogReceiverNet.purgePackets();
-}
