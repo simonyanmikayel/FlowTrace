@@ -56,7 +56,7 @@ void WorkerThread::StartWork(LPVOID pWorkParam /*=0*/)
     StopWork();
 
     m_pWorkParam = pWorkParam;
-    m_hTreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    m_hTreadEvent = CreateEvent(NULL, FALSE, FALSE, NULL); //bManualReset = FALSE
     m_hThread = CreateThread(0, 0, ThreadFunk, this, 0, &m_dwTID);
 	int i = GetThreadPriority(m_hThread);
     WaitForSingleObject(m_hTreadEvent, INFINITE);
@@ -81,3 +81,7 @@ DWORD WorkerThread::SleepThread(DWORD  dwMilliseconds)
 	return WaitForSingleObject(m_hTreadEvent, dwMilliseconds);
 }
 
+void WorkerThread::ResumeThread()
+{
+	SetEvent(m_hTreadEvent);
+}

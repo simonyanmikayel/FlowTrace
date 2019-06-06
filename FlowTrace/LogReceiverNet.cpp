@@ -33,7 +33,6 @@ void LogReceiverNet::add(NetThread* pNetThread)
 	{
 		pNetThreads[cNetThreads++] = pNetThread;
 		pNetThread->StartWork();
-		pNetThread->SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	}
 	else
 	{
@@ -60,6 +59,7 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
 	int slen, cb, cb_read;
 	bool packError = false;
 	slen = sizeof(si_other);
+	SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	//TODO resolve si_other
 	//keep listening for data
 	while (true)
@@ -235,6 +235,9 @@ UdpThread::UdpThread()
 		Helpers::SysErrMessageBox(TEXT("UDP socket bind failed\nClear log to restart"));
 		goto err;
 	}
+#ifdef  USE_RECORDER_THREAD
+	recorder.StartWork();
+#endif
 	return;
 
 err:
@@ -250,9 +253,10 @@ bool Unreachable() {
 void UdpThread::Work(LPVOID pWorkParam)
 {
 	int slen, cb_recv;
-	struct sockaddr_in si_other;
-	slen = sizeof(si_other);
-	
+	slen = sizeof(sockaddr_in);
+
+	SetThreadPriority(THREAD_PRIORITY_HIGHEST);
+
 	int ack_retry_count = 0;
 #ifdef _USE_RETRY_COUNT
 	DWORD dwLastTimeout = INFINITE;
@@ -269,39 +273,49 @@ void UdpThread::Work(LPVOID pWorkParam)
 		}
 #endif //_USE_RETRY_COUNT
 
+#ifdef  USE_RECORDER_THREAD
+		NET_PACK* pack = recorder.GetNetPak();
+#else
+		NET_PACK* pack = &thePack;
+#endif
+		if (!pack)
+			break;
 		//try to receive data, this is a blocking call
-		if ((cb_recv = recvfrom(s, packBuf, sizeof(packBuf), 0, (struct sockaddr *) &si_other, &slen)) < 4)
+		if ((cb_recv = recvfrom(s, (char*)pack, NET_PACK::PackSize(), 0, (struct sockaddr *) &pack->si_other, &slen)) < 4)
 		{
 #ifdef _USE_RETRY_COUNT
 			if (ack_retry_count) {
 				//stdlog("retry ack %d\n", pack->pack_nn);
 				sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other));
 				ack_retry_count--;
+				SetPackState(pack, NET_PACK_FREE);
 				continue;
 			}
 #endif //_USE_RETRY_COUNT
 			if (Unreachable()) {
 				ack_retry_count = 0;
+				SetPackState(pack, NET_PACK_FREE);
 				continue;
 			}
 			else {
 				break;
 			}
 		}
-		NET_PACK_INFO* pack = (NET_PACK_INFO*)packBuf;
-		if (cb_recv != pack->data_len + sizeof(NET_PACK_INFO))
+		if (cb_recv != pack->info.data_len + sizeof(NET_PACK_INFO))
 		{
-			stdlog("incompleate package received %d %d\n", cb_recv, pack->data_len + sizeof(NET_PACK_INFO));
+			stdlog("incompleate package received %d %d\n", cb_recv, pack->info.data_len + sizeof(NET_PACK_INFO));
+			SetPackState(pack, NET_PACK_FREE);
 			continue;
 		}
-		if (!pack->retry_count)
-			pack->pack_nn = 0;//turn of packet checking
-		if (pack->pack_nn)
+		if (!pack->info.retry_count)
+			pack->info.pack_nn = 0;//turn of packet checking
+		if (pack->info.pack_nn)
 		{
-			if ((sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &si_other, sizeof(si_other))) < 0)
+			if ((sendto(s, (const char*)pack, sizeof(NET_PACK_INFO), 0, (struct sockaddr *) &pack->si_other, sizeof(sockaddr_in))) < 0)
 			{
 				if (Unreachable()) {
 					ack_retry_count = 0;
+					SetPackState(pack, NET_PACK_FREE);
 					continue;
 				}
 				else 
@@ -315,28 +329,16 @@ void UdpThread::Work(LPVOID pWorkParam)
 			dwAckTimeout = pack->retry_delay / 1000;
 #endif //_USE_RETRY_COUNT
 		}
-		if (pack->data_len == 0)
-			continue; //ping packet
-
-		gLogReceiver.lock();
-
-		int cb_parced = sizeof(NET_PACK_INFO);
-		LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)(packBuf + sizeof(NET_PACK_INFO));
-
-		while (cb_parced < cb_recv)
+		if (pack->info.data_len == 0)
 		{
-			if (pLogData->len > (cb_recv - cb_parced))
-			{
-				break;
-			}
-			if (!gArchive.append(pLogData, &si_other, false, 0, pack))
-			{
-				break;
-			}
-			cb_parced += pLogData->len;
-			pLogData = (LOG_REC_NET_DATA*)(packBuf + cb_parced);
+			SetPackState(pack, NET_PACK_FREE);
+			continue; //ping packet
 		}
-		gLogReceiver.unlock();
+
+		SetPackState(pack, NET_PACK_READY);
+#ifdef  USE_RECORDER_THREAD
+		recorder.ResumeThread();
+#endif
 	}
 
 	if (IsWorking())

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "WorkerThread.h"
+
+//#define USE_TCP
+
 class LogReceiver
 {
 public:

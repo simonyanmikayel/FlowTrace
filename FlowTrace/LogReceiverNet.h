@@ -1,16 +1,10 @@
 #pragma once
 
 #include "LogReceiver.h"
+#include "LogRecorder.h"
 #include "WorkerThread.h"
 #include "Archive.h"
 
-//#define USE_TCP
-
-#ifdef USE_TCP
-#define MAX_NET_BUF 16*1024  //maximum TCP window size in Microsoft Windows 2000 is 17,520 bytes 
-#else
-#define MAX_NET_BUF 16*1024  //max UDP datagam is 65515 Bytes
-#endif
 
 class NetThread : public WorkerThread
 {
@@ -24,7 +18,11 @@ protected:
 class UdpThread : public NetThread
 {
 	virtual void Work(LPVOID pWorkParam);
-    char packBuf[MAX_NET_BUF + sizeof(NET_PACK_INFO)];
+#ifdef  USE_RECORDER_THREAD
+	LogRecorder recorder;
+#else
+	NET_PACK thePack;
+#endif
 public:
 	UdpThread();
 };
@@ -56,4 +54,3 @@ public:
 protected:
 	void add(NetThread* pNetThread);
 };
-

@@ -3,9 +3,10 @@
 #include "LogData.h"
 
 #define MAX_JAVA_TAG_NAME_LEN 500
-#define MAX_JAVA_FUNC_NAME_LEN 1200
 #define MAX_TRCAE_LEN (1024*2)
 #define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(LOG_REC_BASE_DATA))
+#define MAX_NET_BUF 1416  //max UDP datagam is 65515 Bytes
+
 struct ListedNodes;
 
 #ifdef _BUILD_X64
@@ -129,6 +130,16 @@ typedef struct
 	int retry_delay;
 	int retry_count;
 }NET_PACK_INFO;
+
+enum NET_PACK_STATE { NET_PACK_FREE, NET_PACK_BUZY, NET_PACK_READY };
+typedef struct
+{
+	NET_PACK_INFO info;
+	char data[MAX_NET_BUF];
+	sockaddr_in si_other;
+	static int PackSize() { return sizeof(NET_PACK_INFO) + MAX_NET_BUF; }
+	NET_PACK_STATE state;
+} NET_PACK;
 #pragma pack(pop)
 
 class Archive

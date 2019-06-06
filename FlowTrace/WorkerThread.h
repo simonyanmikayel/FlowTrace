@@ -11,6 +11,7 @@ public:
     virtual void Work(LPVOID pWorkParam) = 0;
     virtual void Terminate() = 0;
 	DWORD SleepThread(DWORD  dwMilliseconds);
+	void ResumeThread();
 	void SetThreadPriority(int nPriority);
 private:
     LPVOID m_pWorkParam;

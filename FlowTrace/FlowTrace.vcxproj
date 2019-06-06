@@ -324,6 +324,7 @@
     <ClInclude Include="LogListView.h" />
     <ClInclude Include="LogReceiver.h" />
     <ClInclude Include="LogReceiverAdb.h" />
+    <ClInclude Include="LogRecorder.h" />
     <ClInclude Include="LogTreeView.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="DlgProgress.h" />
@@ -356,6 +357,7 @@
     <ClCompile Include="LogListView.cpp" />
     <ClCompile Include="LogReceiver.cpp" />
     <ClCompile Include="LogReceiverAdb.cpp" />
+    <ClCompile Include="LogRecorder.cpp" />
     <ClCompile Include="LogTreeView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="DlgProgress.cpp" />

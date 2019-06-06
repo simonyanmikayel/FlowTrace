@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "LogReceiverAdb.h"
 #include "LogReceiverNet.h"
+#include "LogRecorder.h"
 
 LogReceiver gLogReceiver;
 extern LogReceiverAdb gLogReceiverAdb;
@@ -23,4 +24,3 @@ void LogReceiver::stop()
 	gLogReceiverAdb.stop();
 	//unlock();
 }
-
