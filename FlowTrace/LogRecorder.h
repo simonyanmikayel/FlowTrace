@@ -34,4 +34,4 @@ void SetPackState(NET_PACK* pack, NET_PACK_STATE s);
 inline void SetPackState(NET_PACK* pack, NET_PACK_STATE s) {}
 #endif
 
-inline bool RecordNetPack(NET_PACK* pack);
+bool RecordNetPack(NET_PACK* pack);

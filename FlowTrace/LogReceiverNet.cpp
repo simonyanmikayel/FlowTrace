@@ -338,6 +338,9 @@ void UdpThread::Work(LPVOID pWorkParam)
 		SetPackState(pack, NET_PACK_READY);
 #ifdef  USE_RECORDER_THREAD
 		recorder.ResumeThread();
+#else
+		if (!RecordNetPack(pack))
+			break;
 #endif
 	}
 
