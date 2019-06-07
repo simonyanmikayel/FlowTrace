@@ -339,7 +339,10 @@ void UdpThread::Work(LPVOID pWorkParam)
 #ifdef  USE_RECORDER_THREAD
 		recorder.ResumeThread();
 #else
-		if (!RecordNetPack(pack))
+		gLogReceiver.lock();
+		bool ss = RecordNetPack(pack);
+		gLogReceiver.unlock();
+		if (!ss)
 			break;
 #endif
 	}
