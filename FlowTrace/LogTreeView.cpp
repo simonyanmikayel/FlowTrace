@@ -108,6 +108,10 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         disable = (!pNode->lastChild);
         Helpers::AddMenu(hMenu, cMenu, ID_TREE_EXPAND_ALL, _T("Expand All"), disable);
 
+		disable = (pNode->data_type != ROOT_DATA_TYPE && pNode->data_type != APP_DATA_TYPE);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_CHECK_ALL, _T("Check All"), disable);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_UNCHECK_ALL, _T("Uncheck All"), disable);
+
         disable = (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild);
         Helpers::AddMenu(hMenu, cMenu, ID_TREE_FIRST_SIBLING, _T("First Sibling\tCtrl+UP"), disable);
 
@@ -134,7 +138,15 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         {
             CollapseExpandAll(pNode, false);
         }
-        else if (nRet == ID_EDIT_COPY)
+		else if (nRet == ID_TREE_CHECK_ALL)
+		{
+			CheckAll(pNode, true);
+		}		
+		else if (nRet == ID_TREE_UNCHECK_ALL)
+		{
+			CheckAll(pNode, false);
+		}
+		else if (nRet == ID_EDIT_COPY)
         {
             ::SendMessage(hwndMain, WM_COMMAND, ID_EDIT_COPY, 0);
         }
@@ -181,6 +193,15 @@ void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
     pNode->CollapseExpandAll(expand);
     SetItemCount(gArchive.getRootNode()->GetExpandCount() + 1);
     RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
+}
+
+void CLogTreeView::CheckAll(LOG_NODE* pNode, bool check)
+{
+	if (pNode->CheckAll(check))
+	{
+		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
+		RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
+	}
 }
 
 void CLogTreeView::CopySelection()

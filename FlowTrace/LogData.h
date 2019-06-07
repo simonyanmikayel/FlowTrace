@@ -111,7 +111,8 @@ struct LOG_NODE
     int GetExpandCount() { return expanded ? cExpanded : 0; }
     void CollapseExpand(BOOL expand);
     int GetPosInTree() { return posInTree; }
-    void CollapseExpandAll(bool expand);
+	void CollapseExpandAll(bool expand);
+	bool CheckAll(bool check);
 
     void add_child(LOG_NODE* pNode)
     {

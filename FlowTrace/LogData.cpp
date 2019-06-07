@@ -604,6 +604,29 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     CalcLines();
 }
 
+//return true if check changed
+bool LOG_NODE::CheckAll(bool check)
+{
+	LOG_NODE* pNode = firstChild;
+	bool checkChanged = false;
+	if (hasCheckBox)
+	{
+		if (checked != check)
+			checkChanged = true;
+		checked = check;
+		hiden = !check;
+	}
+	while (pNode && pNode->hasCheckBox)
+	{
+		if (pNode->checked != check)
+			checkChanged = true;
+		pNode->checked = check;
+		pNode->hiden = !check;
+		pNode = pNode->nextSibling;
+	}
+	return checkChanged;
+}
+
 bool LOG_NODE::CanShowInIDE()
 {
 	if (!isInfo())
