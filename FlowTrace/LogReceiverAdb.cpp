@@ -156,16 +156,59 @@ static bool ParceFtData()
 }
 #endif //_USE_FT
 
-static void TraceLog(const char* szLog, int cbLog)
+static void AddTrace(size_t cbLog, char* szLog)
 {
 	if (cbLog)
 	{
 		gLogReceiver.lock();
 		adbRec.p_trace = szLog;
-		adbRec.cb_trace = cbLog;
+		adbRec.cb_trace = (WORD)cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
 		gArchive.append(&adbRec);
 		gLogReceiver.unlock();
+	}
+}
+
+static void TraceLog(const char* szLog, int cbLog)
+{
+	if (cbLog)
+	{
+		adbRec.log_flags |= LOG_FLAG_COLOR_PARCED;
+		char *start = (char*)szLog;
+		char *end = (char*)szLog;
+		char *endLog = (char*)szLog + cbLog;
+		while (end < endLog) {
+			while (*(end) >= ' ') {
+				end++;
+				if (end - start >= MAX_TRCAE_LEN) {
+					AddTrace(end - start, start);
+					start = end;
+				}
+			}
+			if (*end == '\n' || *end == '\r') {
+				AddTrace(end - start + 1, start);
+				while (*end == '\n' || *end == '\r')
+					end++;
+				start = end;
+			}
+			else {
+				if (*end == '\t') {
+					*end = ' ';
+				}
+				else {
+					*end = '?';
+				}
+				end++;
+				if (end - start >= MAX_TRCAE_LEN) {
+					AddTrace(end - start, start);
+					start = end;
+				}
+			}
+		}
+		if (end > start)
+		{
+			AddTrace(end - start, start);
+		}
 	}
 }
 
