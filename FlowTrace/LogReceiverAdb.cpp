@@ -300,7 +300,7 @@ static bool ParceMetaData()
 				adbRec.priority = FLOW_LOG_INFO;
 			else if (adbRec.tag[0] == 'D')
 				adbRec.priority = FLOW_LOG_DEBUG;
-			else if (adbRec.tag[0] == 'D')
+			else if (adbRec.tag[0] == 'W')
 				adbRec.priority = FLOW_LOG_WARN;
 		}
 	}
