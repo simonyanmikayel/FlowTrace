@@ -308,8 +308,8 @@ void CLogListView::EnsureTextVisible(int iItem, int startChar, int endChar)
 	ShowItem(iItem, false, false);
 
 	SIZE size1, size2;
-	GetTextExtentPoint32(memDC, log, startChar, &size1);
-	GetTextExtentPoint32(memDC, log, endChar, &size2);
+	GetTextExtentPoint32(wndMemDC, log, startChar, &size1);
+	GetTextExtentPoint32(wndMemDC, log, endChar, &size2);
 
 	RECT rcClient, rcItem;
 	GetClientRect(&rcClient);
@@ -405,7 +405,7 @@ void CLogListView::UpdateCaret()
 			if (cb > cbText)
 				cb = cbText;
 			SIZE  size;
-			GetTextExtentPoint32(memDC, szText, cb, &size);
+			GetTextExtentPoint32(wndMemDC, szText, cb, &size);
 			x = itemRect.left + size.cx + TEXT_MARGIN;
 			//STDLOG("cb = %d x = %d y = %d iItem = %d itemRect l = %d r = %d t = %d b = %d\n", cb, x, y, curItem, itemRect.left, itemRect.right, itemRect.top, itemRect.bottom);
 
@@ -830,12 +830,12 @@ bool CLogListView::UdjustSelectionOnMouseEven(UINT uMsg, WPARAM wParam, LPARAM l
 			int nMaxExtent = xPos - itemRect.left - TEXT_MARGIN;
 			int cb = logLen;
 			SIZE  size;
-			GetTextExtentExPoint(memDC, log, cb, nMaxExtent, &nFit, NULL, &size);
+			GetTextExtentExPoint(wndMemDC, log, cb, nMaxExtent, &nFit, NULL, &size);
 			if (nFit < logLen)
 			{
 				SIZE  size1, size2;
-				GetTextExtentPoint32(memDC, log, nFit, &size1);
-				GetTextExtentPoint32(memDC, log, nFit + 1, &size2);
+				GetTextExtentPoint32(wndMemDC, log, nFit, &size1);
+				GetTextExtentPoint32(wndMemDC, log, nFit + 1, &size2);
 				if (nMaxExtent > (size2.cx + size1.cx) / 2)
 					nFit++;
 			}
@@ -865,10 +865,12 @@ void CLogListView::ApplySettings(bool fontChanged)
 	if (fontChanged)
 	{
 		SetFont(gSettings.GetFont());
-		SelectObject(memDC, gSettings.GetFont());
+		SelectObject(wndMemDC, gSettings.GetFont());
+		SelectObject(itemMemDC, gSettings.GetFont());
 	}
 	SetBkColor(gSettings.LogListBkColor());
-	memDC.SetBkColor(gSettings.LogListBkColor());
+	wndMemDC.SetBkColor(gSettings.LogListBkColor());
+	itemMemDC.SetBkColor(gSettings.LogListBkColor());
 	SetColumns();
 }
 
@@ -887,22 +889,28 @@ void CLogListView::Clear()
 	}
 }
 
-void CLogListView::SetColumnLen(int len)
+bool CLogListView::SetColumnLen(int len)
 {
 	RECT rc;
 	GetClientRect(&rc);
 	len = max(rc.right + 16, (long)len);
-	if (m_ColLen < len)
+	if (m_ColLen < len && len < 30000)
 	{
-		//stdlog("iSubItem = %d len = %d col = %d m_ColLen = %d\n", iSubItem, len, col, m_ColLen[col]);
+		//stdlog("len = %d m_ColLen = %d\n", len, m_ColLen);
 		m_ColLen = len;
 		SetColumnWidth(0, m_ColLen);
+		return true;
 	}
+	return false;
 }
 
 void CLogListView::OnSize(UINT nType, CSize size)
 {
-	SetColumnLen(0);
+	if (size.cx > 0 && size.cy > 0)
+	{
+		wndMemDC.CreateCompatibleBitmap(NULL, size.cx, size.cy);
+		SetColumnLen(0);
+	}
 }
 
 void CLogListView::RefreshList(bool redraw)
@@ -971,7 +979,7 @@ LRESULT CLogListView::OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*l
 		if (rcItem.bottom <= rcEraze.bottom)
 			rcEraze.top = rcItem.bottom;
 	}
-	::FillRect((HDC)wParam, &rcEraze, memDC.m_bkBrush);
+	::FillRect((HDC)wParam, &rcEraze, wndMemDC.m_bkBrush);
 	m_pListInfo->Invalidate();
 	//stdlog(" nLast=%d l=%d r=%d t=%d b=%d\n", nLast, rcEraze.left, rcEraze.right, rcEraze.top, rcEraze.bottom);
 	return 1; // handled
@@ -994,12 +1002,16 @@ void CLogListView::ItemPrePaint(int iItem, HDC hdc, RECT rcItem)
 		//for (int i = 1; i < m_cColumns; i++)
 		{
 			size.cx = 0;
-			int cbText;
+			int cbText = 0;
 			char* szText = getText(iItem, &cbText);
 			if (cbText)
+			{
 				GetTextExtentPoint32(hdc, szText, cbText, &size);
-			SetColumnLen(size.cx + 3 * TEXT_MARGIN);
-			//stdlog("\t iItem i %d size.cx %d %s\n", iItem, size.cx, szText);
+				if (SetColumnLen(size.cx + 3 * TEXT_MARGIN))
+				{
+					//stdlog("\t iItem i %d size.cx %d %s\n", iItem, size.cx, szText);
+				}
+			}
 		}
 	}
 }
@@ -1020,9 +1032,9 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	if (!(cx && cy))
 		return;
 
-	memDC.CreateCompatibleBitmap(hdc, cx, cy);
-	memDC.EraseBackground();
-	memDC.SetBkMode(OPAQUE);
+	itemMemDC.CreateCompatibleBitmap(hdc, cx, cy);
+	itemMemDC.EraseBackground();
+	itemMemDC.SetBkMode(OPAQUE);
 
 
 	int cbText, cbInfo;
@@ -1036,11 +1048,11 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	//	int x = -rcItem.left;
 	//	// startChar is number of characters which fit in x
 	//	SIZE  textSizeUnused;
-	//	GetTextExtentExPoint(memDC, szText, cbText, x, &startChar, NULL, &textSizeUnused);
+	//	GetTextExtentExPoint(itemMemDC, szText, cbText, x, &startChar, NULL, &textSizeUnused);
 	//	if (startChar > 0)
 	//	{
 	//		SIZE  size;
-	//		GetTextExtentPoint32(memDC, szText, startChar, &size);
+	//		GetTextExtentPoint32(itemMemDC, szText, startChar, &size);
 	//		if (size.cx < x)
 	//			textPoint -= (x - size.cx);
 	//	}
@@ -1179,24 +1191,24 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 					{
 						curBkColor = selBkColor;
 					}
-					::SetBkColor(memDC, curBkColor);
+					::SetBkColor(itemMemDC, curBkColor);
 
 					if (curBkColor != infoBkColor)
-						::SetTextColor(memDC, selColor);
+						::SetTextColor(itemMemDC, selColor);
 					else if (pNode->isFlow() || (oldFlag  & bNotTrace))
-						::SetTextColor(memDC, infoTextColor);
+						::SetTextColor(itemMemDC, infoTextColor);
 					else
-						::SetTextColor(memDC, textColor);
+						::SetTextColor(itemMemDC, textColor);
 
 					if ((oldFlag & bSelected) || (oldFlag & bcurSearch) || (oldFlag & bSearched))
 					{
-						::SetTextColor(memDC, selColor);
+						::SetTextColor(itemMemDC, selColor);
 					}
 
 					//if (iItem == 3)stdlog("prevChar %d, curChar %d cbText %d\n", prevChar, curChar, cbText);
-					TextOut(memDC, textPoint, 0, szText + prevChar, curChar - prevChar);
+					TextOut(itemMemDC, textPoint, 0, szText + prevChar, curChar - prevChar);
 					SIZE size;
-					GetTextExtentPoint32(memDC, szText + prevChar, curChar - prevChar, &size);
+					GetTextExtentPoint32(itemMemDC, szText + prevChar, curChar - prevChar, &size);
 					textPoint += size.cx;
 					prevChar = curChar;
 					oldFlag = curFlag;
@@ -1216,19 +1228,19 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		if (iItem == m_ListSelection.CurItem())
 		{
 			RECT rc = { -1, 0, cx+2, cy };
-			FrameRect(memDC, &rc, Gdi::SelectionBrush);
+			FrameRect(itemMemDC, &rc, Gdi::SelectionBrush);
 			//DrawFocusRect(memDC, &rc);
 		}
 
 	}
 
-	::BitBlt(hdc, 0, rcItem.top, cx, cy, memDC, 0, 0, SRCCOPY);
+	::BitBlt(hdc, 0, rcItem.top, cx, cy, itemMemDC, 0, 0, SRCCOPY);
 
 }
 
 CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
-	const int MAX_BUF_LEN = 2 * MAX_TRCAE_LEN - 10;
+	const int MAX_BUF_LEN = 2 * MAX_LOG_LEN - 10;
 	static CHAR pBuf[MAX_BUF_LEN + 10];
 	int c_Buf, c_Info;
 	int& cb = cBuf ? *cBuf : c_Buf;

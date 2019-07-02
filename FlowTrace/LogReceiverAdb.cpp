@@ -180,7 +180,7 @@ static void TraceLog(const char* szLog, int cbLog)
 		while (end < endLog) {
 			while (*(end) >= ' ') {
 				end++;
-				if (end - start >= MAX_TRCAE_LEN) {
+				if (end - start >= MAX_LOG_LEN) {
 					AddTrace(end - start, start);
 					start = end;
 				}
@@ -199,7 +199,7 @@ static void TraceLog(const char* szLog, int cbLog)
 					*end = '?';
 				}
 				end++;
-				if (end - start >= MAX_TRCAE_LEN) {
+				if (end - start >= MAX_LOG_LEN) {
 					AddTrace(end - start, start);
 					start = end;
 				}
@@ -451,6 +451,11 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 				c--;
 			char* name = sz + c;
 			c = std::min(MAX_APP_NAME, (int)strlen(name));
+			while (c && name[0] == ' ')
+			{
+				name++;
+				c--;
+			}
 			if (c && pid) {
 				psInfo[cPsInfo].pid = pid;
 				memcpy(psInfo[cPsInfo].name, name, c);

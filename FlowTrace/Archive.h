@@ -3,8 +3,8 @@
 #include "LogData.h"
 
 #define MAX_JAVA_TAG_NAME_LEN 500
-#define MAX_TRCAE_LEN (1024*2)
-#define MAX_RECORD_LEN (MAX_TRCAE_LEN + 2 * sizeof(LOG_REC_BASE_DATA))
+#define MAX_LOG_LEN (1600)
+#define MAX_RECORD_LEN (MAX_LOG_LEN + 2 * sizeof(LOG_REC_BASE_DATA))
 #define MAX_NET_BUF 1416  //max UDP datagam is 65515 Bytes
 
 struct ListedNodes;

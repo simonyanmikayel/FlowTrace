@@ -301,7 +301,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
     {
         if (pThreadNode->latestTrace->hasNewLine == 0)
         {
-            if (pThreadNode->latestTrace->cb_trace + cb_trace < MAX_TRCAE_LEN)
+            if (pThreadNode->latestTrace->cb_trace + cb_trace < MAX_LOG_LEN)
                 newChank = true;
             else
                 pThreadNode->latestTrace->hasNewLine = 1;

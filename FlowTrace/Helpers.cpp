@@ -327,8 +327,8 @@ namespace Helpers
 
 	CHAR* find_str(const CHAR *phaystack, const CHAR *pneedle, int bMatchCase)
 	{
-		register const CHAR *haystack, *needle;
-		register chartype b, c;
+		const CHAR *haystack, *needle;
+		chartype b, c;
 
 		if (!initialised)
 		{
@@ -361,8 +361,8 @@ namespace Helpers
 
 		for (;;)
 		{
-			register chartype a;
-			register const CHAR *rhaystack, *rneedle;
+			chartype a;
+			const CHAR *rhaystack, *rneedle;
 
 			do
 			{

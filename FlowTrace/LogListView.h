@@ -103,7 +103,7 @@ public:
 private:
 
 	void SetColumns();
-	void SetColumnLen(int len);
+	bool SetColumnLen(int len);
 	void MoveSelectionToEnd(bool extend);
 	void ClearColumnInfo();
 	bool IsWordChar(char c) { return (0 != isalnum(c)) || c == '_'; }
@@ -121,7 +121,8 @@ private:
 	int m_recCount;
 	int m_curBookmark;
 	LOG_SELECTION m_ListSelection;
-	MemDC memDC;
+	MemDC wndMemDC;
+	MemDC itemMemDC;
 };
 
 
