@@ -377,10 +377,16 @@ LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
   return 0;
 }
 
-LRESULT CMainFrame::OnRunExternalCmd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnRunExternalCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	char* pExternalCmd = gSettings.GetExternalCmd();
-	if (*pExternalCmd)
+	char* pExternalCmd = nullptr;
+	if (ID_VIEW_RUN_EXTERNAL_CMD_1 == wID)
+		pExternalCmd = gSettings.GetExternalCmd_1();
+	else if (ID_VIEW_RUN_EXTERNAL_CMD_2 == wID)
+		pExternalCmd = gSettings.GetExternalCmd_2();
+	else if (ID_VIEW_RUN_EXTERNAL_CMD_3 == wID)
+		pExternalCmd = gSettings.GetExternalCmd_3();
+	if (pExternalCmd && *pExternalCmd)
 	{
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;

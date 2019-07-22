@@ -34,7 +34,9 @@ public:
   CButton m_FullSrcPath;
   CButton m_UseAdb;
   CEdit   m_edtEclipsePath;
-  CEdit   m_edtExternalCmd;
+  CEdit   m_edtExternalCmd_1;
+  CEdit   m_edtExternalCmd_2;
+  CEdit   m_edtExternalCmd_3;
   CEdit   m_edtLinuxHome;
   CEdit   m_edtMapOnWin;
   CEdit   m_edtAndroidStudio;

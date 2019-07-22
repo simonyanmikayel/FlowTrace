@@ -49,8 +49,8 @@ int CBackTraceCallView::getSubItemText(int iItem, int iSubItem, char* buf, int c
         }
         else
         {
-            cb = 2;
-            memcpy(buf, " ", cb);
+            cb = 1;
+			buf[0] = ' ';
         }
     }
     //else if (iSubItem == BACK_TRACE_LNK_CALL || iSubItem == BACK_TRACE_LNK_FUNC)

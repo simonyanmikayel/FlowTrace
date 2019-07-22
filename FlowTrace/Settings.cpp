@@ -55,7 +55,9 @@ LPCTSTR STR_APP_REG_VAL_MapOnWin = _T("MapOnWin");
 LPCTSTR STR_APP_REG_VAL_AndroidStudio = _T("AndroidStudio");
 LPCTSTR STR_APP_REG_VAL_AndroidProject = _T("AndroidProject");
 LPCTSTR STR_APP_REG_VAL_PrefModulePath = _T("PrefModulePath");
-LPCTSTR STR_APP_REG_VAL_ExternalCmd = _T("ExternalCmd");
+LPCTSTR STR_APP_REG_VAL_ExternalCmd_1 = _T("ExternalCmd_1");
+LPCTSTR STR_APP_REG_VAL_ExternalCmd_2 = _T("ExternalCmd_2");
+LPCTSTR STR_APP_REG_VAL_ExternalCmd_3 = _T("ExternalCmd_3");
 LPCTSTR STR_APP_REG_VAL_Modules = _T("Modules");
 
 //#define DefBkColor RGB(0,0,0)
@@ -102,7 +104,9 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 0);
 
 	Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
-	Read(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd, sizeof(m_ExternalCmd), "");
+	Read(STR_APP_REG_VAL_ExternalCmd_1, m_ExternalCmd_1, sizeof(m_ExternalCmd_1), "");
+	Read(STR_APP_REG_VAL_ExternalCmd_2, m_ExternalCmd_2, sizeof(m_ExternalCmd_2), "");
+	Read(STR_APP_REG_VAL_ExternalCmd_3, m_ExternalCmd_3, sizeof(m_ExternalCmd_3), "");
 	Read(STR_APP_REG_VAL_LinuxHome, m_LinuxHome, sizeof(m_LinuxHome), "");
 	Read(STR_APP_REG_VAL_MapOnWin, m_MapOnWin, sizeof(m_MapOnWin), "");
 	Read(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio, sizeof(m_AndroidStudio), "");
@@ -445,7 +449,9 @@ void CSettings::SetUsePrefModule(DWORD i) { m_UsePrefModule = i; }
 void CSettings::SetFullSrcPath(DWORD i) { m_FullSrcPath = i; Write(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath); }
 
 void CSettings::SetEclipsePath(const CHAR* EclipsePath) { int c = _countof(m_EclipsePath); _tcsncpy_s(m_EclipsePath, c, EclipsePath, c - 1); m_EclipsePath[c] = 0; Write(STR_APP_REG_VAL_EclipsePath, m_EclipsePath); }
-void CSettings::SetExternalCmd(const CHAR* ExternalCmd) { int c = _countof(m_ExternalCmd); _tcsncpy_s(m_ExternalCmd, c, ExternalCmd, c - 1); m_ExternalCmd[c] = 0; Write(STR_APP_REG_VAL_ExternalCmd, m_ExternalCmd); }
+void CSettings::SetExternalCmd_1(const CHAR* ExternalCmd) { int c = _countof(m_ExternalCmd_1); _tcsncpy_s(m_ExternalCmd_1, c, ExternalCmd, c - 1); m_ExternalCmd_1[c] = 0; Write(STR_APP_REG_VAL_ExternalCmd_1, m_ExternalCmd_1); }
+void CSettings::SetExternalCmd_2(const CHAR* ExternalCmd) { int c = _countof(m_ExternalCmd_2); _tcsncpy_s(m_ExternalCmd_2, c, ExternalCmd, c - 1); m_ExternalCmd_2[c] = 0; Write(STR_APP_REG_VAL_ExternalCmd_2, m_ExternalCmd_2); }
+void CSettings::SetExternalCmd_3(const CHAR* ExternalCmd) { int c = _countof(m_ExternalCmd_3); _tcsncpy_s(m_ExternalCmd_3, c, ExternalCmd, c - 1); m_ExternalCmd_2[c] = 0; Write(STR_APP_REG_VAL_ExternalCmd_3, m_ExternalCmd_3); }
 void CSettings::SetLinuxHome(const CHAR* LinuxHome) { int c = _countof(m_LinuxHome); _tcsncpy_s(m_LinuxHome, c, LinuxHome, c - 1); m_LinuxHome[c] = 0; Write(STR_APP_REG_VAL_LinuxHome, m_LinuxHome); }
 void CSettings::SetMapOnWin(const CHAR* MapOnWin) { int c = _countof(m_MapOnWin); _tcsncpy_s(m_MapOnWin, c, MapOnWin, c - 1); m_MapOnWin[c] = 0; Write(STR_APP_REG_VAL_MapOnWin, m_MapOnWin); }
 void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m_AndroidStudio); _tcsncpy_s(m_AndroidStudio, c, AndroidStudio, c - 1); m_AndroidStudio[c] = 0; Write(STR_APP_REG_VAL_AndroidStudio, m_AndroidStudio); }

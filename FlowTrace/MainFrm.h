@@ -67,8 +67,10 @@ public:
         COMMAND_ID_HANDLER(ID_FILE_IMPORT, OnFileImport)
         COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_TREE, OnShowHideTreeView)
         COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_STACK, OnShowHideStack)
-        COMMAND_ID_HANDLER(ID_VIEW_RUN_EXTERNAL_CMD, OnRunExternalCmd)
-        COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_FLOW_TRACES, OnShowHideFlowTraces)
+		COMMAND_ID_HANDLER(ID_VIEW_RUN_EXTERNAL_CMD_1, OnRunExternalCmd)
+		COMMAND_ID_HANDLER(ID_VIEW_RUN_EXTERNAL_CMD_2, OnRunExternalCmd)
+		COMMAND_ID_HANDLER(ID_VIEW_RUN_EXTERNAL_CMD_3, OnRunExternalCmd)
+		COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_FLOW_TRACES, OnShowHideFlowTraces)
         COMMAND_ID_HANDLER(ID_VIEW_PAUSERECORDING, OnPauseRecording)
         COMMAND_ID_HANDLER(ID_VIEW_STARTRECORDIG, OnStartRecording)
         COMMAND_ID_HANDLER(ID_VIEW_CLEARLOG, OnClearLog)
@@ -123,8 +125,8 @@ public:
     LRESULT OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-    LRESULT OnRunExternalCmd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-    LRESULT OnShowHideFlowTraces(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnRunExternalCmd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnShowHideFlowTraces(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

@@ -83,7 +83,9 @@ public:
     DECL_GET(CHAR*, ResFontName);
 
     DECL_STR_PROP(CHAR, EclipsePath, MAX_PATH);
-	DECL_STR_PROP(CHAR, ExternalCmd, MAX_PATH);
+	DECL_STR_PROP(CHAR, ExternalCmd_1, MAX_PATH);
+	DECL_STR_PROP(CHAR, ExternalCmd_2, MAX_PATH);
+	DECL_STR_PROP(CHAR, ExternalCmd_3, MAX_PATH);
 	DECL_STR_PROP(CHAR, LinuxHome, MAX_PATH);
     DECL_STR_PROP(CHAR, MapOnWin, MAX_PATH);
 	DECL_STR_PROP(CHAR, AndroidStudio, MAX_PATH);

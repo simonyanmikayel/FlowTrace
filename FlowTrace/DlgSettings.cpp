@@ -14,7 +14,9 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_UseAdb.Attach(GetDlgItem(IDC_CHECK_USE_ADB));
   m_FullSrcPath.Attach(GetDlgItem(IDC_CHECK_FULL_SRC_PATH));
   m_edtEclipsePath.Attach(GetDlgItem(IDC_EDIT_ECLIPSE_ON_WIN));
-  m_edtExternalCmd.Attach(GetDlgItem(IDC_EDIT_EXTERNAL_COMMAND));
+  m_edtExternalCmd_1.Attach(GetDlgItem(IDC_EDIT_EXTERNAL_COMMAND_1));
+  m_edtExternalCmd_2.Attach(GetDlgItem(IDC_EDIT_EXTERNAL_COMMAND_2));
+  m_edtExternalCmd_3.Attach(GetDlgItem(IDC_EDIT_EXTERNAL_COMMAND_3));
   m_edtLinuxHome.Attach(GetDlgItem(IDC_EDIT_LINUX_HOME));
   m_edtMapOnWin.Attach(GetDlgItem(IDC_EDIT_MAP_ON_WIN));
   m_edtAndroidStudio.Attach(GetDlgItem(IDC_EDIT_ANDROID_STUDIO));
@@ -30,7 +32,9 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
   m_UseAdb.SetCheck(gSettings.GetUseAdb() ? BST_CHECKED : BST_UNCHECKED);
   m_edtEclipsePath.SetWindowText(gSettings.GetEclipsePath());
-  m_edtExternalCmd.SetWindowText(gSettings.GetExternalCmd());
+  m_edtExternalCmd_1.SetWindowText(gSettings.GetExternalCmd_1());
+  m_edtExternalCmd_2.SetWindowText(gSettings.GetExternalCmd_2());
+  m_edtExternalCmd_3.SetWindowText(gSettings.GetExternalCmd_3());
   m_edtLinuxHome.SetWindowText(gSettings.GetLinuxHome());
   m_edtMapOnWin.SetWindowText(gSettings.GetMapOnWin());
   m_edtAndroidStudio.SetWindowText(gSettings.GetAndroidStudio());
@@ -99,8 +103,12 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     gSettings.SetEclipsePath(strEclipsePath.GetString());
 
 	CString strExternalCmd;
-	m_edtExternalCmd.GetWindowText(strExternalCmd);
-	gSettings.SetExternalCmd(strExternalCmd.GetString());
+	m_edtExternalCmd_1.GetWindowText(strExternalCmd);
+	gSettings.SetExternalCmd_1(strExternalCmd.GetString());
+	m_edtExternalCmd_2.GetWindowText(strExternalCmd);
+	gSettings.SetExternalCmd_2(strExternalCmd.GetString());
+	m_edtExternalCmd_3.GetWindowText(strExternalCmd);
+	gSettings.SetExternalCmd_3(strExternalCmd.GetString());
 
     CString strLinuxHome;
     m_edtLinuxHome.GetWindowText(strLinuxHome);
