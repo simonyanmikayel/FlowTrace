@@ -156,7 +156,7 @@ static bool ParceFtData()
 }
 #endif //_USE_FT
 
-static void AddTrace(size_t cbLog, char* szLog)
+static void AddTrace(size_t cbLog, char* szLog, int color)
 {
 	if (cbLog)
 	{
@@ -164,13 +164,16 @@ static void AddTrace(size_t cbLog, char* szLog)
 		adbRec.p_trace = szLog;
 		adbRec.cb_trace = (WORD)cbLog;
 		adbRec.len = sizeof(LOG_REC_ADB_DATA) + adbRec.cbData();
+		adbRec.color = color;
 		gArchive.append(&adbRec);
 		gLogReceiver.unlock();
 	}
 }
 
+int parceCollor(char** c);
 static void TraceLog(const char* szLog, int cbLog)
 {
+	int color = 0;
 	if (cbLog)
 	{
 		adbRec.log_flags |= LOG_FLAG_COLOR_PARCED;
@@ -181,14 +184,39 @@ static void TraceLog(const char* szLog, int cbLog)
 			while (*(end) >= ' ') {
 				end++;
 				if (end - start >= MAX_LOG_LEN) {
-					AddTrace(end - start, start);
+					AddTrace(end - start, start, color);
 					start = end;
 				}
 			}
 			if (*end == '\n' || *end == '\r') {
-				AddTrace(end - start + 1, start);
+				AddTrace(end - start + 1, start, color);
 				while (*end == '\n' || *end == '\r')
 					end++;
+				start = end;
+			}
+			else if (*end == '\033' && *(end + 1) == '[') {
+				int c1 = 0, c2 = 0, c3 = 0;
+				char* colorPos = end;
+				end += 2;
+				c1 = parceCollor(&end);
+				if (*end == ';') {
+					end++;
+					c2 = parceCollor(&end);
+				}
+				if (*end == ';') {
+					end++;
+					c3 = parceCollor(&end);
+				}
+				if (*end == 'm')
+				{
+					end++;
+					if (!color) color = c1;
+					if (!color) color = c2;
+					if (!color) color = c3;
+				}
+				if (colorPos > start) {
+					AddTrace(colorPos - start, start, color);
+				}
 				start = end;
 			}
 			else {
@@ -200,14 +228,14 @@ static void TraceLog(const char* szLog, int cbLog)
 				}
 				end++;
 				if (end - start >= MAX_LOG_LEN) {
-					AddTrace(end - start, start);
+					AddTrace(end - start, start, color);
 					start = end;
 				}
 			}
 		}
 		if (end > start)
 		{
-			AddTrace(end - start, start);
+			AddTrace(end - start, start, color);
 		}
 	}
 }

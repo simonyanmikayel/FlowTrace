@@ -406,7 +406,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
     return pThreadNode->latestTrace;
 }
 
-static inline int parceCollor(char** c)
+int parceCollor(char** c)
 {
 	int color = 0;
 	if (isdigit(**c))
