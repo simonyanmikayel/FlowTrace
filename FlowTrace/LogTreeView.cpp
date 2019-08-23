@@ -109,10 +109,13 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         Helpers::AddMenu(hMenu, cMenu, ID_TREE_EXPAND_ALL, _T("Expand All"), disable);
 
 		disable = (pNode->data_type != ROOT_DATA_TYPE && pNode->data_type != APP_DATA_TYPE);
-		Helpers::AddMenu(hMenu, cMenu, ID_TREE_CHECK_ALL, _T("Check All"), disable);
-		Helpers::AddMenu(hMenu, cMenu, ID_TREE_UNCHECK_ALL, _T("Uncheck All"), disable);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_CHECK_ALL, _T("Show All Children"), disable);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_UNCHECK_ALL, _T("Hide All Children"), disable);
 
-        disable = (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS, _T("Show only this"), false);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_ALL, _T("Show All"), false);
+		
+		disable = (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild);
         Helpers::AddMenu(hMenu, cMenu, ID_TREE_FIRST_SIBLING, _T("First Sibling\tCtrl+UP"), disable);
 
         disable = (!pNode->prevSibling);
@@ -145,6 +148,14 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 		else if (nRet == ID_TREE_UNCHECK_ALL)
 		{
 			CheckAll(pNode, false);
+		}
+		else if (nRet == ID_TREE_SHOW_THIS)
+		{
+			ShowOnlyThis(pNode, true);
+		}
+		else if (nRet == ID_TREE_SHOW_ALL)
+		{
+			ShowOnlyThis(pNode, false);
 		}
 		else if (nRet == ID_EDIT_COPY)
         {
@@ -198,6 +209,15 @@ void CLogTreeView::CollapseExpandAll(LOG_NODE* pNode, bool expand)
 void CLogTreeView::CheckAll(LOG_NODE* pNode, bool check)
 {
 	if (pNode->CheckAll(check))
+	{
+		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
+		RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
+	}
+}
+
+void CLogTreeView::ShowOnlyThis(LOG_NODE* pNode, bool show)
+{
+	if (pNode->ShowOnlyThis(show))
 	{
 		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
 		RedrawItems(0, gArchive.getRootNode()->GetExpandCount());

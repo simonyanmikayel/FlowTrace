@@ -29,6 +29,7 @@ public:
 	void RefreshTree(bool showAll);
 	void CollapseExpandAll(LOG_NODE* pNode, bool expand);
 	void CheckAll(LOG_NODE* pNode, bool check);
+	void ShowOnlyThis(LOG_NODE* pNode, bool show);
 
 	LRESULT OnSetFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnKillFocus(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);

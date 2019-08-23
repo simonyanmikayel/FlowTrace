@@ -112,7 +112,9 @@ struct LOG_NODE
     void CollapseExpand(BOOL expand);
     int GetPosInTree() { return posInTree; }
 	void CollapseExpandAll(bool expand);
-	bool CheckAll(bool check);
+	bool CheckAll(bool check, bool recursive = false);
+	bool ShowOnlyThis(bool show);
+	bool Check(bool check);
 
     void add_child(LOG_NODE* pNode)
     {
@@ -155,8 +157,10 @@ struct LOG_NODE
     CHAR* getListText(int* cBuf, LIST_COL col, int iItem = 0);
     int getTreeImage();
     FLOW_NODE* getSyncNode();
-    APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
-    int getTraceText(char* pBuf, int max_cb_trace);
+	THREAD_NODE* getTrhread() { LOG_NODE* p = this; while (p && !p->isThread()) p = p->parent; return (THREAD_NODE*)p; }
+	APP_NODE* getApp() { LOG_NODE* p = this; while (p && !p->isApp()) p = p->parent; return (APP_NODE*)p; }
+	ROOT_NODE* getRoot() { LOG_NODE* p = this; while (p && !p->isRoot()) p = p->parent; return (ROOT_NODE*)p; }
+	int getTraceText(char* pBuf, int max_cb_trace);
 };
 
 struct ROOT_NODE : LOG_NODE

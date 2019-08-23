@@ -604,10 +604,8 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     CalcLines();
 }
 
-//return true if check changed
-bool LOG_NODE::CheckAll(bool check)
+bool LOG_NODE::Check(bool check)
 {
-	LOG_NODE* pNode = firstChild;
 	bool checkChanged = false;
 	if (hasCheckBox)
 	{
@@ -616,13 +614,48 @@ bool LOG_NODE::CheckAll(bool check)
 		checked = check;
 		hiden = !check;
 	}
+	return checkChanged;
+}
+
+//return true if check changed
+bool LOG_NODE::CheckAll(bool check, bool recursive)
+{
+	bool checkChanged = false;
+	checkChanged = Check(check) || checkChanged;
+	LOG_NODE* pNode = firstChild;
 	while (pNode && pNode->hasCheckBox)
 	{
-		if (pNode->checked != check)
-			checkChanged = true;
-		pNode->checked = check;
-		pNode->hiden = !check;
+		checkChanged = pNode->Check(check) || checkChanged;
+		if (recursive)
+			checkChanged = pNode->CheckAll(check, recursive) || checkChanged;
 		pNode = pNode->nextSibling;
+	}
+	return checkChanged;
+}
+
+bool LOG_NODE::ShowOnlyThis(bool onlyThis)
+{
+	bool checkChanged = false;
+	if (onlyThis)
+	{
+		checkChanged = getRoot()->CheckAll(false) || checkChanged;
+		if (!isRoot())
+		{
+			if (isApp())
+			{
+				checkChanged = getApp()->CheckAll(true) || checkChanged;
+			}
+			else
+			{
+				checkChanged = getApp()->CheckAll(false) || checkChanged;
+				checkChanged = getApp()->Check(true) || checkChanged;
+				checkChanged = getTrhread()->Check(true) || checkChanged;
+			}
+		}
+	}
+	else
+	{
+		checkChanged = getRoot()->CheckAll(true, true) || checkChanged;
 	}
 	return checkChanged;
 }
