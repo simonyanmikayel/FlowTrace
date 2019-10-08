@@ -59,8 +59,9 @@ public:
         COMMAND_ID_HANDLER(ID_VIEW_TOOLBAR, OnViewToolBar)
         COMMAND_ID_HANDLER(ID_VIEW_STATUS_BAR, OnViewStatusBar)
         COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
-        COMMAND_ID_HANDLER(ID_VIEW_MODULES, OnViewModules)
-        COMMAND_ID_HANDLER(ID_VIEW_DETAILES, OnViewDetailes)
+		COMMAND_ID_HANDLER(ID_VIEW_MODULES, OnViewModules)
+		COMMAND_ID_HANDLER(ID_VIEW_FILTERS, OnViewFilters)
+		COMMAND_ID_HANDLER(ID_VIEW_DETAILES, OnViewDetailes)
         COMMAND_ID_HANDLER(ID_VIEW_SETTINGS, OnViewSettings)
         COMMAND_ID_HANDLER(ID_FILE_SAVE, OnFileSave)
         COMMAND_ID_HANDLER(ID_FILE_EXPORT, OnFileSave)
@@ -78,7 +79,7 @@ public:
 		COMMAND_ID_HANDLER(ID_EDIT_COPY, onCopy)
         COMMAND_ID_HANDLER(ID_EDIT_SELECTALL, onSelectAll)
         MESSAGE_HANDLER(WM_INPORT_TASK, OnImportTask);
-    MESSAGE_HANDLER(WM_UPDATE_FILTER, onUpdateFilter)
+		MESSAGE_HANDLER(WM_UPDATE_FILTER, onUpdateFilter)
         MESSAGE_HANDLER(WM_SHOW_NGS, onShowMsg)
         MESSAGE_HANDLER(WM_UPDATE_BACK_TRACE, onUpdateBackTrace)
 
@@ -119,6 +120,7 @@ public:
     LRESULT OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnViewModules(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnViewFilters(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

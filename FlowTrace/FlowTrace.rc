@@ -149,6 +149,7 @@ BEGIN
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
         MENUITEM "Modules ...",                 ID_VIEW_MODULES
+		MENUITEM "Filters ...",                 ID_VIEW_FILTERS
         MENUITEM "View Detailes ...",           ID_VIEW_DETAILES
         MENUITEM "Settings ...",                ID_VIEW_SETTINGS
     END
@@ -299,14 +300,28 @@ FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,200,301,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,254,301,50,14
-    GROUPBOX        "Static",IDC_STATIC_MODUL_LST,7,34,297,261
-    CONTROL         "Resolve function call lines",IDC_CHECK_RESOLVE_ADDR,
+    GROUPBOX        "Static",IDC_STATIC_LST,7,34,297,261
+    CONTROL         "Resolve function call lines",IDC_CHECK_APPLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,99,10
     PUSHBUTTON      "Add (Ins.)",IDC_BUTTON_ADD,137,16,50,14
     PUSHBUTTON      "Edit (Click)",IDC_BUTTON_EDIT,195,16,50,14
     PUSHBUTTON      "Delete (Del.)",IDC_BUTTON_DEL,253,16,50,14
 END
 
+IDD_FILTERS DIALOGEX 0, 0, 311, 322
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Filters"
+FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+DEFPUSHBUTTON   "OK", IDOK, 200, 301, 50, 14
+PUSHBUTTON      "Cancel", IDCANCEL, 254, 301, 50, 14
+GROUPBOX        "Static", IDC_STATIC_LST, 7, 34, 297, 261
+CONTROL         "Apply filters", IDC_CHECK_APPLY,
+"Button", BS_AUTOCHECKBOX | WS_TABSTOP, 7, 7, 99, 10
+PUSHBUTTON      "Add (Ins.)", IDC_BUTTON_ADD, 137, 16, 50, 14
+PUSHBUTTON      "Edit (Click)", IDC_BUTTON_EDIT, 195, 16, 50, 14
+PUSHBUTTON      "Delete (Del.)", IDC_BUTTON_DEL, 253, 16, 50, 14
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -461,6 +476,11 @@ END
 IDD_MODULES AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+IDD_FILTERS AFX_DIALOG_LAYOUT
+BEGIN
+0
 END
 
 

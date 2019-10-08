@@ -1,9 +1,9 @@
 #pragma once
 
-class DlgModules : public CDialogImpl<DlgModules>, public CGridCtrl::CListener
+class DlgFilters : public CDialogImpl<DlgFilters>, public CGridCtrl::CListener
 {
 public:
-	enum { IDD = IDD_MODULES };
+	enum { IDD = IDD_FILTERS};
 
 	BEGIN_MSG_MAP(DlgModules)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
@@ -20,7 +20,7 @@ private:
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
     CButton m_Apply;
-    CStatic m_List;//	IDC_STATIC_LST
+    CStatic m_List;
     CGridCtrl m_Grid;
 public:
     LRESULT OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

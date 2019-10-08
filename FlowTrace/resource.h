@@ -33,6 +33,7 @@
 #define IDB_SYNC2                       537
 #define IDB_CALL_IN_ECLIPSE             537
 #define IDD_MODULES                     538
+#define IDD_FILTERS                     539
 #define IDC_NN                          1000
 #define IDC_APP                         1001
 #define IDC_FONT_NAME                   1002
@@ -54,7 +55,7 @@
 #define IDC_CALL_LINE                   1020
 #define IDC_CHECK_USE_PC_TIME2          1021
 #define IDC_CHECK_COMPACT_VIEW          1022
-#define IDC_CHECK_RESOLVE_ADDR          1023
+#define IDC_CHECK_APPLY          1023
 #define IDC_FUNC_NAME                   1024
 #define IDC_CHECK_COMPACT_VIEW3         1024
 #define IDC_CHECK_FULL_SRC_PATH         1024
@@ -84,7 +85,7 @@
 #define IDC_EIDT_INFO                   1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
 #define IDC_STATIC_MODULES              1203
-#define IDC_STATIC_MODUL_LST            1203
+#define IDC_STATIC_LST            1203
 #define IDC_EDIT_EXTERNAL_COMMAND_1     1204
 #define IDC_EDIT_ANDROID_STUDIO         1205
 #define IDC_EDIT_ANDOID_PROJECT         1206
@@ -137,6 +138,7 @@
 #define ID_BOOKMARKS_PREVIOUSBOOKMARK   32821
 #define ID_BOOKMARKS_CLEARBOOKMARKS     32822
 #define ID_BOOKMARKS_TOGGLE             32823
+#define ID_VIEW_FILTERS                 32824
 #define ID_EDIT_COPY_ALL                32829
 #define ID_EDIT_COPY_TRACES             32830
 #define ID_CALL_STACK                   32831

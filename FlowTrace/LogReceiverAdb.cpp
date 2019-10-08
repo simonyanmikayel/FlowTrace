@@ -224,7 +224,7 @@ static void TraceLog(const char* szLog, int cbLog)
 					*end = ' ';
 				}
 				else {
-					*end = '?';
+					*end = '*';
 				}
 				end++;
 				if (end - start >= MAX_LOG_LEN) {

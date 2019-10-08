@@ -312,6 +312,7 @@
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="DlgDetailes.h" />
+    <ClInclude Include="DlgFilters.h" />
     <ClInclude Include="DlgInfo.h" />
     <ClInclude Include="DlgModules.h" />
     <ClInclude Include="FlowTraceView.h" />
@@ -344,6 +345,7 @@
     <ClCompile Include="BackTraceCallView.cpp" />
     <ClCompile Include="BackTraceView.cpp" />
     <ClCompile Include="DlgDetailes.cpp" />
+    <ClCompile Include="DlgFilters.cpp" />
     <ClCompile Include="DlgInfo.cpp" />
     <ClCompile Include="DlgModules.cpp" />
     <ClCompile Include="FlowTrace.cpp" />

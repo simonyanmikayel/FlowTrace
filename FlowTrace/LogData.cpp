@@ -718,3 +718,19 @@ ADDR_INFO * FLOW_NODE::getCallInfo(bool resolve)
     return p_call_info;
 }
 
+int APP_NODE::applyFilter()
+{
+	if (!gSettings.GetApplyFilter() || !checked)
+		return 0;
+
+	StringList& filterList = gSettings.getFilterList();
+	for (int i = 0; i < filterList.getItemCount(); i++)
+	{
+		if (0 == strcmp(filterList.getItem(i), appName))
+		{
+			checked = 0;
+			return 1;
+		}
+	}
+	return 0;
+}

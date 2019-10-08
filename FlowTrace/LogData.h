@@ -178,6 +178,7 @@ struct APP_NODE : LOG_NODE
     int cb_app_name;
     int cb_short_app_name_offset;
     char appName[MAX_APP_NAME + 1];
+	int applyFilter();
 };
 
 struct INFO_NODE : LOG_NODE

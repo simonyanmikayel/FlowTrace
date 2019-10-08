@@ -15,6 +15,7 @@
 #include "DlgProgress.h"
 #include "SearchInfo.h"
 #include "DlgModules.h"
+#include "DlgFilters.h"
 #include "LogReceiver.h"
 
 HWND       hwndMain;
@@ -315,6 +316,13 @@ LRESULT CMainFrame::OnViewModules(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWn
     DlgModules dlg;
     dlg.DoModal();
     return 0;
+}
+
+LRESULT CMainFrame::OnViewFilters(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	DlgFilters dlg;
+	dlg.DoModal();
+	return 0;
 }
 
 LRESULT CMainFrame::OnViewDetailes(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

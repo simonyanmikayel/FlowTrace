@@ -80,9 +80,11 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
         return nullptr;
 	const char* appName = p->appName();
 	WORD cb_app_name = pLogData->cb_app_name;
+	bool nameIsKnown = true;
 	if (cb_app_name == 0) {
 		cb_app_name = 1;
-		appName = "?";
+		appName = "*";
+		nameIsKnown = false;
 	}
     pNode->data_type = APP_DATA_TYPE;
     pNode->pid = pLogData->pid;
@@ -105,7 +107,33 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
+	if (nameIsKnown)
+	{
+		pNode->applyFilter();
+	}
     return pNode;
+}
+
+
+bool Archive::setAppName(int pid, char* szName, int cbName)
+{
+	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
+	while (app)
+	{
+		if ((app->pid == pid) && app->cb_app_name == 1 && app->appName[0] == '*') {
+			cbName = std::min(cbName, MAX_APP_NAME);
+			memcpy(app->appName, szName, cbName);
+			app->appName[cbName] = 0;
+			app->cb_app_name = cbName;
+			if (app->applyFilter())
+			{
+				::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, (LPARAM)app);
+			}
+			return true;
+		}
+		app = (APP_NODE*)app->prevSibling;
+	}
+	return false;
 }
 
 THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
@@ -125,29 +153,6 @@ THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
     pNode->checked = 1;
 
     return pNode;
-}
-
-bool Archive::setAppName(int pid, char* szName, int cbName)
-{
-	char* appName = szName;
-	WORD cb_app_name = cbName;
-	if (cbName == 1 && appName[0] == '?') {
-		cb_app_name = 2;
-		appName = "??";
-	}
-	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
-	while (app)
-	{
-		if ((app->pid == pid) && app->cb_app_name == 1 && app->appName[0] == '?') {
-			cbName = std::min(cbName, MAX_APP_NAME);
-			memcpy(app->appName, szName, cbName);
-			app->appName[cbName] = 0;
-			app->cb_app_name = cbName;
-			return true;
-		}
-		app = (APP_NODE*)app->prevSibling;
-	}
-	return false;
 }
 
 APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)

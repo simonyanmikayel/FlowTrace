@@ -7,54 +7,54 @@
 
 LRESULT DlgModules::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    m_ResolveAddr.Attach(GetDlgItem(IDC_CHECK_RESOLVE_ADDR));
-    m_staticModulList.Attach(GetDlgItem(IDC_STATIC_MODUL_LST));
+    m_Apply.Attach(GetDlgItem(IDC_CHECK_APPLY));
+    m_List.Attach(GetDlgItem(IDC_STATIC_LST));
 
-    m_ResolveAddr.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
+    m_Apply.SetCheck(gSettings.GetResolveAddr() ? BST_CHECKED : BST_UNCHECKED);
 
 
     CRect rc;
-    m_staticModulList.GetClientRect(&rc);
-    m_ModulGrid.Create(m_staticModulList.m_hWnd, rc, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE, 1);
-    m_ModulGrid.SetListener(this);
-    m_ModulGrid.SetExtendedGridStyle(GS_EX_CONTEXTMENU);
-    m_ModulGrid.GetClientRect(&rc);
-    m_ModulGrid.AddColumn(COL_MODULES, m_ModulGrid.GetGridClientWidth(), CGridCtrl::EDIT_TEXT);
+    m_List.GetClientRect(&rc);
+    m_Grid.Create(m_List.m_hWnd, rc, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, WS_EX_CLIENTEDGE, 1);
+    m_Grid.SetListener(this);
+    m_Grid.SetExtendedGridStyle(GS_EX_CONTEXTMENU);
+    m_Grid.GetClientRect(&rc);
+    m_Grid.AddColumn(COL_MODULES, m_Grid.GetGridClientWidth(), CGridCtrl::EDIT_TEXT);
 
-    m_ModulGrid.SetRedraw(FALSE);
-    m_ModulGrid.DeleteAllItems();
+    m_Grid.SetRedraw(FALSE);
+    m_Grid.DeleteAllItems();
     CHAR* szModules = gSettings.GetModules();
     char *next_token = NULL;
     char *p = strtok_s(szModules, "\n", &next_token);
     while (p) {
-        long nItem = m_ModulGrid.AddRow();
-        m_ModulGrid.SetItem(nItem, COL_MODULES, p);
+        long nItem = m_Grid.AddRow();
+        m_Grid.SetItem(nItem, COL_MODULES, p);
         p = strtok_s(NULL, "\n", &next_token);
     }
-    m_ModulGrid.SetRedraw(TRUE);
+    m_Grid.SetRedraw(TRUE);
 
 	CenterWindow(GetParent());
-    m_ModulGrid.SetFocus();
+    m_Grid.SetFocus();
     return TRUE;
 }
 
 LRESULT DlgModules::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    if (m_ModulGrid.IsEditing())
+    if (m_Grid.IsEditing())
     {
-        m_ModulGrid.EndEdit(wID != IDOK);
+        m_Grid.EndEdit(wID != IDOK);
         return 0;
     }
 
     if (wID == IDOK)
     {
-        gSettings.SetResolveAddr(m_ResolveAddr.GetCheck());
+        gSettings.SetResolveAddr(m_Apply.GetCheck());
 
         string strModules;
-        int count = m_ModulGrid.GetRowCount();
+        int count = m_Grid.GetRowCount();
         for (int i = 0; i < count; i++)
         {
-            _variant_t vtModuleName = m_ModulGrid.GetItem(i, COL_MODULES);
+            _variant_t vtModuleName = m_Grid.GetItem(i, COL_MODULES);
             if (vtModuleName.vt == VT_BSTR && vtModuleName.bstrVal)
             {
                 char* szModul = _com_util::ConvertBSTRToString(vtModuleName.bstrVal);
@@ -74,23 +74,23 @@ LRESULT DlgModules::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 
 LRESULT DlgModules::OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_ModulGrid.SetFocus();
-    m_ModulGrid.InsertRow();
+    m_Grid.SetFocus();
+    m_Grid.InsertRow();
     return 0;
 }
 
 
 LRESULT DlgModules::OnBnClickedButtonEdit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_ModulGrid.SetFocus();
-    m_ModulGrid.EditSelectedRow();
+    m_Grid.SetFocus();
+    m_Grid.EditSelectedRow();
     return 0;
 }
 
 
 LRESULT DlgModules::OnBnClickedButtonDel(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_ModulGrid.SetFocus();
-    m_ModulGrid.DeleteSelectedRow();
+    m_Grid.SetFocus();
+    m_Grid.DeleteSelectedRow();
     return 0;
 }

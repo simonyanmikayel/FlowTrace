@@ -9,6 +9,64 @@ enum _flow_LogPriority;
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
 #define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
 
+struct StringList
+{
+	StringList(CRegKeyExt* pReg, LPCTSTR key, int max_buf, int max_it) {
+		pRegKey = pReg;
+		max_buffer = max_buf;
+		max_item = max_it;
+		buffer = new CHAR[max_buffer + 1];
+		items = new CHAR*[max_item];
+		regKey = key;
+
+		if (!pRegKey->Read(regKey, buffer, max_buffer))
+		{
+			buffer[0] = 0;
+		}
+		formatBuffer();
+	}
+	~StringList() {
+		delete [] buffer;
+		delete[] items;
+	}
+	LPCTSTR getKey() {
+		return regKey;
+	};
+	void setList(const CHAR* szList) {
+		size_t n = _tcslen(szList);
+		n = min((size_t)max_buffer, n);
+		memcpy(buffer, szList, n);
+		buffer[n] = 0;
+		pRegKey->Write(regKey, buffer);
+		formatBuffer();
+	}
+	int getItemCount() {
+		return itemCount;
+	}
+	CHAR* getItem(int item) {
+		return items[item];
+	}
+private:
+	CHAR* buffer;
+	LPCTSTR regKey;
+	int max_buffer;
+	int max_item;
+	int itemCount;
+	CHAR** items;
+	CRegKeyExt* pRegKey;
+
+	void formatBuffer() {
+		itemCount = 0;
+		char *next_token = NULL;
+		char *p = strtok_s(buffer, "\n", &next_token);
+		while (p && itemCount < max_item) {
+			items[itemCount] = p;
+			itemCount++;
+			p = strtok_s(NULL, "\n", &next_token);
+		}
+	}
+};
+
 class CSettings : public CRegKeyExt
 {
 public:
@@ -21,9 +79,14 @@ public:
 	bool SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor);
 	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
 
+	StringList m_filterList;
+	StringList& getFilterList() {
+		return m_filterList;
+	}
+
     void SetModules(const CHAR* szList);
-    CHAR* GetModules();
-    void SetSearchList(CHAR* szList);
+	CHAR* GetModules();
+	void SetSearchList(CHAR* szList);
     CHAR* GetSearchList();
     DWORD SelectionBkColor();
     DWORD SelectionTxtColor();
@@ -44,6 +107,7 @@ public:
     DECL_PROP(HFONT, Font);
     DECL_PROP(int, FontHeight);
     DECL_PROP(int, FontWidth);
+
 	//DECL_PROP(DWORD, TextColor);
     //DECL_PROP(DWORD, InfoTextColor);
     //DECL_PROP(DWORD, BkColor);
@@ -74,6 +138,8 @@ public:
     DECL_PROP(int, ColCallAddr);
     DECL_PROP(int, FnCallLine);
 	DECL_PROP(int, UseAdb);
+	DECL_PROP(int, ApplyFilter);
+
 
     DECL_PROP(DWORD, UdpPort);
 
@@ -98,8 +164,8 @@ private:
     HANDLE m_resourceFonthandle;
 
     void AddDefaultFont();
-    void InitFont();
-    void DeleteFont();
+	void InitFont();
+	void DeleteFont();
 };
 
 extern CSettings gSettings;
