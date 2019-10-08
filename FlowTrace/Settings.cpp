@@ -39,6 +39,7 @@ LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
 LPCTSTR STR_APP_REG_VAL_ColCallAddr = _T("ColCallAddr");
 LPCTSTR STR_APP_REG_VAL_FnCallLine = _T("FnCallLine");
 LPCTSTR STR_APP_REG_VAL_UseAdb = _T("UseAdb");
+LPCTSTR STR_APP_REG_VAL_ApplyLogcutFilter = _T("ApplyLogcutFilter");
 
 LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
 LPCTSTR STR_APP_REG_VAL_TREE_VIEW_HIDEN = _T("TreeViewHiden");
@@ -60,7 +61,8 @@ LPCTSTR STR_APP_REG_VAL_ExternalCmd_2 = _T("ExternalCmd_2");
 LPCTSTR STR_APP_REG_VAL_ExternalCmd_3 = _T("ExternalCmd_3");
 LPCTSTR STR_APP_REG_VAL_Modules = _T("Modules");
 LPCTSTR STR_APP_REG_VAL_Filters = _T("Filters");
-LPCTSTR STR_APP_REG_VAL_ApplyFilter = _T("ApplyFilter");
+LPCTSTR STR_APP_REG_VAL_ApplyPorcessFilter = _T("ApplyPorcessFilter");
+LPCTSTR STR_APP_REG_VAL_LogcutFilter = _T("LogcutFilter1");
 
 //#define DefBkColor RGB(0,0,0)
 //#define DefTextColor RGB(176,176,176)
@@ -78,7 +80,8 @@ static CHAR* DEF_FONT_NAME = _T("Consolas"); //Courier New //Consolas //Inconsol
 
 CSettings::CSettings() :
 	CRegKeyExt(STR_APP_REG_KEY)
-	, m_filterList(this, STR_APP_REG_VAL_Filters, 3*1024, 128)
+	, m_processFilterList(this, STR_APP_REG_VAL_Filters, 3*1024, 128, "\n")
+	, m_adbFilterList(this, STR_APP_REG_VAL_LogcutFilter, 512, 48, " ")
 	, m_Font(NULL)
 {
 	Read(STR_APP_REG_VAL_VERT_SPLITTER_POS, m_VertSplitterPos, 50);
@@ -104,8 +107,9 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_ColTime, m_ColTime);
 	Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 	Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
-	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 0);
-	Read(STR_APP_REG_VAL_ApplyFilter, m_ApplyFilter, 1);
+	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 1);
+	Read(STR_APP_REG_VAL_ApplyLogcutFilter, m_ApplyLogcutFilter, 1);
+	Read(STR_APP_REG_VAL_ApplyPorcessFilter, m_ApplyPorcessFilter, 1);
 
 	Read(STR_APP_REG_VAL_EclipsePath, m_EclipsePath, sizeof(m_EclipsePath), "");
 	Read(STR_APP_REG_VAL_ExternalCmd_1, m_ExternalCmd_1, sizeof(m_ExternalCmd_1), "");
@@ -434,7 +438,8 @@ void CSettings::SetColTime(int i) { m_ColTime = i; Write(STR_APP_REG_VAL_ColTime
 void CSettings::SetColCallAddr(int i) { m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
 void CSettings::SetUseAdb(int i) { m_UseAdb = i; Write(STR_APP_REG_VAL_UseAdb, m_UseAdb); }
-void CSettings::SetApplyFilter(int i) { m_ApplyFilter = i; Write(STR_APP_REG_VAL_ApplyFilter, m_ApplyFilter); }
+void CSettings::SetApplyLogcutFilter(int i) { m_ApplyLogcutFilter = i; Write(STR_APP_REG_VAL_ApplyLogcutFilter, m_ApplyLogcutFilter); }
+void CSettings::SetApplyPorcessFilter(int i) { m_ApplyPorcessFilter = i; Write(STR_APP_REG_VAL_ApplyPorcessFilter, m_ApplyPorcessFilter); }
 void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount); }
 
 //void CSettings::SetBkColor(DWORD i){ m_BkColor = i; Write(STR_APP_REG_VAL_BK_COLOR, m_BkColor); }

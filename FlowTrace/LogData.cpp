@@ -720,10 +720,10 @@ ADDR_INFO * FLOW_NODE::getCallInfo(bool resolve)
 
 int APP_NODE::applyFilter()
 {
-	if (!gSettings.GetApplyFilter() || !checked)
+	if (!gSettings.GetApplyPorcessFilter() || !checked)
 		return 0;
 
-	StringList& filterList = gSettings.getFilterList();
+	StringList& filterList = gSettings.getProcessFilterList();
 	for (int i = 0; i < filterList.getItemCount(); i++)
 	{
 		if (0 == strcmp(filterList.getItem(i), appName))

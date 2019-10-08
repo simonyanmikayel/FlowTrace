@@ -7,6 +7,7 @@
 #include "LogReceiverAdb.h"
 #include "Resource.h"
 #include "MainFrm.h"
+#include "Settings.h"
 
 #if defined(_WRITE_LOCAL) || defined(_READ_LOCAL) 
 static FILE *testLogFile;
@@ -422,7 +423,24 @@ void LogcatLogThread::Work(LPVOID pWorkParam)
 	}
 	while (IsWorking()) {
 		ResetLog();
-		adb_commandline(_countof(cmdLogcatLog), cmdLogcatLog, &streamCallback);
+		if (gSettings.GetApplyLogcutFilter())
+		{
+			StringList& stringList = gSettings.getAdbFilterList();
+			const char* argv[128]{ 0 };
+			int maxCmd = _countof(argv);
+			int argc = 0;
+			for (int i = 0; argc < maxCmd && i < _countof(cmdLogcatLog); i++, argc++) {
+				argv[argc] = cmdLogcatLog[i];
+			}
+			for (int i = 0; argc < maxCmd && i < stringList.getItemCount(); i++, argc++) {
+				argv[argc] = stringList.getItem(i);
+			}
+			adb_commandline(argc, argv, &streamCallback);
+		}
+		else
+		{
+			adb_commandline(_countof(cmdLogcatLog), cmdLogcatLog, &streamCallback);
+		}
 		SleepThread(1000);
 	}
 #endif

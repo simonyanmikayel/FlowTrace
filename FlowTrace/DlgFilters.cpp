@@ -10,7 +10,7 @@ LRESULT DlgFilters::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
     m_Apply.Attach(GetDlgItem(IDC_CHECK_APPLY));
     m_List.Attach(GetDlgItem(IDC_STATIC_LST));
 
-    m_Apply.SetCheck(gSettings.GetApplyFilter() ? BST_CHECKED : BST_UNCHECKED);
+    m_Apply.SetCheck(gSettings.GetApplyPorcessFilter() ? BST_CHECKED : BST_UNCHECKED);
 
 
     CRect rc;
@@ -23,7 +23,7 @@ LRESULT DlgFilters::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 
     m_Grid.SetRedraw(FALSE);
     m_Grid.DeleteAllItems();
-	StringList& filterList = gSettings.getFilterList();
+	StringList& filterList = gSettings.getProcessFilterList();
 	for (int i = 0; i < filterList.getItemCount(); i++)
 	{
 		long nItem = m_Grid.AddRow();
@@ -46,7 +46,7 @@ LRESULT DlgFilters::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 
     if (wID == IDOK)
     {
-        gSettings.SetApplyFilter(m_Apply.GetCheck());
+        gSettings.SetApplyPorcessFilter(m_Apply.GetCheck());
 
         string strItems;
         int count = m_Grid.GetRowCount();
@@ -63,7 +63,7 @@ LRESULT DlgFilters::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
                 delete szItem;
             }
         }
-		StringList& filterList = gSettings.getFilterList();
+		StringList& filterList = gSettings.getProcessFilterList();
 		filterList.setList(strItems.c_str());
     }
 	EndDialog(wID);

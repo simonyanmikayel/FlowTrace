@@ -11,13 +11,15 @@ enum _flow_LogPriority;
 
 struct StringList
 {
-	StringList(CRegKeyExt* pReg, LPCTSTR key, int max_buf, int max_it) {
+	StringList(CRegKeyExt* pReg, LPCTSTR key, int max_buf, int max_it, LPCSTR delim) {
 		pRegKey = pReg;
 		max_buffer = max_buf;
 		max_item = max_it;
 		buffer = new CHAR[max_buffer + 1];
 		items = new CHAR*[max_item];
 		regKey = key;
+		delimeter = delim;
+		origList = 0;
 
 		if (!pRegKey->Read(regKey, buffer, max_buffer))
 		{
@@ -28,6 +30,7 @@ struct StringList
 	~StringList() {
 		delete [] buffer;
 		delete[] items;
+		free(origList);
 	}
 	LPCTSTR getKey() {
 		return regKey;
@@ -46,23 +49,30 @@ struct StringList
 	CHAR* getItem(int item) {
 		return items[item];
 	}
+	CHAR* toString() {
+		return origList ? origList : nullptr;
+	}
 private:
 	CHAR* buffer;
 	LPCTSTR regKey;
+	LPCSTR delimeter;
 	int max_buffer;
 	int max_item;
 	int itemCount;
 	CHAR** items;
 	CRegKeyExt* pRegKey;
+	CHAR* origList;
 
 	void formatBuffer() {
+		free(origList);
+		origList = _strdup(buffer);
 		itemCount = 0;
 		char *next_token = NULL;
-		char *p = strtok_s(buffer, "\n", &next_token);
+		char *p = strtok_s(buffer, delimeter, &next_token);
 		while (p && itemCount < max_item) {
 			items[itemCount] = p;
 			itemCount++;
-			p = strtok_s(NULL, "\n", &next_token);
+			p = strtok_s(NULL, delimeter, &next_token);
 		}
 	}
 };
@@ -79,9 +89,14 @@ public:
 	bool SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor);
 	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
 
-	StringList m_filterList;
-	StringList& getFilterList() {
-		return m_filterList;
+	StringList m_adbFilterList;
+	StringList& getAdbFilterList() {
+		return m_adbFilterList;
+	}
+
+	StringList m_processFilterList;
+	StringList& getProcessFilterList() {
+		return m_processFilterList;
 	}
 
     void SetModules(const CHAR* szList);
@@ -138,7 +153,8 @@ public:
     DECL_PROP(int, ColCallAddr);
     DECL_PROP(int, FnCallLine);
 	DECL_PROP(int, UseAdb);
-	DECL_PROP(int, ApplyFilter);
+	DECL_PROP(int, ApplyLogcutFilter);
+	DECL_PROP(int, ApplyPorcessFilter);
 
 
     DECL_PROP(DWORD, UdpPort);
