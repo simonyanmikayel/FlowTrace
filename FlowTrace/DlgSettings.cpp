@@ -32,7 +32,7 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
-  m_UseAdb.SetCheck(gSettings.GetApplyLogcutFilter() ? BST_CHECKED : BST_UNCHECKED);
+  m_UseAdb.SetCheck(gSettings.GetUseAdb() ? BST_CHECKED : BST_UNCHECKED);
   m_ApplyLogcutFilter.SetCheck(gSettings.GetApplyLogcutFilter() ? BST_CHECKED : BST_UNCHECKED);
   m_edtEclipsePath.SetWindowText(gSettings.GetEclipsePath());
   m_edtExternalCmd_1.SetWindowText(gSettings.GetExternalCmd_1());
