@@ -9,9 +9,11 @@ LRESULT DlgFilters::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 {
     m_Apply.Attach(GetDlgItem(IDC_CHECK_APPLY));
     m_List.Attach(GetDlgItem(IDC_STATIC_LST));
+	m_ApplyLogcutFilter.Attach(GetDlgItem(IDC_CHECK_APPLY_LOGCUT_FILTER));
+	m_edtLogcutFilter.Attach(GetDlgItem(IDC_EDIT_LOGCUT_FILTER));
 
     m_Apply.SetCheck(gSettings.GetApplyPorcessFilter() ? BST_CHECKED : BST_UNCHECKED);
-
+	m_ApplyLogcutFilter.SetCheck(gSettings.GetApplyLogcutFilter() ? BST_CHECKED : BST_UNCHECKED);
 
     CRect rc;
     m_List.GetClientRect(&rc);
@@ -31,6 +33,9 @@ LRESULT DlgFilters::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	}
     m_Grid.SetRedraw(TRUE);
 
+	StringList& stringList = gSettings.getAdbFilterList();
+	m_edtLogcutFilter.SetWindowText(stringList.toString());
+
 	CenterWindow(GetParent());
     m_Grid.SetFocus();
     return TRUE;
@@ -47,6 +52,7 @@ LRESULT DlgFilters::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
     if (wID == IDOK)
     {
         gSettings.SetApplyPorcessFilter(m_Apply.GetCheck());
+		gSettings.SetApplyLogcutFilter(m_ApplyLogcutFilter.GetCheck());
 
         string strItems;
         int count = m_Grid.GetRowCount();
@@ -65,6 +71,11 @@ LRESULT DlgFilters::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
         }
 		StringList& filterList = gSettings.getProcessFilterList();
 		filterList.setList(strItems.c_str());
+
+		CString strLogcutFilter;
+		m_edtLogcutFilter.GetWindowText(strLogcutFilter);
+		StringList& stringList = gSettings.getAdbFilterList();
+		stringList.setList(strLogcutFilter.GetString());
     }
 	EndDialog(wID);
 	return 0;

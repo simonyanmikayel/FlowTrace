@@ -248,11 +248,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_EXTERNAL_COMMAND_3,205,170,145,14,ES_AUTOHSCROLL
     CTEXT           "3",IDC_STATIC,190,172,8,8
     GROUPBOX        "External commands",IDC_STATIC,190,124,168,65
-    GROUPBOX        "Logcat Options",IDC_STATIC,189,57,169,59
-    CONTROL         "Apply Logcat Fiter ",IDC_CHECK_APPLY_LOGCUT_FILTER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,278,76,72,10,WS_EX_RIGHT
-    LTEXT           "Logcut filters (e.g.  dalvikvm:S MsmdServer:S):",IDC_STATIC,191,90,138,8
-    EDITTEXT        IDC_EDIT_LOGCUT_FILTER,192,102,159,14,ES_AUTOHSCROLL
+    GROUPBOX        "Logcat Options",IDC_STATIC,189,57,169,31
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 252
@@ -319,11 +315,15 @@ FONT 10, "Microsoft Sans Serif", 400, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,200,301,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,254,301,50,14
-    GROUPBOX        "Static",IDC_STATIC_LST,7,34,297,261
-    CONTROL         "Apply filters",IDC_CHECK_APPLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,99,10
+    GROUPBOX        "Static",IDC_STATIC_LST,7,34,297,206
+    CONTROL         "Apply processes filters",IDC_CHECK_APPLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,99,10
     PUSHBUTTON      "Add (Ins.)",IDC_BUTTON_ADD,137,16,50,14
     PUSHBUTTON      "Edit (Click)",IDC_BUTTON_EDIT,195,16,50,14
     PUSHBUTTON      "Delete (Del.)",IDC_BUTTON_DEL,253,16,50,14
+    LTEXT           "Logcut filters (e.g.  dalvikvm:S MsmdServer:S):",IDC_STATIC,12,260,138,8
+    EDITTEXT        IDC_EDIT_LOGCUT_FILTER,13,272,285,14,ES_AUTOHSCROLL
+    CONTROL         "Apply logcut filters",IDC_CHECK_APPLY_LOGCUT_FILTER,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,247,99,10
 END
 
 
@@ -377,6 +377,10 @@ BEGIN
         RIGHTMARGIN, 304
         TOPMARGIN, 7
         BOTTOMMARGIN, 315
+    END
+
+    IDD_FILTERS, DIALOG
+    BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED

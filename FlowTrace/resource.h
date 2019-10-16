@@ -49,7 +49,6 @@
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
 #define IDC_CHILD_COUNT                 1008
-#define IDC_CHECK_APPLY_LOGCUT_FILTER   1008
 #define IDC_CHECK_USE_PC_TIME           1009
 #define IDC_CALL_ADDR3                  1009
 #define IDC_FN_CALL_LINE                1009
@@ -60,6 +59,8 @@
 #define IDC_FUNC_NAME                   1024
 #define IDC_CHECK_COMPACT_VIEW3         1024
 #define IDC_CHECK_FULL_SRC_PATH         1024
+#define IDC_CHECK_APPLY2                1024
+#define IDC_CHECK_APPLY_LOGCUT_FILTER   1024
 #define IDC_BUTTON_ADD                  1025
 #define IDC_CHECK_UDATE_STACK_VIEW      1025
 #define IDC_CHECK_FULL_SRC_PATH2        1025
@@ -93,7 +94,6 @@
 #define IDC_EDIT_ANDROID_PROJECT        1206
 #define IDC_EDIT_EXTERNAL_COMMAND_2     1207
 #define IDC_EDIT_EXTERNAL_COMMAND_3     1208
-#define IDC_EDIT3                       1209
 #define IDC_EDIT_LOGCUT_FILTER          1209
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775

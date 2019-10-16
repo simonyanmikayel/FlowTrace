@@ -22,6 +22,8 @@ private:
     CButton m_Apply;
     CStatic m_List;
     CGridCtrl m_Grid;
+	CButton m_ApplyLogcutFilter;
+	CEdit   m_edtLogcutFilter;
 public:
     LRESULT OnBnClickedButtonAdd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnBnClickedButtonEdit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
