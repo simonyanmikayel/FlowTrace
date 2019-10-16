@@ -21,10 +21,10 @@ void LogReceiverAdb::start(bool reset)
 {
 	//logcat(0, 0);
 	resetAtStart = reset;
-	logcatLogThread.StartWork();
-	//logcatLogThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	psThread.StartWork();
 	//psThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);//THREAD_PRIORITY_LOWEST
+	logcatLogThread.StartWork();
+	//logcatLogThread.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 }
 
 void LogReceiverAdb::stop()
@@ -453,14 +453,8 @@ void LogcatLogThread::Work(LPVOID pWorkParam)
 }
 
 
-struct PS_INFO {
-	int pid;
-	char name[MAX_APP_NAME + 1];
-	int cName;
-};
-static PS_INFO psInfo[512];
-static int maxPsInfo = _countof(psInfo) - 1;
-static int cPsInfo;
+static PS_INFO psInfoTemp[maxPsInfo];
+static int cPsInfoTemp;
 //USER     PID   PPID  VSIZE  RSS   PRIO  NICE  RTPRI SCHED   WCHAN    PC         NAME
 static LOG_PARCER ps("\n*\r"); //captur one line
 bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
@@ -473,7 +467,7 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 	//stdlog("->%d\n", cbLog);
 	//stdlog("\x1%s", szLog);
 	//return true;
-	while (cbLog && (cPsInfo < maxPsInfo) && gLogReceiver.working()) {
+	while (cbLog && (cPsInfoTemp < maxPsInfo) && gLogReceiver.working()) {
 		ps.parce(szLog, cbLog);
 		int start = (int)(ps.dataStart - szLog);
 		int end = (int)(ps.dataEnd - szLog);
@@ -503,12 +497,12 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 				c--;
 			}
 			if (c && pid) {
-				psInfo[cPsInfo].pid = pid;
-				memcpy(psInfo[cPsInfo].name, name, c);
-				psInfo[cPsInfo].name[c] = 0;
-				psInfo[cPsInfo].cName = c;
-				//stdlog("\x1 %d %s\n", pid, psInfo[cPsInfo].name);
-				cPsInfo++;
+				psInfoTemp[cPsInfoTemp].pid = pid;
+				memcpy(psInfoTemp[cPsInfoTemp].name, name, c);
+				psInfoTemp[cPsInfoTemp].name[c] = 0;
+				psInfoTemp[cPsInfoTemp].cName = c;
+				//stdlog("\x1 %d %s\n", pid, psInfoTemp[cPsInfoTemp].name);
+				cPsInfoTemp++;
 			}
 			ps.reset();
 		}
@@ -516,7 +510,7 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 		cbLog -= end;
 	}
 
-	return (cPsInfo < maxPsInfo) && gLogReceiver.working();
+	return (cPsInfoTemp < maxPsInfo) && gLogReceiver.working();
 }
 
 static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
@@ -529,7 +523,7 @@ void PsThread::Work(LPVOID pWorkParam)
 #endif
 
 #if defined(_READ_LOCAL)
-	cPsInfo = 0;
+	cPsInfoTemp = 0;
 	ps.reset();
 	while (true) {
 		char* buf = streamCallback.GetBuf();
@@ -540,31 +534,20 @@ void PsThread::Work(LPVOID pWorkParam)
 		streamCallback.OnStdout(streamCallback.GetBuf(), cb);
 	}
 #else
-	while (true) {
-#if !defined(_WRITE_LOCAL)
-		SleepThread(5000);
-#endif
-		if (IsWorking()) {
-			cPsInfo = 0;
-			ps.reset();
-			adb_commandline(_countof(cmdAdbShell), cmdAdbShell, &streamCallback);//do this after LogcatLogThread::Work
-			streamCallback.OnStdout("\r", 1);//end with new line
+	while (IsWorking()) {
+		cPsInfoTemp = 0;
+		ps.reset(); 
+		adb_commandline(_countof(cmdAdbShell), cmdAdbShell, &streamCallback);//do this after LogcatLogThread::Work
+		streamCallback.OnStdout("\r", 1);//end with new line
 #if defined(_WRITE_LOCAL)
-			break;
+		break;
 #endif
-			bool updateViews = false;
-			
-			while (IsWorking() && cPsInfo--) {
-				if (gArchive.setAppName(psInfo[cPsInfo].pid, psInfo[cPsInfo].name, psInfo[cPsInfo].cName))
-					updateViews = true;
-			}
-			if (IsWorking() && updateViews) {
-				gMainFrame->RedrawViews();
-			}
-		}
-		else {
-			break;
-		}
+		if (gArchive.setPsInfo(psInfoTemp, cPsInfoTemp))
+			gMainFrame->RedrawViews();
+#if !defined(_WRITE_LOCAL)
+		for (int i = 0; i < 5 && IsWorking(); i++)
+			SleepThread(1000);
+#endif
 	}
 #endif
 

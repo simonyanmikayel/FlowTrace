@@ -3,7 +3,7 @@
 #include "Helpers.h"
 #include "AddrInfo.h"
 #include "Settings.h"
-
+#include "LogReceiver.h"
 Archive    gArchive;
 DWORD Archive::archiveNumber = 0;
 
@@ -107,6 +107,10 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
+
+	if (!nameIsKnown)
+		nameIsKnown = resolveAppName(pNode);
+
 	if (nameIsKnown)
 	{
 		pNode->applyFilter();
@@ -114,6 +118,23 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     return pNode;
 }
 
+PS_INFO psInfo[maxPsInfo + 1];
+int cPsInfo;
+bool  Archive::setPsInfo(PS_INFO* p, int c)
+{
+	gLogReceiver.lock();
+	memcpy(psInfo, p, c * sizeof(PS_INFO));
+	cPsInfo = c;
+	gLogReceiver.unlock();
+
+	bool updateViews = false;
+
+	for (int i = 0; i < cPsInfo; i++) {
+		if (setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName))
+			updateViews = true;
+	}
+	return updateViews;
+}
 
 bool Archive::setAppName(int pid, char* szName, int cbName)
 {
@@ -132,6 +153,20 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 			return true;
 		}
 		app = (APP_NODE*)app->prevSibling;
+	}
+	return false;
+}
+
+bool Archive::resolveAppName(APP_NODE* app)
+{
+	for (int i = 0; i < cPsInfo; i++) {
+		if ((app->pid == psInfo[i].pid)) {
+			int cbName = std::min(psInfo[i].cName, MAX_APP_NAME);
+			memcpy(app->appName, psInfo[i].name, cbName);
+			app->appName[cbName] = 0;
+			app->cb_app_name = cbName;
+			return true;
+		}
 	}
 	return false;
 }

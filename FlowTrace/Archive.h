@@ -15,6 +15,14 @@ const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
 const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 #endif
 
+struct PS_INFO {
+	int pid;
+	char name[MAX_APP_NAME + 1];
+	int cName;
+};
+#define maxPsInfo 512
+
+
 #pragma pack(push,4)
 struct LOG_REC_BASE_DATA
 {
@@ -164,9 +172,9 @@ public:
     size_t UsedMemory();
     DWORD getLost() { return m_lost; }
     void Log(LOG_REC* rec);
-	bool setAppName(int pid, char* szName, int cbName);
 	int append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	int append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
+	bool setPsInfo(PS_INFO* p, int c);
 	//void updateNodes();
 
 private:
@@ -178,7 +186,9 @@ private:
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName);
 	inline APP_NODE*   getApp(LOG_REC* p, sockaddr_in *p_si_other);
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);
-    DWORD m_lost;
+	bool setAppName(int pid, char* szName, int cbName);
+	bool resolveAppName(APP_NODE* app);
+	DWORD m_lost;
     static DWORD archiveNumber;
     BYTE bookmarkNumber;
     APP_NODE* curApp;
