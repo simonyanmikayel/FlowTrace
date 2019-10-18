@@ -19,7 +19,7 @@ private:
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-    CButton m_Apply;
+    CButton m_ApplyPorcessFilter;
     CStatic m_List;
     CGridCtrl m_Grid;
 	CButton m_ApplyLogcutFilter;

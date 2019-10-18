@@ -7,12 +7,12 @@
 
 LRESULT DlgFilters::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    m_Apply.Attach(GetDlgItem(IDC_CHECK_APPLY));
+	m_ApplyPorcessFilter.Attach(GetDlgItem(IDC_CHECK_APPLY));
     m_List.Attach(GetDlgItem(IDC_STATIC_LST));
 	m_ApplyLogcutFilter.Attach(GetDlgItem(IDC_CHECK_APPLY_LOGCUT_FILTER));
 	m_edtLogcutFilter.Attach(GetDlgItem(IDC_EDIT_LOGCUT_FILTER));
 
-    m_Apply.SetCheck(gSettings.GetApplyPorcessFilter() ? BST_CHECKED : BST_UNCHECKED);
+	m_ApplyPorcessFilter.SetCheck(gSettings.GetApplyPorcessFilter() ? BST_CHECKED : BST_UNCHECKED);
 	m_ApplyLogcutFilter.SetCheck(gSettings.GetApplyLogcutFilter() ? BST_CHECKED : BST_UNCHECKED);
 
     CRect rc;
@@ -51,7 +51,7 @@ LRESULT DlgFilters::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 
     if (wID == IDOK)
     {
-        gSettings.SetApplyPorcessFilter(m_Apply.GetCheck());
+        gSettings.SetApplyPorcessFilter(m_ApplyPorcessFilter.GetCheck());
 		gSettings.SetApplyLogcutFilter(m_ApplyLogcutFilter.GetCheck());
 
         string strItems;

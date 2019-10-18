@@ -83,7 +83,7 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 	bool nameIsKnown = true;
 	if (cb_app_name == 0) {
 		cb_app_name = 1;
-		appName = "*";
+		appName = UNKNOWNP_APP_NAME;
 		nameIsKnown = false;
 	}
     pNode->data_type = APP_DATA_TYPE;
@@ -107,6 +107,7 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
+	pNode->applyFilter();
 
 	if (!nameIsKnown)
 		nameIsKnown = resolveAppName(pNode);

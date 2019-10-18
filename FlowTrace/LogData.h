@@ -167,6 +167,7 @@ struct ROOT_NODE : LOG_NODE
 {
 };
 
+#define UNKNOWNP_APP_NAME "*"
 struct APP_NODE : LOG_NODE
 {
     int pid;
@@ -179,6 +180,7 @@ struct APP_NODE : LOG_NODE
     int cb_short_app_name_offset;
     char appName[MAX_APP_NAME + 1];
 	int applyFilter();
+	bool isProcessFiltered();
 };
 
 struct INFO_NODE : LOG_NODE
