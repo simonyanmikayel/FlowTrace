@@ -7,7 +7,7 @@ enum _flow_LogPriority;
 #define DECL_GET(type, name) public: type Get##name () { return m_##name ;} private: type m_##name
 #define DECL_SET(type, name) public: void Set##name ( type ); private: type m_##name
 #define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
-#define DECL_STR_PROP(type, name, cb) public: type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
+#define DECL_STR_PROP(type, name, cb) public: const type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
 
 struct StringList
 {

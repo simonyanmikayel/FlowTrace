@@ -36,7 +36,7 @@ namespace Helpers
 		si.cb = sizeof(si);
 		const int max_cmd = 2 * MAX_PATH;
 		char cmd[max_cmd + 1];
-		char *process;
+		const char *process;
 
 		if (IsAndroidLog)
 		{
@@ -49,7 +49,7 @@ namespace Helpers
                 return false;
             *fileName = 0;
             fileName++;
-            char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, false);
+            const char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, false);
             if (!srcPath)
                 return false;
             _sntprintf_s(fileName2, MAX_PATH, MAX_PATH, "%s.java", fileName);
@@ -64,7 +64,7 @@ namespace Helpers
 		}
 		else
 		{
-			char* szLinuxHome = gSettings.GetLinuxHome();
+			const char* szLinuxHome = gSettings.GetLinuxHome();
 			if (strstr(src, szLinuxHome))
 				src = strstr(src, szLinuxHome) + strlen(szLinuxHome);
 			_sntprintf_s(cmd, max_cmd, max_cmd, " -name Eclipse --launcher.openFile %s\\%s:%d", gSettings.GetMapOnWin(), src, line);
@@ -552,7 +552,7 @@ namespace Helpers
 
     static char szFindFilePath[2*MAX_PATH];
     bool fileFound = false;
-    void _FindFile(char* szDirName, char* szFileName, bool isFile, size_t cbFileName)
+    void _FindFile(const char* szDirName, const char* szFileName, bool isFile, size_t cbFileName)
     {
         HANDLE hFind;
         WIN32_FIND_DATA wfd;
@@ -613,7 +613,7 @@ namespace Helpers
         }
         FindClose(hFind);
     }
-    char* FindFile(char* szDirName, char* szFileName, bool isFile)
+	const char* FindFile(const char* szDirName, const char* szFileName, bool isFile)
     {
         fileFound = false;
         szFindFilePath[0] = 0;

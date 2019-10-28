@@ -33,5 +33,5 @@ namespace Helpers
 	void ShowInIDE(LOG_NODE* pNode, bool bShowCallSite);
 	bool ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
-    char* FindFile(char* szDirName, char* szFileName, bool isFile);
+	const char* FindFile(const char* szDirName, const char* szFileName, bool isFile);
 };

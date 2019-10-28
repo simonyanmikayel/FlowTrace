@@ -387,7 +387,7 @@ LRESULT CMainFrame::OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
 
 LRESULT CMainFrame::OnRunExternalCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	char* pExternalCmd = nullptr;
+	const char* pExternalCmd = nullptr;
 	if (ID_VIEW_RUN_EXTERNAL_CMD_1 == wID)
 		pExternalCmd = gSettings.GetExternalCmd_1();
 	else if (ID_VIEW_RUN_EXTERNAL_CMD_2 == wID)
@@ -396,14 +396,35 @@ LRESULT CMainFrame::OnRunExternalCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 		pExternalCmd = gSettings.GetExternalCmd_3();
 	if (pExternalCmd && *pExternalCmd)
 	{
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		CreateProcessA(pExternalCmd, "", NULL, NULL, FALSE,
-			NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
+		char cmd[MAX_PATH];
+		strncpy_s(cmd, pExternalCmd, sizeof(cmd));
+		cmd[sizeof(cmd) - 1] = 0;
+		
+		char *next_token;
+		char* cmdToken = strtok_s(cmd, ";", &next_token);
+		while (cmdToken != nullptr)
+		{
+			if (cmdToken[1] == 0 && (cmdToken[0] == 'x' || cmdToken[0] == 'X'))
+			{
+				ClearLog(true, true); 
+			}
+			else
+			{
+				STARTUPINFO si;
+				PROCESS_INFORMATION pi;
+				ZeroMemory(&si, sizeof(si));
+				si.cb = sizeof(si);
+				if (CreateProcessA(cmdToken, "", NULL, NULL, FALSE,
+					NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi))
+				{
+					WaitForSingleObject(pi.hProcess, INFINITE);
+					CloseHandle(pi.hProcess);
+					CloseHandle(pi.hThread);
+				}
+			}
+			cmdToken = strtok_s(nullptr, ";", &next_token);
+		}
+
 	}
 	return 0;
 }
