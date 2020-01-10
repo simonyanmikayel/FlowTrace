@@ -113,7 +113,7 @@ struct LOG_NODE
     int GetPosInTree() { return posInTree; }
 	void CollapseExpandAll(bool expand);
 	bool CheckAll(bool check, bool recursive = false);
-	bool ShowOnlyThis(bool show);
+	bool ShowOnlyThis();
 	bool Check(bool check);
 
     void add_child(LOG_NODE* pNode)

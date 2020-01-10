@@ -33,7 +33,7 @@ public:
   LRESULT OnPositionChanging(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
-  void SyncViews();
+  LOG_NODE* SyncViews();
   void ShowTreeView(bool show);
   void ShowStackView(bool show);
   void ClearLog();

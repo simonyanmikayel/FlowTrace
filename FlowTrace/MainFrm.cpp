@@ -563,6 +563,54 @@ LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
     return 0;
 }
 
+LRESULT CMainFrame::OnShowOnlyThisApp(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	FilterNode(wID);
+	return 0;
+}
+LRESULT CMainFrame::OnShowOnlyThisThread(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	FilterNode(wID);
+	return 0;
+}
+LRESULT CMainFrame::OnShowAllApps(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	FilterNode(wID);
+	return 0;
+}
+void CMainFrame::FilterNode(WORD wID)
+{
+	LOG_NODE* pNode = m_view.SyncViews();
+	if (!pNode)
+		return;
+	
+	if (wID == ID_TREE_SHOW_THIS_THREAD)
+	{
+		pNode = pNode->getTrhread();
+	}
+	else if (wID == ID_TREE_SHOW_THIS_APP)
+	{
+		pNode = pNode->getApp();
+	}
+	else if (wID == ID_TREE_SHOW_ALL)
+	{
+		pNode = pNode->getRoot();
+	}
+
+	if (!pNode)
+		return;
+
+	bool checkChanged = pNode->ShowOnlyThis();
+	if (checkChanged)
+	{
+		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
+		m_tree.RedrawAll();
+	}
+}
+
+
+
+
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     ClearLog(true, true);

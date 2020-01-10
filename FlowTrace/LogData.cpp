@@ -633,29 +633,23 @@ bool LOG_NODE::CheckAll(bool check, bool recursive)
 	return checkChanged;
 }
 
-bool LOG_NODE::ShowOnlyThis(bool onlyThis)
+bool LOG_NODE::ShowOnlyThis()
 {
 	bool checkChanged = false;
-	if (onlyThis)
+	checkChanged = getRoot()->CheckAll(false) || checkChanged;
+	if (isRoot())
 	{
-		checkChanged = getRoot()->CheckAll(false) || checkChanged;
-		if (!isRoot())
-		{
-			if (isApp())
-			{
-				checkChanged = getApp()->CheckAll(true) || checkChanged;
-			}
-			else
-			{
-				checkChanged = getApp()->CheckAll(false) || checkChanged;
-				checkChanged = getApp()->Check(true) || checkChanged;
-				checkChanged = getTrhread()->Check(true) || checkChanged;
-			}
-		}
+		checkChanged = CheckAll(true, true) || checkChanged;
+	}
+	else if (isApp())
+	{
+		checkChanged = CheckAll(true) || checkChanged;
 	}
 	else
 	{
-		checkChanged = getRoot()->CheckAll(true, true) || checkChanged;
+		checkChanged = getApp()->CheckAll(false) || checkChanged;
+		checkChanged = getApp()->Check(true) || checkChanged;
+		checkChanged = getTrhread()->Check(true) || checkChanged;
 	}
 	return checkChanged;
 }

@@ -99,6 +99,10 @@ public:
         COMMAND_ID_HANDLER(ID_SEARCH_MATCH_WHOLE_WORD, OnSearchSettings)
         COMMAND_ID_HANDLER(ID_SYNC_VIEWES, OnSyncViews)
         COMMAND_ID_HANDLER(ID_EDIT_FIND32798, OnEditFind)
+		COMMAND_ID_HANDLER(ID_TREE_SHOW_THIS_APP, OnShowOnlyThisApp)
+		COMMAND_ID_HANDLER(ID_TREE_SHOW_THIS_THREAD, OnShowOnlyThisThread)
+		COMMAND_ID_HANDLER(ID_TREE_SHOW_ALL, OnShowAllApps)
+			 
 
 
 
@@ -144,6 +148,10 @@ public:
     LRESULT OnTakeSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnStartNewSnamshot(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnBookmarks(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnShowOnlyThisApp(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnShowOnlyThisThread(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnShowAllApps(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
 
     LRESULT OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchSettings(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -157,6 +165,7 @@ public:
     void SyncViews();
 	void RedrawViews();
     void SetTitle();
+	void FilterNode(WORD wID);
 private:
     //Search support
     void SearchNavigate(WORD wID);

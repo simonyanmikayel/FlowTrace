@@ -612,6 +612,11 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     disable = (m_ListSelection.IsEmpty());
     Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
 
+	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
+	Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS_THREAD, _T("Show only this thread\tCtrl+D"), false);
+	Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS_APP, _T("Show only this app\tCtrl+P"), false);
+	Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_ALL, _T("Show All\tCtrl+L"), false);
+
     UINT nRet = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_TOPALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, 0);
 	DestroyMenu(hMenu);
 
@@ -638,6 +643,18 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
     else if (nRet == ID_VIEW_NODE_DATA)
 	{
 		Helpers::ShowNodeDetails(pNode);
+	}
+	else if (nRet == ID_TREE_SHOW_THIS_THREAD)
+	{
+		::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
+	}
+	else if (nRet == ID_TREE_SHOW_THIS_APP)
+	{
+		::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
+	}
+	else if (nRet == ID_TREE_SHOW_ALL)
+	{
+		::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
 	}
 
 	return 0;

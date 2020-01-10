@@ -112,9 +112,12 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 		Helpers::AddMenu(hMenu, cMenu, ID_TREE_CHECK_ALL, _T("Show All Children"), disable);
 		Helpers::AddMenu(hMenu, cMenu, ID_TREE_UNCHECK_ALL, _T("Hide All Children"), disable);
 
-		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS, _T("Show only this"), false);
-		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_ALL, _T("Show All"), false);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS_THREAD, _T("Show only this thread\tCtrl+D"), false);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS_APP, _T("Show only this app\tCtrl+P"), false);
+		Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_ALL, _T("Show All\tCtrl+L"), false);
 		
+		InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
+
 		disable = (!pNode->parent || !pNode->parent->firstChild || pNode->parent->firstChild == pNode->parent->lastChild);
         Helpers::AddMenu(hMenu, cMenu, ID_TREE_FIRST_SIBLING, _T("First Sibling\tCtrl+UP"), disable);
 
@@ -149,13 +152,17 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 		{
 			CheckAll(pNode, false);
 		}
-		else if (nRet == ID_TREE_SHOW_THIS)
+		else if (nRet == ID_TREE_SHOW_THIS_THREAD)
 		{
-			ShowOnlyThis(pNode, true);
+			::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
+		}
+		else if (nRet == ID_TREE_SHOW_THIS_APP)
+		{
+			::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
 		}
 		else if (nRet == ID_TREE_SHOW_ALL)
-		{
-			ShowOnlyThis(pNode, false);
+		{			
+			::SendMessage(hwndMain, WM_COMMAND, nRet, 0);
 		}
 		else if (nRet == ID_EDIT_COPY)
         {
@@ -215,15 +222,6 @@ void CLogTreeView::CheckAll(LOG_NODE* pNode, bool check)
 	}
 }
 
-void CLogTreeView::ShowOnlyThis(LOG_NODE* pNode, bool show)
-{
-	if (pNode->ShowOnlyThis(show))
-	{
-		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
-		RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
-	}
-}
-
 void CLogTreeView::CopySelection()
 {
     if (!m_pSelectedNode)
@@ -232,6 +230,11 @@ void CLogTreeView::CopySelection()
     char* szText;
     szText = m_pSelectedNode->getTreeText(&cbText, false);
     Helpers::CopyToClipboard(m_hWnd, szText, cbText);
+}
+
+void CLogTreeView::RedrawAll()
+{
+	RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
 }
 
 void CLogTreeView::RefreshTree(bool showAll)

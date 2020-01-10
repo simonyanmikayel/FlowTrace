@@ -157,7 +157,7 @@ LRESULT CFlowTraceView::OnCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHand
 	return CDRF_DODEFAULT;
 }
 
-void CFlowTraceView::SyncViews()
+LOG_NODE* CFlowTraceView::SyncViews()
 {
 	HWND hwnd = GetFocus();
 	LOG_NODE* pNode = NULL;
@@ -198,6 +198,7 @@ void CFlowTraceView::SyncViews()
             m_wndBackTraceView.m_wndCallStackView.Invalidate();
         }
     }
+	return pNode;
 }
 
 void CFlowTraceView::ShowStackView(bool show)

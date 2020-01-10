@@ -151,14 +151,15 @@
 #define ID_VIEW_RUN_EXTERNAL_CMD_2      32835
 #define ID_VIEW_RUN_EXTERNAL_CMD_3      32836
 #define ID_TREE_SHOW_ALL                32837
-#define ID_TREE_SHOW_THIS               32838
+#define ID_TREE_SHOW_THIS_APP           32838
+#define ID_TREE_SHOW_THIS_THREAD        32839
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        540
-#define _APS_NEXT_COMMAND_VALUE         32839
+#define _APS_NEXT_COMMAND_VALUE         32842
 #define _APS_NEXT_CONTROL_VALUE         1210
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
