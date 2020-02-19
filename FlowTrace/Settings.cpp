@@ -364,7 +364,7 @@ CHAR* CSettings::GetModules()
 	return szModuls;
 }
 
-static const int MAX_SEARCH_LIST = 255;
+static const int MAX_SEARCH_LIST = 2*1024;
 static CHAR searchList[MAX_SEARCH_LIST + 1];
 void CSettings::SetSearchList(CHAR* szList)
 {

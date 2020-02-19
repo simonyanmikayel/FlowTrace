@@ -114,24 +114,14 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
         m_cb.Create(m_hWnd, rcCombo, NULL, dwComboStyle);
         m_cb.SetParent(hWndToolBar);
 
-        // set 15 lines visible in combo list
-        m_cb.GetComboCtrl().ResizeClient(rcCombo.Width(), rcCombo.Height() + 15 * m_cb.GetItemHeight(0));
+        // set 25 lines visible in combo list
+        m_cb.GetComboCtrl().ResizeClient(rcCombo.Width(), rcCombo.Height() + 25 * m_cb.GetItemHeight(0));
         m_searchbox = m_cb.GetComboCtrl();
         m_searchedit = m_cb.GetEditCtrl();
         oldEditProc = (WNDPROC)m_searchedit.SetWindowLongPtr(GWLP_WNDPROC, (LONG_PTR)subEditProc);
         searchInfo.hwndEdit = m_searchedit;
 
-        CHAR* searchList = gSettings.GetSearchList();
-        char *next_token = NULL;
-        char *p = strtok_s(searchList, "\n", &next_token);
-        COMBOBOXEXITEM item = { 0 };
-        item.mask = CBEIF_TEXT;
-        while (p) {
-            item.pszText = p;
-            m_cb.InsertItem(&item);
-            item.iItem++;
-            p = strtok_s(NULL, "\n", &next_token);
-        }
+        //LoadSearchList();
 
         //m_searchedit.SetCueBannerText(L"Search...");
 
@@ -184,6 +174,56 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
     SetTitle();
 
     return 0;
+}
+
+LRESULT CMainFrame::OnNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+    bHandled = FALSE;
+    NMHDR* lpNMHDR = (NMHDR*)lParam;
+    if (lpNMHDR->hwndFrom == m_cb.m_hWnd)
+    {
+        if (lpNMHDR->code == CBEN_BEGINEDIT)
+        {
+            //stdlog("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+            while (m_cb.GetCount())
+                m_cb.DeleteItem(0);
+            LoadSearchList();
+            bHandled = TRUE;
+        }
+    }
+    return 0;
+}
+
+void CMainFrame::LoadSearchList()
+{
+    CHAR* searchList = gSettings.GetSearchList();
+    char* next_token = NULL;
+    char* p = strtok_s(searchList, "\n", &next_token);
+    COMBOBOXEXITEM item = { 0 };
+    item.mask = CBEIF_TEXT;
+    const int MAX_SEARCH_ITEM = 40;
+    while (p && item.iItem < MAX_SEARCH_ITEM) {
+        item.pszText = p;
+        m_cb.InsertItem(&item);
+        item.iItem++;
+        p = strtok_s(NULL, "\n", &next_token);
+    }
+}
+
+void CMainFrame::SaveSearchList()
+{
+    CString strSearch;
+    for (int i = 0; i < m_cb.GetCount(); i++)
+    {
+        CString str;
+        m_cb.GetLBText(i, str);
+        if (!str.IsEmpty())
+        {
+            strSearch += str;
+            strSearch += "\n";
+        }
+    }
+    gSettings.SetSearchList(strSearch.GetBuffer());
 }
 
 LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -715,23 +755,9 @@ void CMainFrame::SearchRefresh(WORD wID)
         item.pszText = szText;
         item.iItem = 0;
         m_cb.InsertItem(&item);
-        if (m_cb.GetCount() > 15) {
-            m_cb.DeleteItem(15);
-            m_cb.SetCurSel(0);
-        }
+        m_cb.SetCurSel(0);
+        SaveSearchList();
 
-        CString strSearch;
-        for (int i = 0; i < m_cb.GetCount(); i++)
-        {
-            CString str;
-            m_cb.GetLBText(i, str);
-            if (!str.IsEmpty())
-            {
-                strSearch += str;
-                strSearch += "\n";
-            }
-        }
-        gSettings.SetSearchList(strSearch.GetBuffer());
         ::SetWindowText(searchInfo.hwndEdit, szText);
 
 

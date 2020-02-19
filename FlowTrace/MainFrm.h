@@ -102,6 +102,7 @@ public:
 		COMMAND_ID_HANDLER(ID_TREE_SHOW_THIS_APP, OnShowOnlyThisApp)
 		COMMAND_ID_HANDLER(ID_TREE_SHOW_THIS_THREAD, OnShowOnlyThisThread)
 		COMMAND_ID_HANDLER(ID_TREE_SHOW_ALL, OnShowAllApps)
+        MESSAGE_HANDLER(WM_NOTIFY, OnNotify)
 			 
 
 
@@ -151,6 +152,7 @@ public:
 	LRESULT OnShowOnlyThisApp(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnShowOnlyThisThread(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnShowAllApps(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    LRESULT OnNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 
     LRESULT OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -165,7 +167,9 @@ public:
     void SyncViews();
 	void RedrawViews();
     void SetTitle();
-	void FilterNode(WORD wID);
+    void LoadSearchList();
+    void SaveSearchList();
+    void FilterNode(WORD wID);
 private:
     //Search support
     void SearchNavigate(WORD wID);
