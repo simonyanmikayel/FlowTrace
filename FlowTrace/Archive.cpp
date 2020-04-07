@@ -62,7 +62,8 @@ void Archive::clearArchive(bool closing)
 		m_pNodes = new PtrArray<LOG_NODE>(m_pTraceBuf);
 		//m_pRecords = new PtrArray<LOG_REC_BASE_DATA>(m_pRecBuf);
 		m_rootNode = (ROOT_NODE*)m_pNodes->Add(sizeof(ROOT_NODE), true);
-        m_rootNode->data_type = ROOT_DATA_TYPE;
+		m_rootNode->expanded = 1;
+		m_rootNode->data_type = ROOT_DATA_TYPE;
         ATLASSERT(m_pNodes && m_rootNode);
     }
 }

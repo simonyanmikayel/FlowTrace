@@ -259,7 +259,7 @@ void CLogTreeView::RefreshTree(bool showAll)
     if (!m_Initialised)
         return;
 
-    int prevExpanded = gArchive.getRootNode()->GetExpandCount();
+    int prevExpanded = m_recCount ? gArchive.getRootNode()->GetExpandCount() : -1;
     int firstAffected = -1;
     //int firstRow = prevExpanded ? 0 : GetTopIndex();
     //int lastRow = m_size.cy / m_rowHeight + 1;
@@ -274,9 +274,9 @@ void CLogTreeView::RefreshTree(bool showAll)
         {
             LOG_NODE* p = pNode->isTreeNode() ? pNode : ((FLOW_NODE*)pNode)->getPeer();
             //if(p) stdlog("pathExpanded = %d line = %d\n", p->parent->pathExpanded, p->parent->line);
-            if (p && p->parent->pathExpanded)
+            if (p && p->parent && p->parent->pathExpanded)
             {
-                if (p->parent->GetExpandCount() > 0 && !p->parent->hasNodeBox)
+                if (p->parent->childCount > 0 && !p->parent->hasNodeBox)
                 {
                     p->parent->hasNodeBox = 1;
                     if (firstAffected == -1 || firstAffected > p->parent->posInTree)
@@ -291,22 +291,16 @@ void CLogTreeView::RefreshTree(bool showAll)
         }
     }
 
-    if (m_recCount != 0)
+    m_recCount = newCount;
+    if (prevExpanded != gArchive.getRootNode()->GetExpandCount())
     {
-        if (prevExpanded != gArchive.getRootNode()->GetExpandCount())
-        {
-            SetItemCountEx(gArchive.getRootNode()->GetExpandCount() + 1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
-        }
-        if (firstAffected > -1)
-        {
-            RedrawItems(firstAffected, gArchive.getRootNode()->GetExpandCount());
-        }
+        SetItemCountEx(gArchive.getRootNode()->GetExpandCount() + 1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
+    }
+    if (firstAffected > -1)
+    {
+        RedrawItems(firstAffected, gArchive.getRootNode()->GetExpandCount());
     }
 
-    if (m_recCount == 0)
-        SetItemCountEx(1, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);//LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL
-
-    m_recCount = newCount;
     Helpers::UpdateStatusBar();
 
 }
