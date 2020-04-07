@@ -186,19 +186,19 @@ LRESULT CLogTreeView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         }
         else if (nRet == ID_TREE_FIRST_SIBLING)
         {
-            OnKeyDown(VK_UP, false, true);
+            _OnKeyDown(VK_UP, false, true);
         }
         else if (nRet == ID_TREE_PREV_SIBLING)
         {
-            OnKeyDown(VK_UP, true, false);
+            _OnKeyDown(VK_UP, true, false);
         }
         else if (nRet == ID_TREE_NEXT_SIBLING)
         {
-            OnKeyDown(VK_DOWN, true, false);
+            _OnKeyDown(VK_DOWN, true, false);
         }
         else if (nRet == ID_TREE_LAST_SIBLING)
         {
-            OnKeyDown(VK_DOWN, false, true);
+            _OnKeyDown(VK_DOWN, false, true);
         }
 
         //stdlog("%u\n", GetTickCount());
@@ -515,10 +515,10 @@ LRESULT CLogTreeView::OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & 
     bHandled = TRUE;
     bool bShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
     bool bCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-    return OnKeyDown(wParam, bShiftPressed, bCtrlPressed);
+    return _OnKeyDown(wParam, bShiftPressed, bCtrlPressed);
 }
 
-LRESULT CLogTreeView::OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlPressed)
+LRESULT CLogTreeView::_OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlPressed)
 {
 
     if (m_pSelectedNode == NULL)

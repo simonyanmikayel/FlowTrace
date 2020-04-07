@@ -41,7 +41,6 @@ public:
 	LRESULT OnLButtonDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnLButtonUp(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
 	LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL & /*bHandled*/);
-    LRESULT OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlPressed);
 
 	LOG_NODE* getTreeNode(int iItem, int* pOffset = NULL);
 	void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem);
@@ -65,6 +64,7 @@ public:
 
 private:
 	void SetColumnLen(int len);
+	LRESULT _OnKeyDown(WPARAM virt_key, bool bShiftPressed, bool bCtrlPressed);
 
 	CFlowTraceView* m_pView;
 	DWORD m_recCount;
