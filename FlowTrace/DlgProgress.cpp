@@ -234,12 +234,7 @@ void TaskThread::FileSave(WORD cmd)
                 memcpy((void*)pLogData->moduleName(), pInfoNode->moduleName(), pLogData->cb_module_name);
             memcpy((void*)pLogData->fnName(), pInfoNode->fnName(), pLogData->cb_fn_name);
 			//gArchive.Log(pLogData);
-            if (pInfoNode->cb_java_call_site && (pInfoNode->log_flags & LOG_FLAG_JAVA))
-            {
-                pLogData->cb_java_call_site = pInfoNode->cb_java_call_site;
-                memcpy((void*)pLogData->trace(), pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
-            }
-            else //if (pLogData->cb_trace)
+            //if (pLogData->cb_trace)
             {
                 TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
                 int cb_trace;

@@ -146,9 +146,9 @@ namespace Helpers
 			}
             else if(pNode->parent && pNode->parent->isFlow())
             {
-                src = pNode->JavaCallSite();
-                cb = pNode->cb_java_call_site;
-                line = ((INFO_NODE*)pSelectedNode)->callLine(true);
+				src = ((INFO_NODE*)pNode->parent)->fnName();
+				cb = ((INFO_NODE*)pNode->parent)->cb_fn_name;
+				line = ((INFO_NODE*)pSelectedNode)->callLine(true);
             }
             if (src && src[0] && cb && line)
             {
@@ -215,11 +215,6 @@ namespace Helpers
         if (cb < cMax - pInfoNode->cb_fn_name) {
             memcpy(buf + cb, pInfoNode->fnName(), pInfoNode->cb_fn_name);
             cb += pInfoNode->cb_fn_name;
-            if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
-        }
-        if (pInfoNode->isJava() && cb < cMax - pInfoNode->cb_java_call_site) {
-            memcpy(buf + cb, pInfoNode->JavaCallSite(), pInfoNode->cb_java_call_site);
-            cb += pInfoNode->cb_java_call_site;
             if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "\r\n");
         }
         if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "nn: %d\r\n", pInfoNode->nn);

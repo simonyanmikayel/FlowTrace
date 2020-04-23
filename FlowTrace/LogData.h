@@ -196,11 +196,8 @@ struct INFO_NODE : LOG_NODE
 	WORD cb_fn_name;
 	WORD cb_short_fn_name_offset;
 	WORD cb_module_name;
-	union {
-		WORD cb_trace;
-		WORD cb_java_call_site; // for java we keep here caller class:method
-	};
-	int call_line;
+    WORD cb_trace;
+    int call_line;
 	DWORD sec;
 	DWORD msec;
 	bool isEnter() {
@@ -212,7 +209,6 @@ struct INFO_NODE : LOG_NODE
 	char* fnName();
 	char* moduleName();
 	int moduleNameLength();
-	char* JavaCallSite() { return fnName() + cb_fn_name + cb_module_name; }
 	void  normilizeFnName(char* name);
 	char* shortFnName();
 	int   callLine(bool resolve);
@@ -249,6 +245,8 @@ struct THREAD_NODE : LOG_NODE
     APP_NODE* pAppNode;
     FLOW_NODE* curentFlow;
     TRACE_NODE* latestTrace;
+    DWORD java_outer_this_fn;
+    int java_outer_fn_line;
     int tid;
     int threadNN;
 

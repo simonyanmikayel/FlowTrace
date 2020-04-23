@@ -310,12 +310,6 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookm
         memcpy(pNode->fnName() + cb_fn_name, pLogRec->moduleName(), pNode->cb_module_name);
     }
 
-    if (pLogData->cb_java_call_site && (pLogData->log_flags & LOG_FLAG_JAVA))
-    {
-        pNode->cb_java_call_site = pLogData->cb_java_call_site;
-        memcpy(pNode->JavaCallSite(), pLogRec->trace(), pLogData->cb_java_call_site);
-    }
-
     pNode->threadNode = pThreadNode;
 
     ((FLOW_NODE*)pNode)->addToTree();
@@ -654,43 +648,21 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
     if (!pThreadNode)
 		return;
 
-    bool ignore = false;
-    if (pLogData->log_type != LOG_TYPE_TRACE && (pLogData->log_flags & LOG_FLAG_JAVA))
-    {
-        FLOW_NODE* lastFlowNode = pThreadNode->curentFlow;
-        if (pLogData->log_type == LOG_TYPE_ENTER)
-        {
-            if (lastFlowNode &&
-                (lastFlowNode->log_flags & LOG_FLAG_OUTER_LOG) &&
-                !(pLogData->log_flags & LOG_FLAG_OUTER_LOG) &&
-                (lastFlowNode->log_type == LOG_TYPE_ENTER) &&
-                lastFlowNode->this_fn == pLogData->this_fn &&
-                !lastFlowNode->peer)
-            {
-                lastFlowNode->fn_line = pLogData->fn_line;
-                ignore = true;
-            }
-        }
-        else if (pLogData->log_type == LOG_TYPE_EXIT)
-        {
-            FLOW_NODE* pLastFlow = NULL;
-            if (lastFlowNode &&
-                lastFlowNode->lastChild &&
-                lastFlowNode->lastChild->isFlow())
-            {
-                pLastFlow = (FLOW_NODE*)lastFlowNode->lastChild;
-            }
-            if (pLastFlow &&
-                pLastFlow->peer &&
-                !(pLastFlow->peer->log_flags & LOG_FLAG_OUTER_LOG) &&
-                pLastFlow->peer->this_fn == pLogData->this_fn)
-            {
-                ignore = true;
-            }
-        }
-    }
-    if (ignore)
-		return;
+	if (pLogData->log_flags & LOG_FLAG_JAVA)
+	{
+		if (pLogData->log_flags & LOG_FLAG_OUTER_LOG)
+		{
+			pThreadNode->java_outer_this_fn = pLogData->this_fn;
+			pThreadNode->java_outer_fn_line = pLogData->fn_line;
+			return;
+		}
+		if (pLogData->log_type == LOG_TYPE_ENTER)
+		{
+			if (pThreadNode->java_outer_this_fn == pLogData->this_fn)
+				pLogData->call_line = pThreadNode->java_outer_fn_line;
+		}
+	}
+	pThreadNode->java_outer_this_fn = 0;
 
 	LOG_NODE* pNode = nullptr;
     if (pLogData->log_type == LOG_TYPE_TRACE)
