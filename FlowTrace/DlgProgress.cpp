@@ -191,8 +191,6 @@ void TaskThread::FileSave(WORD cmd)
             i = i;
 		if (isExport)
         {
-            int cbColor = 0;
-            char szColor[32];
             if (pInfoNode->isFlow())
             {
 				//continue;
@@ -223,7 +221,6 @@ void TaskThread::FileSave(WORD cmd)
                 pLogData->call_site = 0;
 				pLogData->fn_line = 0;
 				pLogData->call_line = p->call_line;
-				pLogData->cb_trace = p->cb_trace;
             }
             
             pLogData->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
@@ -234,39 +231,34 @@ void TaskThread::FileSave(WORD cmd)
                 memcpy((void*)pLogData->moduleName(), pInfoNode->moduleName(), pLogData->cb_module_name);
             memcpy((void*)pLogData->fnName(), pInfoNode->fnName(), pLogData->cb_fn_name);
 			//gArchive.Log(pLogData);
-            //if (pLogData->cb_trace)
+            pLogData->cb_trace = 0;
+            if (!pInfoNode->isFlow())
             {
-                TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
-                int cb_trace;
+                //TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
+                int cb_trace = 0;
                 char* log = pInfoNode->getListText(&cb_trace, LOG_COL);
-                pLogData->cb_trace = cb_trace;
                 int cb_size = pLogData->size();
-                bool truncate = cb_size > MAX_RECORD_LEN - 128;
+                bool truncate = (cb_size + cb_trace ) > MAX_RECORD_LEN - 128;
                 if (truncate) {
-                    cb_trace -= (cb_size - MAX_RECORD_LEN + 128);
-                    pLogData->cb_trace = cb_trace;
+                    cb_trace -= (cb_size + cb_trace - MAX_RECORD_LEN + 128);
                 }
-                memcpy((void*)pLogData->trace(), log, pLogData->cb_trace + 1);
+                memcpy((void*)pLogData->trace(), log, cb_trace);
                 if (truncate) {
-                    memcpy((void*)(pLogData->trace() + pLogData->cb_trace), "...", 3);
-                    pLogData->cb_trace += 3;
+                    memcpy((void*)(pLogData->trace() + cb_trace), "...", 3);
+                    cb_trace += 3;
                 }
-				//TODO set colors
-                if (pLogData->cb_trace > 2000)
-                    i = i;
+                pLogData->cb_trace = cb_trace;
             }
 
             pLogData->len = sizeof(LOG_REC_NET_DATA) + pLogData->cbData();
 
             fprintf(m_fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-",
-                pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->nn, pLogData->cb_app_name, pLogData->cb_module_name,
-				pLogData->cb_fn_name, pLogData->cb_trace, pLogData->pid, pLogData->tid,
-				pLogData->sec, pLogData->msec, 
-				pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pInfoNode->bookmark);
+                pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->nn,
+                pLogData->cb_app_name, pLogData->cb_module_name,
+                pLogData->cb_fn_name, pLogData->cb_trace, pLogData->pid, pLogData->tid, pLogData->sec, pLogData->msec,
+                pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pInfoNode->bookmark);
 
-            //!!fwrite(pLogData->data, pLogData->cbData() - cbColor, 1, m_fp);
-            if (cbColor)
-                fwrite(szColor, cbColor, 1, m_fp);
+            fwrite(pLogData->data, pLogData->cbData(), 1, m_fp);
             fwrite("\n", 1, 1, m_fp);
         }
         else
@@ -291,7 +283,7 @@ void TaskThread::FileSave(WORD cmd)
             fwrite("] ", 1, 2, m_fp);
 
             if (pInfoNode->isFlow())
-                fwrite("\n", 1, 1, m_fp);
+                pInfoNode->isEnter() ? fwrite(" ->\n", 4, 1, m_fp) : fwrite(" <-\n", 4, 1, m_fp);
             else {
                 int cb_trace;
                 fprintf(m_fp, "%s\n", pInfoNode->getListText(&cb_trace, LOG_COL));
@@ -367,7 +359,8 @@ void TaskThread::FileImport()
     }
     else
     {
-        char buf[MAX_RECORD_LEN];
+        char buf[MAX_RECORD_LEN + 1];
+        char* bufEnd = buf + MAX_RECORD_LEN;
 
         DWORD count = 0;
         fseek(m_fp, 0, SEEK_END);
@@ -387,19 +380,24 @@ void TaskThread::FileImport()
                 &pLogData->cb_app_name, &pLogData->cb_module_name, 
                 &pLogData->cb_fn_name, &pLogData->cb_trace, &pLogData->pid, &pLogData->tid, &pLogData->sec, &pLogData->msec,
                 &pLogData->this_fn, &pLogData->call_site, &pLogData->fn_line, &pLogData->call_line, &bookmark);
+
             ss = (17 == cf);
             ss = ss && pLogData->isValid();
-			//!! if (pLogData->cbData())
-				//!! ss = ss && (1 == fread(pLogData->data, pLogData->cbData(), 1, m_fp));
+            int cb = pLogData->cbData();
+            if (bufEnd < pLogData->data + cb)
+                ss = false;
+            pLogData->data[cb] = 0;
+			if (ss && pLogData->cbData())
+			    ss = ss && (1 == fread(pLogData->data, pLogData->cbData(), 1, m_fp));
             if (ss)
             {
                 if (pLogData->isTrace())
                 {
-					//!! pLogData->data[pLogData->cbData()] = '\n';
+					pLogData->data[pLogData->cbData()] = '\n';
                     pLogData->cb_trace++;
                     pLogData->len++;
                 }
-				//!! pLogData->data[pLogData->cbData()] = 0;
+				pLogData->data[pLogData->cbData()] = 0;
             }
 
             ss = ss && pLogData->isValid();

@@ -267,15 +267,8 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookm
         fnName++;
         cb_fn_name--;
     }
-    if (0 == (pLogData->log_flags & LOG_FLAG_JAVA))
-		pLogData->cb_java_call_site = 0;
-	else {
-		const char* trace = pLogRec->trace();
-		while (pLogData->cb_java_call_site &&  (trace[pLogData->cb_java_call_site - 1] == '\r' || trace[pLogData->cb_java_call_site - 1] == '\n'))
-			pLogData->cb_java_call_site--;
-	}
 
-    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogData->cb_module_name + pLogData->cb_java_call_site + 1, true);
+    FLOW_NODE* pNode = (FLOW_NODE*)m_pNodes->Add(sizeof(FLOW_NODE) + cb_fn_name + pLogData->cb_module_name + 1, true);
     if (!pNode)
         return nullptr;
 

@@ -35,10 +35,7 @@ struct LOG_REC_BASE_DATA
 	WORD cb_app_name;
 	WORD cb_module_name;
 	WORD cb_fn_name;
-	union {
-		WORD cb_trace;
-		WORD cb_java_call_site; // for java we keep here caller class:method
-	};
+	WORD cb_trace;
 	int tid;
 	int pid;
 	DWORD sec;
