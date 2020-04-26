@@ -265,27 +265,6 @@ void CSettings::SaveWindPos(HWND hWnd)
 		Write(STR_APP_REG_VAL_WINDOWPOS, &wpl, sizeof(wpl));
 }
 
-bool CSettings::SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor)
-{
-	bool ret = true;
-	switch (priority)
-	{
-	case FLOW_LOG_ERROR:
-	case FLOW_LOG_FATAL:
-		textColor = RGB(255, 0, 0);//31	Red
-		break;
-	case FLOW_LOG_WARN:
-		textColor = RGB(255, 255, 0);//33	Yellow
-		break;
-	case FLOW_LOG_INFO:
-		textColor = RGB(0, 255, 0);//32	Green
-		break;
-	default:
-		ret = false;
-	}
-	return ret;
-}
-
 bool CSettings::SetTraceColor(int color, DWORD& textColor, DWORD& bkColor)
 {
 	bool ret = true;

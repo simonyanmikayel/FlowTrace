@@ -206,6 +206,7 @@ void TaskThread::FileSave(WORD cmd)
                 pLogData->call_site = p->call_site;
 				pLogData->fn_line = p->fn_line;
 				pLogData->call_line = p->call_line;
+                pLogData->color = 0;
             }
             else
             {
@@ -221,6 +222,7 @@ void TaskThread::FileSave(WORD cmd)
                 pLogData->call_site = 0;
 				pLogData->fn_line = 0;
 				pLogData->call_line = p->call_line;
+                pLogData->color = p->color;
             }
             
             pLogData->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
@@ -252,8 +254,8 @@ void TaskThread::FileSave(WORD cmd)
 
             pLogData->len = sizeof(LOG_REC_NET_DATA) + pLogData->cbData();
 
-            fprintf(m_fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-",
-                pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->nn,
+            fprintf(m_fp, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-",
+                pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->color, pLogData->nn,
                 pLogData->cb_app_name, pLogData->cb_module_name,
                 pLogData->cb_fn_name, pLogData->cb_trace, pLogData->pid, pLogData->tid, pLogData->sec, pLogData->msec,
                 pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pInfoNode->bookmark);
@@ -375,13 +377,13 @@ void TaskThread::FileImport()
                 count = count;
             LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)buf;
             int bookmark; 
-			int cf = fscanf_s(m_fp, TEXT("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-"),
-				&pLogData->len, &pLogData->log_type, &pLogData->log_flags, &pLogData->nn, 
+			int cf = fscanf_s(m_fp, TEXT("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d-"),
+				&pLogData->len, &pLogData->log_type, &pLogData->log_flags, &pLogData->color, &pLogData->nn,
                 &pLogData->cb_app_name, &pLogData->cb_module_name, 
                 &pLogData->cb_fn_name, &pLogData->cb_trace, &pLogData->pid, &pLogData->tid, &pLogData->sec, &pLogData->msec,
                 &pLogData->this_fn, &pLogData->call_site, &pLogData->fn_line, &pLogData->call_line, &bookmark);
 
-            ss = (17 == cf);
+            ss = (18 == cf);
             ss = ss && pLogData->isValid();
             int cb = pLogData->cbData();
             if (bufEnd < pLogData->data + cb)

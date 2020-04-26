@@ -256,7 +256,7 @@ THREAD_NODE* Archive::getThread(APP_NODE* pAppNode, LOG_REC* p)
     return curThread;
 }
 
-LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark)
+LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport)
 {
 	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
 
@@ -393,6 +393,23 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
             pNode->bookmark = bookmark;
         }
 
+		if (pLogData->priority)
+		{
+			switch (pLogData->priority)
+			{
+			case FLOW_LOG_ERROR:
+			case FLOW_LOG_FATAL:
+				pNode->color = 31;	//Red
+				break;
+			case FLOW_LOG_WARN:
+				pNode->color = 33;	//Yellow
+				break;
+			case FLOW_LOG_INFO:
+				pNode->color = 32;	//Green
+				break;
+			}
+		}
+
         pNode->cb_fn_name = cb_fn_name;
         memcpy(pNode->fnName(), fnName, cb_fn_name);
         pNode->cb_short_fn_name_offset = 0xFFFF;
@@ -453,7 +470,7 @@ int parceCollor(char** c)
 	return color;
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport)
 {
 	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
 	const char* fnName = pLogRec->fnName();
@@ -461,7 +478,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	int cb_trace = pLogData->cb_trace;
 	char* trace = (char*)pLogRec->trace();
 	LOG_NODE* pNode = nullptr;
-	if (pLogRec->getLogData()->log_flags & LOG_FLAG_COLOR_PARCED)
+	if (fromImport || pLogRec->getLogData()->log_flags & LOG_FLAG_COLOR_PARCED)
 	{
 		pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName);
 	}
@@ -550,14 +567,14 @@ void Archive::Log(LOG_REC* rec)
 		pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, rec->appName());
 }
 
-int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
+int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_ADB rec(pLogData);
 	if (!rec.isValid()) {
 		ATLASSERT(0);
 		return 0;
 	}
-	appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	appendRec(&rec, p_si_other, false, bookmark, pack);
 	return 1;
 }
 
@@ -660,11 +677,11 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	LOG_NODE* pNode = nullptr;
     if (pLogData->log_type == LOG_TYPE_TRACE)
     {
-		pNode = addTrace(pThreadNode, rec, bookmark);
+		pNode = addTrace(pThreadNode, rec, bookmark, fromImport);
 	}
     else
     {
-		pNode = addFlow(pThreadNode, rec, bookmark);
+		pNode = addFlow(pThreadNode, rec, bookmark, fromImport);
 	}
 	//if (pLogData->log_type == LOG_TYPE_TRACE)//if (curApp0 != curApp)
 	//{

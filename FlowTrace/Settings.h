@@ -86,7 +86,6 @@ public:
     void RestoreWindPos(HWND hWnd);
     void SaveWindPos(HWND hWnd);
 	bool SetTraceColor(int color, DWORD& textColor, DWORD& bkColor);
-	bool SetTracePriority(_flow_LogPriority priority, DWORD& textColor, DWORD& bkColor);
 	void SetUIFont(CHAR* lfFaceName, LONG lfWeight, LONG lfHeight);
 
 	StringList m_adbFilterList;

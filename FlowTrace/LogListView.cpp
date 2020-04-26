@@ -1098,9 +1098,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		bkColor = bkColor_0;
 		if (pNode->isTrace())
 		{
-			bool color_is_set = false;
-			color_is_set = gSettings.SetTracePriority((flow_LogPriority)((TRACE_NODE*)pNode)->priority, textColor, bkColor);
-			if (!color_is_set && ((TRACE_NODE*)pNode)->color)
+			if (((TRACE_NODE*)pNode)->color)
 				gSettings.SetTraceColor(((TRACE_NODE*)pNode)->color, textColor, bkColor);
 		}
 
