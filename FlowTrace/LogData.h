@@ -198,7 +198,9 @@ struct INFO_NODE : LOG_NODE
 	WORD cb_module_name;
     WORD cb_trace;
     int call_line;
-	DWORD sec;
+    DWORD call_site;
+    ADDR_INFO* p_call_info;
+    DWORD sec;
 	DWORD msec;
 	bool isEnter() {
 		return log_type == LOG_TYPE_ENTER;
@@ -212,6 +214,7 @@ struct INFO_NODE : LOG_NODE
 	void  normilizeFnName(char* name);
 	char* shortFnName();
 	int   callLine(bool resolve);
+    ADDR_INFO* getCallInfo(bool resolve);
 
 	//int cb_actual_module_name;
 	//int cb_short_module_name_offset;
@@ -227,14 +230,9 @@ struct FLOW_NODE : INFO_NODE
 
 	FLOW_NODE* peer;
 	DWORD this_fn;
-	DWORD call_site;
 	int fn_line;
-private:
 	ADDR_INFO *p_func_info;
-	ADDR_INFO *p_call_info;
-public:
 	ADDR_INFO *getFuncInfo(bool resolve);
-	ADDR_INFO *getCallInfo(bool resolve);
 	bool isOpenEnter() { return isEnter() && peer == 0; }
 	void addToTree();
 	char* getCallSrc(bool fullPath, bool resolve);

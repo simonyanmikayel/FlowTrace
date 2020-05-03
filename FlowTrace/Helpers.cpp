@@ -175,29 +175,33 @@ namespace Helpers
 		}
 		else
 		{
-            FLOW_NODE* flowNode = pSelectedNode->getSyncNode();
-            if (flowNode)
-            {
-                ADDR_INFO* p_addr_info = NULL;
-                p_addr_info = pSelectedNode->isTrace() ? flowNode->getFuncInfo(true) : (bShowCallSite ? flowNode->getCallInfo(true) : flowNode->getFuncInfo(true));
-                if (!p_addr_info)
-                {
-                    p_addr_info = pSelectedNode->isTrace() ? flowNode->getFuncInfo(true) : (bShowCallSite ? flowNode->getCallInfo(true) : flowNode->getFuncInfo(true));
-                }                
-                if (p_addr_info && p_addr_info->line > 0)
-                {
-                    src = p_addr_info->src;
-                    line = 0;
-                    if (pSelectedNode->isTrace())
-                    {
-                        line = ((TRACE_NODE*)pSelectedNode)->call_line;
-                    }
-                    else
-                    {
-                        line = p_addr_info->line;
-                    }
-                }
-            }
+			ADDR_INFO* p_addr_info = NULL;
+			if (pSelectedNode->isTrace())
+			{
+				INFO_NODE* pinfoNode = (INFO_NODE*)pSelectedNode;
+				p_addr_info = pinfoNode->getCallInfo(true);
+			}
+			if (!p_addr_info)
+			{
+				FLOW_NODE* flowNode = pSelectedNode->getSyncNode();
+				if (flowNode)
+				{
+					p_addr_info = pSelectedNode->isTrace() ? flowNode->getFuncInfo(true) : (bShowCallSite ? flowNode->getCallInfo(true) : flowNode->getFuncInfo(true));
+				}
+			}
+			if (p_addr_info && p_addr_info->line > 0)
+			{
+				src = p_addr_info->src;
+				line = 0;
+				if (pSelectedNode->isTrace() && ((TRACE_NODE*)pSelectedNode)->call_line)
+				{
+					line = ((TRACE_NODE*)pSelectedNode)->call_line;
+				}
+				else
+				{
+					line = p_addr_info->line;
+				}
+			}
 		}
 		ShowInIDE(src, line, IsAndroidLog);
 	}
@@ -222,9 +226,9 @@ namespace Helpers
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "log_flags: %d\r\n", pInfoNode->log_flags);
         if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "data_type: %d\r\n", pInfoNode->data_type);
         if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_line: %d\r\n", pInfoNode->call_line);
+		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_site: %X\r\n", pInfoNode->call_site);
 		if (pFlowNode) {
 			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "this_fn: %X\r\n", pFlowNode->this_fn);
-			if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "call_site: %X\r\n", pFlowNode->call_site);
             if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "fn_line: %d\r\n", pFlowNode->fn_line);
         }
 		if (cb < cMax) cb += snprintf(buf + cb, cMax - cb, "----------------------\r\n");

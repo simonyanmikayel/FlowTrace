@@ -373,7 +373,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
             return nullptr;
 
         pNode->data_type = TRACE_DATA_TYPE;
-
+		 
 #ifdef _NN_TEST
 		pNode->prev_nn = g_prev_nn;
 		pNode->pack_nn = g_pack_nn;
@@ -388,7 +388,8 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 		pNode->sec = pLogData->sec;
 		pNode->msec = pLogData->msec;
 		pNode->call_line = pLogData->call_line;
-        if (bookmark) {
+		pNode->call_site = pLogData->call_site;
+		if (bookmark) {
             bookmarkNumber++;
             pNode->bookmark = bookmark;
         }

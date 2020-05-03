@@ -666,6 +666,12 @@ bool LOG_NODE::CanShowInIDE()
 
 int TRACE_NODE::getCallLine(bool bCallSiteInContext, bool resolve)
 {
+    ADDR_INFO* p_addr_info = getCallInfo(true);
+    if (p_addr_info && p_addr_info->line)
+    {
+        return p_addr_info->line;
+    }
+
     int line = 0;
     if (bCallSiteInContext)
     {
@@ -703,7 +709,7 @@ ADDR_INFO * FLOW_NODE::getFuncInfo(bool resolve)
         AddrInfo::Resolve(this);
     return p_func_info;
 }
-ADDR_INFO * FLOW_NODE::getCallInfo(bool resolve)
+ADDR_INFO * INFO_NODE::getCallInfo(bool resolve)
 {
     if (p_call_info == pInvalidAddrInfo)
         return 0;

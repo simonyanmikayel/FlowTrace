@@ -64,14 +64,14 @@ int CreateModuleList()
     return 0;
 }
 
-MuduleInfo* GetMuduleInfo(FLOW_NODE* flowNode)
+MuduleInfo* GetMuduleInfo(INFO_NODE* infoNode)
 {
     MuduleInfo* pMuduleInfo = lastMuduleInfo;
     while (pMuduleInfo) 
     {
 		if (pMuduleInfo->szModuleName) {
-			char* moduleName = flowNode->moduleName();
-			int moduleNameLength = std::max(flowNode->moduleNameLength(), (int)strlen(pMuduleInfo->szModuleName));
+			char* moduleName = infoNode->moduleName();
+			int moduleNameLength = std::max(infoNode->moduleNameLength(), (int)strlen(pMuduleInfo->szModuleName));
 			if (0 == _strnicmp(moduleName, pMuduleInfo->szModuleName, moduleNameLength)) {
 				break;
 			}
@@ -135,16 +135,20 @@ void FillModuleInfo(MuduleInfo* pMuduleInfo)
         pMuduleInfo->pAddrInfo = pInvalidAddrInfo;
 }
 
-void AddrInfo::Resolve(FLOW_NODE* flowNode)
+void AddrInfo::Resolve(INFO_NODE* infoNode)
 {
-    flowNode->p_func_info = flowNode->p_call_info = pInvalidAddrInfo;
+    if (infoNode->isFlow())
+    {
+        FLOW_NODE* flowNode = (FLOW_NODE*)infoNode;
+        flowNode->p_func_info = flowNode->p_call_info = pInvalidAddrInfo;
+    }
 
     if (!Initialized)
     {
         CreateModuleList();
     }
 
-    MuduleInfo* pMuduleInfo = GetMuduleInfo(flowNode);
+    MuduleInfo* pMuduleInfo = GetMuduleInfo(infoNode);
     if (!pMuduleInfo)
         return;
 
@@ -154,36 +158,43 @@ void AddrInfo::Resolve(FLOW_NODE* flowNode)
     if (pMuduleInfo->pAddrInfo == pInvalidAddrInfo)
         return;
 
-    DWORD call_addr = flowNode->call_site;
-    DWORD func_addr = flowNode->this_fn;
+    DWORD call_addr = infoNode->call_site;
+    DWORD func_addr = 0;
+    if (infoNode->isFlow())
+    {
+        FLOW_NODE* flowNode = (FLOW_NODE*)infoNode;
+        func_addr = flowNode->this_fn;
+    }
+
     const int max_delta = 128;
     DWORD call_addr_delta = max_delta;
     DWORD func_addr_delta = max_delta;
     ADDR_INFO *p_addr_info = pMuduleInfo->pAddrInfo;
-    while (p_addr_info)
+    while (p_addr_info && (func_addr || call_addr))
     {
-        if (call_addr >= p_addr_info->addr && (call_addr - p_addr_info->addr) < call_addr_delta)
+        if (call_addr && call_addr >= p_addr_info->addr && (call_addr - p_addr_info->addr) < call_addr_delta)
         {
             call_addr_delta = call_addr - p_addr_info->addr;
-            flowNode->p_call_info = p_addr_info;
+            infoNode->p_call_info = p_addr_info;
         }
-        else if (call_addr < p_addr_info->addr && (p_addr_info->addr - call_addr) < call_addr_delta)
+        else if (call_addr && call_addr < p_addr_info->addr && (p_addr_info->addr - call_addr) < call_addr_delta)
         {
             call_addr_delta = p_addr_info->addr - call_addr;
-            flowNode->p_call_info = p_addr_info;
+            infoNode->p_call_info = p_addr_info;
         }
 
-        if (func_addr >= p_addr_info->addr && (func_addr - p_addr_info->addr) < func_addr_delta)
+        if (func_addr && func_addr >= p_addr_info->addr && (func_addr - p_addr_info->addr) < func_addr_delta)
         {
             func_addr_delta = func_addr - p_addr_info->addr;
+            FLOW_NODE* flowNode = (FLOW_NODE*)infoNode;
             flowNode->p_func_info = p_addr_info;
         }
-        else if (func_addr < p_addr_info->addr && (p_addr_info->addr - func_addr) < func_addr_delta)
+        else if (func_addr && func_addr < p_addr_info->addr && (p_addr_info->addr - func_addr) < func_addr_delta)
         {
             func_addr_delta = p_addr_info->addr - func_addr;
+            FLOW_NODE* flowNode = (FLOW_NODE*)infoNode;
             flowNode->p_func_info = p_addr_info;
         }
-
         p_addr_info = p_addr_info->pPrev;
     }
 }

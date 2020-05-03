@@ -6,7 +6,7 @@ extern ADDR_INFO* pInvalidAddrInfo;
 class AddrInfo
 {
 public:
-    static void Resolve(FLOW_NODE* flowNode);
+    static void Resolve(INFO_NODE* infoNode);
     static void Reset();
 };
 
