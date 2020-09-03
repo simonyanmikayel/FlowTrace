@@ -75,7 +75,6 @@ DWORD WINAPI WorkerThread::ThreadFunk(LPVOID lpParameter)
     return 0;
 }
 
-
 DWORD WorkerThread::SleepThread(DWORD  dwMilliseconds)
 {
 	return WaitForSingleObject(m_hTreadEvent, dwMilliseconds);

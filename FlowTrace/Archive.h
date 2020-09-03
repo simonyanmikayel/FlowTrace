@@ -20,7 +20,7 @@ struct PS_INFO {
 	char name[MAX_APP_NAME + 1];
 	int cName;
 };
-#define maxPsInfo 512
+#define maxPsInfo 1024 
 
 
 #pragma pack(push,4)
@@ -126,7 +126,7 @@ private:
 	LOG_REC_ADB_DATA* pLogData;
 };
 
-typedef struct
+struct NET_PACK_INFO
 {
     int data_len;
     int pack_nn;
@@ -134,17 +134,17 @@ typedef struct
 	int buff_nn;
 	int retry_delay;
 	int retry_count;
-}NET_PACK_INFO;
+};
 
 enum NET_PACK_STATE { NET_PACK_FREE, NET_PACK_BUZY, NET_PACK_READY };
-typedef struct
+struct NET_PACK
 {
 	NET_PACK_INFO info;
 	char data[MAX_NET_BUF];
 	sockaddr_in si_other;
 	static int PackSize() { return sizeof(NET_PACK_INFO) + MAX_NET_BUF; }
 	NET_PACK_STATE state;
-} NET_PACK;
+};
 #pragma pack(pop)
 
 class Archive

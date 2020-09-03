@@ -45,65 +45,65 @@ void LogcatLogThread::Terminate()
 
 
 struct LOG_PARCER {
-	LOG_PARCER(char* e) : expr(e), maxPos((int)strlen(e)) { reset(); }
-	bool pending() { 
-		return pos && pos < maxPos; 
+	LOG_PARCER(int c) {
+		_buf_size = c;
+		_buf = new char[_buf_size + 8];
+		reset();
 	}
-	bool compeated() { 
-		return cb >= maxPos && !pending();
+	~LOG_PARCER() {
+		delete[] _buf;
 	}
-	void reset() { cb = pos = 0; buf[0] = 0; buf[buf_size];  }
-	void parce(const char* szLog, int cbLog);
-
-	static const int buf_size = 512;
-	char buf[buf_size + 1];
-	int pos, cb;
-	const char* dataStart;
-	const char* dataEnd;
+	char* buf() { return _buf; }
+	int size() { return _size; }
+	int getLine(const char* sz, int cb, bool endWithNewLine); //return number of bytes parese in sz
+	void reset() { _size = 0; _buf[0] = 0; riched = false; }
+	bool compleated() { return riched; }
 private:
-	const int maxPos;
-	const char *expr;
+	bool riched;
+	char* _buf;
+	int _buf_size;
+	int _size;
 };
 
-void LOG_PARCER::parce(const char* szLog, int cbLog)
+//return number of bytes parese in sz
+int LOG_PARCER::getLine(const char* sz, int cb, bool endWithNewLine)
 {
-	dataStart = dataEnd = szLog;
-	for (; dataEnd < (szLog + cbLog) && !compeated(); dataEnd++) {
-		if (pos == 0 && expr[0] != '*') { 
-			char * p = strchr((char*)dataEnd, expr[0]); //fast search for metadata start
-			if (p) {
-				dataEnd = p;
-			}
-		}
-		char c = *dataEnd;
-		if (c == expr[pos] || '*' == expr[pos]) {
-			if (cb == 0) {
-				dataStart = dataEnd;
-			}
-			if (cb < buf_size) {
-				buf[cb++] = c;
-				if (expr[pos] != '*') {
-					pos++;
-				}
-				else if (expr[pos + 1] == c) {
-					pos++;
-					if (!compeated())
-						pos++;
-				}
-			}
-			else {
-				ATLASSERT(false);
-				reset();
-				break;
-			}
-		}
-		else {
-			if (cb)
-				dataEnd--;
-			reset();
+	int i = 0;
+	const char* end = sz + cb;
+	bool endOfLine = false;
+	//skip leading new lines
+	if (_size == 0)
+	{
+		for (; i < cb && (sz[i] == '\n' || sz[i] == '\r'); i++)
+		{
 		}
 	}
-	buf[cb] = 0;
+	for (; i < cb && (sz[i] != '\n' && sz[i] != '\r'); i++)
+	{
+		if (_size < _buf_size)
+		{
+			_buf[_size] = sz[i];
+			_size++;
+		}
+		else
+		{
+			ATLASSERT(false); 
+			break;
+		}
+
+	}
+	riched = (_size > 0 && i < cb && (sz[i] == '\n' || sz[i] == '\r'));
+	//skip trailing new lines
+	for (; i < cb && (sz[i] == '\n' || sz[i] == '\r'); i++)
+	{
+	}
+	if (riched && endWithNewLine)
+	{
+		_buf[_size] = '\n';
+		_size++;
+	}
+	_buf[_size] = 0;
+	return i;
 }
 
 static LOG_REC_ADB_DATA adbRec;
@@ -287,36 +287,38 @@ static void WriteLog(const char* szLog, int cbLog)
 	TraceLog(szLog, cbLog);
 #endif //_USE_FT
 }
-// test on "\r\n[\r\n\x1b[0m\r\n\r\n[ 03-02 20:27:03.803 14375:14375 D/FLOW_TRACE ]\r\n"
-// metadata example: [ 02-22 16:39:05.830   775:  865 D/TAG ]
-static LOG_PARCER mt("\r\n[ *]\r\n"); //for adb metadara
+#define LOGGER_ENTRY_MAX_LEN  (8*1024) // (4*1024) in android sorces
+static LOG_PARCER mt(LOGGER_ENTRY_MAX_LEN);
 
 static bool ParceMetaData()
 {
+	if (mt.size() < 3 || mt.buf()[0] != '[' || mt.buf()[mt.size() - 2] != ']')
+		return false;
+
 	bool ok = true;
 	int i = 0;
-	int unused1 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int unused2 = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int h = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int m = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int s = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int ms = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int pid = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
-	int tid = NextMetaDataDigit(mt.buf, mt.buf_size, i, ok);
+	int unused1 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int unused2 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int h = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int m = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int s = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int ms = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int pid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int tid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
 	if (ok && pid && tid) {
 		adbRec.reset();
 		adbRec.pid = pid;
 		adbRec.tid = tid;
 		adbRec.sec = Helpers::GetSec(h , m, s);// 3600 * h + 60 * m + s;
 		adbRec.msec = ms;
-		int cb_fn_name = mt.cb - i - 5;
+		int cb_fn_name = mt.size() - i - 5;
 		if (i > 0 && cb_fn_name > 0 && cb_fn_name < MAX_JAVA_TAG_NAME_LEN - 2)
 		{
 			//if (0 != strstr(mt.buf + i + 1, "V/Lap"))
 			//{
 			//	i = i;
 			//}
-			memcpy(adbRec.tag, mt.buf + i + 1, cb_fn_name);
+			memcpy(adbRec.tag, mt.buf() + i + 1, cb_fn_name);
 			while (cb_fn_name > 2 && adbRec.tag[cb_fn_name - 1] == ' ')
 				cb_fn_name--;
 			adbRec.tag[cb_fn_name] = ':';
@@ -359,25 +361,18 @@ bool LogcatStreamCallback::HundleStream(const char* szLog, int cbLog)
 	return true;
 #endif
 	//return;
-	while (cbLog && gLogReceiver.working()) {
-		mt.parce(szLog, cbLog);
-		int start = (int)(mt.dataStart - szLog);
-		int end = (int)(mt.dataEnd - szLog);
-		if (mt.compeated()) {
-			WriteLog(szLog, start);
+	while (cbLog && gLogReceiver.working()) 
+	{
+		int skiped = mt.getLine(szLog, cbLog, true);
+		if (mt.compleated())
+		{
 			if (!ParceMetaData())
-				WriteLog(mt.buf, mt.cb);
+				WriteLog(mt.buf(), mt.size());
 			mt.reset();
 		}
-		else if (mt.pos > 0) {//we have incompleate metadata at the end of szLog
-			ATLASSERT(end == cbLog);
-			WriteLog(szLog, start);
-		}
-		else {
-			WriteLog(szLog, end);
-		}
-		szLog += end;
-		cbLog -= end;
+
+		szLog += skiped;
+		cbLog -= skiped;
 	}
 	//DWORD dwTick = GetTickCount();
 	//stdlog("<-%d - %d\n", cbLog0, dwTick-gdwLastPrintTick);
@@ -403,6 +398,7 @@ static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:S" }; //h
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long" };
 void LogcatLogThread::Work(LPVOID pWorkParam)
 {
+	//return;
 #if defined(_WRITE_LOCAL)
 	if (!testLogFile) fopen_s(&testLogFile, "d:\\temp\\adbLog.txt", "wb");
 #elif defined(_READ_LOCAL)
@@ -455,8 +451,9 @@ void LogcatLogThread::Work(LPVOID pWorkParam)
 
 static PS_INFO psInfoTemp[maxPsInfo];
 static int cPsInfoTemp;
-//USER     PID   PPID  VSIZE  RSS   PRIO  NICE  RTPRI SCHED   WCHAN    PC         NAME
-static LOG_PARCER ps("\n*\r"); //captur one line
+//PID NAME
+//static LOG_PARCER ps("\n*\r"); //captur one line
+static LOG_PARCER ps(1024);
 bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 {
 #ifdef _WRITE_LOCAL
@@ -465,29 +462,36 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 	return true;
 #endif
 	//stdlog("->%d\n", cbLog);
-	//stdlog("\x1%s", szLog);
+	//stdlog("\x1->%s\n", szLog);
 	//return true;
 	while (cbLog && (cPsInfoTemp < maxPsInfo) && gLogReceiver.working()) {
-		ps.parce(szLog, cbLog);
-		int start = (int)(ps.dataStart - szLog);
-		int end = (int)(ps.dataEnd - szLog);
-		if (ps.compeated()) {
-			char* sz = ps.buf;
-			int c = ps.cb - 1;
-			sz[c] = 0;
-			//stdlog("\x1%s\n", sz);
-			while (sz[0] != ' ') { //reach to first space
+		int skiped = ps.getLine(szLog, cbLog, false);
+		if (ps.compleated()) {
+			char* sz = ps.buf();
+			int c = ps.size();
+			//stdlog("\x1size: %d, %s\n", ps.size(), sz);
+			while (c && !isdigit(sz[0])) 
+			{ //reach to first digit
 				sz++;
 				c--;
 			}
-			while (!isdigit(sz[0])) { //reach to first digit
-				sz++;
-				c--;
+			if (sz > ps.buf() && *(sz - 1) != ' ' && !isdigit(*(sz - 1)))
+			{
+				while (c && sz[0] != ' ' )
+				{ //reach to first space
+					sz++;
+					c--;
+				}
+				while (c && !isdigit(sz[0]))
+				{ //reach to first digit
+					sz++;
+					c--;
+				}
 			}
 			int pid = atoi(sz);
-			//if (pid == 18325)
-			//	pid = pid;
-			while (c && sz[c] != ' ')
+			if (pid == 3304)
+				pid = pid;
+			while (c && sz[c-1] != ' ')
 				c--;
 			char* name = sz + c;
 			c = std::min(MAX_APP_NAME, (int)strlen(name));
@@ -496,23 +500,25 @@ bool PsStreamCallback::HundleStream(const char* szLog, int cbLog)
 				name++;
 				c--;
 			}
-			if (c && pid) {
+			if (c && pid) 
+			{
 				psInfoTemp[cPsInfoTemp].pid = pid;
 				memcpy(psInfoTemp[cPsInfoTemp].name, name, c);
 				psInfoTemp[cPsInfoTemp].name[c] = 0;
 				psInfoTemp[cPsInfoTemp].cName = c;
-				//stdlog("\x1 %d %s\n", pid, psInfoTemp[cPsInfoTemp].name);
+				//stdlog("\x1 [PID: %d %s]\n", pid, psInfoTemp[cPsInfoTemp].name);
 				cPsInfoTemp++;
 			}
 			ps.reset();
-		}
-		szLog += end;
-		cbLog -= end;
+		}		
+		szLog += skiped;
+		cbLog -= skiped;
 	}
 
 	return (cPsInfoTemp < maxPsInfo) && gLogReceiver.working();
 }
 
+//static const char* cmdAdbShell[]{ "cmd_shell", "ps", "-o", "PID,NAME" };
 static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
 void PsThread::Work(LPVOID pWorkParam)
 {
@@ -537,8 +543,10 @@ void PsThread::Work(LPVOID pWorkParam)
 	while (IsWorking()) {
 		cPsInfoTemp = 0;
 		ps.reset(); 
+		//stdlog("->adb shell ps\n");
 		adb_commandline(_countof(cmdAdbShell), cmdAdbShell, &streamCallback);//do this after LogcatLogThread::Work
 		streamCallback.OnStdout("\r", 1);//end with new line
+		//return;
 #if defined(_WRITE_LOCAL)
 		break;
 #endif
