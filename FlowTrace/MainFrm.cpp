@@ -513,6 +513,7 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
         searchInfo.ClearSearchResults();
         gArchive.getListedNodes()->applyFilter(gSettings.GetFlowTracesHiden());
         m_list.RefreshList(true);
+        m_tree.RedrawAll();
     }
     return 0;
 }
