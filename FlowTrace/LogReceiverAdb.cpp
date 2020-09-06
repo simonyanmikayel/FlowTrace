@@ -353,7 +353,7 @@ bool LogcatStreamCallback::HundleStream(const char* szLog, int cbLog)
 	//static DWORD gdwLastPrintTick = 0;
 	//int cbLog0 = cbLog;
 
-	//stdlog("->%d\n", cbLog);
+	//stdlog("->%d %s\n", cbLog, szLog);
 	//stdlog("\x1%s", szLog);
 #ifdef _WRITE_LOCAL
 	if (testLogFile)
@@ -364,6 +364,7 @@ bool LogcatStreamCallback::HundleStream(const char* szLog, int cbLog)
 	while (cbLog && gLogReceiver.working()) 
 	{
 		int skiped = mt.getLine(szLog, cbLog, true);
+		//stdlog("-->%d %d %d %s\n", mt.compleated(), skiped, mt.size(), mt.buf());
 		if (mt.compleated())
 		{
 			if (!ParceMetaData())

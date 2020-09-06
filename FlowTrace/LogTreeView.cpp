@@ -435,7 +435,7 @@ void CLogTreeView::EnsureItemVisible(int iItem)
     GetNodetPos(m_hdc, pNode->hasCheckBox, offset, szText, cbText, cxText, xStart, xEnd);
 
     SetColumnLen(xEnd);
-
+    /*
     SCROLLINFO si;
     si.cbSize = sizeof(si);
     si.fMask = SIF_RANGE | SIF_POS;
@@ -459,6 +459,7 @@ void CLogTreeView::EnsureItemVisible(int iItem)
         SIZE size = { cxRight + cxleft, 0 };
         Scroll(size);
     }
+    */
     //stdlog("pNode = %p iItem = %d offset = %d cxleft = %d cxleft = %d xStart = %d cxText = %d xEnd = %d si.nPos = %d si.nMin = %d si.nMax = %d rcClient.left = %d rcClient.right = %d rcItem.left = %d rcItem.right = %d szText = %s\n", pNode, iItem, offset, cxleft, cxleft, xStart, cxText, xEnd, si.nPos, si.nMin, si.nMax, rcClient.left, rcClient.right, rcItem.left, rcItem.right, szText);
 }
 

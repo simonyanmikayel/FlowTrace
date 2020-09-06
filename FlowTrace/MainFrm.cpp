@@ -491,23 +491,22 @@ LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lPara
 }
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-    bool filterChanged = false;
-    LOG_NODE* pNode = (LOG_NODE*)lParam;
-    if (pNode && (pNode->isApp() || pNode->isThread()))
-    {
-        int cheked = pNode->checked;
-        if (pNode->hiden != !cheked)
-        {
-            pNode->hiden = !cheked;
-            filterChanged = true;
-        }
-    }
-    else
-    {
-        filterChanged = true;
-    }
-
-    if (filterChanged)
+    //bool filterChanged = false;
+    //LOG_NODE* pNode = (LOG_NODE*)lParam;
+    //if (pNode && (pNode->isApp() || pNode->isThread()))
+    //{
+    //    int cheked = pNode->checked;
+    //    if (pNode->hiden != !cheked)
+    //    {
+    //        pNode->hiden = !cheked;
+    //        filterChanged = true;
+    //    }
+    //}
+    //else
+    //{
+    //    filterChanged = true;
+    //}
+    //if (filterChanged)
     {
         //m_searchedit.SetWindowText(_T(""));
         m_searchResult.SetWindowText(_T(""));

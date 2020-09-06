@@ -612,7 +612,7 @@ bool LOG_NODE::Check(bool check)
 		if (checked != check)
 			checkChanged = true;
 		checked = check;
-		hiden = !check;
+		//hiden = !check;
 	}
 	return checkChanged;
 }

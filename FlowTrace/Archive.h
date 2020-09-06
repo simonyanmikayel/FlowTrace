@@ -223,11 +223,11 @@ struct ListedNodes
     }
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
         DWORD64 ndx = gArchive.index(pNode);
-        if (pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
-        {
-            m_pListNodes->AddPtr(pNode);
-        }
-    }
+		if (pNode->threadNode && pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
+		{
+		    m_pListNodes->AddPtr(pNode);
+		}
+	}
     DWORD Count() { return m_pListNodes->Count(); }
     void applyFilter(BOOL flowTraceHiden);
 	void updateList(BOOL flowTraceHiden);

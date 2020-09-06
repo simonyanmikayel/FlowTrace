@@ -78,7 +78,7 @@ struct LOG_NODE
     LOG_NODE* nextSibling;
     struct {
         WORD hasNewLine : 1;
-        WORD hiden : 1;
+        //WORD hiden : 1;
         WORD hasCheckBox : 1;
         WORD checked : 1;
         WORD selected : 1;
@@ -262,7 +262,8 @@ struct THREAD_NODE : LOG_NODE
         pParent->add_child((LOG_NODE*)pNode);
         curentFlow = pNode;
     }
-    bool isHiden() { return hiden || pAppNode->hiden; }
+    //bool isHiden() { return hiden || pAppNode->hiden; }
+    bool isHiden() { return !checked || !pAppNode->checked; }
 };
 
 struct TRACE_CHANK
