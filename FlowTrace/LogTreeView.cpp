@@ -435,13 +435,27 @@ void CLogTreeView::EnsureItemVisible(int iItem)
     GetNodetPos(m_hdc, pNode->hasCheckBox, offset, szText, cbText, cxText, xStart, xEnd);
 
     SetColumnLen(xEnd);
-    /*
+    
     SCROLLINFO si;
     si.cbSize = sizeof(si);
     si.fMask = SIF_RANGE | SIF_POS;
     GetScrollInfo(SB_HORZ, &si);
-    //stdlog("cxClient: %d, xStart: %d, xEnd: %d, si.nPos: %d\n", cxClient, xStart, xEnd, si.nPos);
+    int cxleft = xStart - si.nPos;
+    int cxRight = xEnd - (si.nPos + cxClient - 16);
+    //stdlog("cxClient: %d, xStart: %d, xEnd: %d, si.nPos: %d, cxleft: %d, cxRight: %d\n", cxClient, xStart, xEnd, si.nPos, cxleft, cxRight);
 
+    if (cxleft < 0)
+    {
+        Scroll({ cxleft, 0 });
+        //stdlog("cxleft: %d\n", cxleft);
+    }
+    else if (cxRight > 0 && cxleft > cxClient /3)
+    {
+        int cx = std::min(cxleft - (cxClient / 3), cxRight);
+        Scroll({ cx, 0 });
+        //stdlog("cx: %d\n", cx);
+    }
+    /*
     int cxRight = 0, cxleft = 0;
     if (xEnd > cxClient + si.nPos - 16)
     {
