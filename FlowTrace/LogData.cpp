@@ -718,17 +718,17 @@ ADDR_INFO * INFO_NODE::getCallInfo(bool resolve)
     return p_call_info;
 }
 
-int APP_NODE::applyFilter()
+bool APP_NODE::applyFilter()
 {
-	if (!checked)
-		return 0;
+	if (!checked || psNN != 0)
+		return false;
 
 	if (isProcessFiltered())
 	{
 		checked = 0;
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 bool APP_NODE::isProcessFiltered()

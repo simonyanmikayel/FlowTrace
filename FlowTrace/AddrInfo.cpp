@@ -67,10 +67,10 @@ int CreateModuleList()
 MuduleInfo* GetMuduleInfo(INFO_NODE* infoNode)
 {
     MuduleInfo* pMuduleInfo = lastMuduleInfo;
-    while (pMuduleInfo) 
+    char* moduleName = infoNode->moduleName();
+    while (pMuduleInfo)
     {
 		if (pMuduleInfo->szModuleName) {
-			char* moduleName = infoNode->moduleName();
 			int moduleNameLength = std::max(infoNode->moduleNameLength(), (int)strlen(pMuduleInfo->szModuleName));
 			if (0 == _strnicmp(moduleName, pMuduleInfo->szModuleName, moduleNameLength)) {
 				break;

@@ -874,9 +874,12 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
         ::SetBkMode(hdc, OPAQUE);
     }
 
-	if (pNode->isJava()) {
-			::SetTextColor(hdc, gSettings.InfoTextColorNative());
-	}
+    if (pNode->isApp() && ((APP_NODE*)pNode)->psNN < 0) {
+        ::SetTextColor(hdc, RGB(185, 122, 87));
+    }
+	else if (pNode->isJava()) {
+        ::SetTextColor(hdc, gSettings.InfoTextColorNative());
+    }
 	else {
 		::SetTextColor(hdc, gSettings.InfoTextColorNative());
 	}

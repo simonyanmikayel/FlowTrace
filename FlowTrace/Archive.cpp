@@ -45,6 +45,7 @@ void Archive::clearArchive(bool closing)
     archiveNumber++;
 	bookmarkNumber = 0;
 	m_lost = 0;
+	m_psNN = 0;
     curApp = 0;
     curThread = 0;
 
@@ -125,6 +126,7 @@ int cPsInfo;
 bool  Archive::setPsInfo(PS_INFO* p, int c)
 {
 	gLogReceiver.lock();
+	c = std::min(c, maxPsInfo);
 	memcpy(psInfo, p, c * sizeof(PS_INFO));
 	cPsInfo = c;
 	gLogReceiver.unlock();
@@ -135,6 +137,20 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		if (setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName))
 			updateViews = true;
 	}
+
+	m_psNN++;
+
+	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
+	while (app)
+	{
+		if (app->psNN > 0 && app->psNN != m_psNN)
+		{
+			app->psNN = -app->psNN;
+			updateViews = true;
+		}
+		app = (APP_NODE*)app->prevSibling;
+	}
+
 	return updateViews;
 }
 
@@ -143,16 +159,25 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if ((app->pid == pid) && app->cb_app_name == 1 && app->appName[0] == '*') {
-			cbName = std::min(cbName, MAX_APP_NAME);
-			memcpy(app->appName, szName, cbName);
-			app->appName[cbName] = 0;
-			app->cb_app_name = cbName;
-			if (app->applyFilter())
+		if (app->pid == pid)
+		{
+			bool ret = false;
+			if (app->cb_app_name == 1 && app->appName[0] == '*')
 			{
-				::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, (LPARAM)app);
+				cbName = std::min(cbName, MAX_APP_NAME);
+				memcpy(app->appName, szName, cbName);
+				app->appName[cbName] = 0;
+				app->cb_app_name = cbName;
+				if (app->applyFilter())
+				{
+					ret = true;
+				}
 			}
-			return true;
+			if (app->psNN == 0)
+				app->psNN = m_psNN;
+			if (app->psNN == m_psNN)
+				app->psNN++;
+			return ret;
 		}
 		app = (APP_NODE*)app->prevSibling;
 	}

@@ -186,7 +186,8 @@ private:
 	bool setAppName(int pid, char* szName, int cbName);
 	bool resolveAppName(APP_NODE* app);
 	DWORD m_lost;
-    static DWORD archiveNumber;
+	DWORD m_psNN;
+	static DWORD archiveNumber;
     BYTE bookmarkNumber;
     APP_NODE* curApp;
     THREAD_NODE* curThread;

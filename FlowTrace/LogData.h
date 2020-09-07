@@ -175,11 +175,12 @@ struct APP_NODE : LOG_NODE
 	DWORD lastRecNN;
 	int   lastPackNN;
 	DWORD lost;
+    int   psNN;
     char ip_address[66];
     int cb_app_name;
     int cb_short_app_name_offset;
     char appName[MAX_APP_NAME + 1];
-	int applyFilter();
+    bool applyFilter();
 	bool isProcessFiltered();
 };
 

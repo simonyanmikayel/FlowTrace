@@ -489,6 +489,13 @@ LRESULT CMainFrame::onUpdateBackTrace(UINT /*uMsg*/, WPARAM wParam, LPARAM lPara
   m_view.ShowBackTrace(pNode);
   return 0;
 }
+
+LRESULT CMainFrame::onUpdateTree(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+{
+    m_tree.RedrawAll();
+    return 0;
+}
+
 LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
     //bool filterChanged = false;
