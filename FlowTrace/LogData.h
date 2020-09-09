@@ -182,6 +182,7 @@ struct APP_NODE : LOG_NODE
     char appName[MAX_APP_NAME + 1];
     bool applyFilter();
 	bool isProcessFiltered();
+    bool isClosed() { return psNN < 0; }
 };
 
 struct INFO_NODE : LOG_NODE

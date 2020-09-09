@@ -159,7 +159,7 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->pid == pid)
+		if (app->pid == pid && !app->isClosed())
 		{
 			bool ret = false;
 			if (app->cb_app_name == 1 && app->appName[0] == '*')
@@ -222,7 +222,7 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
 	LOG_REC_BASE_DATA* pLogData = p->getLogData();
     if (curApp)
     {
-        if (curApp && (curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+        if (curApp && (curApp->pid == pLogData->pid) && !curApp->isClosed()) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
             return curApp;
     }
 
@@ -230,7 +230,7 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)
     {
-        if ((curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+        if ((curApp->pid == pLogData->pid) && !curApp->isClosed()) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
             break;
         curApp = (APP_NODE*)curApp->prevSibling;
     }
