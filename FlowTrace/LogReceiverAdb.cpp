@@ -311,15 +311,16 @@ static bool ParceMetaData()
 		adbRec.tid = tid;
 		adbRec.sec = Helpers::GetSec(h , m, s);// 3600 * h + 60 * m + s;
 		adbRec.msec = ms;
-		int cb_fn_name = mt.size() - i - 5;
+		int cb_fn_name = mt.size() - i - 1;
 		if (i > 0 && cb_fn_name > 0 && cb_fn_name < MAX_JAVA_TAG_NAME_LEN - 2)
 		{
-			//if (0 != strstr(mt.buf + i + 1, "V/Lap"))
+			//if (0 != strstr(mt.buf + i + 1, "V/Lap")) 
 			//{
 			//	i = i;
 			//}
 			memcpy(adbRec.tag, mt.buf() + i + 1, cb_fn_name);
-			while (cb_fn_name > 2 && adbRec.tag[cb_fn_name - 1] == ' ')
+			adbRec.tag[cb_fn_name] = 0;
+			while (cb_fn_name > 2 && (adbRec.tag[cb_fn_name - 1] <= ' ' || adbRec.tag[cb_fn_name - 1] == ']'))
 				cb_fn_name--;
 			adbRec.tag[cb_fn_name] = ':';
 			adbRec.tag[++cb_fn_name] = 0;
