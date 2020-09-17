@@ -3,6 +3,7 @@
 #include "WorkerThread.h"
 
 //#define USE_TCP
+#define USE_UDP
 
 class LogReceiver
 {

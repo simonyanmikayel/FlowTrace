@@ -11,7 +11,9 @@ static int cNetThreads = 0;
 void LogReceiverNet::start(bool reset)
 {
 	//logcat(0, 0);
+#ifdef USE_UDP
 	add(new UdpThread());
+#endif
 #ifdef USE_TCP
 	add(new TcpListenThread());
 #endif

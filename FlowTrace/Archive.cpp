@@ -162,7 +162,7 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 		if (app->pid == pid && !app->isClosed())
 		{
 			bool ret = false;
-			if (app->cb_app_name == 1 && app->appName[0] == '*')
+			if (app->cb_app_name == 1 && app->appName[0] == UNKNOWNP_APP_NAME[0])
 			{
 				cbName = std::min(cbName, MAX_APP_NAME);
 				memcpy(app->appName, szName, cbName);
@@ -170,7 +170,7 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 				app->cb_app_name = cbName;
 				if (app->applyFilter())
 				{
-					ret = true;
+					ret = true; //we need refresh views
 				}
 			}
 			if (app->psNN == 0)
