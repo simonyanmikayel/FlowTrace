@@ -542,6 +542,7 @@ void PsThread::Work(LPVOID pWorkParam)
 		streamCallback.OnStdout(streamCallback.GetBuf(), cb);
 	}
 #else
+	int cPsInfoPrev = 0;
 	while (IsWorking()) {
 		cPsInfoTemp = 0;
 		ps.reset(); 
@@ -552,8 +553,9 @@ void PsThread::Work(LPVOID pWorkParam)
 #if defined(_WRITE_LOCAL)
 		break;
 #endif
-		if (gArchive.setPsInfo(psInfoTemp, cPsInfoTemp))
+		if (gArchive.setPsInfo(psInfoTemp, cPsInfoTemp) || cPsInfoPrev != cPsInfoTemp)
 			gMainFrame->RedrawViews();
+		cPsInfoPrev = cPsInfoTemp;
 #if !defined(_WRITE_LOCAL)
 		for (int i = 0; i < 5 && IsWorking(); i++)
 			SleepThread(1000);
