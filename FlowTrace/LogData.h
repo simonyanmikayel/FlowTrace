@@ -167,7 +167,10 @@ struct ROOT_NODE : LOG_NODE
 {
 };
 
+#define UNKNOWNP_CLOSED_APP_NAME "???"
 #define UNKNOWNP_APP_NAME "*"
+#define PRE_INITIALIZED_APP_NAME "<pre-initialized>"
+
 struct APP_NODE : LOG_NODE
 {
     int pid;
@@ -183,6 +186,8 @@ struct APP_NODE : LOG_NODE
     bool applyFilter();
 	bool isProcessFiltered();
     bool isClosed() { return psNN < 0; }
+    bool isUnknown() { return cb_app_name == 1 && appName[0] == UNKNOWNP_APP_NAME[0]; }
+    bool isPreInitialized() { return cb_app_name == 17 && appName[0] == PRE_INITIALIZED_APP_NAME[0] && 0 == strncmp(PRE_INITIALIZED_APP_NAME, appName, 17); }
 };
 
 struct INFO_NODE : LOG_NODE

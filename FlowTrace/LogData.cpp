@@ -736,7 +736,7 @@ bool APP_NODE::isProcessFiltered()
 	if (!gSettings.GetApplyPorcessFilter())
 		return false;
 
-	if (cb_app_name == 1 && UNKNOWNP_APP_NAME[0] == appName[0])
+	if (isUnknown())
 		return false;
 
 	StringList& filterList = gSettings.getProcessFilterList();
