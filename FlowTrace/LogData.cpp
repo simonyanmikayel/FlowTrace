@@ -720,7 +720,7 @@ ADDR_INFO * INFO_NODE::getCallInfo(bool resolve)
 
 bool APP_NODE::applyFilter()
 {
-	if (!checked || psNN != 0)
+	if (!checked)
 		return false;
 
 	if (isProcessFiltered())

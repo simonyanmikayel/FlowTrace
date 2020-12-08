@@ -109,7 +109,6 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
-	pNode->applyFilter();
 
 	if (!nameIsKnown)
 		nameIsKnown = resolveAppName(pNode);
@@ -174,6 +173,7 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 				app->cb_app_name = cbName;
 				memcpy(app->appName, szName, cbName);
 				app->appName[cbName] = 0;
+				app->applyFilter();
 				ret = true; //we need refresh views
 			}
 			if (app->psNN == 0)
