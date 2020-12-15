@@ -3,6 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "Resource.h"
 #include "Helpers.h"
 #include "LogListView.h"
 #include "LogTreeView.h"
@@ -182,7 +183,7 @@ private:
     CEdit               m_searchedit;
     HICON            m_lostIcon;
 
-    void StartLogging(bool reset = false);
+    void StartLogging(bool reset);
     void ClearLog(bool bRestart, bool reset = false);
     void StopLogging(bool bClearArcive, bool closing = false);
     void SearchRefresh(WORD wID);

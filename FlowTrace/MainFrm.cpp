@@ -234,7 +234,7 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
     {
 		activated = true;
 		gSettings.RestoreWindPos(m_hWnd);
-		StartLogging();
+		StartLogging(true);
 		//DlgModules dlg;
         //dlg.DoModal();
     }
@@ -389,7 +389,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
         if (udpPort != gSettings.GetUdpPort())
         {
             StopLogging(false);
-            StartLogging();
+            StartLogging(true);
             SetTitle();
         }
         m_view.ApplySettings(true);
@@ -537,7 +537,7 @@ LRESULT CMainFrame::OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 #ifdef _AUTO_TEST
 	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
 #endif
-	StartLogging();
+	StartLogging(true);
     return 0;
 }
 

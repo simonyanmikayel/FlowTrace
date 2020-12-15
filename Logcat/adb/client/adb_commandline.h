@@ -28,10 +28,10 @@ class StandardStreamsCallbackInterface {
 		serverFd = -1;
 	}
     // Handles the stdout output from devices supporting the Shell protocol.
-    virtual bool OnStdout(const char* buffer, int length) = 0;
+    virtual bool OnStdout(char* buffer, int length) = 0;
 
     // Handles the stderr output from devices supporting the Shell protocol.
-    virtual bool OnStderr(const char* buffer, int length) = 0;
+    virtual bool OnStderr(char* buffer, int length) = 0;
 
     // Indicates the communication is finished and returns the appropriate error
     // code.
@@ -46,8 +46,7 @@ class StandardStreamsCallbackInterface {
 		return status;
 	}
 
-	virtual int GetBufSize() { return 0; };
-	virtual char* GetBuf() { return nullptr; };
+    virtual void GetStreamBuf(char** p, size_t* c) { *p = nullptr; *c = 0; };
 
 	int serverFd;
 
@@ -79,11 +78,11 @@ class DefaultStandardStreamsCallback : public StandardStreamsCallbackInterface {
         : stdout_str_(stdout_str), stderr_str_(stderr_str) {
     }
 
-	bool OnStdout(const char* buffer, int length) {
+	bool OnStdout(char* buffer, int length) {
         return OnStream(stdout_str_, stdout, buffer, length);
     }
 
-	bool OnStderr(const char* buffer, int length) {
+	bool OnStderr(char* buffer, int length) {
         return OnStream(stderr_str_, stderr, buffer, length);
     }
 

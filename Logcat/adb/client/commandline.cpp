@@ -84,12 +84,8 @@ int read_and_dump(int fd, bool use_shell_protocol = false,
 	int length = 0;
 
 	static char local_buffer[4 * 512]; //512
-	int buffer_size = sizeof(local_buffer);
-	char* buffer_ptr = local_buffer;
-	if (callback->GetBuf()) {
-		buffer_size = callback->GetBufSize();
-		buffer_ptr = callback->GetBuf();
-	}
+	char* buffer_ptr;
+	size_t buffer_size;
 
 	if (use_shell_protocol) {
 		protocol = std::make_unique<ShellProtocol>(fd);
@@ -101,6 +97,11 @@ int read_and_dump(int fd, bool use_shell_protocol = false,
 	}
 
 	while (true) {
+		callback->GetStreamBuf(&buffer_ptr, &buffer_size);
+		if (!buffer_ptr || !buffer_size) {
+			buffer_size = sizeof(local_buffer);
+			buffer_ptr = local_buffer;
+		}
 		if (use_shell_protocol) {
 			if (!protocol->Read()) {
 				break;
@@ -123,12 +124,11 @@ int read_and_dump(int fd, bool use_shell_protocol = false,
 		}
 		else {
 			D("read_and_dump(): pre adb_read(fd=%d)", fd);
-			length = adb_read(fd, buffer_ptr, buffer_size - 1);
+			length = adb_read(fd, buffer_ptr, (int)(buffer_size));
 			D("read_and_dump(): post adb_read(fd=%d): length=%d", fd, length);
 			if (length <= 0) {
 				break;
 			}
-			buffer_ptr[length] = 0;
 			if (!callback->OnStdout(buffer_ptr, length))
 				break;
 		}

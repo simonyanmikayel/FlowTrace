@@ -327,6 +327,7 @@
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="GDI.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="LogcatLogBuffer.h" />
     <ClInclude Include="LogData.h" />
     <ClInclude Include="LogListFrame.h" />
     <ClInclude Include="LogListInfo.h" />
@@ -361,6 +362,10 @@
     <ClCompile Include="FontPreviewCombo.cpp" />
     <ClCompile Include="GDI.cpp" />
     <ClCompile Include="Helpers.cpp" />
+    <ClCompile Include="LogcatLogBuffer.cpp" />
+    <ClCompile Include="LogcatLogConsumer.cpp" />
+    <ClCompile Include="LogcatLogSupplier.cpp" />
+    <ClCompile Include="LogcatPsCommand.cpp" />
     <ClCompile Include="LogData.cpp" />
     <ClCompile Include="LogListFrame.cpp" />
     <ClCompile Include="LogListInfo.cpp" />

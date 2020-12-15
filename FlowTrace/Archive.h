@@ -74,10 +74,14 @@ struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
 	const char* fnName() { return p_fn_name; }
 	const char* trace() { return p_trace; }
 	int cbModuleName() { return cb_module_name; }
-	void reset() { ZeroMemory(this, sizeof(*this)); resetFT(); }
-	void resetFT() { ftChecked = false; log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
+	void reset() { 
+		ZeroMemory(this, sizeof(*this)); resetFT(); 
+	}
+	bool ok() {
+		return pid != 0 && tid != 0;
+	}
+	void resetFT() { log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
 
-	bool ftChecked; //is adb sent flow trace
 	const char* p_app_name;
 	const char* p_module_name;
 	const char* p_fn_name;

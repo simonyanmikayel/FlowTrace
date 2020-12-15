@@ -23,8 +23,8 @@
 class SilentStandardStreamsCallbackInterface : public StandardStreamsCallbackInterface {
   public:
     SilentStandardStreamsCallbackInterface() = default;
-    bool OnStdout(const char*, int) override final {}
-    bool OnStderr(const char*, int) override final {}
+    bool OnStdout(char*, int) override final {}
+    bool OnStderr(char*, int) override final {}
     int Done(int status) override final { return status; }
 };
 
