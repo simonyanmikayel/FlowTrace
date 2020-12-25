@@ -136,7 +136,6 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		if (setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName))
 			updateViews = true;
 	}
-	//
 	m_psNN++;
 
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
