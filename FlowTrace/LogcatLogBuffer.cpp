@@ -11,13 +11,14 @@ LogcatLogBuffer::LogcatLogBuffer() : start_pos(buffer), end_pos(buffer + sizeof(
 	InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
 	m_hNewDataEvent = CreateEvent(NULL, bManualReset, FALSE, NULL);
 	m_hFreeBufferEvent = CreateEvent(NULL, bManualReset, FALSE, NULL);
+	buffer = new char[1024 * 1024 * 256];
 }
 
 void LogcatLogBuffer::init()
 {
 	EnterCriticalSection(&m_cs);
 	data_pos = start_pos;
-	cb = 0;
+	max_cb = cb = 0;
 	LeaveCriticalSection(&m_cs);
 }
 
@@ -42,6 +43,11 @@ void LogcatLogBuffer::GetLogBuffer(char** p, size_t* cnt)
 	while (c == 0 && gLogReceiverAdb.working())
 	{
 		EnterCriticalSection(&m_cs);
+		if (cb > max_cb)
+		{
+			stdlog("GetLogBuffer cb = %d\n", cb);
+			max_cb = cb;
+		}
 		char* data_end = data_pos + cb;
 		if (data_end < end_pos)
 		{
@@ -50,7 +56,6 @@ void LogcatLogBuffer::GetLogBuffer(char** p, size_t* cnt)
 		}
 		else
 		{
-			//stdlog("GetLogBuffer cb = %d\n", cb);
 			data_end = start_pos + (data_end - end_pos);
 			ATLASSERT(data_end <= data_pos);
 			if (data_end < data_pos)

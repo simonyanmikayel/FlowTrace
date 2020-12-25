@@ -136,7 +136,7 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		if (setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName))
 			updateViews = true;
 	}
-
+	//
 	m_psNN++;
 
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
@@ -626,21 +626,26 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	static DWORD archiveNN = INFINITE;
 	static DWORD lstNN = INFINITE;
 	static DWORD lstApp = INFINITE;
-	if (archiveNN != archiveNumber || lstApp != pLogData->tid)
+	if (pLogData->nn)
 	{
-		lstNN = INFINITE;
-		lstApp = pLogData->tid;
-		m_lost = 0;
-		archiveNN = archiveNumber;
+		if (archiveNN != archiveNumber || lstApp != pLogData->tid)
+		{
+			lstNN = INFINITE;
+			lstApp = pLogData->tid;
+			m_lost = 0;
+			archiveNN = archiveNumber;
+			stdlog("lstApp = %d\n", lstApp);
+		}
+		if (lstNN != pLogData->nn && lstNN != INFINITE && !fromImport)
+		{
+			int lost = (pLogData->nn - lstNN > 0) ? pLogData->nn - lstNN : lstNN - pLogData->nn;
+			m_lost += lost;
+			Helpers::UpdateStatusBar();
+			stdlog("lstApp = %d lstNN = %d pLogData->nn = %d\n", lstApp, lstNN, pLogData->nn);
+		}
+		lstNN = pLogData->nn + 1;
 	}
-	if (lstNN != pLogData->nn && lstNN != INFINITE && !fromImport)
-	{
-		int lost = (pLogData->nn - lstNN > 0) ? pLogData->nn - lstNN : lstNN - pLogData->nn;
-		m_lost += lost;
-		Helpers::UpdateStatusBar();
-	}
-	lstNN = pLogData->nn + 1;
-	return true;
+	return;
 #endif
 
 	//if (pLogData->log_flags & LOG_FLAG_JAVA)

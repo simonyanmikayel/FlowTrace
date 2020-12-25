@@ -14,14 +14,15 @@ public:
 	~LogcatLogBuffer()
 	{
 		DeleteCriticalSection(&m_cs);
+		delete [] buffer;
 	}
 private:
 	void init();
-	char  buffer[256*1024];
+	char*  buffer;
 	char* const start_pos;
 	char* const end_pos;
 	char* data_pos;
-	size_t cb;
+	size_t cb, max_cb;
 	CRITICAL_SECTION m_cs;
 	HANDLE m_hNewDataEvent;
 	HANDLE m_hFreeBufferEvent;

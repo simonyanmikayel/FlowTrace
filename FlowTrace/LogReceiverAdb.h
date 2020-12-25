@@ -6,8 +6,6 @@
 #include "Archive.h"
 #include "LogcatLogBuffer.h"
 
-//#define USE_RING_BUF
-
 struct LOG_PARCER {
 	LOG_PARCER(int c) {
 		_buf_size = c;
