@@ -18,9 +18,9 @@ public:
 	}
 private:
 	void init();
-	char*  buffer;
-	char* const start_pos;
-	char* const end_pos;
+	char* buffer;
+	char* start_pos;
+	char* end_pos;
 	char* data_pos;
 	size_t cb, max_cb;
 	CRITICAL_SECTION m_cs;

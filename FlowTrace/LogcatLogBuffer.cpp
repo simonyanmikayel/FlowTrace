@@ -5,13 +5,16 @@
 
 LogcatLogBuffer gLogcatLogBuffer;
 
-LogcatLogBuffer::LogcatLogBuffer() : start_pos(buffer), end_pos(buffer + sizeof(buffer))
+LogcatLogBuffer::LogcatLogBuffer()
 {
 	BOOL bManualReset = TRUE;
 	InitializeCriticalSectionAndSpinCount(&m_cs, 0x00000400);
 	m_hNewDataEvent = CreateEvent(NULL, bManualReset, FALSE, NULL);
 	m_hFreeBufferEvent = CreateEvent(NULL, bManualReset, FALSE, NULL);
-	buffer = new char[1024 * 1024 * 256];
+	const int buffer_size = 1024 * 1024 * 128;
+	buffer = new char[buffer_size];
+	start_pos = buffer;
+	end_pos = buffer + buffer_size;
 }
 
 void LogcatLogBuffer::init()
