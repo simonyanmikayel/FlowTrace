@@ -120,8 +120,8 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     return pNode;
 }
 
-PS_INFO psInfo[maxPsInfo + 1];
-int cPsInfo;
+static PS_INFO psInfo[maxPsInfo + 1];
+static int cPsInfo;
 bool  Archive::setPsInfo(PS_INFO* p, int c)
 {
 	gLogReceiver.lock();
