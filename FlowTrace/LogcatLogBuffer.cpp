@@ -59,6 +59,7 @@ void LogcatLogBuffer::GetLogBuffer(char** p, size_t* cnt)
 		}
 		else
 		{
+			stdlog("->GetLogBuffer buffer over = %d\n", data_end - end_pos);
 			data_end = start_pos + (data_end - end_pos);
 			ATLASSERT(data_end <= data_pos);
 			if (data_end < data_pos)
@@ -70,7 +71,7 @@ void LogcatLogBuffer::GetLogBuffer(char** p, size_t* cnt)
 		LeaveCriticalSection(&m_cs);
 		if (c == 0 && gLogReceiverAdb.working())
 		{
-			//stdlog("->GetLogBuffer wait for m_hFreeBufferEvent cb = %d\n", cb);
+			stdlog("->GetLogBuffer wait for m_hFreeBufferEvent cb = %d\n", cb);
 			WaitForSingleObject(m_hFreeBufferEvent, INFINITE);
 			ResetEvent(m_hFreeBufferEvent);
 			//stdlog("<-GetLogBuffer wait for m_hFreeBufferEvent cb = %d\n", cb);
