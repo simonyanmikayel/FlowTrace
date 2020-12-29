@@ -31,9 +31,9 @@ void LogReceiverAdb::start(bool reset)
 	logcatPsCommand.StartWork();
 	logcatLogSupplier.StartWork(&reset);
 #ifdef USE_RING_BUF
+	logcatLogSupplier.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 	logcatLogConsumer.StartWork();
 #endif //USE_RING_BUF
-	//logcatLogSupplier.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
 }
 
 void LogReceiverAdb::stop()
