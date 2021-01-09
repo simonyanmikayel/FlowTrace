@@ -276,10 +276,8 @@ void LogReceiverAdb::HandleLogData(const char* szLog, size_t cbLog)
 			if (!ParceMetaData())
 			{
 				WriteLog(mt.buf(), mt.size());
-				adbRec.reset();
 			}
 			mt.reset();
-			
 		}
 
 		szLog += skiped;
