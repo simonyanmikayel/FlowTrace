@@ -389,7 +389,7 @@ LRESULT CMainFrame::OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hW
         if (udpPort != gSettings.GetUdpPort())
         {
             StopLogging(false);
-            StartLogging(true);
+            StartLogging(false);
             SetTitle();
         }
         m_view.ApplySettings(true);
@@ -537,7 +537,7 @@ LRESULT CMainFrame::OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 #ifdef _AUTO_TEST
 	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
 #endif
-	StartLogging(true);
+	StartLogging(false);
     return 0;
 }
 
@@ -571,7 +571,7 @@ LRESULT CMainFrame::OnImportTask(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BO
 	if (wParam == 0)
 	{
 		if (!lParam)
-			ClearLog(false);
+			ClearLog(false, false);
 	}
     else
     {

@@ -18,12 +18,18 @@ LogReceiverAdb gLogReceiverAdb;
 
 #define LOGGER_ENTRY_MAX_LEN  (8*1024) // (4*1024) in android sorces
 static LOG_PARCER mt(LOGGER_ENTRY_MAX_LEN);
+static MetaDataInfo gMtInfo;
+static int cMtInfo;
+static bool logRestarted;
 static LOG_REC_ADB_DATA adbRec;
 
 void LogReceiverAdb::start(bool reset)
 {
 	m_working = true;
 	mt.reset();
+	gMtInfo.reset();
+	cMtInfo = 0;
+	logRestarted = false;
 	adbRec.reset();
 #ifdef USE_RING_BUF
 	gLogcatLogBuffer.StartWork();
@@ -156,6 +162,8 @@ static void WriteLog(const char* szLog, int cbLog)
 {
 	if (cbLog == 0)
 		return;
+	if (logRestarted)
+		return;
 
 	bool isFlowTraceLog = false;
 	long long* pLL1 = (long long*)(adbRec.tag + 2);
@@ -210,6 +218,8 @@ static bool ParceMetaData()
 		return false;
 
 	bool ok = true;
+	MetaDataInfo mtInfo;
+	mtInfo.size = mt.size();
 	int i = 0;
 	int unused1 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
 	int unused2 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
@@ -217,14 +227,15 @@ static bool ParceMetaData()
 	int m = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
 	int s = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
 	int ms = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int pid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int tid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	if (ok && pid && tid) {
+	mtInfo.pid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	mtInfo.tid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	if (ok && mtInfo.pid && mtInfo.tid) {
 		adbRec.reset();
-		adbRec.pid = pid;
-		adbRec.tid = tid;
-		adbRec.sec = Helpers::GetSec(h , m, s);// 3600 * h + 60 * m + s;
+		adbRec.pid = mtInfo.pid;
+		adbRec.tid = mtInfo.tid;
+		adbRec.sec = Helpers::GetSec(h, m, s); // 3600 * h + 60 * m + s;
 		adbRec.msec = ms;
+		mtInfo.totMsec = (long long)(adbRec.sec) * 1000L + adbRec.msec;
 		int cb_fn_name = mt.size() - i - 1;
 		if (i > 0 && cb_fn_name > 0 && cb_fn_name < MAX_JAVA_TAG_NAME_LEN - 2)
 		{
@@ -248,6 +259,44 @@ static bool ParceMetaData()
 				adbRec.priority = FLOW_LOG_DEBUG;
 			else if (adbRec.tag[0] == 'W')
 				adbRec.priority = FLOW_LOG_WARN;
+		}
+	}
+
+	if (logRestarted) {
+		if (gMtInfo.totMsec < mtInfo.totMsec) {
+			logRestarted = false;
+			//stdlog("1 logRestarted = false: %s\n", mt.buf());
+		}
+		else if (gMtInfo.totMsec == mtInfo.totMsec) {
+			if (cMtInfo) {
+				cMtInfo--;
+			}
+			else {
+				//stdlog("2 logRestarted = false: %s\n", mt.buf());
+				logRestarted = false;
+			}
+		}
+		if (!logRestarted) {
+			gMtInfo.reset();
+		}
+	}
+	if (!logRestarted) {
+		if (gMtInfo.totMsec < mtInfo.totMsec) {
+			gMtInfo = mtInfo;
+			cMtInfo = 1;
+		}
+		else if (gMtInfo.totMsec == mtInfo.totMsec) {
+			if (gMtInfo == mtInfo) {
+				cMtInfo++;
+			}
+			else {
+				gMtInfo = mtInfo;
+				cMtInfo = 1;
+			}
+		}
+		else {
+			//stdlog("logRestarted = true: %s\n", mt.buf());
+			logRestarted = true;
 		}
 	}
 

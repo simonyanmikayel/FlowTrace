@@ -6,6 +6,15 @@
 #include "Archive.h"
 #include "LogcatLogBuffer.h"
 
+struct MetaDataInfo {
+	int pid, tid, size;
+	long long totMsec;
+	boolean operator== (const MetaDataInfo& other) {
+		return totMsec == other.totMsec && pid == other.pid && tid == other.tid && size == other.size;
+	}
+	void reset() { totMsec = 0; }
+};
+
 struct LOG_PARCER {
 	LOG_PARCER(int c) {
 		_buf_size = c;

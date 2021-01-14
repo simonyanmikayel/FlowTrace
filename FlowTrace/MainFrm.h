@@ -184,7 +184,7 @@ private:
     HICON            m_lostIcon;
 
     void StartLogging(bool reset);
-    void ClearLog(bool bRestart, bool reset = false);
+    void ClearLog(bool bRestart, bool reset);
     void StopLogging(bool bClearArcive, bool closing = false);
     void SearchRefresh(WORD wID);
     void RefreshLog(bool showAll);

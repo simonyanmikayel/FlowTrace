@@ -35,6 +35,7 @@ adb logcat -g
 */
 //adb logcat -G 512K or adb logcat -G 4M
 static const char* cmdLogcatClear[]{ "logcat", "-c" };
+//static const char* cmdLogcatClear[]{ "logcat", "-b", "all", "-c" }; //adb logcat -b all -c
 //static const char* cmdStartServer[]{ "start-server" };
 //-v long: Display all metadata fields and separate messages with blank lines.
 //adb logcat -v long FLOW_TRACE:* *:S
@@ -47,8 +48,8 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 {
 	resetAtStart = *((bool*)pWorkParam);
 
-	if (resetAtStart) {
-		resetAtStart = false;
+	if (resetAtStart)
+	{
 		adb_commandline(_countof(cmdLogcatClear), cmdLogcatClear, &streamCallback);
 	}
 	while (IsWorking()) {
