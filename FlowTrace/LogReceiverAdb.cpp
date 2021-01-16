@@ -204,6 +204,8 @@ static void WriteLog(const char* szLog, int cbLog)
 
 	if (isFlowTraceLog)
 	{
+		ft->sec = adbRec.sec;
+		ft->msec = adbRec.msec;
 		gArchive.append(ft);
 	}
 	else
@@ -300,6 +302,7 @@ static bool ParceMetaData()
 		}
 	}
 
+	//logRestarted = !(8358 == mtInfo.pid && 8378 == mtInfo.tid);
 	return ok;
 }
 
