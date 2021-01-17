@@ -116,6 +116,9 @@ static int line_info(
     if (p_addr_info == NULL)
         return 0;
 
+    //if (address == 0x738c)
+    //    address = address;
+
     workCtxt.maxAddr = max(workCtxt.maxAddr, address);
     p_addr_info->addr = address;
     p_addr_info->line = line;
