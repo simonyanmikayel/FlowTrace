@@ -182,6 +182,7 @@ private:
     CComboBox           m_searchbox;
     CEdit               m_searchedit;
     HICON            m_lostIcon;
+    CString          m_importFile;
 
     void StartLogging(bool reset);
     void ClearLog(bool bRestart, bool reset);

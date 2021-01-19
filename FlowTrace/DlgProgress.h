@@ -5,6 +5,7 @@
 class TaskThread :
   public WorkerThread
 {
+    friend class DlgProgress;
 public:
   TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu);
   ~TaskThread ();
@@ -44,6 +45,8 @@ public:
   LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+  LPCTSTR getFileName() { return m_pTaskThread->m_strFile.GetString(); };
+
 
   void End(int wID);
   CStatic m_ctrlInfo;
@@ -51,5 +54,4 @@ public:
   TaskThread* m_pTaskThread;
   WORD m_cmd;
   bool m_isAuto;
-
 };
