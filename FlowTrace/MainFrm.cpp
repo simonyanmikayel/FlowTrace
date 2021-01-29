@@ -987,6 +987,8 @@ void CMainFrame::UpdateStatusBar()
 #else
     int cb = 0;
     DWORD lost = gArchive.getLost();
+    if (gArchive.m_SkipedLogcat)
+        cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Bypassing old logs: %d   "), gArchive.m_SkipedLogcat);
 	if (lost)
 		cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("LOST: %d   "), lost);
 	cb += _sntprintf_s(pBuf + cb, _countof(pBuf) - cb, _countof(pBuf) - cb - 1, TEXT("Count: %s"), Helpers::str_format_int_grouped(gArchive.getNodeCount()));

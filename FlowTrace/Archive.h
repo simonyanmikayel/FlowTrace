@@ -177,6 +177,7 @@ public:
 	int append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	bool setPsInfo(PS_INFO* p, int c);
 	//void updateNodes();
+	DWORD m_SkipedLogcat;
 
 private:
 	void appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack);

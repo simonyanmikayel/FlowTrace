@@ -45,6 +45,7 @@ void Archive::clearArchive(bool closing)
     archiveNumber++;
 	bookmarkNumber = 0;
 	m_lost = 0;
+	m_SkipedLogcat = 0;
 	m_psNN = 0;
     curApp = 0;
     curThread = 0;

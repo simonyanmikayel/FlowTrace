@@ -30,6 +30,7 @@ void LogReceiverAdb::start(bool reset)
 	gMtInfo.reset();
 	cMtInfo = 0;
 	logRestarted = false;
+	gArchive.m_SkipedLogcat = 0;
 	adbRec.reset();
 #ifdef USE_RING_BUF
 	gLogcatLogBuffer.StartWork();
@@ -280,6 +281,12 @@ static bool ParceMetaData()
 		}
 		if (!logRestarted) {
 			gMtInfo.reset();
+			gArchive.m_SkipedLogcat = 0;
+		}
+		else {
+			gArchive.m_SkipedLogcat++;
+			if (0 == gArchive.m_SkipedLogcat % 500)
+				Helpers::UpdateStatusBar();
 		}
 	}
 	if (!logRestarted) {
