@@ -228,7 +228,6 @@ void CMainFrame::SaveSearchList()
 
 LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    //DlgProgress dlg(ID_FILE_IMPORT, "D:\\Temp\\t1.txt"); dlg.DoModal();
     static bool activated = false;
     if (!activated && wParam != WA_INACTIVE)
     {
@@ -237,6 +236,7 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
 		StartLogging(true);
 		//DlgModules dlg;
         //dlg.DoModal();
+        DlgProgress dlg(ID_FILE_IMPORT, "y:\\tmp\\ssl.slog"); dlg.DoModal();
     }
 
     return 0;
@@ -413,11 +413,7 @@ LRESULT CMainFrame::OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 {
     DlgProgress dlg(wID, NULL);
     dlg.DoModal();
-    LPCTSTR fileName = dlg.getFileName();
-    LPCTSTR fileName_1 = strrchr(fileName, '\\');
-    if (fileName_1)
-        fileName = fileName_1 + 1;
-    m_importFile = fileName;
+    m_importFile = dlg.getFileName();
     SetTitle();
     return 0;
 }

@@ -3,7 +3,9 @@
 #include "Helpers.h"
 #include "Archive.h"
 #include "Settings.h"
+#include "FileMap.h"
 #include "MainFrm.h"
+#include "addr2line.h"
 
 #pragma warning( push )
 #pragma warning(disable:4477) //string '%d' requires an argument of type 'int *', but variadic argument 2 has type 'char *'
@@ -105,7 +107,7 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
         {
             CFileDialog dlg(TRUE);
             nRet = dlg.DoModal();
-            m_strFile = dlg.m_ofn.lpstrFile;
+            m_strFilePath = dlg.m_ofn.lpstrFile;
         }
         else
         {
@@ -115,27 +117,47 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
             //  _T("");
             CFileDialog dlg(FALSE);// , NULL, _T(""), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, lpcstrTextFilter);
             nRet = dlg.DoModal();
-            m_strFile = dlg.m_ofn.lpstrFile;
+            m_strFilePath = dlg.m_ofn.lpstrFile;
         }
     }
     else
     {
-        m_strFile = lpstrFile;
+        m_strFilePath = lpstrFile;
     }
 
-    if (!m_strFile.IsEmpty() && !m_isAuto)
+    int chPos = m_strFilePath.ReverseFind('\\');
+    if (chPos < 0)
+        chPos = m_strFilePath.ReverseFind('/');
+    if (chPos > 0)
+        m_strFileName = m_strFilePath.Mid(chPos + 1);
+    else
+        m_strFileName = m_strFilePath;
+    chPos = m_strFileName.ReverseFind('.');
+    if (chPos > 0) {
+        m_strFileExt = m_strFileName.Mid(chPos + 1);
+        m_strFileNameWithoutExt = m_strFileName.Mid(0, chPos);
+    }
+    else
+        m_strFileNameWithoutExt = m_strFileName;
+    
+    m_fp = NULL;
+    if (!m_strFilePath.IsEmpty() && !m_isAuto)
     {
 		if (m_cmd == ID_FILE_IMPORT)
 		{
-			if (0 != fopen_s(&m_fp, m_strFile, "r")) {
-				Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFile);
+            if (isShortLog())
+            {
+                ImportShortLog();
+            }
+            else if (0 != fopen_s(&m_fp, m_strFilePath, "r")) {
+				Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFilePath);
 				m_fp = NULL;
 			}
 		}
 		else
 		{
-			if (0 != fopen_s(&m_fp, m_strFile, "w")) {
-				Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFile);
+			if (0 != fopen_s(&m_fp, m_strFilePath, "w")) {
+				Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFilePath);
 				m_fp = NULL;
 			}
 		}
@@ -385,12 +407,15 @@ void TaskThread::FileImport()
 
             ss = (18 == cf);
             ss = ss && pLogData->isValid();
-            int cb = pLogData->cbData();
-            if (bufEnd < pLogData->data + cb)
-                ss = false;
-            pLogData->data[cb] = 0;
-			if (ss && pLogData->cbData())
-			    ss = ss && (1 == fread(pLogData->data, pLogData->cbData(), 1, m_fp));
+            if (ss) {
+                int cb = pLogData->cbData();
+                if (bufEnd < pLogData->data + cb)
+                    ss = false;
+                if (ss)
+                    pLogData->data[cb] = 0;
+            }
+            ss = ss && pLogData->cbData();
+            ss = ss && (1 == fread(pLogData->data, pLogData->cbData(), 1, m_fp));
             if (ss)
             {
                 if (pLogData->isTrace())
@@ -422,4 +447,192 @@ void TaskThread::FileImport()
         }
     }
 }
+
+bool TaskThread::isShortLog()
+{
+    int i = _stricmp("slog", m_strFileExt.GetString());
+    return 0 == i;
+}
+
+static const int max_fn_name = 32;
+struct FUNC_INFO{
+    unsigned int this_fn;
+    char fn_name[max_fn_name + 1];
+};
+int compareFuncInfo(const void* a, const void* b)
+{
+    FUNC_INFO* p1 = (FUNC_INFO*)a;
+    FUNC_INFO* p2 = (FUNC_INFO*)b;
+    if (p1->this_fn == p2->this_fn)
+        return 0;
+    else if (p1->this_fn < p2->this_fn)
+        return -1;
+    else
+        return 1;
+}
+static unsigned int fn_addr;
+static FUNC_INFO* pfuncInfo;
+static int fnCount;
+static bool getFnCount;
+static int line_info( 
+    unsigned long address,
+    unsigned char op_index,
+    char* src,
+    char* section_name,
+    char* function_name,
+    unsigned int line)
+{
+    if (fn_addr == INFINITE) {
+        return 0;
+    }
+    if (fn_addr > address) { //esure that pfuncInfo will be sorted
+        fn_addr = -1;
+        return 0;
+    }
+    fn_addr = address;
+     
+    if (!function_name) {
+        //stdlog("%x %s:%d %s  %s\n", address, src, line, section_name ? section_name : "?", function_name ? function_name : "??");
+        return 1;
+    }
+    if (address == 0x11DBC4) {
+        stdlog("%x %s:%d %s  %s\n", address, src, line, section_name ? section_name : "?", function_name ? function_name : "??");
+    }
+    if (getFnCount) {
+        fnCount++;
+        return 1;
+    }
+    pfuncInfo[fnCount].this_fn = address;
+    strncpy_s(pfuncInfo[fnCount].fn_name, function_name, max_fn_name);
+    pfuncInfo[fnCount].fn_name[max_fn_name] = 0;
+
+    fnCount++;
+    return 1;
+}
+
+void TaskThread::ImportShortLog()
+{
+    /*
+    char* szModules = gSettings.GetModules();
+    char* newLine = strchr(szModules, '\n');
+    CString strModulePath;
+    while (newLine)
+    {
+        *newLine = 0;
+
+        char* szModule = szModules;
+        char* slash = strrchr(szModule, '\\');
+        if (!slash)
+            slash = strrchr(szModule, '/');
+        if (slash)
+            szModule = slash + 1;
+
+        if (0 == strcmp(szModule, m_strFileNameWithoutExt.GetString())) {
+            strModulePath = szModules;
+            break;
+        }        
+        szModules = newLine + 1;
+        newLine = strchr(szModules, '\n');
+    }
+
+    if (strModulePath.IsEmpty()) {
+        Helpers::ErrMessageBox(TEXT("No module defined for %s"), m_strFileNameWithoutExt.GetString());
+        return;
+    }
+
+    fnCount = 0;
+    fn_addr = 0;
+    getFnCount = true;
+    enum_file_addresses(strModulePath.GetString(), ".text", line_info);
+    if (!fnCount || fn_addr == INFINITE) {
+        Helpers::ErrMessageBox(TEXT("Not a valid module: %s"), strModulePath.GetString());
+        return;
+    }
+
+    pfuncInfo = new FUNC_INFO[fnCount];
+    int fnCountPrev = fnCount;
+    fnCount = 0;
+    fn_addr = 0;
+    getFnCount = false;
+    enum_file_addresses(strModulePath.GetString(), ".text", line_info);
+    if (fnCountPrev != fnCount) {
+        Helpers::ErrMessageBox(TEXT("Smthing wrong in addr2line utility"));
+        return;
+    }
+    */
+
+    FILE_MAP fmap(m_strFilePath, false);
+    SHORT_LOG_REC* pRec = (SHORT_LOG_REC*)fmap.m_ptr;
+    int cRec = fmap.Size() / sizeof(SHORT_LOG_REC);
+    if (!pRec || !cRec) {
+        Helpers::ErrMessageBox(TEXT("Could not open file %s"), m_strFilePath.GetString());
+        return;
+    }
+
+    //find first record in cyclic buffer
+    int iFirst = 0;
+    for (int i = 0; i < cRec - 1; i++) {
+        if (pRec[i].nn == pRec[i + 1].nn) {
+            Helpers::ErrMessageBox(TEXT("Bad record index %d"), i);
+            goto Cleanup;
+        }
+        if (pRec[i].nn > pRec[i + 1].nn) {
+            iFirst = i + 1;
+            break;
+        }
+    }
+    
+    //fill records
+    char buf[MAX_RECORD_LEN + 1];
+    char* bufEnd = buf + MAX_RECORD_LEN;
+    for (int c = 0, i = iFirst; c < cRec; c++) {
+
+        int cb_app_name = m_strFileNameWithoutExt.GetLength();
+        /*
+        char* fn_name = "?";        
+        FUNC_INFO* pfnInfo = (FUNC_INFO*)bsearch(&(pRec[i].this_fn), pfuncInfo, fnCount, sizeof(FUNC_INFO), compareFuncInfo);
+        if (pfnInfo && pfnInfo->fn_name) {
+            fn_name = pfnInfo->fn_name;
+        }
+        int cb_fn_name = (int)strlen(fn_name);
+        */
+        ZeroMemory(buf, sizeof(buf));
+        LOG_REC_NET_DATA* pLogData = (LOG_REC_NET_DATA*)buf;
+        pLogData->len = sizeof(LOG_REC_BASE_DATA) + cb_app_name + pRec[i].cb_fn_name + 1;
+        pLogData->log_type = pRec[i].log_type;
+        pLogData->nn = pRec[i].nn;
+        pLogData->cb_app_name = cb_app_name;
+        pLogData->cb_fn_name = pRec[i].cb_fn_name;
+        pLogData->tid = pRec[i].tid;
+        pLogData->this_fn = pRec[i].this_fn;
+        pLogData->call_site = pRec[i].call_site;
+        memcpy(pLogData->data, m_strFileNameWithoutExt.GetString(), cb_app_name);
+        memcpy(pLogData->data + cb_app_name, pRec[i].fn_name, pRec[i].cb_fn_name);
+
+        if (!pLogData->isValid()) {
+            Helpers::ErrMessageBox(TEXT("Record %d is not valid"), i);
+            goto Cleanup;
+        }
+
+        if (!gArchive.append(pLogData, NULL, true, false)) {
+            Helpers::ErrMessageBox(TEXT("Failed to add record %d"), i);
+            goto Cleanup;
+        }
+        
+        //fread(pLogData->data, pLogData->cbData(), 1, m_fp));
+        int iNext = i + 1;        
+        if (iNext == cRec)
+            iNext = 0;
+        if (c < cRec - 1) {
+            if ((pRec[i].nn + 1) != pRec[iNext].nn) {
+                Helpers::ErrMessageBox(TEXT("Bad record secuance %d"), i);
+                goto Cleanup;
+            }
+        }
+        i = iNext;
+    }
+Cleanup:
+    delete[] pfuncInfo;
+}
+
 #pragma warning(pop)

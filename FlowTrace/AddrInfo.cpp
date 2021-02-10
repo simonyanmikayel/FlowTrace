@@ -93,10 +93,9 @@ static int line_info(
     unsigned long address,
     unsigned char op_index,
     char *src,
-    unsigned int line,
-    unsigned int column,
-    unsigned int discriminator,
-    int end_sequence)
+    char* section_name,
+    char* function_name,
+    unsigned int line)
 {
     int cbSrc = (int)strlen(src);
     ADDR_INFO* p_addr_info = NULL;
@@ -116,8 +115,10 @@ static int line_info(
     if (p_addr_info == NULL)
         return 0;
 
-    //if (address == 0x738c)
+    //if (address == 0x13B8C8) { //5b308 13B8C8
+    //    stdlog("src: %s:%d %s  %s\n", src, line, section_name ? section_name : "?", function_name ? function_name : "??");
     //    address = address;
+    //}
 
     workCtxt.maxAddr = max(workCtxt.maxAddr, address);
     p_addr_info->addr = address;
@@ -133,7 +134,7 @@ void FillModuleInfo(MuduleInfo* pMuduleInfo)
 {
     ZeroMemory(&workCtxt, sizeof(workCtxt));
     workCtxt.pMuduleInfo = pMuduleInfo;
-    enum_file_addresses(pMuduleInfo->szModulePath, line_info);
+    enum_file_addresses(pMuduleInfo->szModulePath, ".text", line_info);//".text"
     if (pMuduleInfo->pAddrInfo == NULL)
         pMuduleInfo->pAddrInfo = pInvalidAddrInfo;
 }

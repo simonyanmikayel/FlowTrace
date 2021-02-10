@@ -6574,10 +6574,9 @@ typedef int(*line_info_cb)(
   unsigned long address,
   unsigned char op_index,
   char *filename,
-  unsigned int line,
-  unsigned int column,
-  unsigned int discriminator,
-  int end_sequence);
+  char* section_name,
+  char* function_name,
+  unsigned int line);
 #endif //LINE_INFO_CB
 
 struct bfd

@@ -327,6 +327,7 @@
     <ClInclude Include="FontPreviewCombo.h" />
     <ClInclude Include="GDI.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="Include\FileMap.h" />
     <ClInclude Include="LogcatLogBuffer.h" />
     <ClInclude Include="LogData.h" />
     <ClInclude Include="LogListFrame.h" />

@@ -18,12 +18,17 @@ private:
   DWORD m_progress;
   DWORD m_count;
   WORD m_cmd;
-  CString m_strFile;
+  CString m_strFilePath;
+  CString m_strFileName;
+  CString m_strFileNameWithoutExt;
+  CString m_strFileExt;
   bool m_isOK, m_isAuto;
   FILE *m_fp;
 
   void FileSave(WORD cmd);
   void FileImport();
+  bool isShortLog();
+  void ImportShortLog();
 };
 
 class DlgProgress :
@@ -45,7 +50,7 @@ public:
   LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
   LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-  LPCTSTR getFileName() { return m_pTaskThread->m_strFile.GetString(); };
+  LPCTSTR getFileName() { return m_pTaskThread->m_strFileName.GetString(); };
 
 
   void End(int wID);
@@ -54,4 +59,16 @@ public:
   TaskThread* m_pTaskThread;
   WORD m_cmd;
   bool m_isAuto;
+};
+
+#define MAX_FN_NAME_SIZE 18
+struct SHORT_LOG_REC
+{
+    unsigned int nn;
+    char log_type;
+    unsigned int tid;
+    unsigned int this_fn;
+    unsigned int call_site;
+    char cb_fn_name;
+    char fn_name[MAX_FN_NAME_SIZE]; //make sure SHORT_LOG_REC is on boundry of 4
 };
