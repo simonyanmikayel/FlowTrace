@@ -185,7 +185,7 @@ struct APP_NODE : LOG_NODE
     char appName[MAX_APP_NAME + 1];
     bool applyFilter();
 	bool isProcessFiltered();
-    bool isClosed() { return psNN < 0; }
+    bool isClosed() { return psNN < 0 && pid != 0; }
     bool isUnknown() { return cb_app_name == 1 && appName[0] == UNKNOWNP_APP_NAME[0]; }
     bool isPreInitialized() { return cb_app_name == 17 && appName[0] == PRE_INITIALIZED_APP_NAME[0] && 0 == strncmp(PRE_INITIALIZED_APP_NAME, appName, 17); }
 };

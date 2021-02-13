@@ -236,7 +236,7 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
 		StartLogging(true);
 		//DlgModules dlg;
         //dlg.DoModal();
-        DlgProgress dlg(ID_FILE_IMPORT, "y:\\tmp\\ssl.slog"); dlg.DoModal();
+        //DlgProgress dlg(ID_FILE_IMPORT, "y:\\tmp\\ssl.slog"); dlg.DoModal();
     }
 
     return 0;

@@ -142,7 +142,7 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->psNN >= 0 && app->psNN != m_psNN)
+		if (app->pid != 0 && app->psNN >= 0 && app->psNN != m_psNN)
 		{
 			app->psNN = -m_psNN;
 			updateViews = true;
@@ -225,16 +225,22 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
 	LOG_REC_BASE_DATA* pLogData = p->getLogData();
     if (curApp)
     {
-        if (curApp && (curApp->pid == pLogData->pid) && !curApp->isClosed()) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
-            return curApp;
+		if (curApp && (curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+		{
+			curApp->psNN = 0;
+			return curApp;
+		}
     }
 
     curApp = (APP_NODE*)gArchive.getRootNode()->lastChild;
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)
     {
-        if ((curApp->pid == pLogData->pid) && !curApp->isClosed()) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
-            break;
+		if ((curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+		{
+			curApp->psNN = 0;
+			break;
+		}
         curApp = (APP_NODE*)curApp->prevSibling;
     }
     //stdlog("curApp 2 %p\n", curApp);
