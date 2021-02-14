@@ -40,23 +40,10 @@ namespace Helpers
 
 		if (IsAndroidLog)
 		{
-            char src2[MAX_PATH + 1];
-            char fileName2[MAX_PATH + 1];
-            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "src\\main\\java\\%s", src);
-            src2[MAX_PATH] = 0;
-            char* fileName = strrchr(src2, '\\');
-            if (!fileName)
-                return false;
-            *fileName = 0;
-            fileName++;
-            const char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, false);
-            if (!srcPath)
-                return false;
-            _sntprintf_s(fileName2, MAX_PATH, MAX_PATH, "%s.java", fileName);
-            fileName2[MAX_PATH] = 0;
-            _sntprintf_s(src2, MAX_PATH, MAX_PATH, "%s", srcPath);
-            srcPath = FindFile(src2, fileName2, true);
-            src2[MAX_PATH] = 0;
+			char src2[MAX_PATH + 1];
+			_sntprintf_s(src2, MAX_PATH, MAX_PATH, "%s.java", src);
+			src2[MAX_PATH] = 0;
+			const char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, true);
             if (!srcPath)
                 return false;
 		    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\"", gSettings.GetAndroidStudio(), line, srcPath);
@@ -600,11 +587,14 @@ namespace Helpers
                     {
                         //if (strstr(szFindFilePath, szFileName))
                         //stdlog("%s  %s\n", szFindFilePath, szFileName);
-                        if (0 == _stricmp(szFindFilePath + (cbFindFilePath - cbFileName), szFileName))
-                        {
-                            fileFound = true;
-                            break;
-                        }
+						if (szFindFilePath[cbFindFilePath - cbFileName - 1] == '\\')
+						{
+							if (0 == _stricmp(szFindFilePath + (cbFindFilePath - cbFileName), szFileName))
+							{
+								fileFound = true;
+								break;
+							}
+						}
                     }
                 }
             }
