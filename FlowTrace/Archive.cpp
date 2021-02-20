@@ -147,12 +147,6 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 			app->psNN = -m_psNN;
 			updateViews = true;
 		}
-		if (app->isClosed() && app->isUnknown())
-		{
-			int cbName = sizeof(UNKNOWNP_CLOSED_APP_NAME) - 1;
-			app->cb_app_name = cbName;
-			memcpy(app->appName, UNKNOWNP_CLOSED_APP_NAME, cbName);			
-		}
 		app = (APP_NODE*)app->prevSibling;
 	}
 
@@ -164,7 +158,7 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->pid == pid && !app->isClosed())
+		if (app->pid == pid)
 		{
 			bool ret = false;
 			if (app->isUnknown() || app->isPreInitialized())
@@ -176,7 +170,9 @@ bool Archive::setAppName(int pid, char* szName, int cbName)
 				app->applyFilter();
 				ret = true; //we need refresh views
 			}
-			if (app->psNN == 0)
+			if (app->psNN < 0)
+				ret = true; //we need refresh views
+			if (app->psNN <= 0)
 				app->psNN = m_psNN;
 			if (app->psNN == m_psNN)
 				app->psNN++;

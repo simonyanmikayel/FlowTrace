@@ -167,7 +167,6 @@ struct ROOT_NODE : LOG_NODE
 {
 };
 
-#define UNKNOWNP_CLOSED_APP_NAME "???"
 #define UNKNOWNP_APP_NAME "*"
 #define PRE_INITIALIZED_APP_NAME "<pre-initialized>"
 
