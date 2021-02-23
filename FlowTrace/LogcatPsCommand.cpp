@@ -7,6 +7,24 @@ void LogcatPsCommand::Terminate()
 	streamCallback.Done(0);
 }
 
+static int getDigit(char* &sz, int& c)
+{
+	c = c;
+	while (c && sz[0] != ' ')
+	{ //reach to first space
+		sz++;
+		c--;
+	}
+	c = c;
+	while (c && !isdigit(sz[0]))
+	{ //reach to first digit
+		sz++;
+		c--;
+	}
+	int ret = atoi(sz);
+	return ret;
+}
+
 static PS_INFO psInfoTemp[maxPsInfo];
 static int cPsInfoTemp;
 //PID NAME
@@ -24,27 +42,8 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog)
 			char* sz = ps.buf();
 			int c = ps.size();
 			//stdlog("\x1size: %d, %s\n", ps.size(), sz);
-			while (c && !isdigit(sz[0]))
-			{ //reach to first digit
-				sz++;
-				c--;
-			}
-			if (sz > ps.buf() && *(sz - 1) != ' ' && !isdigit(*(sz - 1)))
-			{
-				while (c && sz[0] != ' ')
-				{ //reach to first space
-					sz++;
-					c--;
-				}
-				while (c && !isdigit(sz[0]))
-				{ //reach to first digit
-					sz++;
-					c--;
-				}
-			}
-			int pid = atoi(sz);
-			if (pid == 3304)
-				pid = pid;
+			int pid = getDigit(sz, c);
+			int ppid = getDigit(sz, c);
 			while (c && sz[c - 1] != ' ')
 				c--;
 			char* name = sz + c;
@@ -57,6 +56,7 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog)
 			if (c && pid)
 			{
 				psInfoTemp[cPsInfoTemp].pid = pid;
+				psInfoTemp[cPsInfoTemp].ppid = ppid;
 				memcpy(psInfoTemp[cPsInfoTemp].name, name, c);
 				psInfoTemp[cPsInfoTemp].name[c] = 0;
 				psInfoTemp[cPsInfoTemp].cName = c;
@@ -72,8 +72,8 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog)
 	return (cPsInfoTemp < maxPsInfo) && gLogReceiver.working();
 }
 
-//static const char* cmdAdbShell[]{ "cmd_shell", "ps", "-o", "PID,NAME" };
-static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
+static const char* cmdAdbShell[]{ "cmd_shell", "ps", "-t" };
+//static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
 void LogcatPsCommand::Work(LPVOID pWorkParam)
 {
 	//return;

@@ -253,6 +253,11 @@ struct THREAD_NODE : LOG_NODE
     int java_outer_fn_line;
     int tid;
     int threadNN;
+    int psNN;
+    char threadName[MAX_APP_NAME + 1];
+    int cb_thread_name;
+
+    bool isClosed() { return psNN < 0; }
 
     void add_thread_child(FLOW_NODE* pNode, THREAD_NODE_CHILD type)
     {

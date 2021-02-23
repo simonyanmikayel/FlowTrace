@@ -134,8 +134,16 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 	bool updateViews = false;
 
 	for (int i = 0; i < cPsInfo; i++) {
-		if (setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName))
-			updateViews = true;
+		if (APP_NODE * app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews))
+		{
+			int ppid = psInfo[i].pid;
+			while (i < cPsInfo - 1 && ppid == psInfo[i + 1].ppid)
+			{
+				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
+				i++;
+			}
+		}
+			
 	}
 	m_psNN++;
 
@@ -147,40 +155,78 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 			app->psNN = -m_psNN;
 			updateViews = true;
 		}
+		THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
+		while (thread)
+		{
+			if (thread->psNN >= 0 && thread->psNN != m_psNN)
+			{
+				thread->psNN = -m_psNN;
+				updateViews = true;
+			}
+			thread = (THREAD_NODE*)thread->prevSibling;
+		}
+
 		app = (APP_NODE*)app->prevSibling;
 	}
 
 	return updateViews;
 }
 
-bool Archive::setAppName(int pid, char* szName, int cbName)
+APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateViews)
 {
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
 		if (app->pid == pid)
 		{
-			bool ret = false;
-			if (app->isUnknown() || app->isPreInitialized())
+			if (app->isUnknown() || app->isPreInitialized() || cbName != app->cb_app_name)
 			{
 				cbName = std::min(cbName, MAX_APP_NAME);
 				app->cb_app_name = cbName;
 				memcpy(app->appName, szName, cbName);
 				app->appName[cbName] = 0;
 				app->applyFilter();
-				ret = true; //we need refresh views
+				updateViews = true; //we need refresh views
 			}
 			if (app->psNN < 0)
-				ret = true; //we need refresh views
+				updateViews = true; //we need refresh views
 			if (app->psNN <= 0)
 				app->psNN = m_psNN;
 			if (app->psNN == m_psNN)
 				app->psNN++;
-			return ret;
+			break;
 		}
 		app = (APP_NODE*)app->prevSibling;
 	}
-	return false;
+	return app;
+}
+
+THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cbName, bool& updateViews)
+{
+	THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
+	while (thread)
+	{
+		if (thread->tid == tid)
+		{
+			if (thread->threadName[0] == 0 || cbName != thread->cb_thread_name)
+			{
+				cbName = std::min(cbName, MAX_APP_NAME);
+				thread->cb_thread_name = cbName;
+				memcpy(thread->threadName, szName, cbName);
+				thread->threadName[cbName] = 0;
+				updateViews = true; //we need refresh views
+			}
+			if (thread->psNN < 0)
+				updateViews = true; //we need refresh views
+			if (thread->psNN <= 0)
+				thread->psNN = m_psNN;
+			if (thread->psNN == m_psNN)
+				thread->psNN++;
+			break;
+		}
+		thread = (THREAD_NODE*)thread->prevSibling;
+	}
+	return thread;
 }
 
 bool Archive::resolveAppName(APP_NODE* app)

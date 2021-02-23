@@ -17,10 +17,11 @@ const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 
 struct PS_INFO {
 	int pid;
+	int ppid;
 	char name[MAX_APP_NAME + 1];
 	int cName;
 };
-#define maxPsInfo 1024 
+#define maxPsInfo 32*1024 
 
 
 #pragma pack(push,4)
@@ -188,7 +189,8 @@ private:
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName);
 	inline APP_NODE*   getApp(LOG_REC* p, sockaddr_in *p_si_other);
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);
-	bool setAppName(int pid, char* szName, int cbName);
+	APP_NODE* setAppName(int pid, char* szName, int cbName, bool& updateViews);
+	THREAD_NODE* setThreadName(APP_NODE*  app, int tid, char* szName, int cbName, bool& updateViews);
 	bool resolveAppName(APP_NODE* app);
 	DWORD m_lost;
 	int m_psNN;

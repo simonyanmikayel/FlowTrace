@@ -281,6 +281,10 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
     }
     else if (isThread())
     {
+        THREAD_NODE* This = (THREAD_NODE*)this;
+        cb = This->cb_thread_name;
+        memcpy(pBuf, This->threadName, cb);
+        pBuf[cb] = 0;
         if (gSettings.GetColPID() && gSettings.GetColTID())
             cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
         else if (gSettings.GetColPID())
