@@ -136,11 +136,13 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 	for (int i = 0; i < cPsInfo; i++) {
 		if (APP_NODE * app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews))
 		{
+			setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews); //main thread
+
 			int ppid = psInfo[i].pid;
 			while (i < cPsInfo - 1 && ppid == psInfo[i + 1].ppid)
 			{
-				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
 				i++;
+				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
 			}
 		}
 			
