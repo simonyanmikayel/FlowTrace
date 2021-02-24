@@ -204,61 +204,100 @@ void TaskThread::FileSave(WORD cmd)
 
     for (DWORD i = 0; (i < m_count) && IsWorking(); i++, m_progress++)
     {
-        LOG_NODE* pNode = isExport ? gArchive.getNode(i) : gArchive.getListedNodes()->getNode(i);        
-        if (!pNode->isInfo())
-            continue;
-        INFO_NODE* pInfoNode = (INFO_NODE*)pNode;
+        LOG_NODE* pNode = isExport ? gArchive.getNode(i) : gArchive.getListedNodes()->getNode(i);
+        APP_NODE* pAppNode = 0;
+        THREAD_NODE* pThreadNode = 0;
+        INFO_NODE* pInfoNode = 0;
+        if (pNode->isApp()) {
+            pAppNode = (APP_NODE*)pNode;
+        }
+        else if (pNode->isThread()) {
+            pThreadNode = (THREAD_NODE*)pNode;
+            pAppNode = pThreadNode->pAppNode;
+        }
+        else if (pNode->isInfo()) {
+            pInfoNode = (INFO_NODE*)pNode;
+            pThreadNode = pInfoNode->threadNode;
+            pAppNode = pThreadNode->pAppNode;
+        }
 
-        if (i == 1711)
-            i = i;
+        if (pAppNode == 0)
+            continue;
+
 		if (isExport)
         {
-            if (pInfoNode->isFlow())
+            if (pNode->isApp())
+            {
+                APP_NODE* p = (APP_NODE*)pNode;
+                ZeroMemory(pLogData, sizeof(*pLogData));
+                pLogData->log_type = LOG_TYPE_APP;
+                pLogData->nn = p->psNN;
+                pLogData->pid = pAppNode->pid;
+            }
+            else if (pNode->isThread())
+            {
+                THREAD_NODE* p = (THREAD_NODE*)pNode;
+                ZeroMemory(pLogData, sizeof(*pLogData));
+                pLogData->log_type = LOG_TYPE_THREAD;
+                pLogData->nn = p->psNN;
+                pLogData->pid = pAppNode->pid;
+                pLogData->tid = pThreadNode->tid;
+            }
+            else if (pNode->isFlow())
             {
 				//continue;
-                FLOW_NODE* p = (FLOW_NODE*)pInfoNode;
+                FLOW_NODE* p = (FLOW_NODE*)pNode;
                 pLogData->log_type = p->log_type;
 				pLogData->log_flags = p->log_flags;
 				pLogData->nn = p->nn;
                 pLogData->sec = p->sec;
                 pLogData->msec = p->msec;
-                pLogData->tid = pInfoNode->threadNode->tid;
-                pLogData->pid = pInfoNode->threadNode->pAppNode->pid;
+                pLogData->tid = pThreadNode->tid;
+                pLogData->pid = pAppNode->pid;
                 pLogData->this_fn = p->this_fn;
                 pLogData->call_site = p->call_site;
 				pLogData->fn_line = p->fn_line;
 				pLogData->call_line = p->call_line;
                 pLogData->color = 0;
             }
-            else
+            else if (pNode->isTrace())
             {
-                TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
+                TRACE_NODE* p = (TRACE_NODE*)pNode;
                 pLogData->log_type = p->log_type;
 				pLogData->log_flags = p->log_flags;
 				pLogData->nn = p->nn;
                 pLogData->sec = p->sec;
                 pLogData->msec = p->msec;
-                pLogData->tid = pInfoNode->threadNode->tid;
-                pLogData->pid = pInfoNode->threadNode->pAppNode->pid;
+                pLogData->tid = pThreadNode->tid;
+                pLogData->pid = pAppNode->pid;
                 pLogData->this_fn = 0;
                 pLogData->call_site = 0;
 				pLogData->fn_line = 0;
 				pLogData->call_line = p->call_line;
                 pLogData->color = p->color;
             }
+            else
+            {
+                continue;
+            }
             
-            pLogData->cb_app_name = pInfoNode->threadNode->pAppNode->cb_app_name;
-            pLogData->cb_module_name = pInfoNode->cb_module_name;
-            pLogData->cb_fn_name = pInfoNode->cb_fn_name;
-            memcpy((void*)pLogData->appName(), pInfoNode->threadNode->pAppNode->appName, pLogData->cb_app_name);
-            if (pLogData->cb_module_name)
+            pLogData->cb_app_name = pAppNode->cb_app_name;
+            memcpy((void*)pLogData->appName(), pAppNode->appName, pLogData->cb_app_name);
+            if (pThreadNode && pLogData->log_type == LOG_TYPE_THREAD && pThreadNode->cb_thread_name) {
+                pLogData->cb_fn_name = pThreadNode->cb_thread_name;
+                memcpy((void*)pLogData->fnName(), pThreadNode->threadName, pLogData->cb_fn_name);
+            }
+            else if (pInfoNode) {
+                pLogData->cb_module_name = pInfoNode->cb_module_name;
                 memcpy((void*)pLogData->moduleName(), pInfoNode->moduleName(), pLogData->cb_module_name);
-            memcpy((void*)pLogData->fnName(), pInfoNode->fnName(), pLogData->cb_fn_name);
+                pLogData->cb_fn_name = pInfoNode->cb_fn_name;
+                memcpy((void*)pLogData->fnName(), pInfoNode->fnName(), pLogData->cb_fn_name);
+            }
+
 			//gArchive.Log(pLogData);
             pLogData->cb_trace = 0;
-            if (!pInfoNode->isFlow())
+            if (pInfoNode && !pInfoNode->isFlow())
             {
-                //TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
                 int cb_trace = 0;
                 char* log = pInfoNode->getListText(&cb_trace, LOG_COL);
                 int cb_size = pLogData->size();
@@ -280,37 +319,39 @@ void TaskThread::FileSave(WORD cmd)
                 pLogData->len, pLogData->log_type, pLogData->log_flags, pLogData->color, pLogData->nn,
                 pLogData->cb_app_name, pLogData->cb_module_name,
                 pLogData->cb_fn_name, pLogData->cb_trace, pLogData->pid, pLogData->tid, pLogData->sec, pLogData->msec,
-                pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pInfoNode->bookmark);
+                pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, pNode->bookmark);
 
             fwrite(pLogData->data, pLogData->cbData(), 1, m_fp);
             fwrite("\n", 1, 1, m_fp);
         }
         else
         {
-            fwrite("[", 1, 1, m_fp);
-            if (pInfoNode->isFlow())
+            if (pNode->isFlow())
             {
-                FLOW_NODE* p = (FLOW_NODE*)pInfoNode;
-                fwrite(pInfoNode->threadNode->pAppNode->appName, 1, pInfoNode->threadNode->pAppNode->cb_app_name, m_fp);
+                fwrite("[", 1, 1, m_fp);
+                FLOW_NODE* p = (FLOW_NODE*)pNode;
+                fwrite(pAppNode->appName, 1, pAppNode->cb_app_name, m_fp);
                 fwrite(" ", 1, 1, m_fp);
                 fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
                 fprintf(m_fp, " %d", p->call_line);
+                fwrite("] ", 1, 2, m_fp);
+                p->isEnter() ? fwrite(" ->\n", 4, 1, m_fp) : fwrite(" <-\n", 4, 1, m_fp);
+            }
+            else if (pNode->isTrace())
+            {
+                fwrite("[", 1, 1, m_fp);
+                TRACE_NODE* p = (TRACE_NODE*)pNode;
+                fwrite(pAppNode->appName, 1, pAppNode->cb_app_name, m_fp);
+                fwrite(" ", 1, 1, m_fp);
+                fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
+                fprintf(m_fp, " %d", p->call_line);
+                fwrite("] ", 1, 2, m_fp);
+                int cb_trace;
+                fprintf(m_fp, "%s\n", p->getListText(&cb_trace, LOG_COL));
             }
             else
             {
-                TRACE_NODE* p = (TRACE_NODE*)pInfoNode;
-                fwrite(pInfoNode->threadNode->pAppNode->appName, 1, pInfoNode->threadNode->pAppNode->cb_app_name, m_fp);
-                fwrite(" ", 1, 1, m_fp);
-                fwrite(p->fnName(), 1, p->cb_fn_name, m_fp);
-                fprintf(m_fp, " %d", p->call_line);
-            }
-            fwrite("] ", 1, 2, m_fp);
-
-            if (pInfoNode->isFlow())
-                pInfoNode->isEnter() ? fwrite(" ->\n", 4, 1, m_fp) : fwrite(" <-\n", 4, 1, m_fp);
-            else {
-                int cb_trace;
-                fprintf(m_fp, "%s\n", pInfoNode->getListText(&cb_trace, LOG_COL));
+                continue;
             }
         }
     }

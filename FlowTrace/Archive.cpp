@@ -278,7 +278,7 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
     //stdlog("curApp 1 %p\n", curApp);
     while (curApp)
     {
-		if ((curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+		if ((curApp->pid == pLogData->pid))
 		{
 			break;
 		}
@@ -699,11 +699,17 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	//	return;
 
 //	static APP_NODE* curApp0 = curApp;
+	int log_type = rec->getLogData()->log_type;
 	APP_NODE* pAppNode = getApp(rec, p_si_other);
     if (!pAppNode)
         return;
+	if (log_type == LOG_TYPE_APP)
+	{
+		pAppNode->psNN = rec->getLogData()->nn;
+		return;
+	}
 
-	if (pack && pack->pack_nn > 0)
+	if (pack && pack->pack_nn > 0 && !fromImport)
 	{
 		if (pack->pack_nn <= pAppNode->lastPackNN)
 		{
@@ -732,12 +738,21 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 		g_buff_nn = pack->buff_nn-1;
 	}
 #endif
-	if (pLogData->nn)
+	if (pLogData->nn && !fromImport)
 		pAppNode->lastRecNN = pLogData->nn;
 	
 	THREAD_NODE* pThreadNode = getThread(pAppNode, rec);
     if (!pThreadNode)
 		return;
+	if (log_type == LOG_TYPE_THREAD)
+	{
+		pThreadNode->psNN = rec->getLogData()->nn;
+		int cbName = std::min((int)(rec->getLogData()->cb_fn_name), MAX_APP_NAME);
+		pThreadNode->cb_thread_name = cbName;
+		memcpy(pThreadNode->threadName, rec->fnName(), cbName);
+		pThreadNode->threadName[cbName] = 0;
+		return;
+	}
 
 	if (pLogData->log_flags & LOG_FLAG_JAVA)
 	{
