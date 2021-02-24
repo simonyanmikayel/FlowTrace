@@ -131,10 +131,13 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 	cPsInfo = c;
 	gLogReceiver.unlock();
 
+	m_psNN++;
 	bool updateViews = false;
+	APP_NODE* app;
 
 	for (int i = 0; i < cPsInfo; i++) {
-		if (APP_NODE * app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews))
+		app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
+		if (app)
 		{
 			setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews); //main thread
 
@@ -147,9 +150,8 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		}
 			
 	}
-	m_psNN++;
 
-	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
+	app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
 		if (app->pid != 0 && app->psNN >= 0 && app->psNN != m_psNN)
@@ -160,8 +162,9 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
 		while (thread)
 		{
-			if (thread->psNN >= 0 && thread->psNN != m_psNN)
+			if (thread->tid > 0 && thread->psNN >= 0 && thread->psNN != m_psNN)
 			{
+				//stdlog("~pid [ %d - %d ] - %d != %d\n", app->pid, thread->tid, thread->psNN, m_psNN);
 				thread->psNN = -m_psNN;
 				updateViews = true;
 			}
@@ -171,6 +174,7 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		app = (APP_NODE*)app->prevSibling;
 	}
 
+	//stdlog("setPsInfo %d update %d  ==================================\n", c, updateViews);
 	return updateViews;
 }
 
@@ -192,10 +196,7 @@ APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateVie
 			}
 			if (app->psNN < 0)
 				updateViews = true; //we need refresh views
-			if (app->psNN <= 0)
-				app->psNN = m_psNN;
-			if (app->psNN == m_psNN)
-				app->psNN++;
+			app->psNN = m_psNN;
 			break;
 		}
 		app = (APP_NODE*)app->prevSibling;
@@ -210,6 +211,7 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 	{
 		if (thread->tid == tid)
 		{
+			//stdlog("pid [ %d - %d ] - %d\n", app->pid, thread->tid, thread->psNN);
 			if (thread->threadName[0] == 0 || cbName != thread->cb_thread_name)
 			{
 				cbName = std::min(cbName, MAX_APP_NAME);
@@ -220,10 +222,7 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 			}
 			if (thread->psNN < 0)
 				updateViews = true; //we need refresh views
-			if (thread->psNN <= 0)
-				thread->psNN = m_psNN;
-			if (thread->psNN == m_psNN)
-				thread->psNN++;
+			thread->psNN = m_psNN;
 			break;
 		}
 		thread = (THREAD_NODE*)thread->prevSibling;
@@ -271,7 +270,6 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
     {
 		if (curApp && (curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
 		{
-			curApp->psNN = 0;
 			return curApp;
 		}
     }
@@ -282,7 +280,6 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
     {
 		if ((curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
 		{
-			curApp->psNN = 0;
 			break;
 		}
         curApp = (APP_NODE*)curApp->prevSibling;
