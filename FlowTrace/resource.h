@@ -153,6 +153,7 @@
 #define ID_TREE_SHOW_ALL                32837
 #define ID_TREE_SHOW_THIS_APP           32838
 #define ID_TREE_SHOW_THIS_THREAD        32839
+#define ID_EDIT_COPY_SPECIAL            32840
 
 // Next default values for new objects
 // 

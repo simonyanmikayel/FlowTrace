@@ -111,7 +111,21 @@ LOG_NODE* CLogListView::GetSynkNode()
 	return pNode;
 }
 
-void CLogListView::CopySelection(bool onlyTraces)
+static void inline CopyLine(char*& lock, int& len, char* buf, int l, int i, bool copySpecial, bool copy) {
+	if (copySpecial) 
+	{
+		CHAR szNN[32];
+		int cbNN = _stprintf_s(szNN, _countof(szNN), _T("%d: "), i + 1);
+		if (copy)
+			memcpy(lock + len, szNN, cbNN);
+		len += cbNN;
+	}
+	if (copy)
+		memcpy(lock + len, buf, l);
+	len += l;
+}
+
+void CLogListView::CopySelection(bool onlyTraces, bool copySpecial)
 {
 	if (m_ListSelection.IsEmpty() && !onlyTraces)
 		return;
@@ -149,31 +163,32 @@ void CLogListView::CopySelection(bool onlyTraces)
 				if (onlyTraces)
 				{
 					l = logLen;
-					if (copy) memcpy(lock + len, log, l);
+					if (copy) 
+						memcpy(lock + len, log, l);
 					len += l;
 				}
 				else if (i == m_ListSelection.StartItem() && i == m_ListSelection.EndItem())
 				{
+					l = 0;
 					if (m_ListSelection.StartChar() < logLen)
 					{
 						l = min(m_ListSelection.EndChar(), logLen) - m_ListSelection.StartChar();
 					}
 					if (l)
 					{
-						if (copy) memcpy(lock + len, log + m_ListSelection.StartChar(), l);
-						len += l;
+						CopyLine(lock, len, log + m_ListSelection.StartChar(), l, i, copySpecial, copy);
 					}
 				}
 				else if (i == m_ListSelection.StartItem())
 				{
+					l = 0;
 					if (m_ListSelection.StartChar() < logLen)
 					{
 						l = logLen - m_ListSelection.StartChar();
 					}
 					if (l)
 					{
-						if (copy) memcpy(lock + len, log + m_ListSelection.StartChar(), l);
-						len += l;
+						CopyLine(lock, len, log + m_ListSelection.StartChar(), l, i, copySpecial, copy);
 					}
 				}
 				else if (i == m_ListSelection.EndItem())
@@ -181,8 +196,7 @@ void CLogListView::CopySelection(bool onlyTraces)
 					l = min(m_ListSelection.EndChar(), logLen);
 					if (l)
 					{
-						if (copy) memcpy(lock + len, log, l);
-						len += l;
+						CopyLine(lock, len, log, l, i, copySpecial, copy);
 					}
 				}
 				else //(i > m_ListSelection.StartItem() && i < m_ListSelection.EndItem())
@@ -190,20 +204,26 @@ void CLogListView::CopySelection(bool onlyTraces)
 					l = logLen;
 					if (l)
 					{
-						if (copy) memcpy(lock + len, log, l);
-						len += l;
+						CopyLine(lock, len, log, l, i, copySpecial, copy);
 					}
 				}
 				if (l)
 				{
 					if (i != m_ListSelection.EndItem())
 					{
-						if (copy) memcpy(lock + len, "\r\n", 2);
+						if (copySpecial) {
+							if (copy)
+								memcpy(lock + len, "\r\n", 2);
+							len += 2;
+						}
+						if (copy)
+							memcpy(lock + len, "\r\n", 2);
 						len += 2;
 					}
 					else
 					{
-						if (copy) memcpy(lock + len, "", 1);
+						if (copy)
+							memcpy(lock + len, "", 1);
 						len += 1;
 					}
 				}
@@ -607,7 +627,8 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	HMENU hMenu = CreatePopupMenu();
 	Helpers::AddCommonMenu(pNode, hMenu, cMenu);
 
-    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
+	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
+	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_SPECIAL, _T("Copy Special"));
 
     disable = (m_ListSelection.IsEmpty());
     Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
@@ -628,6 +649,10 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	{
 		CopySelection(true);
 	}
+	else if (nRet == ID_EDIT_COPY_SPECIAL)
+	{
+		CopySelection(false, true);
+	}	
 	else if (nRet == ID_SYNC_VIEWES)
 	{
 		m_pFlowTraceView->SyncViews();

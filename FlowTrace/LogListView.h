@@ -83,7 +83,7 @@ public:
 	void UpdateCaret();
 	bool HasSelection();
 	LOG_NODE* GetSynkNode();
-	void CopySelection(bool onlyTraces = false);
+	void CopySelection(bool onlyTraces = false, bool copySpecial = false);
 	CHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
 	void SelectAll();
     int getSelectionItem() { return m_ListSelection.CurItem(); }
