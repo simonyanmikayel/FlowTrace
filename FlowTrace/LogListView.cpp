@@ -627,11 +627,10 @@ LRESULT CLogListView::OnRButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	HMENU hMenu = CreatePopupMenu();
 	Helpers::AddCommonMenu(pNode, hMenu, cMenu);
 
+	disable = (m_ListSelection.IsEmpty());
+	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
 	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_TRACES, _T("Copy Trace"));
-	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_SPECIAL, _T("Copy Special"));
-
-    disable = (m_ListSelection.IsEmpty());
-    Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY, _T("&Copy\tCtrl+C"), disable);
+	Helpers::AddMenu(hMenu, cMenu, ID_EDIT_COPY_SPECIAL, _T("Copy Special"), disable);
 
 	InsertMenu(hMenu, cMenu++, MF_BYPOSITION | MF_SEPARATOR, 0, _T(""));
 	Helpers::AddMenu(hMenu, cMenu, ID_TREE_SHOW_THIS_THREAD, _T("Show only this thread\tCtrl+D"), false);
