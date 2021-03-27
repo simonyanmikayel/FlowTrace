@@ -204,6 +204,8 @@ private:
 	//MemBuf* m_pRecBuf;
 	PtrArray<LOG_NODE>* m_pNodes;
 	//PtrArray<LOG_REC_BASE_DATA>* m_pRecords;
+	PS_INFO psInfo[maxPsInfo + 1];
+	int cPsInfo;
 };
 
 struct ListedNodes

@@ -42,6 +42,7 @@ void Archive::onPaused()
 
 void Archive::clearArchive(bool closing)
 {
+	cPsInfo = 0;
     archiveNumber++;
 	bookmarkNumber = 0;
 	m_lost = 0;
@@ -121,8 +122,6 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     return pNode;
 }
 
-static PS_INFO psInfo[maxPsInfo + 1];
-static int cPsInfo;
 bool  Archive::setPsInfo(PS_INFO* p, int c)
 {
 	gLogReceiver.lock();
