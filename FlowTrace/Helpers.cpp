@@ -612,5 +612,6 @@ namespace Helpers
         else
             return 0;
     }
+
 };
 

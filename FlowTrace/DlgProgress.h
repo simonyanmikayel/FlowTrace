@@ -26,7 +26,8 @@ private:
   FILE *m_fp;
 
   void FileSave(WORD cmd);
-  void FileImport();
+  void FileImportTrases();
+  void FileImportLogcat();
   bool isShortLog();
   void ImportShortLog();
 };

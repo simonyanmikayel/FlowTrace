@@ -35,4 +35,45 @@ namespace Helpers
 	bool ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
 	const char* FindFile(const char* szDirName, const char* szFileName, bool isFile);
+
+	inline void NextLine(char* buf, int buf_size, int& i)
+	{
+		while (buf[i] != 0 && buf[i] == '\r' || buf[i] == '\n' && i < buf_size)
+			i++;
+	}
+
+	inline bool ToChar(char ch, char* buf, int buf_size, int& i)
+	{
+		while (buf[i] != 0 && buf[i] != ch && i < buf_size)
+			i++;
+		return buf[i] == ch;
+	}
+
+	inline void LineEnd(char* buf, int buf_size, int& i)
+	{
+		while (buf[i] != 0 && buf[i] != '\r' && buf[i] != '\n' && i < buf_size)
+			i++;
+	}
+
+	inline void SkipWhite(char* buf, int buf_size, int& i)		
+	{
+		while (buf[i] != 0 && buf[i] <= ' ' && i < buf_size)
+			i++;
+	}
+
+	inline int NextDigit(char* buf, int buf_size, int& i, bool& ok)
+	{
+		int ret = 0;
+		if (ok) {
+			while (buf[i] != 0 && !isdigit(buf[i]) && i < buf_size)
+				i++;
+			int i0 = i;
+			ret = ok ? atoi(buf + i) : 0;
+			while (isdigit(buf[i]) && i < buf_size)
+				i++;
+			ok = (i != i0);
+		}
+		return ret;
+	}
+
 };

@@ -234,9 +234,7 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
 		activated = true;
 		gSettings.RestoreWindPos(m_hWnd);
 		StartLogging(true);
-		//DlgModules dlg;
-        //dlg.DoModal();
-        //DlgProgress dlg(ID_FILE_IMPORT, "y:\\tmp\\ssl.slog"); dlg.DoModal();
+        DlgProgress dlg(ID_FILE_IMPORT_LOGCAT, "d:\\temp\\tracees\\logcat.file.1.1"); dlg.DoModal();
     }
 
     return 0;
@@ -284,7 +282,7 @@ LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 		if (!autoDone && wParam != WA_INACTIVE)
 		{
 			autoDone = true;
-			DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+			DlgProgress dlg(ID_FILE_IMPORT_TRACES, "auto"); dlg.DoModal();
 			return 0;
 		}
 #endif
@@ -418,6 +416,15 @@ LRESULT CMainFrame::OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
     return 0;
 }
 
+LRESULT CMainFrame::OnFileImportLogcat(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    DlgProgress dlg(wID, NULL);
+    dlg.DoModal();
+    m_importFile = dlg.getFileName();
+    SetTitle();
+    return 0;
+}
+
 LRESULT CMainFrame::OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     gSettings.SetTreeViewHiden(!gSettings.GetTreeViewHiden());
@@ -542,7 +549,7 @@ LRESULT CMainFrame::OnShowHideFlowTraces(WORD /*wNotifyCode*/, WORD /*wID*/, HWN
 LRESULT CMainFrame::OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 #ifdef _AUTO_TEST
-	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+	DlgProgress dlg(ID_FILE_IMPORT_TRACES, "auto"); dlg.DoModal();
 #endif
 	StartLogging(false);
     return 0;
@@ -551,7 +558,7 @@ LRESULT CMainFrame::OnStartRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 LRESULT CMainFrame::OnPauseRecording(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 #ifdef _AUTO_TEST
-	DlgProgress dlg(ID_FILE_IMPORT, "auto"); dlg.DoModal();
+	DlgProgress dlg(ID_FILE_IMPORT_TRACES, "auto"); dlg.DoModal();
 #endif
 	StopLogging(false);
     return 0;

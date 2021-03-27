@@ -99,7 +99,7 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
 				packError = true;
 				break;
 			}
-			if (!gArchive.append(rec, NULL))//&si_other
+			if (!gArchive.appendNet(rec, NULL))//&si_other
 			{
 				packError = true;
 				gLogReceiverNet.unlock();

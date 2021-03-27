@@ -56,21 +56,6 @@ void LogReceiverAdb::stop()
 	logcatPsCommand.StopWork();
 }
 
-static inline int NextMetaDataDigit(char* buf, int buf_size, int &i, bool& ok)
-{
-	int ret = 0;
-	if (ok) {
-		while (buf[i] != 0 && !isdigit(buf[i]) && i < buf_size)
-			i++;
-		int i0 = i;
-		ret = ok ? atoi(buf + i) : 0;
-		while (isdigit(buf[i]) && i < buf_size)
-			i++;
-		ok = (i != i0);
-	}
-	return ret;
-}
-
 static void AddTrace(size_t cbLog, char* szLog, int color)
 {
 	if (cbLog)
@@ -80,7 +65,7 @@ static void AddTrace(size_t cbLog, char* szLog, int color)
 		adbRec.cb_trace = (WORD)cbLog;
 		adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
 		adbRec.color = color;
-		gArchive.append(&adbRec);
+		gArchive.appendAdb(&adbRec);
 		gLogReceiver.unlock();
 	}
 }
@@ -207,7 +192,8 @@ static void WriteLog(const char* szLog, int cbLog)
 	{
 		ft->sec = adbRec.sec;
 		ft->msec = adbRec.msec;
-		gArchive.append(ft);
+		adbRec.log_flags &= (~LOG_FLAG_ADB); //clear the bit
+		gArchive.appendNet(ft);
 	}
 	else
 	{
@@ -224,14 +210,14 @@ static bool ParceMetaData()
 	MetaDataInfo mtInfo;
 	mtInfo.size = mt.size();
 	int i = 0;
-	int unused1 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int unused2 = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int h = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int m = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int s = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	int ms = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	mtInfo.pid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
-	mtInfo.tid = NextMetaDataDigit(mt.buf(), mt.size(), i, ok);
+	int unused1 = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	int unused2 = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	int h = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	int m = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	int s = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	int ms = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	mtInfo.pid = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
+	mtInfo.tid = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
 	if (ok && mtInfo.pid && mtInfo.tid) {
 		adbRec.reset();
 		adbRec.pid = mtInfo.pid;

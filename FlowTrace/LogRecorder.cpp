@@ -16,7 +16,7 @@ bool RecordNetPack(NET_PACK* pack)
 			isOK = false;
 			break;
 		}
-		if (!gArchive.append(pLogData, &pack->si_other, false, 0, &pack->info))
+		if (!gArchive.appendNet(pLogData, &pack->si_other, false, 0, &pack->info))
 		{
 			isOK = false;
 			break;

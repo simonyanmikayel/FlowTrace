@@ -65,8 +65,9 @@ public:
 		COMMAND_ID_HANDLER(ID_VIEW_DETAILES, OnViewDetailes)
         COMMAND_ID_HANDLER(ID_VIEW_SETTINGS, OnViewSettings)
         COMMAND_ID_HANDLER(ID_FILE_SAVE, OnFileSave)
-        COMMAND_ID_HANDLER(ID_FILE_EXPORT, OnFileSave)
-        COMMAND_ID_HANDLER(ID_FILE_IMPORT, OnFileImport)
+        COMMAND_ID_HANDLER(ID_FILE_EXPORT_TRACES, OnFileSave)
+        COMMAND_ID_HANDLER(ID_FILE_IMPORT_TRACES, OnFileImport)
+        COMMAND_ID_HANDLER(ID_FILE_IMPORT_LOGCAT, OnFileImportLogcat)
         COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_TREE, OnShowHideTreeView)
         COMMAND_ID_HANDLER(ID_VIEW_SHOW_HIDE_STACK, OnShowHideStack)
 		COMMAND_ID_HANDLER(ID_VIEW_RUN_EXTERNAL_CMD_1, OnRunExternalCmd)
@@ -132,6 +133,7 @@ public:
     LRESULT OnViewSettings(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    LRESULT OnFileImportLogcat(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnShowHideTreeView(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnShowHideStack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnRunExternalCmd(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

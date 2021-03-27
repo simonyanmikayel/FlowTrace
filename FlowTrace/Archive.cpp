@@ -386,7 +386,7 @@ LOG_NODE* Archive::addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookm
 
 }
 
-LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName)
+LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, bool fromImport, char* trace, int cb_trace, const char* fnName, const char* moduleName)
 {
 	bool endsWithNewLine = (cb_trace > 0 && trace[cb_trace - 1] == '\n' || trace[cb_trace - 1] == '\r');
 	if (endsWithNewLine)
@@ -401,7 +401,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 
     bool newChank = false;
     // check if we can append to previous trace
-    if (pThreadNode->latestTrace)
+    if (pThreadNode->latestTrace && !(pLogData->log_flags & LOG_FLAG_ADB) && !fromImport)
     {
         if (pThreadNode->latestTrace->hasNewLine == 0)
         {
@@ -556,14 +556,14 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	LOG_NODE* pNode = nullptr;
 	if (fromImport || pLogRec->getLogData()->log_flags & LOG_FLAG_COLOR_PARCED)
 	{
-		pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName);
+		pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName);
 	}
 	else
 	{
 		char last_char = trace[cb_trace];
 		trace[cb_trace] = 0;
 
-#define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, trace, (int)(cb_trace), fnName, moduleName)
+#define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName)
 
 		int old_color = pLogData->color;
 		char *start = trace;
@@ -643,18 +643,18 @@ void Archive::Log(LOG_REC* rec)
 		pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, rec->appName());
 }
 
-int Archive::append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, int bookmark, NET_PACK_INFO* pack)
+int Archive::appendAdb(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_ADB rec(pLogData);
 	if (!rec.isValid()) {
 		ATLASSERT(0);
 		return 0;
 	}
-	appendRec(&rec, p_si_other, false, bookmark, pack);
+	appendRec(&rec, p_si_other, fromImport, bookmark, pack);
 	return 1;
 }
 
-int Archive::append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
+int Archive::appendNet(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
 {
 	LOG_REC_NET rec(pLogData);
 	if (!rec.isValid()) {

@@ -105,8 +105,9 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
-        MENUITEM "Export",                      ID_FILE_EXPORT
-        MENUITEM "Import",                      ID_FILE_IMPORT
+        MENUITEM "Export Traces",               ID_FILE_EXPORT_TRACES
+        MENUITEM "Import Traces",               ID_FILE_IMPORT_TRACES
+        MENUITEM "Import Logcat",               ID_FILE_IMPORT_LOGCAT
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
@@ -413,8 +414,8 @@ BEGIN
     "R",            ID_VIEW_RESETLOG,       VIRTKEY, CONTROL, NOINVERT
     "R",            ID_VIEW_RESETLOG,       VIRTKEY, SHIFT, CONTROL, NOINVERT
     "P",            ID_TREE_SHOW_THIS_APP,  VIRTKEY, CONTROL, NOINVERT
-	"D",            ID_TREE_SHOW_THIS_THREAD, VIRTKEY, CONTROL, NOINVERT
-	"L",            ID_TREE_SHOW_ALL,       VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_TREE_SHOW_THIS_THREAD, VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_TREE_SHOW_ALL,       VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -510,8 +511,8 @@ BEGIN
     ID_SEARCH_FIRST         "Find First\nFind First  (Sift_Ctrl+F3)"
     ID_SEARCH_MATCH_CASE    "Match case\nMatch case"
     ID_SEARCH_MATCH_WHOLE_WORD "Match whole word\nMatch whole word"
-    ID_FILE_EXPORT          "Export File\nExport File"
-    ID_FILE_IMPORT          "Import File\nImport File"
+    ID_FILE_EXPORT_TRACES          "Export File\nExport File"
+    ID_FILE_IMPORT_TRACES          "Import File\nImport File"
     ID_VIEW_DETAILES        "Set view detailes\nSet view detailes"
     ID_VIEW_SETTINGS        "Application settings\nApplication settings"
     ID_VIEW_CLEARLOG        "Clear Log\nClear Log  (Ctrl+K)"

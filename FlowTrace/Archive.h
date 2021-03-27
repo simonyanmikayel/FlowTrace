@@ -174,8 +174,8 @@ public:
     size_t UsedMemory();
     DWORD getLost() { return m_lost; }
     void Log(LOG_REC* rec);
-	int append(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, int bookmark = 0, NET_PACK_INFO* pack = 0);
-	int append(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
+	int appendAdb(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
+	int appendNet(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	bool setPsInfo(PS_INFO* p, int c);
 	//void updateNodes();
 	DWORD m_SkipedLogcat;
@@ -186,7 +186,7 @@ private:
     inline THREAD_NODE* addThread(LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport);
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport);
-	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, char* trace, int cb_trace, const char* fnName, const char* moduleName);
+	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, bool fromImport, char* trace, int cb_trace, const char* fnName, const char* moduleName);
 	inline APP_NODE*   getApp(LOG_REC* p, sockaddr_in *p_si_other);
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);
 	APP_NODE* setAppName(int pid, char* szName, int cbName, bool& updateViews);

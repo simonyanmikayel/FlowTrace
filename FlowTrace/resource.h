@@ -108,8 +108,8 @@
 #define ID_SEARCH_FIRST                 32784
 #define ID_SEARCH_MATCH_CASE            32785
 #define ID_SEARCH_MATCH_WHOLE_WORD      32786
-#define ID_FILE_EXPORT                  32787
-#define ID_FILE_IMPORT                  32788
+#define ID_FILE_EXPORT_TRACES                  32787
+#define ID_FILE_IMPORT_TRACES                  32788
 #define ID_VIEW_DETAILES                32789
 #define ID_VIEW_SETTINGS                32790
 #define ID_VIEW_CLEARLOG                32791
@@ -154,13 +154,14 @@
 #define ID_TREE_SHOW_THIS_APP           32838
 #define ID_TREE_SHOW_THIS_THREAD        32839
 #define ID_EDIT_COPY_SPECIAL            32840
+#define ID_FILE_IMPORT_LOGCAT            32842
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        540
-#define _APS_NEXT_COMMAND_VALUE         32842
+#define _APS_NEXT_COMMAND_VALUE         32843
 #define _APS_NEXT_CONTROL_VALUE         1210
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

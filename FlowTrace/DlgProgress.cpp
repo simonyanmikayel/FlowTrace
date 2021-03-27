@@ -31,7 +31,7 @@ LRESULT DlgProgress::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
         return FALSE;
     }
 
-    if (m_cmd == ID_FILE_IMPORT)
+    if (m_cmd == ID_FILE_IMPORT_TRACES || m_cmd == ID_FILE_IMPORT_LOGCAT)
         ::SendMessage(hwndMain, WM_INPORT_TASK, 0, m_isAuto);
     m_pTaskThread->StartWork(NULL);
     SetTimer(1, 2000);
@@ -82,7 +82,7 @@ void DlgProgress::End(int wID)
 {
     KillTimer(1);
     m_pTaskThread->StopWork();
-    if (m_cmd == ID_FILE_IMPORT)
+    if (m_cmd == ID_FILE_IMPORT_TRACES || m_cmd == ID_FILE_IMPORT_LOGCAT)
     {
         ::PostMessage(hwndMain, WM_INPORT_TASK, 1, 0);
     }
@@ -103,7 +103,7 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
     if (lpstrFile == 0)
     {
         INT_PTR nRet;
-        if (m_cmd == ID_FILE_IMPORT)
+        if (m_cmd == ID_FILE_IMPORT_TRACES || m_cmd == ID_FILE_IMPORT_LOGCAT)
         {
             CFileDialog dlg(TRUE);
             nRet = dlg.DoModal();
@@ -141,29 +141,39 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
         m_strFileNameWithoutExt = m_strFileName;
     
     m_fp = NULL;
-    if (!m_strFilePath.IsEmpty() && !m_isAuto)
+    if (m_isAuto)
     {
-		if (m_cmd == ID_FILE_IMPORT)
+        m_isOK = true;
+    }
+    else if (!m_strFilePath.IsEmpty())
+    {
+		if (m_cmd == ID_FILE_IMPORT_TRACES || m_cmd == ID_FILE_IMPORT_LOGCAT)
 		{
-            if (isShortLog())
+            if (isShortLog() || m_cmd == ID_FILE_IMPORT_LOGCAT)
             {
-                ImportShortLog();
+                m_isOK = true;
             }
-            else if (0 != fopen_s(&m_fp, m_strFilePath, "r")) {
-				Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFilePath);
-				m_fp = NULL;
+            else if (0 == fopen_s(&m_fp, m_strFilePath, "r")) {
+                m_isOK = true;
 			}
+            else
+            {
+                Helpers::SysErrMessageBox(TEXT("Cannot open file %s"), m_strFilePath);
+                m_fp = NULL;
+            }
 		}
 		else
 		{
-			if (0 != fopen_s(&m_fp, m_strFilePath, "w")) {
-				Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFilePath);
-				m_fp = NULL;
-			}
+			if (0 == fopen_s(&m_fp, m_strFilePath, "w")) {
+                m_isOK = true;
+            }
+            else
+            {
+                Helpers::SysErrMessageBox(TEXT("Cannot create file %s"), m_strFilePath);
+                m_fp = NULL;
+            }
 		}
 	}
-    m_isOK = m_isAuto || (m_fp != NULL);
-
 }
 
 TaskThread::~TaskThread()
@@ -186,8 +196,12 @@ void TaskThread::Work(LPVOID pWorkParam)
 {
     if (m_isOK)
     {
-        if (m_cmd == ID_FILE_IMPORT)
-            FileImport();
+        if (isShortLog())
+            ImportShortLog();
+        else if (m_cmd == ID_FILE_IMPORT_TRACES)
+            FileImportTrases();
+        else if (m_cmd == ID_FILE_IMPORT_LOGCAT)
+            FileImportLogcat();
         else
             FileSave(m_cmd);
     }
@@ -195,7 +209,7 @@ void TaskThread::Work(LPVOID pWorkParam)
 
 void TaskThread::FileSave(WORD cmd)
 {
-    bool isExport = (cmd == ID_FILE_EXPORT);
+    bool isExport = (cmd == ID_FILE_EXPORT_TRACES);
 
     m_count = isExport ? gArchive.getNodeCount() : gArchive.getListedNodes()->Count();
 
@@ -357,7 +371,87 @@ void TaskThread::FileSave(WORD cmd)
     }
 }
 
-void TaskThread::FileImport()
+void TaskThread::FileImportLogcat()
+{
+    static LOG_REC_ADB_DATA adbRec;
+
+    FILE_MAP fmap(m_strFilePath, false);
+    if (!fmap.Size()) {
+        Helpers::ErrMessageBox(TEXT("Could not open file %s"), m_strFilePath.GetString());
+        return;
+    }
+
+    m_count = fmap.Size();
+    char* p = fmap.m_ptr;
+    int c = (int)fmap.Size();
+    int i = 0; 
+    while (i < c)
+    {
+        Helpers::SkipWhite(p, c, i);
+        adbRec.reset();
+        int i0 = i;
+        bool ok = true;
+        int unused1 = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == '-';
+        int unused2 = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == ' ';
+        int h = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == ':';
+        int m = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == ':';
+        int s = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == '.';
+        int ms = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && p[i] == ' ';
+        int pid = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && (p[i] == ' ' || p[i] == '-');
+        int tid = Helpers::NextDigit(p, c, i, ok);
+        ok = ok && (p[i] == ' ' || p[i] == '/');
+        if (ok && p[i] == '/')
+        {
+            //we have process name TODO -use it
+            Helpers::ToChar(' ', p, c, i);
+        }
+        Helpers::ToChar(' ', p, c, i);
+        Helpers::SkipWhite(p, c, i);
+        int i1 = i;
+        Helpers::LineEnd(p, c, i);
+        int i2 = i;
+        if (ok)
+        {
+            adbRec.pid = pid;
+            adbRec.tid = tid;
+            adbRec.sec = Helpers::GetSec(h, m, s); // 3600 * h + 60 * m + s;
+            adbRec.msec = ms;
+
+            if (p[i1] == 'E')
+                adbRec.priority = FLOW_LOG_ERROR;
+            else if (p[i1] == 'I')
+                adbRec.priority = FLOW_LOG_INFO;
+            else if (p[i1] == 'D')
+                adbRec.priority = FLOW_LOG_DEBUG;
+            else if (p[i1] == 'W')
+                adbRec.priority = FLOW_LOG_WARN;
+
+            adbRec.p_trace = &p[i1];
+            adbRec.cb_trace = (WORD)(i2-i1);
+            adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
+            gArchive.appendAdb(&adbRec, NULL, true);
+        }
+        else
+        {
+            adbRec.p_trace = &p[i0];
+            adbRec.cb_trace = (WORD)(i2 - i0);
+            adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
+            gArchive.appendAdb(&adbRec, NULL, true);
+        }
+
+        Helpers::NextLine(p, c, i);
+        m_progress = i;
+    }
+}
+
+void TaskThread::FileImportTrases()
 {
     if (m_isAuto)
     {
@@ -411,14 +505,14 @@ void TaskThread::FileImport()
             for (int i = 0; i < cRecursion; i++)
             {
                 recEnter->nn = ++nn;
-                ss = ss && gArchive.append(recEnter);
+                ss = ss && gArchive.appendNet(recEnter);
                 recTrace->nn = ++nn;
-                ss = ss && gArchive.append(recTrace);
+                ss = ss && gArchive.appendNet(recTrace);
             }
             for (int i = 0; i < cRecursion; i++)
             {
                 recExit->nn = ++nn;
-                ss = ss && gArchive.append(recExit);
+                ss = ss && gArchive.appendNet(recExit);
             }
         }
     }
@@ -470,7 +564,7 @@ void TaskThread::FileImport()
 
             ss = ss && pLogData->isValid();
             if (ss)
-                appended = gArchive.append(pLogData, NULL, true, bookmark);
+                appended = gArchive.appendNet(pLogData, NULL, true, bookmark);
             ss = ss && appended;
             if (feof(m_fp))
             {
@@ -553,55 +647,6 @@ static int line_info(
 
 void TaskThread::ImportShortLog()
 {
-    /*
-    char* szModules = gSettings.GetModules();
-    char* newLine = strchr(szModules, '\n');
-    CString strModulePath;
-    while (newLine)
-    {
-        *newLine = 0;
-
-        char* szModule = szModules;
-        char* slash = strrchr(szModule, '\\');
-        if (!slash)
-            slash = strrchr(szModule, '/');
-        if (slash)
-            szModule = slash + 1;
-
-        if (0 == strcmp(szModule, m_strFileNameWithoutExt.GetString())) {
-            strModulePath = szModules;
-            break;
-        }        
-        szModules = newLine + 1;
-        newLine = strchr(szModules, '\n');
-    }
-
-    if (strModulePath.IsEmpty()) {
-        Helpers::ErrMessageBox(TEXT("No module defined for %s"), m_strFileNameWithoutExt.GetString());
-        return;
-    }
-
-    fnCount = 0;
-    fn_addr = 0;
-    getFnCount = true;
-    enum_file_addresses(strModulePath.GetString(), ".text", line_info);
-    if (!fnCount || fn_addr == INFINITE) {
-        Helpers::ErrMessageBox(TEXT("Not a valid module: %s"), strModulePath.GetString());
-        return;
-    }
-
-    pfuncInfo = new FUNC_INFO[fnCount];
-    int fnCountPrev = fnCount;
-    fnCount = 0;
-    fn_addr = 0;
-    getFnCount = false;
-    enum_file_addresses(strModulePath.GetString(), ".text", line_info);
-    if (fnCountPrev != fnCount) {
-        Helpers::ErrMessageBox(TEXT("Smthing wrong in addr2line utility"));
-        return;
-    }
-    */
-
     FILE_MAP fmap(m_strFilePath, false);
     SHORT_LOG_REC* pRec = (SHORT_LOG_REC*)fmap.m_ptr;
     int cRec = fmap.Size() / sizeof(SHORT_LOG_REC);
@@ -655,7 +700,7 @@ void TaskThread::ImportShortLog()
             goto Cleanup;
         }
 
-        if (!gArchive.append(pLogData, NULL, true, false)) {
+        if (!gArchive.appendNet(pLogData, NULL, true)) {
             Helpers::ErrMessageBox(TEXT("Failed to add record %d"), i);
             goto Cleanup;
         }
