@@ -234,7 +234,7 @@ LRESULT CMainFrame::OnActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, 
 		activated = true;
 		gSettings.RestoreWindPos(m_hWnd);
 		StartLogging(true);
-        DlgProgress dlg(ID_FILE_IMPORT_LOGCAT, "d:\\temp\\tracees\\logcat.file.1.1"); dlg.DoModal();
+        //DlgProgress dlg(ID_FILE_IMPORT_LOGCAT, "d:\\temp\\tracees\\logcat.file.1.1"); dlg.DoModal();
     }
 
     return 0;
