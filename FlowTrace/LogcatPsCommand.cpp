@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "LogReceiverAdb.h"
 #include "MainFrm.h"
+#include "Settings.h"
+#include "Helpers.h"
 
 void LogcatPsCommand::Terminate()
 {
@@ -72,8 +74,9 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog)
 	return (cPsInfoTemp < maxPsInfo) && gLogReceiver.working();
 }
 
-static const char* cmdAdbShell[]{ "cmd_shell", "ps", "-t" };
-//static const char* cmdAdbShell[]{ "cmd_shell", "ps" };
+static const char* cmdAdbShell = "cmd_shell ps -t";
+static char cmd[1204];
+
 void LogcatPsCommand::Work(LPVOID pWorkParam)
 {
 	//return;
@@ -82,7 +85,13 @@ void LogcatPsCommand::Work(LPVOID pWorkParam)
 		cPsInfoTemp = 0;
 		ps.reset();
 		//stdlog("->adb shell ps\n");
-		adb_commandline(_countof(cmdAdbShell), cmdAdbShell, &streamCallback);//do this after LogcatLogSupplier::Work
+		char* p = cmd;
+		size_t c = _countof(cmd);
+
+		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
+		Helpers::strCpy(p, " ", c);
+		Helpers::strCpy(p, cmdAdbShell, c);
+		adb_commandline(cmd, &streamCallback);//do this after LogcatLogSupplier::Work
 		char b[] = { '\r', 0 };
 		streamCallback.OnStdout(b, 1);//end with new line
 		//return;

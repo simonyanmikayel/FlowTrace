@@ -95,6 +95,7 @@
 #define IDC_EDIT_EXTERNAL_COMMAND_2     1207
 #define IDC_EDIT_EXTERNAL_COMMAND_3     1208
 #define IDC_EDIT_LOGCUT_FILTER          1209
+#define IDC_EDIT_ADB_ARG                1209
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
@@ -108,8 +109,8 @@
 #define ID_SEARCH_FIRST                 32784
 #define ID_SEARCH_MATCH_CASE            32785
 #define ID_SEARCH_MATCH_WHOLE_WORD      32786
-#define ID_FILE_EXPORT_TRACES                  32787
-#define ID_FILE_IMPORT_TRACES                  32788
+#define ID_FILE_EXPORT_TRACES           32787
+#define ID_FILE_IMPORT_TRACES           32788
 #define ID_VIEW_DETAILES                32789
 #define ID_VIEW_SETTINGS                32790
 #define ID_VIEW_CLEARLOG                32791
@@ -154,7 +155,7 @@
 #define ID_TREE_SHOW_THIS_APP           32838
 #define ID_TREE_SHOW_THIS_THREAD        32839
 #define ID_EDIT_COPY_SPECIAL            32840
-#define ID_FILE_IMPORT_LOGCAT            32842
+#define ID_FILE_IMPORT_LOGCAT           32842
 
 // Next default values for new objects
 // 

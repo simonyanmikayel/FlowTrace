@@ -483,6 +483,31 @@ static int adb_query_command(const std::string& command) {
 	return 0;
 }
 
+int adb_commandline(const char* cmd, StandardStreamsCallbackInterface* callback)
+{
+	char arg[1204];
+	strncpy(arg, cmd, _countof(arg));
+	arg[_countof(arg) - 1] = 0;
+	const int maxArg = 128;
+	const char* argv[maxArg]{ 0 };
+	int argc = 0;
+	char* p = arg;
+	while (*p) {
+		while (*p == ' ') {
+			*p= 0;
+			p++;
+		}
+		if (*p) {
+			argv[argc] = p;
+			argc++;
+		}
+		while (*p != ' ' && *p) {
+			p++;
+		}
+	}
+	return adb_commandline(argc, argv, callback);
+}
+
 int adb_commandline(int argc, const char** argv, StandardStreamsCallbackInterface* callback) {
 #if _BUILD_ALL
 	bool is_server = false;

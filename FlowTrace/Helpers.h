@@ -35,6 +35,7 @@ namespace Helpers
 	bool ShowInIDE(char* src, int line, bool IsAndroidLog);
 	void ShowNodeDetails(LOG_NODE* pNode);
 	const char* FindFile(const char* szDirName, const char* szFileName, bool isFile);
+	size_t strCpy(char*& strDest, const char* strSource, size_t& count);
 
 	inline void NextLine(char* buf, int buf_size, int& i)
 	{

@@ -613,5 +613,23 @@ namespace Helpers
             return 0;
     }
 
+	size_t strCpy(char*& strDest, const char* strSource, size_t& count)
+	{
+		size_t c = 0;
+		if (count > 0)
+		{ 
+			if (count > 1)
+			{
+				c = strlen(strSource);
+				if (c >= count)
+					c = count - 1;
+				memcpy(strDest, strSource, c);
+			}
+			strDest[c] = 0;
+			count -= c;
+			strDest += c;
+		}
+		return c;
+	}
 };
 

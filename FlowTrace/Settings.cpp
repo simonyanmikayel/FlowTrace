@@ -26,6 +26,7 @@ LPCTSTR STR_APP_REG_VAL_FONTSIZE = _T("FontSize");
 LPCTSTR STR_APP_REG_VAL_SEARCH_LIST = _T("SearchList");
 
 LPCTSTR STR_APP_REG_VAL_UDP_PORT = _T("UdpPort");
+LPCTSTR STR_APP_REG_VAL_ADB_ARG = _T("AdbArg");
 
 LPCTSTR STR_APP_REG_VAL_ColNN = _T("ColNN");
 LPCTSTR STR_APP_REG_VAL_ColApp = _T("ColApp");
@@ -131,6 +132,7 @@ CSettings::CSettings() :
 	//Read(STR_APP_REG_VAL_CUR_SEARCH_COLOR, m_CurSerachColor, DefCurSerachColor);
 
 	Read(STR_APP_REG_VAL_UDP_PORT, m_UdpPort, DefUdpPort);
+	Read(STR_APP_REG_VAL_ADB_ARG, m_AdbArg, sizeof(m_AdbArg), "");
 
 	InitFont();
 }
@@ -447,6 +449,7 @@ void CSettings::SetAndroidStudio(const CHAR* AndroidStudio) { int c = _countof(m
 void CSettings::SetAndroidProject(const CHAR* AndroidProject) { int c = _countof(m_AndroidProject); _tcsncpy_s(m_AndroidProject, c, AndroidProject, c - 1); m_AndroidProject[c] = 0; Write(STR_APP_REG_VAL_AndroidProject, m_AndroidProject); }
 
 void CSettings::SetUdpPort(DWORD i) { m_UdpPort = i; Write(STR_APP_REG_VAL_UDP_PORT, m_UdpPort); }
+void CSettings::SetAdbArg(const CHAR* str) { int c = _countof(m_AdbArg); _tcsncpy_s(m_AdbArg, c, str, c - 1); m_AdbArg[c] = 0; Write(STR_APP_REG_VAL_ADB_ARG, m_AdbArg); }
 
 
 

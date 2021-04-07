@@ -156,7 +156,8 @@ public:
 	DECL_PROP(int, ApplyPorcessFilter);
 
 
-    DECL_PROP(DWORD, UdpPort);
+	DECL_PROP(DWORD, UdpPort);
+	DECL_STR_PROP(CHAR, AdbArg, MAX_PATH);
 
     DECL_GET(DWORD, FontSize);
     DECL_GET(CHAR*, FontName);

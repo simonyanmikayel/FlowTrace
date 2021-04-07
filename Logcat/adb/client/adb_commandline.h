@@ -99,6 +99,7 @@ class DefaultStandardStreamsCallback : public StandardStreamsCallbackInterface {
 	void operator=(const DefaultStandardStreamsCallback&) = delete;
 };
 
+int adb_commandline(const char* cmd, StandardStreamsCallbackInterface* callback = nullptr);
 int adb_commandline(int argc, const char** argv, StandardStreamsCallbackInterface* callback = nullptr);
 
 

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "LogReceiverAdb.h"
 #include "Settings.h"
+#include "Helpers.h"
 
 void LogcatLogSupplier::Terminate()
 {
@@ -34,7 +35,7 @@ adb logcat -g
 /dev/log/system: ring buffer is 256Kb (92Kb consumed), max entry is 5120b, max payload is 4076b
 */
 //adb logcat -G 512K or adb logcat -G 4M
-static const char* cmdLogcatClear[]{ "logcat", "-c" };
+static const char* cmdLogcatClear = "logcat -c";
 //static const char* cmdLogcatClear[]{ "logcat", "-b", "all", "-c" }; //adb logcat -b all -c
 //static const char* cmdStartServer[]{ "start-server" };
 //-v long: Display all metadata fields and separate messages with blank lines.
@@ -43,34 +44,41 @@ static const char* cmdLogcatClear[]{ "logcat", "-c" };
 //adb logcat -v long -f d:\temp\log.txt
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:*", "*:S" }; //show only FLOW_TRACE tag
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:S" }; //hide FLOW_TRACE tag
-static const char* cmdLogcatLog[]{ "logcat", "-v", "long" }; // adb logcat -v long
+static const char* cmdLogcatLog = "logcat -v long"; // adb logcat -v long
+static char cmd[1204];
 void LogcatLogSupplier::Work(LPVOID pWorkParam)
 {
 	resetAtStart = *((bool*)pWorkParam);
 
 	if (resetAtStart)
 	{
-		adb_commandline(_countof(cmdLogcatClear), cmdLogcatClear, &streamCallback);
+		char* p = cmd;
+		size_t c = _countof(cmd);
+		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
+		Helpers::strCpy(p, " ", c);
+		Helpers::strCpy(p, cmdLogcatClear, c);
+		adb_commandline(cmd, &streamCallback);
 	}
 	while (IsWorking()) {
+		char* p = cmd;
+		size_t c = _countof(cmd);
+		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
+		Helpers::strCpy(p, " ", c);
 		if (gSettings.GetApplyLogcutFilter())
 		{
+			Helpers::strCpy(p, cmdLogcatLog, c);
+
 			StringList& stringList = gSettings.getAdbFilterList();
-			const char* argv[128]{ 0 };
-			int maxCmd = _countof(argv);
-			int argc = 0;
-			for (int i = 0; argc < maxCmd && i < _countof(cmdLogcatLog); i++, argc++) {
-				argv[argc] = cmdLogcatLog[i];
+			for (int i = 0; i < stringList.getItemCount(); i++) {
+				Helpers::strCpy(p, " ", c); 
+				Helpers::strCpy(p, stringList.getItem(i), c);
 			}
-			for (int i = 0; argc < maxCmd && i < stringList.getItemCount(); i++, argc++) {
-				argv[argc] = stringList.getItem(i);
-			}
-			adb_commandline(argc, argv, &streamCallback);
 		}
 		else
 		{
-			adb_commandline(_countof(cmdLogcatLog), cmdLogcatLog, &streamCallback);
+			Helpers::strCpy(p, cmdLogcatLog, c);
 		}
+		adb_commandline(cmd, &streamCallback);
 		SleepThread(1000);
 	}
 }

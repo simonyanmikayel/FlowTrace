@@ -13,7 +13,6 @@ public:
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
     COMMAND_HANDLER(IDC_BTN_FONT, BN_CLICKED, OnBnClickedBtnFont)
     COMMAND_HANDLER(IDC_BUTTON_RESET, BN_CLICKED, OnBnClickedButtonReset)
-    REFLECT_NOTIFICATIONS()
   END_MSG_MAP()
 
   // Handler prototypes (uncomment arguments if needed):
@@ -29,6 +28,7 @@ public:
   void SetFontLabel();
   CStatic m_lblFont;
   CEdit m_UdpPort;
+  CEdit m_AdbArg;
   CButton m_btnFont;
   CButton m_btnReset;
   CButton m_FullSrcPath;
