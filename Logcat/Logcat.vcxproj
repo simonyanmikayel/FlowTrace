@@ -40,6 +40,9 @@
     <ClCompile Include="base\threads.cpp" />
     <ClCompile Include="base\utf8.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="adb\client\adb_commandline.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{EC80A096-1C37-420C-9EE3-4CEE83531663}</ProjectGuid>

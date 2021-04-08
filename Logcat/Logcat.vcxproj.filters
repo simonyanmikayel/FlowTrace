@@ -82,4 +82,9 @@
       <Filter>base</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="adb\client\adb_commandline.h">
+      <Filter>adb\client</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

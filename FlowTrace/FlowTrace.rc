@@ -242,7 +242,7 @@ BEGIN
     LTEXT           "Andoid Studio path",IDC_STATIC,25,142,61,8
     EDITTEXT        IDC_EDIT_ANDROID_PROJECT,20,175,156,14,ES_AUTOHSCROLL
     LTEXT           "Android project path",IDC_STATIC,25,166,66,8
-    CONTROL         "Retrive Logcat Logs",IDC_CHECK_USE_ADB,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,230,68,71,10
+    CONTROL         "Retrive Logcat Logs",IDC_CHECK_USE_ADB,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,268,65,82,10
     CTEXT           "1",IDC_STATIC,190,136,8,8
     EDITTEXT        IDC_EDIT_EXTERNAL_COMMAND_2,205,152,146,14,ES_AUTOHSCROLL
     CTEXT           "2",IDC_STATIC,190,154,8,8
@@ -251,7 +251,9 @@ BEGIN
     GROUPBOX        "External commands",IDC_STATIC,190,124,168,65
     GROUPBOX        "Logcat Options",IDC_STATIC,189,57,169,61
     EDITTEXT        IDC_EDIT_ADB_ARG,193,101,158,14,ES_AUTOHSCROLL
-    LTEXT           "First argument of adb command\n(e.g. -s 192.168.0.72:5555):",IDC_STATIC,192,79,156,20
+    LTEXT           "First argument of adb (e.g. -s 192.168.0.72:5555):",IDC_STATIC,192,90,156,8
+    CONTROL         "Restart adb server if can not connect",IDC_CHECK_RESTART_ADB,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,218,77,132,10
 END
 
 IDD_DETAILES DIALOGEX 0, 0, 129, 252

@@ -31,6 +31,7 @@ void LogReceiverAdb::start(bool reset)
 	cMtInfo = 0;
 	logRestarted = false;
 	gArchive.m_SkipedLogcat = 0;
+	gAdbProp.restartAdbIfNeeded = gSettings.GetRestartAdb();
 	adbRec.reset();
 #ifdef USE_RING_BUF
 	gLogcatLogBuffer.StartWork();

@@ -64,6 +64,8 @@
 #include "shell_protocol.h"
 #include "sysdeps/chrono.h"
 
+ADB_PROP gAdbProp;
+
 #if _BUILD_ALL1
 extern int gListenAll;
 DefaultStandardStreamsCallback DEFAULT_STANDARD_STREAMS_CALLBACK(nullptr, nullptr);

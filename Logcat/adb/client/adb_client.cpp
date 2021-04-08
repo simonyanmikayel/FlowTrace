@@ -44,6 +44,7 @@
 #include "adb_utils.h"
 #include "socket_spec.h"
 #include "sysdeps/chrono.h"
+#include "adb_commandline.h"
 
 static TransportType __adb_transport = kTransportAny;
 static const char* __adb_serial = nullptr;
@@ -289,7 +290,7 @@ static int orig_adb_connect(const std::string& service, std::string* error) {
 
 int adb_connect(const std::string& service, std::string* error) {
 	int serverFd = orig_adb_connect(service, error);
-	if (serverFd == -1) {
+	if (serverFd == -1 && gAdbProp.restartAdbIfNeeded) {
 		//start server and try again
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;

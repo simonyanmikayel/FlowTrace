@@ -152,6 +152,7 @@ public:
     DECL_PROP(int, ColCallAddr);
     DECL_PROP(int, FnCallLine);
 	DECL_PROP(int, UseAdb);
+	DECL_PROP(int, RestartAdb);
 	DECL_PROP(int, ApplyLogcutFilter);
 	DECL_PROP(int, ApplyPorcessFilter);
 

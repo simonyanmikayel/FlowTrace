@@ -33,6 +33,7 @@ public:
   CButton m_btnReset;
   CButton m_FullSrcPath;
   CButton m_UseAdb;
+  CButton m_RestartAdb;
   CEdit   m_edtEclipsePath;
   CEdit   m_edtExternalCmd_1;
   CEdit   m_edtExternalCmd_2;

@@ -40,6 +40,7 @@ LPCTSTR STR_APP_REG_VAL_ColTime = _T("ColTime");
 LPCTSTR STR_APP_REG_VAL_ColCallAddr = _T("ColCallAddr");
 LPCTSTR STR_APP_REG_VAL_FnCallLine = _T("FnCallLine");
 LPCTSTR STR_APP_REG_VAL_UseAdb = _T("UseAdb");
+LPCTSTR STR_APP_REG_VAL_RestartAdb = _T("RestartAdb");
 LPCTSTR STR_APP_REG_VAL_ApplyLogcutFilter = _T("ApplyLogcutFilter");
 
 LPCTSTR STR_APP_REG_VAL_FLOW_TRACE_HIGEN = _T("FlowTraceHiden");
@@ -109,6 +110,7 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr);
 	Read(STR_APP_REG_VAL_FnCallLine, m_FnCallLine);
 	Read(STR_APP_REG_VAL_UseAdb, m_UseAdb, 1);
+	Read(STR_APP_REG_VAL_RestartAdb, m_RestartAdb, 1);
 	Read(STR_APP_REG_VAL_ApplyLogcutFilter, m_ApplyLogcutFilter, 1);
 	Read(STR_APP_REG_VAL_ApplyPorcessFilter, m_ApplyPorcessFilter, 1);
 
@@ -419,6 +421,7 @@ void CSettings::SetColTime(int i) { m_ColTime = i; Write(STR_APP_REG_VAL_ColTime
 void CSettings::SetColCallAddr(int i) { m_ColCallAddr = i; Write(STR_APP_REG_VAL_ColCallAddr, m_ColCallAddr); }
 void CSettings::SetFnCallLine(int i) { m_FnCallLine = i; Write(STR_APP_REG_VAL_FnCallLine, m_FnCallLine); }
 void CSettings::SetUseAdb(int i) { m_UseAdb = i; Write(STR_APP_REG_VAL_UseAdb, m_UseAdb); }
+void CSettings::SetRestartAdb(int i) { m_RestartAdb = i; Write(STR_APP_REG_VAL_RestartAdb, m_RestartAdb); }
 void CSettings::SetApplyLogcutFilter(int i) { m_ApplyLogcutFilter = i; Write(STR_APP_REG_VAL_ApplyLogcutFilter, m_ApplyLogcutFilter); }
 void CSettings::SetApplyPorcessFilter(int i) { m_ApplyPorcessFilter = i; Write(STR_APP_REG_VAL_ApplyPorcessFilter, m_ApplyPorcessFilter); }
 void CSettings::SetShowChildCount(int i) { m_ShowChildCount = i; Write(STR_APP_REG_VAL_ShowChildCount, m_ShowChildCount); }

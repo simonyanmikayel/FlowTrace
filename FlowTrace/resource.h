@@ -67,6 +67,8 @@
 #define IDC_CHECK_USE_ADB               1025
 #define IDC_CHECK_SHOW_APP_IP           1026
 #define IDC_CHECK_ECLIPSE_ON_WIN        1026
+#define IDC_CHECK_USE_ADB2              1026
+#define IDC_CHECK_RESTART_ADB           1026
 #define IDC_NN2                         1027
 #define IDC_CHECK_SHOW_APP_IP2          1027
 #define IDC_CHECK_SHOW_ELAPSED_TIME     1027
