@@ -376,7 +376,7 @@ void CMainFrame::SetTitle()
     CHAR pBuf[256];
 
     if (m_importFile.IsEmpty())
-        _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%d - %s"), gSettings.GetUdpPort(), TEXT("FlowTrace"));
+        _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%d - %s - %s"), gSettings.GetUdpPort(), gSettings.GetAdbArg(), TEXT("FlowTrace"));
     else
         _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%s - %s"), m_importFile.GetString(), TEXT("FlowTrace"));
 
