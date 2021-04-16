@@ -46,7 +46,7 @@ namespace Helpers
 			const char* srcPath = FindFile(gSettings.GetAndroidProject(), src2, true);
             if (!srcPath)
                 return false;
-		    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" --line %d \"%s\"", gSettings.GetAndroidStudio(), line, srcPath);
+		    _sntprintf_s(cmd, max_cmd, max_cmd, "\"%s\" \"%s:%d\"", gSettings.GetAndroidStudio(), srcPath, line);
 			process = NULL;
 		}
 		else

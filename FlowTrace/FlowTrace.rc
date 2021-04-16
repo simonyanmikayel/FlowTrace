@@ -107,7 +107,8 @@ BEGIN
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Export Traces",               ID_FILE_EXPORT_TRACES
         MENUITEM "Import Traces",               ID_FILE_IMPORT_TRACES
-        MENUITEM "Import Logcat",               ID_FILE_IMPORT_LOGCAT
+        MENUITEM SEPARATOR
+        MENUITEM "Open Logcat traces",          ID_FILE_IMPORT_LOGCAT
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
