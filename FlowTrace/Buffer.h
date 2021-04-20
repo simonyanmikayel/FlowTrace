@@ -61,6 +61,7 @@ public:
 			}
 			m_curChank = m_MemBufChank;
 			m_curChank->used = 0;
+			m_allocMem = 0;
 			m_usedMem = m_curChank->size;
 			LeaveCriticalSection(&m_cs);
 		}
@@ -94,6 +95,7 @@ public:
 	}
 
 	size_t UsedMemory() { return m_usedMem; }
+	size_t AllocMemory() { return m_allocMem; }
 
 private:
 	void * _Alloc(size_t size)
@@ -123,6 +125,7 @@ private:
 
 		void * buf = (char*)m_curChank->buf + m_curChank->used;
 		m_curChank->used += size;
+		m_allocMem += size;
 		return buf;
 	}
 
@@ -140,6 +143,7 @@ private:
 	size_t m_chankCount;
 	size_t m_allocSize;
 	size_t m_usedMem;
+	size_t m_allocMem;
 };
 
 template <typename Type> class PtrArray

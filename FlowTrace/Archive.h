@@ -171,7 +171,7 @@ public:
     static DWORD getArchiveNumber() { return archiveNumber; }
     BYTE getNewBookmarkNumber() { return ++bookmarkNumber; }
     BYTE resteBookmarkNumber() { return bookmarkNumber = 0; }
-    size_t UsedMemory();
+    size_t AllocMemory();
     DWORD getLost() { return m_lost; }
     void Log(LOG_REC* rec);
 	int appendAdb(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
@@ -228,8 +228,8 @@ struct ListedNodes
         archiveCount = 0;
         m_pListNodes = new PtrArray<LOG_NODE>(m_pListBuf);
     }
-    size_t UsedMemory() {
-        return m_pListBuf->UsedMemory();
+    size_t AllocMemory() {
+        return m_pListBuf->AllocMemory();
     }
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
         DWORD64 ndx = gArchive.index(pNode);

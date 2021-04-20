@@ -71,9 +71,9 @@ void Archive::clearArchive(bool closing)
     }
 }
 
-size_t Archive::UsedMemory() 
+size_t Archive::AllocMemory()
 {
-    return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); // + m_pRecBuf->UsedMemory()
+    return m_pTraceBuf->AllocMemory() + m_listedNodes->AllocMemory(); // + m_pRecBuf->AllocMemory()
 }
 
 bool Archive::resolveAppName(LOG_REC* p, APP_NODE* app)
