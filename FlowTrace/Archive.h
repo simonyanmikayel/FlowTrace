@@ -191,7 +191,7 @@ private:
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);
 	APP_NODE* setAppName(int pid, char* szName, int cbName, bool& updateViews);
 	THREAD_NODE* setThreadName(APP_NODE*  app, int tid, char* szName, int cbName, bool& updateViews);
-	bool resolveAppName(APP_NODE* app);
+	bool resolveAppName(LOG_REC* p, APP_NODE* app);
 	DWORD m_lost;
 	int m_psNN;
 	static DWORD archiveNumber;

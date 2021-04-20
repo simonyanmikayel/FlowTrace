@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "LogReceiverAdb.h"
-#include "MainFrm.h"
 #include "Settings.h"
 #include "Helpers.h"
 
@@ -96,7 +95,7 @@ void LogcatPsCommand::Work(LPVOID pWorkParam)
 		streamCallback.OnStdout(b, 1);//end with new line
 		//return;
 		if (gArchive.setPsInfo(psInfoTemp, cPsInfoTemp) || cPsInfoPrev != cPsInfoTemp)
-			gMainFrame->RedrawViews();
+			Helpers::RedrawViews();
 		cPsInfoPrev = cPsInfoTemp;
 		for (int i = 0; i < 5 && IsWorking(); i++)
 			SleepThread(1000);

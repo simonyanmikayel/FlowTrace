@@ -275,6 +275,11 @@ namespace Helpers
 		gMainFrame->UpdateStatusBar();
 	}
 
+	void RedrawViews()
+	{
+		gMainFrame->RedrawViews();
+	}
+
 	void SysErrMessageBox(CHAR* lpFormat, ...)
 	{
 		DWORD err = GetLastError();

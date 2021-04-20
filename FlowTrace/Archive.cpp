@@ -76,12 +76,9 @@ size_t Archive::UsedMemory()
     return m_pTraceBuf->UsedMemory() + m_listedNodes->UsedMemory(); // + m_pRecBuf->UsedMemory()
 }
 
-APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
+bool Archive::resolveAppName(LOG_REC* p, APP_NODE* app)
 {
-    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE), true);
 	LOG_REC_BASE_DATA* pLogData = p->getLogData();
-    if (!pNode)
-        return nullptr;
 	const char* appName = p->appName();
 	WORD cb_app_name = pLogData->cb_app_name;
 	bool nameIsKnown = true;
@@ -90,35 +87,56 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 		appName = UNKNOWNP_APP_NAME;
 		nameIsKnown = false;
 	}
-    pNode->data_type = APP_DATA_TYPE;
-    pNode->pid = pLogData->pid;
-    pNode->cb_app_name = std::min(cb_app_name, (WORD)MAX_APP_NAME);
-	pNode->lastRecNN = INFINITE;
-	pNode->lastPackNN = -1;
-	
-    memcpy(pNode->appName, appName, pNode->cb_app_name);
-    pNode->appName[pNode->cb_app_name] = 0;
-    char* dotdot = strrchr(pNode->appName, ':');
-    if (dotdot) {
-        *dotdot = 0;
-        char* dot = strrchr(pNode->appName, '.');
-        if (dot) {
-            pNode->cb_short_app_name_offset = int(dot - pNode->appName + 1);
-        }
-        *dotdot = ':'; //restore
-    }    
+	app->data_type = APP_DATA_TYPE;
+	app->pid = pLogData->pid;
+	app->cb_app_name = std::min(cb_app_name, (WORD)MAX_APP_NAME);
+	app->lastRecNN = INFINITE;
+	app->lastPackNN = -1;
+
+	memcpy(app->appName, appName, app->cb_app_name);
+	app->appName[app->cb_app_name] = 0;
+	char* dotdot = strrchr(app->appName, ':');
+	if (dotdot) {
+		*dotdot = 0;
+		char* dot = strrchr(app->appName, '.');
+		if (dot) {
+			app->cb_short_app_name_offset = int(dot - app->appName + 1);
+		}
+		*dotdot = ':'; //restore
+	}
+
+	if (!nameIsKnown)
+	{
+		for (int i = 0; i < cPsInfo; i++) {
+			if ((app->pid == psInfo[i].pid)) {
+				int cbName = std::min(psInfo[i].cName, MAX_APP_NAME);
+				memcpy(app->appName, psInfo[i].name, cbName);
+				app->appName[cbName] = 0;
+				app->cb_app_name = cbName;
+				nameIsKnown = true;
+			}
+		}
+	}
+
+	if (nameIsKnown)
+		app->applyFilter();
+
+	return nameIsKnown;
+}
+
+APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
+{
+    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE), true);
+    if (!pNode)
+        return nullptr;
+
 
     gArchive.getRootNode()->add_child(pNode);
     pNode->hasCheckBox = 1;
     pNode->checked = 1;
 
-	if (!nameIsKnown)
-		nameIsKnown = resolveAppName(pNode);
+	resolveAppName(p, pNode);
 
-	if (nameIsKnown)
-	{
-		pNode->applyFilter();
-	}
     return pNode;
 }
 
@@ -229,20 +247,6 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 	return thread;
 }
 
-bool Archive::resolveAppName(APP_NODE* app)
-{
-	for (int i = 0; i < cPsInfo; i++) {
-		if ((app->pid == psInfo[i].pid)) {
-			int cbName = std::min(psInfo[i].cName, MAX_APP_NAME);
-			memcpy(app->appName, psInfo[i].name, cbName);
-			app->appName[cbName] = 0;
-			app->cb_app_name = cbName;
-			return true;
-		}
-	}
-	return false;
-}
-
 THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
 {
     THREAD_NODE* pNode = (THREAD_NODE*)m_pNodes->Add(sizeof(THREAD_NODE) + p->cbModuleName() + 1, true);
@@ -267,40 +271,51 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
 	LOG_REC_BASE_DATA* pLogData = p->getLogData();
     if (curApp)
     {
-		if (curApp && (curApp->pid == pLogData->pid)) //&& (0 == memcmp(curApp->appPath(), p->appPath(), p->cb_app_path))
+		if (curApp->pid != pLogData->pid)
 		{
-			return curApp;
+			return curApp = nullptr;
 		}
     }
 
-    curApp = (APP_NODE*)gArchive.getRootNode()->lastChild;
-    //stdlog("curApp 1 %p\n", curApp);
-    while (curApp)
-    {
-		if ((curApp->pid == pLogData->pid))
+	if (!curApp) 
+	{
+		curApp = (APP_NODE*)gArchive.getRootNode()->lastChild;
+		//stdlog("curApp 1 %p\n", curApp);
+		while (curApp)
 		{
-			break;
+			if ((curApp->pid == pLogData->pid))
+			{
+				break;
+			}
+			curApp = (APP_NODE*)curApp->prevSibling;
 		}
-        curApp = (APP_NODE*)curApp->prevSibling;
-    }
+	}
+
     //stdlog("curApp 2 %p\n", curApp);
     if (!curApp)
     {
         curApp = addApp(p, p_si_other);
-        //curApp->getData()->Log();
-    }
-
-	if (curApp && p_si_other && !curApp->ip_address[0])
-	{
-		char* str_ip = inet_ntoa(p_si_other->sin_addr);
-		if (str_ip)
+		if (curApp && p_si_other && !curApp->ip_address[0])
 		{
-			strncpy_s(curApp->ip_address, sizeof(curApp->ip_address), str_ip, sizeof(curApp->ip_address) - 1);
-			curApp->ip_address[sizeof(curApp->ip_address) - 1] = 0;
+			char* str_ip = inet_ntoa(p_si_other->sin_addr);
+			if (str_ip)
+			{
+				strncpy_s(curApp->ip_address, sizeof(curApp->ip_address), str_ip, sizeof(curApp->ip_address) - 1);
+				curApp->ip_address[sizeof(curApp->ip_address) - 1] = 0;
+			}
+			else
+			{
+				curApp->ip_address[0] = '?';
+			}
 		}
-		else
-		{
-			curApp->ip_address[0] = '?';
+	}
+	else
+	{
+		if (curApp->isUnknown()) {
+			if (resolveAppName(p, curApp))
+			{
+				Helpers::RedrawViews();
+			}
 		}
 	}
 
