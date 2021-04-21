@@ -87,11 +87,7 @@ bool Archive::resolveAppName(LOG_REC* p, APP_NODE* app)
 		appName = UNKNOWNP_APP_NAME;
 		nameIsKnown = false;
 	}
-	app->data_type = APP_DATA_TYPE;
-	app->pid = pLogData->pid;
 	app->cb_app_name = std::min(cb_app_name, (WORD)MAX_APP_NAME);
-	app->lastRecNN = INFINITE;
-	app->lastPackNN = -1;
 
 	memcpy(app->appName, appName, app->cb_app_name);
 	app->appName[app->cb_app_name] = 0;
@@ -126,18 +122,23 @@ bool Archive::resolveAppName(LOG_REC* p, APP_NODE* app)
 
 APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 {
-    APP_NODE* pNode = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE), true);
-    if (!pNode)
+    APP_NODE* app = (APP_NODE*)m_pNodes->Add(sizeof(APP_NODE), true);
+    if (!app)
         return nullptr;
 
+	LOG_REC_BASE_DATA* pLogData = p->getLogData();
 
-    gArchive.getRootNode()->add_child(pNode);
-    pNode->hasCheckBox = 1;
-    pNode->checked = 1;
+    gArchive.getRootNode()->add_child(app);
+	app->hasCheckBox = 1;
+	app->checked = 1;
+	app->data_type = APP_DATA_TYPE;
+	app->pid = pLogData->pid;
+	app->lastRecNN = INFINITE;
+	app->lastPackNN = -1;
 
-	resolveAppName(p, pNode);
+	resolveAppName(p, app);
 
-    return pNode;
+    return app;
 }
 
 bool  Archive::setPsInfo(PS_INFO* p, int c)
@@ -312,7 +313,8 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
 	else
 	{
 		if (curApp->isUnknown()) {
-			if (resolveAppName(p, curApp))
+			LOG_REC_BASE_DATA* pLogData = p->getLogData();
+			if (pLogData->cb_app_name > 1 && resolveAppName(p, curApp))
 			{
 				Helpers::RedrawViews();
 			}
