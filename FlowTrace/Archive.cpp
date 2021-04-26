@@ -274,7 +274,7 @@ APP_NODE* Archive::getApp(LOG_REC* p, sockaddr_in *p_si_other)
     {
 		if (curApp->pid != pLogData->pid)
 		{
-			return curApp = nullptr;
+			curApp = nullptr;
 		}
     }
 

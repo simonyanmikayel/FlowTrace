@@ -147,6 +147,7 @@ static LOG_REC_NET_DATA* ft = (LOG_REC_NET_DATA*)ft_log_buf;
 
 static void WriteLog(const char* szLog, int cbLog)
 {
+	//stdlog("%s\n", szLog);
 	if (cbLog == 0)
 		return;
 	if (logRestarted)
