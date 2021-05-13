@@ -94,7 +94,7 @@ CSettings::CSettings() :
 	Read(STR_APP_REG_VAL_INFO_HIDEN, m_InfoHiden, FALSE);
 	Read(STR_APP_REG_VAL_SHOW_APP_IP, m_ShowAppIp, FALSE);
 	Read(STR_APP_REG_VAL_SHOW_ELAPSED_TIME, m_ShowElapsedTime, FALSE);
-	Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, FALSE);
+	Read(STR_APP_REG_VAL_RESOLVE_ADDR, m_ResolveAddr, TRUE);
 	m_UsePrefModule = FALSE;
 	Read(STR_APP_REG_VAL_FULL_SRC_PATH, m_FullSrcPath, FALSE);
 

@@ -58,6 +58,8 @@ namespace Helpers
 			//D:\Programs\eclipse\eclipse-cpp-neon-M4a-win32-x86_64\eclipsec.exe -name Eclipse --launcher.openFile X:\prj\c\c\ctap\kernel\CTAPparameters\src\CTAP_parameters.c:50
 			process = gSettings.GetEclipsePath();
 		}
+
+		stdlog("%s %s\n", process, cmd);
 		CreateProcess(process, cmd, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
