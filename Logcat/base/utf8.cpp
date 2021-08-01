@@ -34,7 +34,6 @@ namespace base {
 
 // Helper to set errno based on GetLastError() after WideCharToMultiByte()/MultiByteToWideChar().
 
-#if _BUILD_ALL1
 static void SetErrnoFromLastError() {
   switch (GetLastError()) {
     case ERROR_NO_UNICODE_TRANSLATION:
@@ -45,9 +44,7 @@ static void SetErrnoFromLastError() {
       break;
   }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WideToUTF8(const wchar_t* utf16, const size_t size, std::string* utf8) {
   utf8->clear();
 
@@ -89,26 +86,20 @@ bool WideToUTF8(const wchar_t* utf16, const size_t size, std::string* utf8) {
 
   return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WideToUTF8(const wchar_t* utf16, std::string* utf8) {
   // Compute string length of NULL-terminated string with wcslen().
   return WideToUTF8(utf16, wcslen(utf16), utf8);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WideToUTF8(const std::wstring& utf16, std::string* utf8) {
   // Use the stored length of the string which allows embedded NULL characters
   // to be converted.
   return WideToUTF8(utf16.c_str(), utf16.length(), utf8);
 }
-#endif //_BUILD_ALL
 
 // Internal helper function that takes MultiByteToWideChar() flags.
 
-#if _BUILD_ALL1
 static bool UTF8ToWideWithFlags(const char* utf8, const size_t size, std::wstring* utf16, const DWORD flags) {
   utf16->clear();
 
@@ -140,9 +131,7 @@ static bool UTF8ToWideWithFlags(const char* utf8, const size_t size, std::wstrin
 
   return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool UTF8ToWide(const char* utf8, const size_t size, std::wstring* utf16) {
   // If strictly interpreting as UTF-8 succeeds, return success.
   if (UTF8ToWideWithFlags(utf8, size, utf16, MB_ERR_INVALID_CHARS)) {
@@ -157,30 +146,22 @@ bool UTF8ToWide(const char* utf8, const size_t size, std::wstring* utf16) {
   errno = saved_errno;
   return false;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool UTF8ToWide(const char* utf8, std::wstring* utf16) {
   // Compute string length of NULL-terminated string with strlen().
   return UTF8ToWide(utf8, strlen(utf8), utf16);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool UTF8ToWide(const std::string& utf8, std::wstring* utf16) {
   // Use the stored length of the string which allows embedded NULL characters
   // to be converted.
   return UTF8ToWide(utf8.c_str(), utf8.length(), utf16);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static bool isDriveLetter(wchar_t c) {
   return (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z');
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool UTF8PathToWindowsLongPath(const char* utf8, std::wstring* utf16) {
   if (!UTF8ToWide(utf8, utf16)) {
     return false;
@@ -199,7 +180,6 @@ bool UTF8PathToWindowsLongPath(const char* utf8, std::wstring* utf16) {
   }
   return true;
 }
-#endif //_BUILD_ALL
 
 // Versions of standard library APIs that support UTF-8 strings.
 namespace utf8 {

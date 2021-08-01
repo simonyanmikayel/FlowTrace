@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "DlgSettings.h"
-#include "Settings.h"
+#include "DlgComPort.h"
 
 #define AS(s) m_cmbFontSize.AddString(#s)
 
@@ -23,12 +23,15 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_edtMapOnWin.Attach(GetDlgItem(IDC_EDIT_MAP_ON_WIN));
   m_edtAndroidStudio.Attach(GetDlgItem(IDC_EDIT_ANDROID_STUDIO));
   m_edtAndroidProject.Attach(GetDlgItem(IDC_EDIT_ANDROID_PROJECT));
+  m_UsePort_1.Attach(GetDlgItem(IDC_CHECK_USE_PORT_1));
+  m_UsePort_2.Attach(GetDlgItem(IDC_CHECK_USE_PORT_2));
+  m_lblPort_1.Attach(GetDlgItem(IDC_STATIC_PORT_1));
+  m_lblPort_2.Attach(GetDlgItem(IDC_STATIC_PORT_2));
 
-  m_FontSize = gSettings.GetFontSize();
+  m_FontSize = gSettings.GetfontSize();
   strncpy_s(m_FaceName, _countof(m_FaceName), gSettings.GetFontName(), _countof(m_FaceName) - 1);
   m_FaceName[LF_FACESIZE - 1] = 0;
   m_lfWeight = gSettings.GetFontWeight();
-  SetFontLabel();
 
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_AdbArg.SetWindowText(gSettings.GetAdbArg());
@@ -43,6 +46,12 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_edtMapOnWin.SetWindowText(gSettings.GetMapOnWin());
   m_edtAndroidStudio.SetWindowText(gSettings.GetAndroidStudio());
   m_edtAndroidProject.SetWindowText(gSettings.GetAndroidProject());
+  m_UsePort_1.SetCheck(gSettings.GetUseComPort_1() ? BST_CHECKED : BST_UNCHECKED);
+  m_UsePort_2.SetCheck(gSettings.GetUseComPort_2() ? BST_CHECKED : BST_UNCHECKED);
+
+  SetFontLabel();
+  SetPortLabel(m_lblPort_1, gSettings.comPort_1);
+  SetPortLabel(m_lblPort_2, gSettings.comPort_2);
 
   CenterWindow(GetParent());
   return TRUE;
@@ -53,6 +62,17 @@ void DlgSettings::SetFontLabel()
   CString str;
   str.Format(_T("Font: %s, %s%d point "), m_FaceName, m_lfWeight >= FW_SEMIBOLD  ? _T("Bold ") : _T(""), m_FontSize);
   m_lblFont.SetWindowText(str);
+}
+
+void DlgSettings::SetPortLabel(CStatic& lbl, ComPort& port)
+{
+    CString str;
+    const CHAR* name = port.GetName();
+
+    str.Format(_T("%s   [%d %d %d %s %s]"), 
+        name[0] ? name : "???", port.GetSpeed(), port.GetDataBits(), port.GetStopBits(),
+        port.GetParityName(port.GetParity()), port.GetFlowControlName(port.GetFlowControl()));
+    lbl.SetWindowText(str);
 }
 
 LRESULT DlgSettings::OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -132,6 +152,8 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 	m_edtAndroidProject.GetWindowText(strAndroidProject);
 	gSettings.SetAndroidProject(strAndroidProject.GetString());
 
+    gSettings.SetUseComPort_1(m_UsePort_1.GetCheck());
+    gSettings.SetUseComPort_2(m_UsePort_2.GetCheck());
   }
   EndDialog(wID);
   return 0;
@@ -140,4 +162,22 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 LRESULT DlgSettings::OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
   return 0;
+}
+
+void DlgSettings::SetPort(CStatic& lbl, ComPort& port)
+{
+    DlgComPort dlg(port);
+    dlg.DoModal();
+    SetPortLabel(lbl, port);
+}
+LRESULT DlgSettings::OnBnClickedButtonSetPort_1(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    SetPort(m_lblPort_1, gSettings.comPort_1);
+    return 0;
+}
+
+LRESULT DlgSettings::OnBnClickedButtonSetPort_2(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    SetPort(m_lblPort_2, gSettings.comPort_2);
+    return 0;
 }

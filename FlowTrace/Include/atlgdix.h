@@ -771,25 +771,25 @@ public:
       return &m_h;
    }
 
-   CHandle& operator=(HANDLE h)
+   CHandle& operator=(HANDLE serport)
    {
       ATLASSERT(!IsValid());
-      m_h = h;
+      m_h = serport;
       return *this;
    }
 
    bool IsValid() const { return m_h != INVALID_HANDLE_VALUE; };
    
-   void Attach(HANDLE h)
+   void Attach(HANDLE serport)
    {
       if( IsValid() ) ::CloseHandle(m_h);
-      m_h = h;
+      m_h = serport;
    }   
    HANDLE Detach()
    {
-      HANDLE h = m_h;
+      HANDLE serport = m_h;
       m_h = INVALID_HANDLE_VALUE;
-      return h;
+      return serport;
    }
    
    BOOL Close()

@@ -23,7 +23,6 @@
 namespace android {
 namespace base {
 
-#if _BUILD_ALL1
 void StringAppendV(std::string* dst, const char* format, va_list ap) {
   // First try with a small fixed size buffer
   char space[1024];
@@ -65,7 +64,6 @@ void StringAppendV(std::string* dst, const char* format, va_list ap) {
   }
   delete[] buf;
 }
-#endif //_BUILD_ALL
 
 std::string StringPrintf(const char* fmt, ...) {
   va_list ap;
@@ -76,14 +74,12 @@ std::string StringPrintf(const char* fmt, ...) {
   return result;
 }
 
-#if _BUILD_ALL1
 void StringAppendF(std::string* dst, const char* format, ...) {
   va_list ap;
   va_start(ap, format);
   StringAppendV(dst, format, ap);
   va_end(ap);
 }
-#endif //_BUILD_ALL
 
 }  // namespace base
 }  // namespace android

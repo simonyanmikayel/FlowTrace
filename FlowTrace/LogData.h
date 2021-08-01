@@ -26,7 +26,7 @@ typedef enum { LOG_TYPE_ENTER, LOG_TYPE_EXIT, LOG_TYPE_TRACE, LOG_TYPE_APP, LOG_
 
 #define LOG_FLAG_NEW_LINE 1
 #define LOG_FLAG_JAVA 2
-#define LOG_FLAG_EXCEPTION 4
+#define LOG_FLAG_SERIAL 4
 #define LOG_FLAG_RUNNABLE_INIT 8
 #define LOG_FLAG_RUNNABLE_RUN 16
 #define LOG_FLAG_OUTER_LOG 32
@@ -105,6 +105,8 @@ struct LOG_NODE
     bool isTrace() { return data_type == TRACE_DATA_TYPE; }
     bool isInfo() { return isFlow() || isTrace(); }
 	bool isJava() { return (log_flags & LOG_FLAG_JAVA) || (log_flags & LOG_FLAG_ADB); }
+    bool isSerial() { return (log_flags & LOG_FLAG_SERIAL); }
+    bool isNativeFT() { return !((log_flags & LOG_FLAG_JAVA) || (log_flags & LOG_FLAG_ADB) || (log_flags & LOG_FLAG_SERIAL)); }
     bool CanShowInIDE();
 
     void CalcLines();

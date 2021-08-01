@@ -436,14 +436,14 @@ void TaskThread::FileImportLogcat()
             adbRec.p_trace = &p[i1];
             adbRec.cb_trace = (WORD)(i2-i1);
             adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
-            gArchive.appendAdb(&adbRec, NULL, true);
+            gArchive.appendAdb(&adbRec, true);
         }
         else
         {
             adbRec.p_trace = &p[i0];
             adbRec.cb_trace = (WORD)(i2 - i0);
             adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
-            gArchive.appendAdb(&adbRec, NULL, true);
+            gArchive.appendAdb(&adbRec, true);
         }
 
         Helpers::NextLine(p, c, i);

@@ -179,7 +179,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -196,7 +196,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_USE_ADB;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -212,7 +212,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_BUILD_X64;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -229,7 +229,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_USE_ADB;_BUILD_X64;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -247,7 +247,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -266,7 +266,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_USE_ADB;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -284,7 +284,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_BUILD_X64;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -303,7 +303,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_USE_ADB;_BUILD_X64;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)logcat\adb\base\include;$(SolutionDir)logcat\adb\client;$(SolutionDir)logcat\adb\;$(SolutionDir)addr2line\binutils\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -319,6 +319,7 @@
     <ClInclude Include="BackTraceCallView.h" />
     <ClInclude Include="BackTraceView.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="DlgComPort.h" />
     <ClInclude Include="DlgDetailes.h" />
     <ClInclude Include="DlgFilters.h" />
     <ClInclude Include="DlgInfo.h" />
@@ -328,13 +329,14 @@
     <ClInclude Include="GDI.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Include\FileMap.h" />
-    <ClInclude Include="LogcatLogBuffer.h" />
     <ClInclude Include="LogData.h" />
     <ClInclude Include="LogListFrame.h" />
     <ClInclude Include="LogListInfo.h" />
     <ClInclude Include="LogListView.h" />
+    <ClInclude Include="LogParcer.h" />
     <ClInclude Include="LogReceiver.h" />
     <ClInclude Include="LogReceiverAdb.h" />
+    <ClInclude Include="LogReceiverSerial.h" />
     <ClInclude Include="LogRecorder.h" />
     <ClInclude Include="LogTreeView.h" />
     <ClInclude Include="MainFrm.h" />
@@ -354,6 +356,7 @@
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="BackTraceCallView.cpp" />
     <ClCompile Include="BackTraceView.cpp" />
+    <ClCompile Include="DlgComPort.cpp" />
     <ClCompile Include="DlgDetailes.cpp" />
     <ClCompile Include="DlgFilters.cpp" />
     <ClCompile Include="DlgInfo.cpp" />
@@ -363,8 +366,6 @@
     <ClCompile Include="FontPreviewCombo.cpp" />
     <ClCompile Include="GDI.cpp" />
     <ClCompile Include="Helpers.cpp" />
-    <ClCompile Include="LogcatLogBuffer.cpp" />
-    <ClCompile Include="LogcatLogConsumer.cpp" />
     <ClCompile Include="LogcatLogSupplier.cpp" />
     <ClCompile Include="LogcatPsCommand.cpp" />
     <ClCompile Include="LogData.cpp" />
@@ -373,6 +374,7 @@
     <ClCompile Include="LogListView.cpp" />
     <ClCompile Include="LogReceiver.cpp" />
     <ClCompile Include="LogReceiverAdb.cpp" />
+    <ClCompile Include="LogReceiverSerial.cpp" />
     <ClCompile Include="LogRecorder.cpp" />
     <ClCompile Include="LogTreeView.cpp" />
     <ClCompile Include="MainFrm.cpp" />

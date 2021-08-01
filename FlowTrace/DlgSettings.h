@@ -13,6 +13,8 @@ public:
     COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
     COMMAND_HANDLER(IDC_BTN_FONT, BN_CLICKED, OnBnClickedBtnFont)
     COMMAND_HANDLER(IDC_BUTTON_RESET, BN_CLICKED, OnBnClickedButtonReset)
+    COMMAND_HANDLER(IDC_BUTTON_SET_PORT_1, BN_CLICKED, OnBnClickedButtonSetPort_1)
+    COMMAND_HANDLER(IDC_BUTTON_SET_PORT_2, BN_CLICKED, OnBnClickedButtonSetPort_2)
   END_MSG_MAP()
 
   // Handler prototypes (uncomment arguments if needed):
@@ -24,8 +26,12 @@ public:
   LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedBtnFont(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
   LRESULT OnBnClickedButtonReset(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedButtonSetPort_1(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+  LRESULT OnBnClickedButtonSetPort_2(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
   void SetFontLabel();
+  void SetPortLabel(CStatic& lbl, ComPort& port);
+  void SetPort(CStatic& lbl, ComPort& port);
   CStatic m_lblFont;
   CEdit m_UdpPort;
   CEdit m_AdbArg;
@@ -42,6 +48,10 @@ public:
   CEdit   m_edtMapOnWin;
   CEdit   m_edtAndroidStudio;
   CEdit   m_edtAndroidProject;
+  CButton m_UsePort_1;
+  CButton m_UsePort_2;
+  CStatic m_lblPort_1;
+  CStatic m_lblPort_2;
 
   DWORD     m_FontSize;
   CHAR     m_FaceName[LF_FACESIZE];

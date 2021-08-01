@@ -417,7 +417,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 
     bool newChank = false;
     // check if we can append to previous trace
-    if (pThreadNode->latestTrace && !(pLogData->log_flags & LOG_FLAG_ADB) && !fromImport)
+    if (pThreadNode->latestTrace && !(pLogData->log_flags & LOG_FLAG_SERIAL) && !(pLogData->log_flags & LOG_FLAG_ADB) && !fromImport)
     {
         if (pThreadNode->latestTrace->hasNewLine == 0)
         {
@@ -562,6 +562,19 @@ int parceCollor(char** c)
 	return color;
 }
 
+inline LOG_NODE* Archive::addTraceLoop(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, bool fromImport, char* trace, int cb_trace, const char* fnName, const char* moduleName)
+{
+	LOG_NODE* pNode = nullptr;
+	while (cb_trace > 0)
+	{
+		int cb = (cb_trace >= MAX_LOG_LEN) ? MAX_LOG_LEN : cb_trace;
+		pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, cb, fnName, moduleName);
+		trace += cb;
+		cb_trace -= cb;
+	}
+	return pNode;
+}
+
 LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport)
 {
 	LOG_REC_BASE_DATA* pLogData = pLogRec->getLogData();
@@ -572,15 +585,23 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	LOG_NODE* pNode = nullptr;
 	if (fromImport || pLogRec->getLogData()->log_flags & LOG_FLAG_COLOR_PARCED)
 	{
-		pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName);
+		if (cb_trace < MAX_LOG_LEN)
+			pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName);
+		else
+			pNode = addTraceLoop(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName);
 	}
 	else
 	{
 		char last_char = trace[cb_trace];
 		trace[cb_trace] = 0;
 
-#define ADD_TRACE(cb_trace, trace) pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName)
-
+#define ADD_TRACE(cb_trace, trace) \
+{ \
+if (cb_trace < MAX_LOG_LEN) \
+	pNode = addTrace(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName); \
+else \
+	pNode = addTraceLoop(pThreadNode, pLogData, bookmark, fromImport, trace, (int)(cb_trace), fnName, moduleName); \
+} 
 		int old_color = pLogData->color;
 		char *start = trace;
 		char *end = trace;
@@ -659,14 +680,25 @@ void Archive::Log(LOG_REC* rec)
 		pLogData->this_fn, pLogData->call_site, pLogData->fn_line, pLogData->call_line, rec->appName());
 }
 
-int Archive::appendAdb(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other, bool fromImport, int bookmark, NET_PACK_INFO* pack)
+int Archive::appendSerial(LOG_REC_SERIAL_DATA* pLogData)
+{
+	LOG_REC_SERIAL rec(pLogData);
+	if (!rec.isValid()) {
+		ATLASSERT(0);
+		return 0;
+	}
+	appendRec(&rec, NULL, false, 0, NULL);
+	return 1;
+}
+
+int Archive::appendAdb(LOG_REC_ADB_DATA* pLogData, bool fromImport)
 {
 	LOG_REC_ADB rec(pLogData);
 	if (!rec.isValid()) {
 		ATLASSERT(0);
 		return 0;
 	}
-	appendRec(&rec, p_si_other, fromImport, bookmark, pack);
+	appendRec(&rec, NULL, fromImport, 0, NULL);
 	return 1;
 }
 

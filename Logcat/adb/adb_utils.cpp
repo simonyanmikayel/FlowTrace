@@ -61,30 +61,25 @@ void close_stdin() {
         PLOG(FATAL) << "failed to open " << kNullFileName;
     }
 
-    if (dup2(fd, STDIN_FILENO) == -1) {
+    if (TEMP_FAILURE_RETRY(dup2(fd, STDIN_FILENO)) == -1) {
         PLOG(FATAL) << "failed to redirect stdin to " << kNullFileName;
     }
     unix_close(fd);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool getcwd(std::string* s) {
   char* cwd = getcwd(nullptr, 0);
   if (cwd != nullptr) *s = cwd;
   free(cwd);
   return (cwd != nullptr);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool directory_exists(const std::string& path) {
   struct stat sb;
   return stat(path.c_str(), &sb) != -1 && S_ISDIR(sb.st_mode);
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string escape_arg(const std::string& s) {
   // Escape any ' in the string (before we single-quote the whole thing).
   // The correct way to do this for the shell is to replace ' with '\'' --- that is,
@@ -107,7 +102,6 @@ std::string escape_arg(const std::string& s) {
   result.push_back('\'');
   return result;
 }
-#endif //_BUILD_ALL
 
 // Given a relative or absolute filepath, create the directory hierarchy
 // as needed. Returns true if the hierarchy is/was setup.
@@ -169,7 +163,6 @@ bool mkdirs(const std::string& path) {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string dump_hex(const void* data, size_t byte_count) {
     size_t truncate_len = 16;
     bool truncated = false;
@@ -197,7 +190,6 @@ std::string dump_hex(const void* data, size_t byte_count) {
 
     return line;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 std::string dump_header(const amessage* msg) {
@@ -231,9 +223,7 @@ std::string dump_header(const amessage* msg) {
 
     return android::base::StringPrintf("[%s] arg0=%s arg1=%s (len=%d) ", cmd, arg0, arg1, len);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string dump_packet(const char* name, const char* func, const apacket* p) {
     std::string result = name;
     result += ": ";
@@ -245,11 +235,9 @@ std::string dump_packet(const char* name, const char* func, const apacket* p) {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string perror_str(const char* msg) {
     return android::base::StringPrintf("%s: %s", msg, strerror(errno));
 }
-#endif //_BUILD_ALL
 
 #if !defined(_WIN32)
 // Windows version provided in sysdeps_win32.cpp
@@ -290,9 +278,7 @@ bool forward_targets_are_valid(const std::string& source, const std::string& des
 
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string adb_get_homedir_path() {
 #ifdef _WIN32
     WCHAR path[MAX_PATH];
@@ -327,9 +313,7 @@ std::string adb_get_homedir_path() {
     return {};
 #endif
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string adb_get_android_dir_path() {
     std::string user_dir = adb_get_homedir_path();
     std::string android_dir = user_dir + OS_PATH_SEPARATOR + ".android";
@@ -343,7 +327,6 @@ std::string adb_get_android_dir_path() {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string GetLogFilePath() {
 #if defined(_WIN32)
     const char log_name[] = "adb.log";
@@ -369,9 +352,8 @@ std::string GetLogFilePath() {
     return android::base::StringPrintf("%s/adb.%u.log", tmp_dir, getuid());
 #endif
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
+//#if _BUILD_ALL
 [[noreturn]] static void error_exit_va(int error, const char* fmt, va_list va) {
     fflush(stdout);
     fprintf(stderr, "%s: ", android::base::Basename(android::base::GetExecutablePath()).c_str());
@@ -387,22 +369,18 @@ std::string GetLogFilePath() {
 
     exit(EXIT_FAILURE);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void error_exit(const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
     error_exit_va(0, fmt, va);
     va_end(va);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void perror_exit(const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
     error_exit_va(errno, fmt, va);
     va_end(va);
 }
-#endif //_BUILD_ALL
+//#endif //_BUILD_ALL

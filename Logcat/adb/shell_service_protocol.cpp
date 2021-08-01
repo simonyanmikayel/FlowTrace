@@ -22,18 +22,13 @@
 
 #include "adb_io.h"
 
-#if _BUILD_ALL1
 ShellProtocol::ShellProtocol(int fd) : fd_(fd) {
     buffer_[0] = kIdInvalid;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 ShellProtocol::~ShellProtocol() {
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool ShellProtocol::Read() {
     // Only read a new header if we've finished the last packet.
     if (!bytes_left_) {
@@ -57,12 +52,11 @@ bool ShellProtocol::Read() {
 
     return true;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool ShellProtocol::Write(Id id, size_t length) {
     buffer_[0] = id;
-    length_t typed_length = (length_t)length;
+    length_t typed_length = length;
     memcpy(&buffer_[1], &typed_length, sizeof(typed_length));
 
     return WriteFdExactly(fd_, buffer_, kHeaderSize + length);

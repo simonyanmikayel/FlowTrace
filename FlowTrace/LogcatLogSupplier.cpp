@@ -8,23 +8,10 @@ void LogcatLogSupplier::Terminate()
 	streamCallback.Done(0);
 }
 
-void LogcatStreamCallback::GetStreamBuf(char** p, size_t* c)
+bool LogcatStreamCallback::HundleStream(char* szLog, int cbLog, bool isError)
 {
-#ifdef USE_RING_BUF
-	gLogcatLogBuffer.GetLogBuffer(p, c);
-#else
-	* p = local_buffer;
-	*c = sizeof(local_buffer) - 1;
-#endif //USE_RING_BUF
-}
-
-bool LogcatStreamCallback::HundleStream(char* szLog, int cbLog)
-{
-#ifdef USE_RING_BUF
-	gLogcatLogBuffer.AddLogData(szLog, cbLog);
-#else
-	gLogReceiverAdb.HandleLogData(szLog, cbLog);
-#endif //USE_RING_BUF
+	if (!isError)
+		gLogReceiverAdb.HandleLogData(szLog, cbLog);
 	return gLogReceiverAdb.working();
 }
 

@@ -5,10 +5,8 @@
 #include "Settings.h"
 
 LogReceiverNet gLogReceiverNet;
-static NetThread* pNetThreads[1024];
-static int cNetThreads = 0;
 
-void LogReceiverNet::start(bool reset)
+void LogReceiverNet::start()
 {
 	//logcat(0, 0);
 #ifdef USE_UDP
@@ -21,19 +19,19 @@ void LogReceiverNet::start(bool reset)
 
 void LogReceiverNet::stop()
 {
-	for (int i = 0; i < cNetThreads; i++)
+	for (int i = 0; i < cThreads; i++)
 	{
-		pNetThreads[i]->StopWork();
-		delete pNetThreads[i];
+		pThreads[i]->StopWork();
+		delete pThreads[i];
 	}
-	cNetThreads = 0;
+	cThreads = 0;
 }
 
 void LogReceiverNet::add(NetThread* pNetThread)
 {
-	if (gLogReceiver.working() && (cNetThreads < _countof(pNetThreads)))
+	if (gLogReceiver.working() && (cThreads < _countof(pThreads)))
 	{
-		pNetThreads[cNetThreads++] = pNetThread;
+		pThreads[cThreads++] = pNetThread;
 		pNetThread->StartWork();
 	}
 	else

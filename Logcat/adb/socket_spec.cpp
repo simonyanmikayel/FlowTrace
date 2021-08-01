@@ -54,14 +54,11 @@ using android::base::StringPrintf;
 // Not static because it is used in commandline.c.
 int gListenAll = 0;
 
-#if _BUILD_ALL1
 struct LocalSocketType {
     int socket_namespace;
     bool available;
 };
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static auto& kLocalSocketTypes = *new std::unordered_map<std::string, LocalSocketType>({
 #if ADB_HOST
     { "local", { ANDROID_SOCKET_NAMESPACE_FILESYSTEM, !ADB_WINDOWS } },
@@ -73,10 +70,9 @@ static auto& kLocalSocketTypes = *new std::unordered_map<std::string, LocalSocke
     { "localabstract", { ANDROID_SOCKET_NAMESPACE_ABSTRACT, ADB_LINUX } },
     { "localfilesystem", { ANDROID_SOCKET_NAMESPACE_FILESYSTEM, !ADB_WINDOWS } },
 });
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
-bool parse_tcp_socket_spec(std::string_view spec, std::string* hostname, int* port, std::string* serial, std::string* error) {
+bool parse_tcp_socket_spec(std::string_view spec, std::string* hostname, int* port,
+                           std::string* serial, std::string* error) {
     if (!spec._Starts_with("tcp:")) {
         *error = "specification is not tcp: ";
         *error += spec;
@@ -122,14 +118,11 @@ bool parse_tcp_socket_spec(std::string_view spec, std::string* hostname, int* po
 
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static bool tcp_host_is_local(std::string_view hostname) {
     // FIXME
     return hostname.empty() || hostname == "localhost";
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool is_socket_spec(std::string_view spec) {
@@ -143,7 +136,6 @@ bool is_socket_spec(std::string_view spec) {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool is_local_socket_spec(std::string_view spec) {
     for (const auto& it : kLocalSocketTypes) {
         std::string prefix = it.first + ":";
@@ -159,10 +151,9 @@ bool is_local_socket_spec(std::string_view spec) {
     }
     return tcp_host_is_local(hostname);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
-bool socket_spec_connect(unique_fd* fd, std::string_view address, int* port, std::string* serial, std::string* error) {
+bool socket_spec_connect(unique_fd* fd, std::string_view address, int* port, std::string* serial,
+                         std::string* error) {
     if (address._Starts_with("tcp:")) {
         std::string hostname;
         int port_value = port ? *port : 0;
@@ -270,7 +261,6 @@ bool socket_spec_connect(unique_fd* fd, std::string_view address, int* port, std
     *error += address;
     return false;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 int socket_spec_listen(std::string_view spec, std::string* error, int* resolved_port) {

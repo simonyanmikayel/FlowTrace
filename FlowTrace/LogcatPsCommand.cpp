@@ -29,10 +29,12 @@ static int getDigit(char* &sz, int& c)
 static PS_INFO psInfoTemp[maxPsInfo];
 static int cPsInfoTemp;
 //PID NAME
-//static LOG_PARCER ps("\n*\r"); //captur one line
-static LOG_PARCER ps(1024);
-bool PsStreamCallback::HundleStream(char* szLog, int cbLog)
+//static LogParcer ps("\n*\r"); //captur one line
+static LogParcer ps(1024);
+bool PsStreamCallback::HundleStream(char* szLog, int cbLog, bool isError)
 {
+	if (isError)
+		return gLogReceiver.working();
 	//stdlog("->%d\n", cbLog);
 	//stdlog("\x1->%s\n", szLog);
 	//return true;

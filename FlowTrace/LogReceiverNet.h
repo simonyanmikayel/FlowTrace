@@ -49,8 +49,10 @@ public:
 class LogReceiverNet
 {
 public:
-	void start(bool reset);
+	void start();
 	void stop();
 protected:
 	void add(NetThread* pNetThread);
+	NetThread* pThreads[32];
+	int cThreads = 0;
 };

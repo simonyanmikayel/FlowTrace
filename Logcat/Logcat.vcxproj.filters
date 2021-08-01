@@ -83,6 +83,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="adb\client\commandline.h">
+      <Filter>adb\client</Filter>
+    </ClInclude>
+    <ClInclude Include="adb\adb.h">
+      <Filter>adb\adb</Filter>
+    </ClInclude>
     <ClInclude Include="adb\client\adb_commandline.h">
       <Filter>adb\client</Filter>
     </ClInclude>

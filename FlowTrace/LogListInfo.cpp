@@ -51,10 +51,6 @@ LRESULT CLogListInfo::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 	memDC.EraseBackground();
 	memDC.SetBkMode(TRANSPARENT);
 
-	DWORD infoTextColorNatve = gSettings.InfoTextColorNative();
-	DWORD infoTextColorAndroid = gSettings.InfoTextColorAndroid();
-
-
 	int nFirst = m_pLogListView->GetTopIndex();
 	int nLast = nFirst + m_pLogListView->GetCountPerPage();
 	if (m_recCount && nLast > 0)
@@ -104,7 +100,12 @@ LRESULT CLogListInfo::OnPaint(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 			x += m_nnWidth - INFO_TEXT_MARGIN;
 			int c = sprintf_s(tmp, "%d", iItem + 1);
 			SetTextAlign(memDC, TA_RIGHT);
-			::SetTextColor(memDC, pNode->isJava() ? infoTextColorAndroid : infoTextColorNatve);
+			if (pNode->isJava())
+				::SetTextColor(memDC, gSettings.InfoTextColorAndroid());
+			else if (pNode->isSerial())
+				::SetTextColor(memDC, gSettings.InfoTextColorSerial());
+			else
+				::SetTextColor(memDC, gSettings.InfoTextColorNative());
 			TextOut(memDC, x, rcItem.top, tmp, c);
 
 			if (selItem == iItem)

@@ -53,6 +53,7 @@
 #include "sysdeps/chrono.h"
 
 #if _BUILD_ALL
+using android::base::ScopedLockAssertion;
 static void remove_transport(atransport* transport);
 static void transport_unref(atransport* transport);
 
@@ -71,22 +72,10 @@ const char* const kFeaturePushSync = "push_sync";
 const char* const kFeatureApex = "apex";
 const char* const kFeatureFixedPushMkdir = "fixed_push_mkdir";
 const char* const kFeatureAbb = "abb";
+const char* const kFeatureFixedPushSymlinkTimestamp = "fixed_push_symlink_timestamp";
+const char* const kFeatureAbbExec = "abb_exec";
 
 namespace {
-
-// A class that helps the Clang Thread Safety Analysis deal with
-// std::unique_lock. Given that std::unique_lock is movable, and the analysis
-// can not currently perform alias analysis, it is not annotated. In order to
-// assert that the mutex is held, a ScopedAssumeLocked can be created just after
-// the std::unique_lock.
-
-#if _BUILD_ALL
-class SCOPED_CAPABILITY ScopedAssumeLocked {
-  public:
-    ScopedAssumeLocked(std::mutex& mutex) ACQUIRE(mutex) {}
-    ~ScopedAssumeLocked() RELEASE() {}
-};
-#endif //_BUILD_ALL
 
 #if ADB_HOST
 // Tracks and handles atransport*s that are attempting reconnection.
@@ -141,16 +130,12 @@ class ReconnectHandler {
 
     DISALLOW_COPY_AND_ASSIGN(ReconnectHandler);
 };
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ReconnectHandler::Start() {
     check_main_thread();
     handler_thread_ = std::thread(&ReconnectHandler::Run, this);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ReconnectHandler::Stop() {
     check_main_thread();
     {
@@ -168,9 +153,7 @@ void ReconnectHandler::Stop() {
         remove_transport(attempt.transport);
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ReconnectHandler::TrackTransport(atransport* transport) {
     check_main_thread();
     {
@@ -183,21 +166,17 @@ void ReconnectHandler::TrackTransport(atransport* transport) {
     }
     reconnect_cv_.notify_one();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ReconnectHandler::CheckForKicked() {
     reconnect_cv_.notify_one();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ReconnectHandler::Run() {
     while (true) {
         ReconnectAttempt attempt;
         {
             std::unique_lock<std::mutex> lock(reconnect_mutex_);
-            ScopedAssumeLocked assume_lock(reconnect_mutex_);
+            ScopedLockAssertion assume_lock(reconnect_mutex_);
 
             if (!reconnect_queue_.empty()) {
                 // FIXME: libstdc++ (used on Windows) implements condition_variable with
@@ -269,9 +248,7 @@ void ReconnectHandler::Run() {
         }
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static auto& reconnect_handler = *new ReconnectHandler();
 #endif //_BUILD_ALL
 
@@ -284,21 +261,20 @@ TransportId NextTransportId() {
     static std::atomic<TransportId> next(1);
     return next++;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
+void Connection::Reset() {
+    LOG(INFO) << "Connection::Reset(): stopping";
+    Stop();
+}
+
 BlockingConnectionAdapter::BlockingConnectionAdapter(std::unique_ptr<BlockingConnection> connection)
     : underlying_(std::move(connection)) {}
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 BlockingConnectionAdapter::~BlockingConnectionAdapter() {
     LOG(INFO) << "BlockingConnectionAdapter(" << this->transport_name_ << "): destructing";
     Stop();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void BlockingConnectionAdapter::Start() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (started_) {
@@ -323,7 +299,7 @@ void BlockingConnectionAdapter::Start() {
         LOG(INFO) << this->transport_name_ << ": write thread spawning";
         while (true) {
             std::unique_lock<std::mutex> lock(mutex_);
-            ScopedAssumeLocked assume_locked(mutex_);
+            ScopedLockAssertion assume_locked(mutex_);
             cv_.wait(lock, [this]() REQUIRES(mutex_) {
                 return this->stopped_ || !this->write_queue_.empty();
             });
@@ -345,9 +321,27 @@ void BlockingConnectionAdapter::Start() {
 
     started_ = true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
+void BlockingConnectionAdapter::Reset() {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!started_) {
+            LOG(INFO) << "BlockingConnectionAdapter(" << this->transport_name_ << "): not started";
+            return;
+        }
+
+        if (stopped_) {
+            LOG(INFO) << "BlockingConnectionAdapter(" << this->transport_name_
+                      << "): already stopped";
+            return;
+        }
+    }
+
+    LOG(INFO) << "BlockingConnectionAdapter(" << this->transport_name_ << "): resetting";
+    this->underlying_->Reset();
+    Stop();
+}
+
 void BlockingConnectionAdapter::Stop() {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -386,9 +380,7 @@ void BlockingConnectionAdapter::Stop() {
     LOG(INFO) << "BlockingConnectionAdapter(" << this->transport_name_ << "): stopped";
     std::call_once(this->error_flag_, [this]() { this->error_callback_(this, "requested stop"); });
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool BlockingConnectionAdapter::Write(std::unique_ptr<apacket> packet) {
     {
         std::lock_guard<std::mutex> lock(this->mutex_);
@@ -398,9 +390,7 @@ bool BlockingConnectionAdapter::Write(std::unique_ptr<apacket> packet) {
     cv_.notify_one();
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool FdConnection::Read(apacket* packet) {
     if (!ReadFdExactly(fd_.get(), &packet->msg, sizeof(amessage))) {
         D("remote local: read terminated (message)");
@@ -421,9 +411,7 @@ bool FdConnection::Read(apacket* packet) {
 
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool FdConnection::Write(apacket* packet) {
     if (!WriteFdExactly(fd_.get(), &packet->msg, sizeof(packet->msg))) {
         D("remote local: write terminated");
@@ -439,16 +427,12 @@ bool FdConnection::Write(apacket* packet) {
 
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void FdConnection::Close() {
     adb_shutdown(fd_.get());
     fd_.reset();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void send_packet(apacket* p, atransport* t) {
     p->msg.magic = p->msg.command ^ 0xffffffff;
     // compute a checksum for connection/auth packets for compatibility reasons
@@ -469,16 +453,19 @@ void send_packet(apacket* p, atransport* t) {
         t->Kick();
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
-void kick_transport(atransport* t) {std::lock_guard<std::recursive_mutex> lock(transport_lock);
+void kick_transport(atransport* t, bool reset) {
+    std::lock_guard<std::recursive_mutex> lock(transport_lock);
     // As kick_transport() can be called from threads without guarantee that t is valid,
     // check if the transport is in transport_list first.
     //
     // TODO(jmgao): WTF? Is this actually true?
     if (std::find(transport_list.begin(), transport_list.end(), t) != transport_list.end()) {
-        t->Kick();
+        if (reset) {
+            t->Reset();
+        } else {
+            t->Kick();
+        }
     }
 
 #if ADB_HOST
@@ -509,15 +496,11 @@ struct device_tracker {
     bool long_output = false;
     device_tracker* next = nullptr;
 };
-#endif //_BUILD_ALL
 
 /* linked list of all device trackers */
 
-#if _BUILD_ALL
 static device_tracker* device_tracker_list;
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void device_tracker_remove(device_tracker* tracker) {
     device_tracker** pnode = &device_tracker_list;
     device_tracker* node = *pnode;
@@ -532,9 +515,7 @@ static void device_tracker_remove(device_tracker* tracker) {
         node = *pnode;
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void device_tracker_close(asocket* socket) {
     device_tracker* tracker = (device_tracker*)socket;
     asocket* peer = socket->peer;
@@ -547,17 +528,13 @@ static void device_tracker_close(asocket* socket) {
     device_tracker_remove(tracker);
     delete tracker;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static int device_tracker_enqueue(asocket* socket, apacket::payload_type) {
     /* you can't read from a device tracker, close immediately */
     device_tracker_close(socket);
     return -1;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static int device_tracker_send(device_tracker* tracker, const std::string& string) {
     asocket* peer = tracker->socket.peer;
 
@@ -569,9 +546,7 @@ static int device_tracker_send(device_tracker* tracker, const std::string& strin
     memcpy(&data[4], string.data(), string.size());
     return peer->enqueue(peer, std::move(data));
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void device_tracker_ready(asocket* socket) {
     device_tracker* tracker = reinterpret_cast<device_tracker*>(socket);
 
@@ -584,9 +559,7 @@ static void device_tracker_ready(asocket* socket) {
         device_tracker_send(tracker, transports);
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 asocket* create_device_tracker(bool long_output) {
     device_tracker* tracker = new device_tracker();
     if (tracker == nullptr) LOG(FATAL) << "cannot allocate device tracker";
@@ -604,11 +577,8 @@ asocket* create_device_tracker(bool long_output) {
 
     return &tracker->socket;
 }
-#endif //_BUILD_ALL
 
 // Check if all of the USB transports are connected.
-
-#if _BUILD_ALL
 bool iterate_transports(std::function<bool(const atransport*)> fn) {
     std::lock_guard<std::recursive_mutex> lock(transport_lock);
     for (const auto& t : transport_list) {
@@ -623,11 +593,8 @@ bool iterate_transports(std::function<bool(const atransport*)> fn) {
     }
     return true;
 }
-#endif //_BUILD_ALL
 
 // Call this function each time the transport list has changed.
-
-#if _BUILD_ALL
 void update_transports() {
     update_transport_status();
 
@@ -657,9 +624,7 @@ struct tmsg {
     atransport* transport;
     int action;
 };
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static int transport_read_action(int fd, struct tmsg* m) {
     char* p = (char*)m;
     int len = sizeof(*m);
@@ -677,9 +642,7 @@ static int transport_read_action(int fd, struct tmsg* m) {
     }
     return 0;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static int transport_write_action(int fd, struct tmsg* m) {
     char* p = (char*)m;
     int len = sizeof(*m);
@@ -697,9 +660,7 @@ static int transport_write_action(int fd, struct tmsg* m) {
     }
     return 0;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void transport_registration_func(int _fd, unsigned ev, void*) {
     tmsg m;
     atransport* t;
@@ -799,9 +760,7 @@ void init_transport_registration(void) {
         fdevent_create(transport_registration_recv, transport_registration_func, nullptr);
     fdevent_set(transport_registration_fde, FDE_READ);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void kick_all_transports() {
 #if ADB_HOST
     reconnect_handler.Stop();
@@ -812,11 +771,8 @@ void kick_all_transports() {
         t->Kick();
     }
 }
-#endif //_BUILD_ALL
 
 /* the fdevent select pump is single threaded */
-
-#if _BUILD_ALL
 void register_transport(atransport* transport) {
     tmsg m;
     m.transport = transport;
@@ -826,9 +782,7 @@ void register_transport(atransport* transport) {
         PLOG(FATAL) << "cannot write transport registration socket";
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void remove_transport(atransport* transport) {
     tmsg m;
     m.transport = transport;
@@ -838,9 +792,7 @@ static void remove_transport(atransport* transport) {
         PLOG(FATAL) << "cannot write transport registration socket";
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void transport_unref(atransport* t) {
     check_main_thread();
     CHECK(t != nullptr);
@@ -872,10 +824,9 @@ static void transport_unref(atransport* t) {
         D("transport: %s unref (count=%zu)", t->serial.c_str(), t->ref_count);
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
-static int qual_match(const std::string& to_test, const char* prefix, const std::string& qual, bool sanitize_qual) {
+static int qual_match(const std::string& to_test, const char* prefix, const std::string& qual,
+                      bool sanitize_qual) {
     if (to_test.empty()) /* Return true if both the qual and to_test are empty strings. */
         return qual.empty();
 
@@ -896,10 +847,10 @@ static int qual_match(const std::string& to_test, const char* prefix, const std:
     /* Everything matched so far.  Return true if *ptr is a NUL. */
     return !*ptr;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
-atransport* acquire_one_transport(TransportType type, const char* serial, TransportId transport_id, bool* is_ambiguous, std::string* error_out, bool accept_any_state) {
+atransport* acquire_one_transport(TransportType type, const char* serial, TransportId transport_id,
+                                  bool* is_ambiguous, std::string* error_out,
+                                  bool accept_any_state) {
     atransport* result = nullptr;
 
     if (transport_id != 0) {
@@ -918,7 +869,7 @@ atransport* acquire_one_transport(TransportType type, const char* serial, Transp
     std::unique_lock<std::recursive_mutex> lock(transport_lock);
     for (const auto& t : transport_list) {
         if (t->GetConnectionState() == kCsNoPerm) {
-            *error_out = "no USB permission";
+            *error_out = UsbNoPermissionsLongHelpText();
             continue;
         }
 
@@ -1010,19 +961,15 @@ atransport* acquire_one_transport(TransportType type, const char* serial, Transp
 
     return result;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool ConnectionWaitable::WaitForConnection(std::chrono::milliseconds timeout) {
     std::unique_lock<std::mutex> lock(mutex_);
-    ScopedAssumeLocked assume_locked(mutex_);
+    ScopedLockAssertion assume_locked(mutex_);
     return cv_.wait_for(lock, timeout, [&]() REQUIRES(mutex_) {
         return connection_established_ready_;
     }) && connection_established_;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void ConnectionWaitable::SetConnectionEstablished(bool success) {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -1033,51 +980,44 @@ void ConnectionWaitable::SetConnectionEstablished(bool success) {
     }
     cv_.notify_one();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 atransport::~atransport() {
     // If the connection callback had not been run before, run it now.
     SetConnectionEstablished(false);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 int atransport::Write(apacket* p) {
     return this->connection()->Write(std::unique_ptr<apacket>(p)) ? 0 : -1;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
+void atransport::Reset() {
+    if (!kicked_.exchange(true)) {
+        LOG(INFO) << "resetting transport " << this << " " << this->serial;
+        this->connection()->Reset();
+    }
+}
+
 void atransport::Kick() {
     if (!kicked_.exchange(true)) {
-        D("kicking transport %p %s", this, this->serial.c_str());
+        LOG(INFO) << "kicking transport " << this << " " << this->serial;
         this->connection()->Stop();
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 ConnectionState atransport::GetConnectionState() const {
     return connection_state_;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::SetConnectionState(ConnectionState state) {
     check_main_thread();
     connection_state_ = state;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::SetConnection(std::unique_ptr<Connection> connection) {
     std::lock_guard<std::mutex> lock(mutex_);
     connection_ = std::shared_ptr<Connection>(std::move(connection));
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string atransport::connection_state_name() const {
     ConnectionState state = GetConnectionState();
     switch (state) {
@@ -1091,8 +1031,10 @@ std::string atransport::connection_state_name() const {
             return "host";
         case kCsRecovery:
             return "recovery";
+        case kCsRescue:
+            return "rescue";
         case kCsNoPerm:
-            return "No USB Permission";
+            return UsbNoPermissionsShortHelpText();
         case kCsSideload:
             return "sideload";
         case kCsUnauthorized:
@@ -1105,28 +1047,21 @@ std::string atransport::connection_state_name() const {
             return "unknown";
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::update_version(int version, size_t payload) {
     protocol_version = std::min(version, A_VERSION);
     max_payload = std::min(payload, MAX_PAYLOAD);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 int atransport::get_protocol_version() const {
     return protocol_version;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 size_t atransport::get_max_payload() const {
     return max_payload;
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 const FeatureSet& supported_features() {
     // Local static allocation to avoid global non-POD variables.
     static const FeatureSet* features = new FeatureSet{
@@ -1140,7 +1075,6 @@ const FeatureSet& supported_features() {
 
     return *features;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 std::string FeatureSetToString(const FeatureSet& features) {
@@ -1148,7 +1082,6 @@ std::string FeatureSetToString(const FeatureSet& features) {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 FeatureSet StringToFeatureSet(const std::string& features_string) {
     if (features_string.empty()) {
         return FeatureSet();
@@ -1157,48 +1090,35 @@ FeatureSet StringToFeatureSet(const std::string& features_string) {
     auto names = android::base::Split(features_string, ",");
     return FeatureSet(names.begin(), names.end());
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool CanUseFeature(const FeatureSet& feature_set, const std::string& feature) {
     return feature_set.count(feature) > 0 && supported_features().count(feature) > 0;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool atransport::has_feature(const std::string& feature) const {
     return features_.count(feature) > 0;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::SetFeatures(const std::string& features_string) {
     features_ = StringToFeatureSet(features_string);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::AddDisconnect(adisconnect* disconnect) {
     disconnects_.push_back(disconnect);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::RemoveDisconnect(adisconnect* disconnect) {
     disconnects_.remove(disconnect);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::RunDisconnects() {
     for (const auto& disconnect : disconnects_) {
         disconnect->func(disconnect->opaque, this);
     }
     disconnects_.clear();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 bool atransport::MatchesTarget(const std::string& target) const {
     if (!serial.empty()) {
         if (target == serial) {
@@ -1233,15 +1153,11 @@ bool atransport::MatchesTarget(const std::string& target) const {
            qual_match(target, "model:", model, true) ||
            qual_match(target, "device:", device, false);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void atransport::SetConnectionEstablished(bool success) {
     connection_waitable_->SetConnectionEstablished(success);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 ReconnectResult atransport::Reconnect() {
     return reconnect_(this);
 }
@@ -1258,9 +1174,7 @@ static std::string sanitize(std::string str, bool alphanumeric) {
     std::replace_if(str.begin(), str.end(), pred, '_');
     return str;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void append_transport_info(std::string* result, const char* key, const std::string& value, bool alphanumeric) {
     if (value.empty()) {
         return;
@@ -1270,9 +1184,7 @@ static void append_transport_info(std::string* result, const char* key, const st
     *result += key;
     *result += sanitize(value, alphanumeric);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 static void append_transport(const atransport* t, std::string* result, bool long_listing) {
     std::string serial = t->serial;
     if (serial.empty()) {
@@ -1299,9 +1211,7 @@ static void append_transport(const atransport* t, std::string* result, bool long
     }
     *result += '\n';
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string list_transports(bool long_listing) {
     std::lock_guard<std::recursive_mutex> lock(transport_lock);
 
@@ -1319,30 +1229,32 @@ std::string list_transports(bool long_listing) {
     }
     return result;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
-void close_usb_devices(std::function<bool(const atransport*)> predicate) {
+void close_usb_devices(std::function<bool(const atransport*)> predicate, bool reset) {
     std::lock_guard<std::recursive_mutex> lock(transport_lock);
     for (auto& t : transport_list) {
         if (predicate(t)) {
-            t->Kick();
+            if (reset) {
+                t->Reset();
+            } else {
+                t->Kick();
+            }
         }
     }
 }
-#endif //_BUILD_ALL
 
 /* hack for osx */
 
-#if _BUILD_ALL
-void close_usb_devices() {
-    close_usb_devices([](const atransport*) { return true; });
+void close_usb_devices(bool reset) {
+    close_usb_devices([](const atransport*) { return true; }, reset);
 }
+
 #endif //_BUILD_ALL
 #endif  // ADB_HOST
 
 #if _BUILD_ALL
-bool register_socket_transport(unique_fd s, std::string serial, int port, int local,atransport::ReconnectCallback reconnect, int* error) {
+bool register_socket_transport(unique_fd s, std::string serial, int port, int local,
+                               atransport::ReconnectCallback reconnect, int* error) {
     atransport* t = new atransport(std::move(reconnect), kCsOffline);
 
     D("transport: %s init'ing for socket %d, on port %d", serial.c_str(), s.get(), port);
@@ -1416,9 +1328,7 @@ atransport* find_transport(const char* serial) {
 
     return result;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void kick_all_tcp_devices() {
     std::lock_guard<std::recursive_mutex> lock(transport_lock);
     for (auto& t : transport_list) {
@@ -1439,7 +1349,8 @@ void kick_all_tcp_devices() {
 #endif
 
 #if _BUILD_ALL
-void register_usb_transport(usb_handle* usb, const char* serial, const char* devpath, unsigned writeable) {
+void register_usb_transport(usb_handle* usb, const char* serial, const char* devpath,
+                            unsigned writeable) {
     atransport* t = new atransport(writeable ? kCsOffline : kCsNoPerm);
 
     D("transport: %p init'ing for usb_handle %p (sn='%s')", t, usb, serial ? serial : "");

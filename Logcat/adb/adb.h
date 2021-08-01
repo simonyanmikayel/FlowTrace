@@ -64,7 +64,7 @@ constexpr size_t LINUX_MAX_SOCKET_SIZE = 4194304;
 std::string adb_version();
 
 // Increment this when we want to force users to start a new adb server.
-#define ADB_SERVER_VERSION 40
+#define ADB_SERVER_VERSION 41
 
 using TransportId = uint64_t;
 class atransport;
@@ -112,6 +112,7 @@ enum ConnectionState {
     kCsHost,
     kCsRecovery,
     kCsSideload,
+    kCsRescue,
 };
 
 inline bool ConnectionStateIsOnline(ConnectionState state) {
@@ -121,6 +122,7 @@ inline bool ConnectionStateIsOnline(ConnectionState state) {
         case kCsHost:
         case kCsRecovery:
         case kCsSideload:
+        case kCsRescue:
             return true;
         default:
             return false;
@@ -150,7 +152,8 @@ unique_fd daemon_service_to_fd(std::string_view name, atransport* transport);
 #endif
 
 #if ADB_HOST
-asocket* host_service_to_socket(const char* name, const char* serial, TransportId transport_id);
+asocket* host_service_to_socket(std::string_view name, std::string_view serial,
+                                TransportId transport_id);
 #endif
 
 #if !ADB_HOST
@@ -158,7 +161,7 @@ asocket* daemon_service_to_socket(std::string_view name);
 #endif
 
 #if !ADB_HOST
-unique_fd execute_binder_command(std::string_view command);
+unique_fd execute_abb_command(std::string_view command);
 #endif
 
 #if !ADB_HOST
@@ -223,8 +226,15 @@ extern const char* adb_device_banner;
 #define USB_FFS_ADB_IN USB_FFS_ADB_EP(ep2)
 #endif
 
-bool handle_host_request(const char* service, TransportType type, const char* serial,
-                         TransportId transport_id, int reply_fd, asocket* s);
+enum class HostRequestResult {
+    Handled,
+    SwitchedTransport,
+    Unhandled,
+};
+
+HostRequestResult handle_host_request(std::string_view service, TransportType type,
+                                      const char* serial, TransportId transport_id, int reply_fd,
+                                      asocket* s);
 
 void handle_online(atransport* t);
 void handle_offline(atransport* t);

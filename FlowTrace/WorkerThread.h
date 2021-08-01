@@ -7,7 +7,7 @@ public:
     DWORD getTID(){ return m_dwTID; }
     bool IsWorking(){ return m_bWorking; }
     void StartWork(LPVOID pWorkParam = 0);
-    void StopWork();
+    void StopWork(const int rettryCount = 500);
     virtual void Work(LPVOID pWorkParam) = 0;
     virtual void Terminate() = 0;
 	DWORD SleepThread(DWORD  dwMilliseconds);

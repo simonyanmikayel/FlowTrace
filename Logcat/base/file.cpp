@@ -214,7 +214,6 @@ namespace base {
 // Versions of standard library APIs that support UTF-8 strings.
 using namespace android::base::utf8;
 
-#if _BUILD_ALL1
 bool ReadFdToString(int fd, std::string* content) {
   content->clear();
 
@@ -233,7 +232,6 @@ bool ReadFdToString(int fd, std::string* content) {
   }
   return (n == 0) ? true : false;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool ReadFileToString(const std::string& path, std::string* content, bool follow_symlinks) {
@@ -453,7 +451,6 @@ bool Realpath(const std::string& path, std::string* result) {
 }
 #endif
 
-#if _BUILD_ALL1
 std::string GetExecutablePath() {
 #if defined(__linux__)
   std::string path;
@@ -479,7 +476,6 @@ std::string GetExecutablePath() {
 #error unknown OS
 #endif
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 std::string GetExecutableDirectory() {
@@ -487,7 +483,6 @@ std::string GetExecutableDirectory() {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string Basename(const std::string& path) {
   // Copy path because basename may modify the string passed in.
 	char szPath[300];
@@ -509,7 +504,6 @@ std::string Basename(const std::string& path) {
 
   return result;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 std::string Dirname(const std::string& path) {

@@ -66,6 +66,8 @@ class ShellProtocol {
     // Returns a pointer to the data buffer.
     const char* data() const { return buffer_ + kHeaderSize; }
     char* data() { return buffer_ + kHeaderSize; }
+    char* buffer() { return buffer_ ; }
+    size_t buffer_size() { return sizeof(buffer_); }
 
     // Returns the total capacity of the data buffer.
     size_t data_capacity() const { return buffer_end_ - data(); }
@@ -97,14 +99,14 @@ class ShellProtocol {
     enum {
         // It's OK if MAX_PAYLOAD doesn't match on the sending and receiving
         // end, reading will split larger packets into multiple smaller ones.
-        kBufferSize = MAX_PAYLOAD,
+        kBufferSize = MAX_PAYLOAD - 1,
 
         // Header is 1 byte ID + 4 bytes length.
         kHeaderSize = sizeof(Id) + sizeof(length_t)
     };
 
     int fd_;
-    char buffer_[kBufferSize];
+    char buffer_[kBufferSize + 1];
     size_t data_length_ = 0, bytes_left_ = 0;
 
     // We need to be able to modify this value for testing purposes, but it

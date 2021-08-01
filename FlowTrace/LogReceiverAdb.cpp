@@ -16,15 +16,18 @@ static FILE *testPsFile;
 
 LogReceiverAdb gLogReceiverAdb;
 
-#define LOGGER_ENTRY_MAX_LEN  (8*1024) // (4*1024) in android sorces
-static LOG_PARCER mt(LOGGER_ENTRY_MAX_LEN);
+#define LOGGER_ENTRY_MAX_LEN  (8*1024) // (4*1024) in android sources
+static LogParcer mt(LOGGER_ENTRY_MAX_LEN);
 static MetaDataInfo gMtInfo;
 static int cMtInfo;
 static bool logRestarted;
-static LOG_REC_ADB_DATA adbRec;
+static LOG_REC_ADB_DATA logData;
 
 void LogReceiverAdb::start(bool reset)
 {
+	if (!gSettings.GetUseAdb())
+		return;
+
 	m_working = true;
 	mt.reset();
 	gMtInfo.reset();
@@ -32,52 +35,51 @@ void LogReceiverAdb::start(bool reset)
 	logRestarted = false;
 	gArchive.m_SkipedLogcat = 0;
 	gAdbProp.restartAdbIfNeeded = gSettings.GetRestartAdb();
-	adbRec.reset();
-#ifdef USE_RING_BUF
-	gLogcatLogBuffer.StartWork();
-#endif //USE_RING_BUF
+	logData.reset();
 	logcatPsCommand.StartWork();
 	logcatLogSupplier.StartWork(&reset);
-#ifdef USE_RING_BUF
-	logcatLogSupplier.SetThreadPriority(THREAD_PRIORITY_HIGHEST);
-	logcatLogConsumer.StartWork();
-#endif //USE_RING_BUF
 }
 
 void LogReceiverAdb::stop()
 {
 	m_working = false;
-#ifdef USE_RING_BUF
-	gLogcatLogBuffer.StopWork();
-#endif //USE_RING_BUF
-	logcatLogSupplier.StopWork();
-#ifdef USE_RING_BUF
-	logcatLogConsumer.StopWork();
-#endif //USE_RING_BUF
-	logcatPsCommand.StopWork();
+	logcatLogSupplier.StopWork(100);
+	logcatPsCommand.StopWork(100);
 }
-
+/*
 static void AddTrace(size_t cbLog, char* szLog, int color)
 {
 	if (cbLog)
 	{
 		gLogReceiver.lock();
-		adbRec.p_trace = szLog;
-		adbRec.cb_trace = (WORD)cbLog;
-		adbRec.len = sizeof(LOG_REC_BASE_DATA) + adbRec.cbData();
-		adbRec.color = color;
-		gArchive.appendAdb(&adbRec);
+		logData.p_trace = szLog;
+		logData.cb_trace = (WORD)cbLog;
+		logData.len = sizeof(LOG_REC_BASE_DATA) + logData.cbData();
+		logData.color = color;
+		gArchive.appendAdb(&logData);
 		gLogReceiver.unlock();
 	}
 }
-
 int parceCollor(char** c);
+*/
+
 static void TraceLog(const char* szLog, int cbLog)
 {
+	if (cbLog)
+	{
+		gLogReceiver.lock();
+		logData.p_trace = szLog;
+		logData.cb_trace = (WORD)cbLog;
+		logData.len = sizeof(LOG_REC_BASE_DATA) + logData.cbData();
+		logData.color = 0;
+		gArchive.appendAdb(&logData);
+		gLogReceiver.unlock();
+	}
+	/*
 	int color = 0;
 	if (cbLog)
 	{
-		adbRec.log_flags |= LOG_FLAG_COLOR_PARCED;
+		logData.log_flags |= LOG_FLAG_COLOR_PARCED;
 		char *start = (char*)szLog;
 		char *end = (char*)szLog;
 		char *endLog = (char*)szLog + cbLog;
@@ -139,6 +141,7 @@ static void TraceLog(const char* szLog, int cbLog)
 			AddTrace(end - start, start, color);
 		}
 	}
+	*/
 }
 
 #define MAX_LOG_SIZE 4000
@@ -154,9 +157,9 @@ static void WriteLog(const char* szLog, int cbLog)
 		return;
 
 	bool isFlowTraceLog = false;
-	long long* pLL1 = (long long*)(adbRec.tag + 2);
+	long long* pLL1 = (long long*)(logData.tag + 2);
 	long long* pLL2 = pLL1 + 1;
-	if (adbRec.cb_fn_name == 18 && *pLL1 == 4706917329019030598 && *pLL2 == 4201654279412335939) // && 0 == strncmp(adbRec.tag + 2, "FLOW_TRACE_INFO:", 16)
+	if (logData.cb_fn_name == 18 && *pLL1 == 4706917329019030598 && *pLL2 == 4201654279412335939) // && 0 == strncmp(adbRec.tag + 2, "FLOW_TRACE_INFO:", 16)
 	{
 		int cbHeader;
 		int cf = sscanf_s(szLog, TEXT("%d~%d~%d~%hhd~%hd~%hd~%hd~%d~%hd~%d~%u~%u~%hhd~%hhd~%hhd~%u~%u~%d:"),
@@ -192,9 +195,9 @@ static void WriteLog(const char* szLog, int cbLog)
 
 	if (isFlowTraceLog)
 	{
-		ft->sec = adbRec.sec;
-		ft->msec = adbRec.msec;
-		adbRec.log_flags &= (~LOG_FLAG_ADB); //clear the bit
+		ft->sec = logData.sec;
+		ft->msec = logData.msec;
+		logData.log_flags &= (~LOG_FLAG_ADB); //clear the bit
 		gArchive.appendNet(ft);
 	}
 	else
@@ -221,12 +224,12 @@ static bool ParceMetaData()
 	mtInfo.pid = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
 	mtInfo.tid = Helpers::NextDigit(mt.buf(), mt.size(), i, ok);
 	if (ok && mtInfo.pid && mtInfo.tid) {
-		adbRec.reset();
-		adbRec.pid = mtInfo.pid;
-		adbRec.tid = mtInfo.tid;
-		adbRec.sec = Helpers::GetSec(h, m, s); // 3600 * h + 60 * m + s;
-		adbRec.msec = ms;
-		mtInfo.totMsec = (long long)(adbRec.sec) * 1000L + adbRec.msec;
+		logData.reset();
+		logData.pid = mtInfo.pid;
+		logData.tid = mtInfo.tid;
+		logData.sec = Helpers::GetSec(h, m, s); // 3600 * h + 60 * m + s;
+		logData.msec = ms;
+		mtInfo.totMsec = (long long)(logData.sec) * 1000L + logData.msec;
 		int cb_fn_name = mt.size() - i - 1;
 		if (i > 0 && cb_fn_name > 0 && cb_fn_name < MAX_JAVA_TAG_NAME_LEN - 2)
 		{
@@ -234,22 +237,22 @@ static bool ParceMetaData()
 			//{
 			//	i = i;
 			//}
-			memcpy(adbRec.tag, mt.buf() + i + 1, cb_fn_name);
-			adbRec.tag[cb_fn_name] = 0;
-			while (cb_fn_name > 2 && (adbRec.tag[cb_fn_name - 1] <= ' ' || adbRec.tag[cb_fn_name - 1] == ']'))
+			memcpy(logData.tag, mt.buf() + i + 1, cb_fn_name);
+			logData.tag[cb_fn_name] = 0;
+			while (cb_fn_name > 2 && (logData.tag[cb_fn_name - 1] <= ' ' || logData.tag[cb_fn_name - 1] == ']'))
 				cb_fn_name--;
-			adbRec.tag[cb_fn_name] = ':';
-			adbRec.tag[++cb_fn_name] = 0;
-			adbRec.cb_fn_name = cb_fn_name;
-			adbRec.p_fn_name = adbRec.tag;
-			if (adbRec.tag[0] == 'E')
-				adbRec.priority = FLOW_LOG_ERROR;
-			else if (adbRec.tag[0] == 'I')
-				adbRec.priority = FLOW_LOG_INFO;
-			else if (adbRec.tag[0] == 'D')
-				adbRec.priority = FLOW_LOG_DEBUG;
-			else if (adbRec.tag[0] == 'W')
-				adbRec.priority = FLOW_LOG_WARN;
+			logData.tag[cb_fn_name] = ':';
+			logData.tag[++cb_fn_name] = 0;
+			logData.cb_fn_name = cb_fn_name;
+			logData.p_fn_name = logData.tag;
+			if (logData.tag[0] == 'E')
+				logData.priority = FLOW_LOG_ERROR;
+			else if (logData.tag[0] == 'I')
+				logData.priority = FLOW_LOG_INFO;
+			else if (logData.tag[0] == 'D')
+				logData.priority = FLOW_LOG_DEBUG;
+			else if (logData.tag[0] == 'W')
+				logData.priority = FLOW_LOG_WARN;
 		}
 	}
 
@@ -317,7 +320,7 @@ void LogReceiverAdb::HandleLogData(const char* szLog, size_t cbLog)
 	while (cbLog && gLogReceiver.working()) 
 	{
 		int skiped = mt.getLine(szLog, cbLog, true);
-		//stdlog("-->%d %d %d %s\n", mt.compleated(), skiped, mt.size(), mt.buf());
+		//stdlog("HandleLogData->%d %d %d %s\n", mt.compleated(), skiped, mt.size(), mt.buf());
 		if (mt.compleated())
 		{
 			if (!ParceMetaData())

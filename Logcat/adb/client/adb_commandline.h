@@ -22,11 +22,14 @@
 //
 extern int adb_shutdown(int fd, int direction);
 
+// Callback used to handle the standard streams (stdout and stderr) sent by the
+// device's upon receiving a command.
+//
 class StandardStreamsCallbackInterface {
-  public:
+public:
     StandardStreamsCallbackInterface() {
-		serverFd = -1;
-	}
+        serverFd = -1;
+    }
     // Handles the stdout output from devices supporting the Shell protocol.
     virtual bool OnStdout(char* buffer, int length) = 0;
 
@@ -38,51 +41,50 @@ class StandardStreamsCallbackInterface {
     //
     // |status| has the status code returning by the underlying communication
     // channels
-	virtual int Done(int status)
-	{
-		if (serverFd >= 0)
-			adb_shutdown(serverFd, 2);
-		serverFd = -1;
-		return status;
-	}
+    virtual int Done(int status)
+    {
+        if (serverFd >= 0)
+            adb_shutdown(serverFd, 2);
+        serverFd = -1;
+        return status;
+    }
 
-    virtual void GetStreamBuf(char** p, size_t* c) { *p = nullptr; *c = 0; };
+    int serverFd;
 
-	int serverFd;
-
-  protected:
+protected:
     static bool OnStream(std::string* string, FILE* stream, const char* buffer, int length) {
         if (string != nullptr) {
             string->append(buffer, length);
-        } else {
+        }
+        else {
             fwrite(buffer, 1, length, stream);
             fflush(stream);
         }
-		return true;
+        return true;
     }
 
-  private:
-	  //DISALLOW_COPY_AND_ASSIGN(StandardStreamsCallbackInterface);
-	  StandardStreamsCallbackInterface(const StandardStreamsCallbackInterface&) = delete;
-	  void operator=(const StandardStreamsCallbackInterface&) = delete;
+private:
+    //DISALLOW_COPY_AND_ASSIGN(StandardStreamsCallbackInterface);
+    StandardStreamsCallbackInterface(const StandardStreamsCallbackInterface&) = delete;
+    void operator=(const StandardStreamsCallbackInterface&) = delete;
 };
 
 // Default implementation that redirects the streams to the equilavent host
 // stream or to a string
 // passed to the constructor.
 class DefaultStandardStreamsCallback : public StandardStreamsCallbackInterface {
-  public:
+public:
     // If |stdout_str| is non-null, OnStdout will append to it.
     // If |stderr_str| is non-null, OnStderr will append to it.
     DefaultStandardStreamsCallback(std::string* stdout_str, std::string* stderr_str)
         : stdout_str_(stdout_str), stderr_str_(stderr_str) {
     }
 
-	bool OnStdout(char* buffer, int length) {
+    bool OnStdout(char* buffer, int length) {
         return OnStream(stdout_str_, stdout, buffer, length);
     }
 
-	bool OnStderr(char* buffer, int length) {
+    bool OnStderr(char* buffer, int length) {
         return OnStream(stderr_str_, stderr, buffer, length);
     }
 
@@ -90,13 +92,13 @@ class DefaultStandardStreamsCallback : public StandardStreamsCallbackInterface {
         return status;
     }
 
-  private:
+private:
     std::string* stdout_str_;
     std::string* stderr_str_;
 
     //DISALLOW_COPY_AND_ASSIGN(DefaultStandardStreamsCallback);
-	DefaultStandardStreamsCallback(const DefaultStandardStreamsCallback&) = delete;
-	void operator=(const DefaultStandardStreamsCallback&) = delete;
+    DefaultStandardStreamsCallback(const DefaultStandardStreamsCallback&) = delete;
+    void operator=(const DefaultStandardStreamsCallback&) = delete;
 };
 
 struct ADB_PROP {

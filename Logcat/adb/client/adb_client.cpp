@@ -46,81 +46,86 @@
 #include "sysdeps/chrono.h"
 #include "adb_commandline.h"
 
+ADB_PROP gAdbProp;
+
 static TransportType __adb_transport = kTransportAny;
 static const char* __adb_serial = nullptr;
 static TransportId __adb_transport_id = 0;
 static const char* __adb_server_socket_spec;
 
-#if _BUILD_ALL1
 void adb_set_transport(TransportType type, const char* serial, TransportId transport_id) {
     __adb_transport = type;
     __adb_serial = serial;
     __adb_transport_id = transport_id;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 void adb_get_transport(TransportType* type, const char** serial, TransportId* transport_id) {
     if (type) *type = __adb_transport;
     if (serial) *serial = __adb_serial;
     if (transport_id) *transport_id = __adb_transport_id;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 void adb_set_socket_spec(const char* socket_spec) {
     if (__adb_server_socket_spec) {
         //TODO LOG(FATAL) << "attempted to reinitialize adb_server_socket_spec " << socket_spec << " (was " << __adb_server_socket_spec << ")";
     }
     __adb_server_socket_spec = socket_spec;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
-static int switch_socket_transport(int fd, std::string* error) {
+static std::optional<TransportId> switch_socket_transport(int fd, std::string* error) {
+    TransportId result;
+    bool read_transport = true;
+
     std::string service;
     if (__adb_transport_id) {
+        read_transport = false;
         service += "host:transport-id:";
         service += std::to_string(__adb_transport_id);
+        result = __adb_transport_id;
     } else if (__adb_serial) {
-        service += "host:transport:";
+        service += "host:tport:serial:";
         service += __adb_serial;
     } else {
         const char* transport_type = "???";
         switch (__adb_transport) {
           case kTransportUsb:
-            transport_type = "transport-usb";
-            break;
+              transport_type = "usb";
+              break;
           case kTransportLocal:
-            transport_type = "transport-local";
-            break;
+              transport_type = "local";
+              break;
           case kTransportAny:
-            transport_type = "transport-any";
+              transport_type = "any";
             break;
           case kTransportHost:
             // no switch necessary
             return 0;
         }
-        service += "host:";
+        service += "host:tport:";
         service += transport_type;
     }
 
     if (!SendProtocolString(fd, service)) {
         *error = perror_str("write failure during connection");
-        return -1;
+        return std::nullopt;
     }
     D("Switch transport in progress");
 
     if (!adb_status(fd, error)) {
         D("Switch transport failed: %s", error->c_str());
-        return -1;
+        return std::nullopt;
+    }
+
+    if (read_transport) {
+        if (!ReadFdExactly(fd, &result, sizeof(result))) {
+            *error = "failed to read transport id from server";
+            return std::nullopt;
+        }
     }
     D("Switch transport success");
-    return 0;
+    return result;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool adb_status(int fd, std::string* error) {
     char buf[5];
     if (!ReadFdExactly(fd, buf, 4)) {
@@ -141,14 +146,11 @@ bool adb_status(int fd, std::string* error) {
     ReadProtocolString(fd, error, error);
     return false;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
-static int _adb_connect(const std::string& service, std::string* error) {
-    D("_adb_connect: %s", service.c_str());
+static int _adb_connect(std::string_view service, TransportId* transport, std::string* error) {
+    LOG(DEBUG) << "_adb_connect: " << service;
     if (service.empty() || service.size() > MAX_PAYLOAD) {
-        *error = android::base::StringPrintf("bad service name length (%zd)",
-                                             service.size());
+        *error = android::base::StringPrintf("bad service name length (%zd)", service.size());
         return -1;
     }
 
@@ -160,8 +162,15 @@ static int _adb_connect(const std::string& service, std::string* error) {
         return -2;
     }
 
-    if (memcmp(&service[0], "host", 4) != 0 && switch_socket_transport(fd.get(), error)) {
-        return -1;
+    if (!service._Starts_with("host")) {
+        std::optional<TransportId> transport_result = switch_socket_transport(fd.get(), error);
+        if (!transport_result) {
+            return -1;
+        }
+
+        if (transport) {
+            *transport = *transport_result;
+        }
     }
 
     if (!SendProtocolString(fd.get(), service)) {
@@ -176,9 +185,7 @@ static int _adb_connect(const std::string& service, std::string* error) {
     D("_adb_connect: return fd %d", fd.get());
     return fd.release();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool adb_kill_server() {
     D("adb_kill_server");
     std::string reason;
@@ -202,47 +209,58 @@ bool adb_kill_server() {
     ReadOrderlyShutdown(fd.get());
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
-static int orig_adb_connect(const std::string& service, std::string* error) {
-    // first query the adb server's version
-    unique_fd fd(_adb_connect("host:version", error));
+int adb_connect(std::string_view service, std::string* error) {
+    return adb_connect(nullptr, service, error);
+}
 
+#if defined(__linux__)
+std::optional<std::string> adb_get_server_executable_path() {
+    int port;
+    std::string error;
+    if (!parse_tcp_socket_spec(__adb_server_socket_spec, nullptr, &port, nullptr, &error)) {
+        LOG(FATAL) << "failed to parse server socket spec: " << error;
+    }
 
-    D("adb_connect: service %s", service.c_str());
-    if (fd == -2 && !is_local_socket_spec(__adb_server_socket_spec)) {
+    return adb_get_android_dir_path() + OS_PATH_SEPARATOR + "adb." + std::to_string(port);
+}
+#endif
+
+static bool __adb_check_server_version(std::string* error) {
+    unique_fd fd(_adb_connect("host:version", nullptr, error));
+
+    bool local = is_local_socket_spec(__adb_server_socket_spec);
+    if (fd == -2 && !local) {
         fprintf(stderr, "* cannot start server on remote host\n");
         // error is the original network connection error
-        return fd;
+        return false;
     } else if (fd == -2) {
-		//fprintf(stderr, "** daemon not running; starting now at %s\n", __adb_server_socket_spec);
-		fprintf(stderr, "** daemon not running at %s; starting it by calling 'adb start-server' \n", __adb_server_socket_spec);
-		return -1;
-		/* !!TODO!!
-	start_server:
+        fprintf(stderr, "* daemon not running; starting now at %s\n", __adb_server_socket_spec);
+        //return false;
+        ///* !!TODO!!
+    start_server:
         if (launch_server(__adb_server_socket_spec)) {
             fprintf(stderr, "* failed to start daemon\n");
             // launch_server() has already printed detailed error info, so just
             // return a generic error string about the overall adb_connect()
             // that the caller requested.
             *error = "cannot connect to daemon";
-            return -1;
+            return false;
         } else {
             fprintf(stderr, "* daemon started successfully\n");
         }
         // The server will wait until it detects all of its connected devices before acking.
         // Fall through to _adb_connect.
-		*/
+        //*/
     } else {
         // If a server is already running, check its version matches.
-        int version = ADB_SERVER_VERSION - 1;
+        int version = 0;
 
         // If we have a file descriptor, then parse version result.
         if (fd >= 0) {
             std::string version_string;
             if (!ReadProtocolString(fd, &version_string, error)) {
-                return -1;
+                return false;
             }
 
             ReadOrderlyShutdown(fd);
@@ -250,26 +268,75 @@ static int orig_adb_connect(const std::string& service, std::string* error) {
             if (sscanf(&version_string[0], "%04x", &version) != 1) {
                 *error = android::base::StringPrintf("cannot parse version string: %s",
                                                      version_string.c_str());
-                return -1;
+                return false;
             }
         } else {
             // If fd is -1 check for "unknown host service" which would
             // indicate a version of adb that does not support the
             // version command, in which case we should fall-through to kill it.
             if (*error != "unknown host service") {
-                return fd;
+                return false;
             }
         }
-#ifdef _DEBUG
+
         if (version != ADB_SERVER_VERSION) {
-            fprintf(stderr, "adb server version (%d) doesn't match this client (%d); killing...\n",
-                    version, ADB_SERVER_VERSION);
-   //         adb_kill_server();
-			//return -1;
-			//!!TODO!! goto start_server;
-        }
+#if defined(__linux__)
+            if (version > ADB_SERVER_VERSION && local) {
+                // Try to re-exec the existing adb server's binary.
+                constexpr const char* adb_reexeced = "adb (re-execed)";
+                if (strcmp(adb_reexeced, *__adb_argv) != 0) {
+                    __adb_argv[0] = adb_reexeced;
+                    std::optional<std::string> server_path_path = adb_get_server_executable_path();
+                    std::string server_path;
+                    if (server_path_path &&
+                        android::base::ReadFileToString(*server_path_path, &server_path)) {
+                        if (execve(server_path.c_str(), const_cast<char**>(__adb_argv),
+                                   const_cast<char**>(__adb_envp)) == -1) {
+                            LOG(ERROR) << "failed to exec newer version at " << server_path;
+                        }
+
+                        // Fall-through to restarting the server.
+                    }
+                }
+            }
 #endif
 
+            fprintf(stderr, "adb server version (%d) doesn't match this client (%d); killing...\n",
+                    version, ADB_SERVER_VERSION);
+            /*//!!TODO!! 
+            adb_kill_server();
+            goto start_server;
+            */
+        }
+    }
+
+    return true;
+}
+
+bool adb_check_server_version(std::string* error) {
+    // Only check the version once per process, since this isn't atomic anyway.
+    static std::once_flag once;
+    static bool result;
+    static std::string err;
+    //TODO - need synchronization here
+    if (gAdbProp.restartAdbIfNeeded) {
+        result = __adb_check_server_version(&err);
+    }
+    else {
+        std::call_once(once, []() {
+            result = __adb_check_server_version(&err);
+            });
+    }
+    *error = err;
+    return result;
+}
+
+int adb_connect(TransportId* transport, std::string_view service, std::string* error) {
+    LOG(DEBUG) << "adb_connect: service: " << service;
+
+    // Query the adb server's version.
+    if (!adb_check_server_version(error)) {
+        return -1;
     }
 
     // if the command is start-server, we are done.
@@ -277,7 +344,7 @@ static int orig_adb_connect(const std::string& service, std::string* error) {
         return 0;
     }
 
-    fd.reset(_adb_connect(service, error));
+    unique_fd fd(_adb_connect(service, transport, error));
     if (fd == -1) {
         D("_adb_connect error: %s", error->c_str());
     } else if(fd == -2) {
@@ -288,40 +355,6 @@ static int orig_adb_connect(const std::string& service, std::string* error) {
     return fd.release();
 }
 
-int adb_connect(const std::string& service, std::string* error) {
-	int serverFd = orig_adb_connect(service, error);
-	if (serverFd == -1 && gAdbProp.restartAdbIfNeeded) {
-		//start server and try again
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		ZeroMemory(&si, sizeof(si));
-		si.cb = sizeof(si);
-		wchar_t cmd[32];
-		wcscpy_s(cmd, L"adb.exe start-server");
-		if (CreateProcessW(NULL, cmd, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi)) {
-			D("successfully run of 'adb start-server'");
-			WaitForSingleObject(pi.hProcess, 5000);
-			// Close the handles.
-			CloseHandle(pi.hProcess);
-			CloseHandle(pi.hThread);
-			serverFd = orig_adb_connect(service, error);
-		}
-		else {
-			LPVOID lpMsgBuf;
-			DWORD dw = GetLastError();
-			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
-			LPTSTR strError = (LPTSTR)lpMsgBuf;
-			// Display the error
-			// Free resources created by the system
-			LocalFree(lpMsgBuf);
-		}
-	}
-	return serverFd;
-}
-#endif //_BUILD_ALL
-
-#if _BUILD_ALL1
 bool adb_command(const std::string& service) {
     std::string error;
     unique_fd fd(adb_connect(service, &error));
@@ -338,9 +371,7 @@ bool adb_command(const std::string& service) {
     ReadOrderlyShutdown(fd.get());
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool adb_query(const std::string& service, std::string* result, std::string* error) {
     D("adb_query: %s", service.c_str());
     unique_fd fd(adb_connect(service, error));
@@ -356,9 +387,7 @@ bool adb_query(const std::string& service, std::string* result, std::string* err
     ReadOrderlyShutdown(fd.get());
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::string format_host_command(const char* command) {
     if (__adb_transport_id) {
         return android::base::StringPrintf("host-transport-id:%" PRIu64 ":%s", __adb_transport_id,
@@ -375,9 +404,7 @@ std::string format_host_command(const char* command) {
     }
     return android::base::StringPrintf("%s:%s", prefix, command);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool adb_get_feature_set(FeatureSet* feature_set, std::string* error) {
     std::string result;
     if (adb_query(format_host_command("features"), &result, error)) {
@@ -387,4 +414,3 @@ bool adb_get_feature_set(FeatureSet* feature_set, std::string* error) {
     feature_set->clear();
     return false;
 }
-#endif //_BUILD_ALL

@@ -34,6 +34,7 @@
 #define IDB_CALL_IN_ECLIPSE             537
 #define IDD_MODULES                     538
 #define IDD_FILTERS                     539
+#define IDD_COM_PORT                    540
 #define IDC_NN                          1000
 #define IDC_APP                         1001
 #define IDC_FONT_NAME                   1002
@@ -49,9 +50,11 @@
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
 #define IDC_CHILD_COUNT                 1008
+#define IDC_CHECK_USE_PORT_1            1008
 #define IDC_CHECK_USE_PC_TIME           1009
 #define IDC_CALL_ADDR3                  1009
 #define IDC_FN_CALL_LINE                1009
+#define IDC_CHECK_USE_PORT_2            1009
 #define IDC_CALL_LINE                   1020
 #define IDC_CHECK_USE_PC_TIME2          1021
 #define IDC_CHECK_COMPACT_VIEW          1022
@@ -75,11 +78,16 @@
 #define IDC_LINE_NN                     1028
 #define IDC_LIST2                       1029
 #define IDC_COMBO1                      1041
+#define IDC_COMBO_PARITY                1041
+#define IDC_COMBO_PORT_PARITY           1041
 #define IDC_COMBO_FONTS                 1042
+#define IDC_COMBO_PORT_FLOW_CONTROL     1042
 #define IDC_COMBO_FONT_SIZE             1043
 #define IDC_CHECK_FONT_WEIGHT           1044
 #define IDC_BUTTON1                     1045
+#define IDC_BUTTON_SET_PORT_1           1045
 #define IDC_BUTTON_EDIT                 1046
+#define IDC_BUTTON_SET_PORT_2           1046
 #define IDC_BUTTON_DEL                  1047
 #define IDC_BUTTON_RESET                1200
 #define IDC_EDIT_LINUX_HOME             1201
@@ -87,6 +95,7 @@
 #define IDC_EDIT_MAP_ON_WIN             1202
 #define IDC_EDIT1                       1202
 #define IDC_EIDT_INFO                   1202
+#define IDC_EDIT_PORT_NAME              1202
 #define IDC_EDIT_ECLIPSE_ON_WIN         1203
 #define IDC_STATIC_MODULES              1203
 #define IDC_STATIC_LST                  1203
@@ -98,6 +107,11 @@
 #define IDC_EDIT_EXTERNAL_COMMAND_3     1208
 #define IDC_EDIT_LOGCUT_FILTER          1209
 #define IDC_EDIT_ADB_ARG                1209
+#define IDC_STATIC_PORT_1               1210
+#define IDC_STATIC_PORT_2               1211
+#define IDC_EDIT_PORT_SPEED             1212
+#define IDC_EDIT_PORT_DATA_BITS         1213
+#define IDC_EDIT_PORT_STOP_BITS         1214
 #define ID_VIEW_SHOW_HIDE_STACK         32774
 #define ID_VIEW_SHOW_HIDE_TREE          32775
 #define ID_VIEW_STARTRECORDIG           32776
@@ -163,9 +177,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        540
+#define _APS_NEXT_RESOURCE_VALUE        542
 #define _APS_NEXT_COMMAND_VALUE         32843
-#define _APS_NEXT_CONTROL_VALUE         1210
+#define _APS_NEXT_CONTROL_VALUE         1213
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

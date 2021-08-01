@@ -4,11 +4,6 @@
 
 enum _flow_LogPriority;
 
-#define DECL_GET(type, name) public: type Get##name () { return m_##name ;} private: type m_##name
-#define DECL_SET(type, name) public: void Set##name ( type ); private: type m_##name
-#define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
-#define DECL_STR_PROP(type, name, cb) public: const type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
-
 struct StringList
 {
 	StringList(CRegKeyExt* pReg, LPCTSTR key, int max_buf, int max_it, LPCSTR delim) {
@@ -36,7 +31,7 @@ struct StringList
 		return regKey;
 	};
 	void setList(const CHAR* szList) {
-		size_t n = _tcslen(szList);
+		size_t n = strlen(szList);
 		n = min((size_t)max_buffer, n);
 		memcpy(buffer, szList, n);
 		buffer[n] = 0;
@@ -77,6 +72,112 @@ private:
 	}
 };
 
+struct RegExString
+{
+	RegExString(CRegKeyExt* pReg, LPCTSTR key, int max_buf, LPTSTR defVal = nullptr) {
+		pRegKey = pReg;
+		max_buffer = max_buf;
+		buffer = new CHAR[max_buffer + 1];
+		regKey = key;
+
+		if (!pRegKey->Read(regKey, buffer, max_buffer, defVal))
+		{
+			buffer[0] = 0;
+		}
+	}
+	~RegExString() {
+		delete[] buffer;
+	}
+	void set(const CHAR* sz, size_t n) {
+		n = min((size_t)max_buffer, n);
+		memcpy(buffer, sz, n);
+		buffer[n] = 0;
+		pRegKey->Write(regKey, buffer);
+	}
+	void set(const CHAR* sz) {
+		size_t n = strlen(sz);
+		set(sz, n);
+	}
+	const CHAR* get() {
+		return buffer;
+	}
+private:
+	CHAR* buffer;
+	LPCTSTR regKey;
+	int max_buffer;
+	CRegKeyExt* pRegKey;
+};
+
+
+template <typename T> struct ReadOnly
+{
+	friend class CSettings;
+	ReadOnly(T def = 0) {
+		val = def;
+	}
+	const T get() {
+		return val;
+	}
+private:
+	ReadOnly<T>& operator = (T v) {
+		val = v;
+		return *this;
+	}
+	operator T() {
+		return val; 
+	}
+	T val;
+};
+
+template <typename T> struct RegExNum
+{
+	RegExNum(CRegKeyExt* pReg, LPCTSTR key, T def) {
+		pRegKey = pReg;
+		regKey = key;
+		pRegKey->Read(regKey, val, (DWORD)def);
+	}
+	void set(T i) {
+		val = (DWORD)i;
+		pRegKey->Write(regKey, i);
+	}
+	const T get() {
+		return (T)val;
+	}
+
+private:
+	DWORD val;
+	LPCTSTR regKey = 0;
+	CRegKeyExt* pRegKey = 0;
+};
+
+#define PROP_STR(name) RegExString m_##name; const CHAR* Get##name() {return m_##name.get();} void Set##name(const CHAR* val){m_##name.set(val);}
+#define PROP_NUM(type, name) RegExNum<type> m_##name; type Get##name(){return m_##name.get();} void Set##name( type val){m_##name.set(val);}
+#define PROP_GET(type, name) ReadOnly<type> m_##name; type Get##name(){return m_##name.get();}
+#define PROP_GET_SET(type, name) ReadWrite<type> m_##name; type Get##name(){return m_##name.get();} void Set##name( type val){m_##name.set(val);}
+
+//#define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
+//#define DECL_STR_PROP(type, name, cb) public: const type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];
+
+struct ComPort
+{
+	ComPort(CRegKeyExt* pReg, LPCTSTR name, LPCTSTR speed, LPCTSTR dataBits, LPCTSTR stopBits, LPCTSTR parity, LPCTSTR flowControl) :
+		m_Name(pReg, name, MAX_PATH)
+		, m_Speed(pReg, speed, 115200)
+		, m_DataBits(pReg, dataBits, 8)
+		, m_StopBits(pReg, stopBits, 1)
+		, m_Parity(pReg, parity, 0)
+		, m_FlowControl(pReg, flowControl, 0)
+	{}
+	PROP_STR(Name);
+	PROP_NUM(DWORD, Speed);
+	PROP_NUM(BYTE, DataBits);
+	PROP_NUM(DWORD, StopBits);
+	PROP_NUM(DWORD, Parity);
+	PROP_NUM(DWORD, FlowControl);
+	static char* GetParityName(int i) { if (i == 0) return "None"; if (i == 1) return "Odd"; if (i == 2) return "Even"; if (i == 3) return "Mark"; if (i == 4) return "Space"; return "???"; }
+	static char* GetFlowControlName(int i) { if (i == 0) return "None"; if (i == 1) return "XON/XOFF"; if (i == 2) return "RTS/CTS"; if (i == 3) return "DSR/DTR"; return "???"; }
+};
+
 class CSettings : public CRegKeyExt
 {
 public:
@@ -102,78 +203,72 @@ public:
 	CHAR* GetModules();
 	void SetSearchList(CHAR* szList);
     CHAR* GetSearchList();
-    DWORD SelectionBkColor();
-    DWORD SelectionTxtColor();
-    DWORD LogListBkColor();
-	DWORD LogListInfoBkColor();
-    DWORD LogListTxtColor();
-    DWORD SerachColor();
-    DWORD CurSerachColor();
-	DWORD InfoTextColor();
-	DWORD InfoTextColorNative();
-	DWORD InfoTextColorAndroid();
+	static DWORD CSettings::InfoTextColor() { return RGB(128, 128, 128); }
+	static DWORD CSettings::InfoTextColorNative() { return RGB(0, 0, 0); }
+	static DWORD CSettings::InfoTextColorAndroid() { return RGB(180, 140, 10); }
+	static DWORD CSettings::InfoTextColorSerial() { return RGB(180, 160, 50); }
+	static DWORD CSettings::SerachColor() { return RGB(0xA0, 0xA9, 0x3d); }
+	static DWORD CSettings::CurSerachColor() { return RGB(64, 128, 64); }
+	static DWORD CSettings::LogListTxtColor() { return RGB(176, 176, 176); }
+	static DWORD CSettings::LogListBkColor() { return RGB(0, 0, 0); }
+	static DWORD CSettings::LogListInfoBkColor() { return RGB(240, 240, 240); }
+	static DWORD CSettings::SelectionTxtColor() { return RGB(255, 255, 255); }
+	static DWORD CSettings::SelectionBkColor() { return RGB(64, 122, 255); }
 	bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
 	bool CanShowInAndroidStudio() { return *GetAndroidStudio() != 0 && *GetAndroidProject() != 0; }
 
-    DECL_PROP(int, VertSplitterPos);
-    DECL_PROP(int, HorzSplitterPos);
-    DECL_PROP(int, StackSplitterPos);
-    DECL_PROP(HFONT, Font);
-    DECL_PROP(int, FontHeight);
-    DECL_PROP(int, FontWidth);
+	PROP_NUM(int, VertSplitterPos);
+	PROP_NUM(int, HorzSplitterPos);
+	PROP_GET(DWORD, fontSize);
 
-	//DECL_PROP(DWORD, TextColor);
-    //DECL_PROP(DWORD, InfoTextColor);
-    //DECL_PROP(DWORD, BkColor);
-    //DECL_PROP(DWORD, SelColor);
-    //DECL_PROP(DWORD, BkSelColor);
-    //DECL_PROP(DWORD, SerachColor);
-    //DECL_PROP(DWORD, CurSerachColor);
-    //DECL_PROP(DWORD, SyncColor);
+	PROP_NUM(int, StackSplitterPos);
+	PROP_GET(HFONT, Font);
+	PROP_GET(int, FontHeight);
+	PROP_GET(int, FontWidth);
 
-    DECL_PROP(DWORD, FlowTracesHiden);
-    DECL_PROP(DWORD, TreeViewHiden);
-    DECL_PROP(DWORD, InfoHiden);
-    DECL_PROP(DWORD, ShowAppIp);
-    DECL_PROP(DWORD, ShowElapsedTime);
-    DECL_PROP(DWORD, ResolveAddr);
-    DECL_PROP(DWORD, UsePrefModule);
-    DECL_PROP(DWORD, FullSrcPath);
+	PROP_NUM(DWORD, FlowTracesHiden);
+	PROP_NUM(DWORD, TreeViewHiden);
+	PROP_NUM(DWORD, InfoHiden);
+	PROP_NUM(DWORD, ShowAppIp);
+	PROP_NUM(DWORD, ShowElapsedTime);
+	PROP_NUM(DWORD, ResolveAddr);
+	PROP_NUM(DWORD, FullSrcPath);
 
-    DECL_PROP(int, ColNN);
-    DECL_PROP(int, ColApp);
-    DECL_PROP(int, ColPID);
-    DECL_PROP(int, ColTID);
-    DECL_PROP(int, ColThreadNN);
-    DECL_PROP(int, ShowChildCount);
-	DECL_PROP(int, ColFunc);
-    DECL_PROP(int, ColLine);
-    DECL_PROP(int, ColTime);
-    DECL_PROP(int, ColCallAddr);
-    DECL_PROP(int, FnCallLine);
-	DECL_PROP(int, UseAdb);
-	DECL_PROP(int, RestartAdb);
-	DECL_PROP(int, ApplyLogcutFilter);
-	DECL_PROP(int, ApplyPorcessFilter);
+	PROP_NUM(int, ColNN);
+	PROP_NUM(int, ColApp);
+	PROP_NUM(int, ColPID);
+	PROP_NUM(int, ColTID);
+	PROP_NUM(int, ColThreadNN);
+	PROP_NUM(int, ShowChildCount);
+	PROP_NUM(int, ColFunc);
+	PROP_NUM(int, ColLine);
+	PROP_NUM(int, ColTime);
+	PROP_NUM(int, ColCallAddr);
+	PROP_NUM(int, FnCallLine);
+	PROP_NUM(int, UseAdb);
+	PROP_NUM(int, RestartAdb);
+	PROP_NUM(int, ApplyLogcutFilter);
+	PROP_NUM(int, ApplyPorcessFilter);
 
+	PROP_NUM(DWORD, UdpPort);
+	PROP_STR(AdbArg);
 
-	DECL_PROP(DWORD, UdpPort);
-	DECL_STR_PROP(CHAR, AdbArg, MAX_PATH);
+	PROP_GET(CHAR*, FontName);
+	PROP_GET(DWORD, FontWeight);
 
-    DECL_GET(DWORD, FontSize);
-    DECL_GET(CHAR*, FontName);
-    DECL_GET(DWORD, FontWeight);
-    DECL_GET(CHAR*, ResFontName);
+	PROP_STR(EclipsePath);
+	PROP_STR(ExternalCmd_1);
+	PROP_STR(ExternalCmd_2);
+	PROP_STR(ExternalCmd_3);
+	PROP_STR(LinuxHome);
+	PROP_STR(MapOnWin);
+	PROP_STR(AndroidStudio);
+	PROP_STR(AndroidProject);
 
-    DECL_STR_PROP(CHAR, EclipsePath, MAX_PATH);
-	DECL_STR_PROP(CHAR, ExternalCmd_1, MAX_PATH);
-	DECL_STR_PROP(CHAR, ExternalCmd_2, MAX_PATH);
-	DECL_STR_PROP(CHAR, ExternalCmd_3, MAX_PATH);
-	DECL_STR_PROP(CHAR, LinuxHome, MAX_PATH);
-    DECL_STR_PROP(CHAR, MapOnWin, MAX_PATH);
-	DECL_STR_PROP(CHAR, AndroidStudio, MAX_PATH);
-	DECL_STR_PROP(CHAR, AndroidProject, MAX_PATH);
-    DECL_STR_PROP(CHAR, PrefModulePath, MAX_PATH);
+	PROP_NUM(int, UseComPort_1);
+	PROP_NUM(int, UseComPort_2);
+	ComPort comPort_1;
+	ComPort comPort_2;
 
 
 private:

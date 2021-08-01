@@ -37,8 +37,7 @@ void copy_to_file(int inFd, int outFd);
 // resulting output.
 // if |callback| is non-null, stdout/stderr output will be handled by it.
 int send_shell_command(
-		const std::string& command,
-		StandardStreamsCallbackInterface* callback = &DEFAULT_STANDARD_STREAMS_CALLBACK,
-        bool disable_shell_protocol = false);
+		const std::string& command, bool disable_shell_protocol,
+        StandardStreamsCallbackInterface* callback = &DEFAULT_STANDARD_STREAMS_CALLBACK);
 
 #endif  // COMMANDLINE_H

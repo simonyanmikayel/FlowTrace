@@ -40,7 +40,9 @@ const char* adb_device_banner = "host";
 #endif
 
 #if _BUILD_ALL
-void AdbLogger(android::base::LogId id, android::base::LogSeverity severity,const char* tag, const char* file, unsigned int line,const char* message) {
+void AdbLogger(android::base::LogId id, android::base::LogSeverity severity,
+               const char* tag, const char* file, unsigned int line,
+               const char* message) {
     android::base::StderrLogger(id, severity, tag, file, line, message);
 #if defined(_WIN32)
     // stderr can be buffered on Windows (and setvbuf doesn't seem to work), so explicitly flush.
@@ -59,20 +61,21 @@ void AdbLogger(android::base::LogId id, android::base::LogSeverity severity,cons
 
 #if !ADB_HOST
 static std::string get_log_file_name() {
+    struct tm now;
     time_t t;
-    _tzset();
+    tzset();
     time(&t);
-	struct tm* now = localtime(&t);
+    localtime_r(&t, &now);
 
     char timestamp[PATH_MAX];
-    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d-%H-%M-%S", now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d-%H-%M-%S", &now);
 
     return android::base::StringPrintf("/data/adb/adb-%s-%d", timestamp,
-                                       _getpid());
+                                       getpid());
 }
 
 void start_device_log(void) {
-    int fd = unix_open(get_log_file_name(), O_WRONLY | O_CREAT | O_TRUNC , 0640); //| O_CLOEXEC
+    int fd = unix_open(get_log_file_name(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0640);
     if (fd == -1) {
         return;
     }
@@ -80,7 +83,7 @@ void start_device_log(void) {
     // Redirect stdout and stderr to the log file.
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
-    fprintf(stderr, "--- adb starting (pid %d) ---\n", _getpid());
+    fprintf(stderr, "--- adb starting (pid %d) ---\n", getpid());
     unix_close(fd);
 }
 #endif
@@ -96,9 +99,7 @@ std::string get_trace_setting_from_env() {
 
     return std::string(setting);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 std::string get_trace_setting() {
 #if ADB_HOST
     return get_trace_setting_from_env();
@@ -106,7 +107,6 @@ std::string get_trace_setting() {
     return android::base::GetProperty("persist.adb.trace_mask", "");
 #endif
 }
-#endif //_BUILD_ALL
 
 // Split the space separated list of tags from the trace setting and build the
 // trace mask from it. note that '1' and 'all' are special cases to enable all
@@ -114,8 +114,6 @@ std::string get_trace_setting() {
 //
 // adb's trace setting comes from the ADB_TRACE environment variable, whereas
 // adbd's comes from the system property persist.adb.trace_mask.
-
-#if _BUILD_ALL
 static void setup_trace_mask() {
     const std::string trace_setting = get_trace_setting();
     if (trace_setting.empty()) {
@@ -161,9 +159,7 @@ static void setup_trace_mask() {
         android::base::SetMinimumLogSeverity(android::base::VERBOSE);
     }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void adb_trace_init(char** argv) {
 #if !ADB_HOST
     // Don't open log file if no tracing, since this will block
@@ -197,9 +193,7 @@ void adb_trace_init(char** argv) {
 
     VLOG(ADB) << adb_version();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
 void adb_trace_enable(AdbTrace trace_tag) {
     adb_trace_mask |= (1 << trace_tag);
 }

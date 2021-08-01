@@ -48,10 +48,10 @@ std::string dump_packet(const char* name, const char* func, const apacket* p);
 
 std::string perror_str(const char* msg);
 
-//!![[noreturn]] void error_exit(const char* fmt, ...) __attribute__((__format__(__printf__, 1, 2)));
-//!![[noreturn]] void perror_exit(const char* fmt, ...) __attribute__((__format__(__printf__, 1, 2)));
+void error_exit(const char* fmt, ...);
+void perror_exit(const char* fmt, ...);
 void log_error(const char* fmt, ...);//TODOD!!!
-//!![[noreturn]] void perror_exit(const char* fmt, ...) __attribute__((__format__(__printf__, 1, 2)));
+void perror_exit(const char* fmt, ...);
 
 bool set_file_block_mode(int fd, bool block);
 

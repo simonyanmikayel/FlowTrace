@@ -82,7 +82,6 @@ static const char* getprogname() {
 }
 #endif
 
-#if _BUILD_ALL1
 static const char* GetFileBasename(const char* file) {
   // We can't use basename(3) even on Unix because the Mac doesn't
   // have a non-modifying basename.
@@ -98,7 +97,6 @@ static const char* GetFileBasename(const char* file) {
 #endif
   return file;
 }
-#endif //_BUILD_ALL
 
 #if defined(__linux__)
 static int OpenKmsg() {
@@ -117,14 +115,11 @@ static int OpenKmsg() {
 }
 #endif
 
-#if _BUILD_ALL1
 static std::mutex& LoggingLock() {
   static auto& logging_lock = *new std::mutex();
   return logging_lock;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static LogFunction& Logger() {
 #ifdef __ANDROID__
   static auto& logger = *new LogFunction(LogdLogger());
@@ -133,21 +128,16 @@ static LogFunction& Logger() {
 #endif
   return logger;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static AbortFunction& Aborter() {
   static auto& aborter = *new AbortFunction(DefaultAborter);
   return aborter;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 static std::recursive_mutex& TagLock() {
   static auto& tag_lock = *new std::recursive_mutex();
   return tag_lock;
 }
-#endif //_BUILD_ALL
 
 static std::string* gDefaultTag;
 
@@ -217,7 +207,6 @@ void KernelLogger(android::base::LogId, android::base::LogSeverity severity,
 }
 #endif
 
-#if _BUILD_ALL1
 void StderrLogger(LogId, LogSeverity severity, const char* tag, const char* file, unsigned int line, const char* message) {
   struct tm now;
   time_t t = time(nullptr);
@@ -238,7 +227,6 @@ void StderrLogger(LogId, LogSeverity severity, const char* tag, const char* file
   fprintf(stderr, "%s %c %s %5d %5" PRIu64 " %s:%u] %s\n", tag ? tag : "nullptr", severity_char,
           timestamp, _getpid(), GetThreadId(), file, line, message);
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 void StdioLogger(LogId, LogSeverity severity, const char* /*tag*/, const char* /*file*/, unsigned int /*line*/, const char* message) {
@@ -251,7 +239,6 @@ void StdioLogger(LogId, LogSeverity severity, const char* /*tag*/, const char* /
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 void DefaultAborter(const char* abort_message) {
 #ifdef __ANDROID__
   android_set_abort_message(abort_message);
@@ -260,7 +247,6 @@ void DefaultAborter(const char* abort_message) {
 #endif
   abort(); //!!TODO!!
 }
-#endif //_BUILD_ALL
 
 
 #ifdef __ANDROID__
@@ -376,7 +362,7 @@ void SetAborter(AbortFunction&& aborter) {
 // This indirection greatly reduces the stack impact of having lots of
 // checks/logging in a function.
 
-#if _BUILD_ALL1
+
 class LogMessageData {
  public:
   LogMessageData(const char* file, unsigned int line, LogId id, LogSeverity severity,
@@ -429,13 +415,9 @@ class LogMessageData {
 
   DISALLOW_COPY_AND_ASSIGN(LogMessageData);
 };
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 LogMessage::LogMessage(const char* file, unsigned int line, LogId id, LogSeverity severity, const char* tag, int error) : data_(new LogMessageData(file, line, id, severity, tag, error)) {}
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 LogMessage::~LogMessage() {
   // Check severity again. This is duplicate work wrt/ LOG macros, but not LOG_STREAM.
   if (!WOULD_LOG(data_->GetSeverity())) {
@@ -482,15 +464,11 @@ LogMessage::~LogMessage() {
     Aborter()(msg.c_str());
   }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 std::ostream& LogMessage::stream() {
   return data_->GetBuffer();
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 void LogMessage::LogLine(const char* file, unsigned int line, LogId id, LogSeverity severity, const char* tag, const char* message) {
   if (tag == nullptr) {
     std::lock_guard<std::recursive_mutex> lock(TagLock());
@@ -502,13 +480,10 @@ void LogMessage::LogLine(const char* file, unsigned int line, LogId id, LogSever
     Logger()(id, severity, tag, file, line, message);
   }
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 LogSeverity GetMinimumLogSeverity() {
     return gMinimumLogSeverity;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 LogSeverity SetMinimumLogSeverity(LogSeverity new_severity) {

@@ -111,10 +111,16 @@
     <ClInclude Include="DlgFilters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LogcatLogBuffer.h">
+    <ClInclude Include="Include\FileMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\FileMap.h">
+    <ClInclude Include="DlgComPort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogReceiverSerial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogParcer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -218,10 +224,10 @@
     <ClCompile Include="LogcatLogSupplier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogcatLogConsumer.cpp">
+    <ClCompile Include="DlgComPort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogcatLogBuffer.cpp">
+    <ClCompile Include="LogReceiverSerial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

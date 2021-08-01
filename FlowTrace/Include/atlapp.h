@@ -381,13 +381,13 @@ static CWndClassInfo& GetWndClassInfo() \
   typedef ULONG_PTR DWORD_PTR;
 
   #ifndef HandleToUlong
-    #define HandleToUlong( h ) ((ULONG)(ULONG_PTR)(h) )
+    #define HandleToUlong( serport ) ((ULONG)(ULONG_PTR)(serport) )
   #endif
   #ifndef HandleToLong
-    #define HandleToLong( h ) ((LONG)(LONG_PTR) (h) )
+    #define HandleToLong( serport ) ((LONG)(LONG_PTR) (serport) )
   #endif
   #ifndef LongToHandle
-    #define LongToHandle( h) ((HANDLE)(LONG_PTR) (h))
+    #define LongToHandle( serport) ((HANDLE)(LONG_PTR) (serport))
   #endif
   #ifndef PtrToUlong
     #define PtrToUlong( p ) ((ULONG)(ULONG_PTR) (p) )

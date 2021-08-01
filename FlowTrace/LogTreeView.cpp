@@ -880,7 +880,10 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	else if (pNode->isJava()) {
         ::SetTextColor(hdc, gSettings.InfoTextColorNative());
     }
-	else {
+    else if (pNode->isSerial()) {
+        ::SetTextColor(hdc, gSettings.InfoTextColorSerial());
+    }
+    else {
 		::SetTextColor(hdc, gSettings.InfoTextColorNative());
 	}
 	TextOut(hdc, left, top, szText, cbText);

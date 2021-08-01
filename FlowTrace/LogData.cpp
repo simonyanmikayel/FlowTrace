@@ -22,7 +22,7 @@ FLOW_NODE* LOG_NODE::getPeer()
 char* FLOW_NODE::getCallSrc(bool fullPath, bool resolve)
 {
     char* src = "";
-    if (!isJava()) 
+    if (isNativeFT())
     {
         ADDR_INFO *p_call_addr_info = getCallInfo(resolve);
         if (p_call_addr_info != 0)
@@ -41,7 +41,7 @@ char* FLOW_NODE::getCallSrc(bool fullPath, bool resolve)
 int INFO_NODE::callLine(bool resolve)
 {
     int line = 0;
-    if (isJava() || isTrace())
+    if (!isNativeFT() || isTrace())
     {
         line = call_line;
     }

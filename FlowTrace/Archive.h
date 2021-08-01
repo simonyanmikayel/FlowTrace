@@ -51,7 +51,12 @@ struct LOG_REC_BASE_DATA
 	bool isValid() {
 		int cb_data = cbData();
 		int cb_size = size();
-		return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(LOG_REC_BASE_DATA) && cb_size < MAX_RECORD_LEN;
+#ifdef DEBUG
+		bool b1 = len >= cb_size, b2 = len > sizeof(LOG_REC_BASE_DATA), b3 = (cb_size < MAX_RECORD_LEN || log_type == LOG_TYPE_TRACE);
+		if (!b1 || !b2 || !b3)
+			ATLASSERT(0);
+#endif
+		return len >= cb_size && cb_app_name >= 0 && cb_fn_name >= 0 && cb_trace >= 0 && len > sizeof(LOG_REC_BASE_DATA) && (cb_size < MAX_RECORD_LEN || log_type == LOG_TYPE_TRACE);
 	}
 	bool isFlow() { return log_type == LOG_TYPE_ENTER || log_type == LOG_TYPE_EXIT; }
 	bool isTrace() { return log_type == LOG_TYPE_TRACE; }
@@ -66,6 +71,28 @@ struct LOG_REC_NET_DATA : public LOG_REC_BASE_DATA
 	int cbModuleName() { return cb_module_name ? cb_module_name : cb_app_name; }
 
 	char data[1];
+};
+
+struct LOG_REC_SERIAL_DATA : public LOG_REC_BASE_DATA
+{
+	const char* appName() { return p_app_name; }
+	const char* moduleName() { return p_module_name; }
+	const char* fnName() { return p_fn_name; }
+	const char* trace() { return p_trace; }
+	int cbModuleName() { return cb_module_name; }
+	void reset() {
+		ZeroMemory(this, sizeof(*this)); resetFT();
+	}
+	bool ok() {
+		return pid != 0 && tid != 0;
+	}
+	void resetFT() { log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_SERIAL;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
+
+	const char* p_app_name;
+	const char* p_module_name;
+	const char* p_fn_name;
+	const char* p_trace;
+	char tag[MAX_JAVA_TAG_NAME_LEN];
 };
 
 struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
@@ -131,6 +158,19 @@ private:
 	LOG_REC_ADB_DATA* pLogData;
 };
 
+struct LOG_REC_SERIAL : public LOG_REC
+{
+	LOG_REC_SERIAL(LOG_REC_SERIAL_DATA* p) { pLogData = p; };
+	LOG_REC_BASE_DATA* getLogData() { return pLogData; };
+	const char* appName() { return pLogData->appName(); }
+	const char* moduleName() { return pLogData->moduleName(); }
+	const char* fnName() { return pLogData->fnName(); }
+	const char* trace() { return pLogData->trace(); }
+	int cbModuleName() { return pLogData->cbModuleName(); }
+private:
+	LOG_REC_SERIAL_DATA* pLogData;
+};
+
 struct NET_PACK_INFO
 {
     int data_len;
@@ -174,7 +214,8 @@ public:
     size_t AllocMemory();
     DWORD getLost() { return m_lost; }
     void Log(LOG_REC* rec);
-	int appendAdb(LOG_REC_ADB_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
+	int appendSerial(LOG_REC_SERIAL_DATA* pLogData);
+	int appendAdb(LOG_REC_ADB_DATA* pLogData, bool fromImport = false);
 	int appendNet(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	bool setPsInfo(PS_INFO* p, int c);
 	//void updateNodes();
@@ -186,6 +227,7 @@ private:
     inline THREAD_NODE* addThread(LOG_REC* p, APP_NODE* pAppNode);
     inline LOG_NODE* addFlow(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport);
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int bookmark, bool fromImport);
+	inline LOG_NODE* addTraceLoop(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, bool fromImport, char* trace, int cb_trace, const char* fnName, const char* moduleName);
 	inline LOG_NODE* addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogData, int bookmark, bool fromImport, char* trace, int cb_trace, const char* fnName, const char* moduleName);
 	inline APP_NODE*   getApp(LOG_REC* p, sockaddr_in *p_si_other);
 	inline THREAD_NODE*   getThread(APP_NODE* pAppNode, LOG_REC* p);

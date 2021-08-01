@@ -30,7 +30,7 @@ bool SendOkay(int fd);
 bool SendFail(int fd, const std::string& reason);
 
 // Writes a protocol-format string; a four hex digit length followed by the string data.
-bool SendProtocolString(int fd, const std::string& s);
+bool SendProtocolString(int fd, std::string_view s);
 
 // Reads a protocol-format string; a four hex digit length followed by the string data.
 bool ReadProtocolString(int fd, std::string* s, std::string* error);

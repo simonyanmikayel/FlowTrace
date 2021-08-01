@@ -34,9 +34,8 @@
 #include "adb_utils.h"
 #include "sysdeps.h"
 
-#if _BUILD_ALL1
-bool SendProtocolString(int fd, const std::string& s) {
-    unsigned int length = (unsigned int)s.size();
+bool SendProtocolString(int fd, std::string_view s) {
+    size_t length = s.size();
     if (length > MAX_PAYLOAD - 4) {
         errno = EMSGSIZE;
         return false;
@@ -47,9 +46,7 @@ bool SendProtocolString(int fd, const std::string& s) {
     auto str = android::base::StringPrintf("%04x", length).append(s);
     return WriteFdExactly(fd, str);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool ReadProtocolString(int fd, std::string* s, std::string* error) {
     char buf[5];
     if (!ReadFdExactly(fd, buf, 4)) {
@@ -67,21 +64,17 @@ bool ReadProtocolString(int fd, std::string* s, std::string* error) {
 
     return true;
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool SendOkay(int fd) {
     return WriteFdExactly(fd, "OKAY", 4);
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL
-bool SendFail(int fd, const std::string& reason) {
+bool SendFail(int fd, std::string_view reason) {
     return WriteFdExactly(fd, "FAIL", 4) && SendProtocolString(fd, reason);
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool ReadFdExactly(int fd, void* buf, size_t len) {
     char* p = reinterpret_cast<char*>(buf);
 
@@ -108,9 +101,7 @@ bool ReadFdExactly(int fd, void* buf, size_t len) {
 
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WriteFdExactly(int fd, const void* buf, size_t len) {
     const char* p = reinterpret_cast<const char*>(buf);
     int r;
@@ -139,19 +130,14 @@ bool WriteFdExactly(int fd, const void* buf, size_t len) {
     }
     return true;
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WriteFdExactly(int fd, const char* str) {
     return WriteFdExactly(fd, str, strlen(str));
 }
-#endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool WriteFdExactly(int fd, const std::string& str) {
     return WriteFdExactly(fd, str.c_str(), str.size());
 }
-#endif //_BUILD_ALL
 
 #if _BUILD_ALL
 bool WriteFdFmt(int fd, const char* fmt, ...) {
@@ -166,7 +152,6 @@ bool WriteFdFmt(int fd, const char* fmt, ...) {
 }
 #endif //_BUILD_ALL
 
-#if _BUILD_ALL1
 bool ReadOrderlyShutdown(int fd) {
     char buf[16];
 
@@ -206,80 +191,3 @@ bool ReadOrderlyShutdown(int fd) {
         return false;
     }
 }
-#endif //_BUILD_ALL
-
-#if defined(__linux__)
-bool SendFileDescriptor(int socket_fd, int fd) {
-    struct msghdr msg;
-    struct iovec iov;
-    char dummy = '!';
-    union {
-        cmsghdr cm;
-        char buffer[CMSG_SPACE(sizeof(int))];
-    } cm_un;
-
-    iov.iov_base = &dummy;
-    iov.iov_len = 1;
-    msg.msg_name = nullptr;
-    msg.msg_namelen = 0;
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    msg.msg_flags = 0;
-    msg.msg_control = cm_un.buffer;
-    msg.msg_controllen = sizeof(cm_un.buffer);
-
-    cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    ((int*)CMSG_DATA(cmsg))[0] = fd;
-
-    int ret = TEMP_FAILURE_RETRY(sendmsg(socket_fd, &msg, 0));
-    if (ret < 0) {
-        D("sending file descriptor via socket %d failed: %s", socket_fd, strerror(errno));
-        return false;
-    }
-
-    D("sent file descriptor %d to via socket %d", fd, socket_fd);
-    return true;
-}
-
-bool ReceiveFileDescriptor(int socket_fd, unique_fd* fd, std::string* error) {
-    char dummy = '!';
-    union {
-        cmsghdr cm;
-        char buffer[CMSG_SPACE(sizeof(int))];
-    } cm_un;
-
-    iovec iov;
-    iov.iov_base = &dummy;
-    iov.iov_len = 1;
-
-    msghdr msg;
-    msg.msg_name = nullptr;
-    msg.msg_namelen = 0;
-    msg.msg_iov = &iov;
-    msg.msg_iovlen = 1;
-    msg.msg_flags = 0;
-    msg.msg_control = cm_un.buffer;
-    msg.msg_controllen = sizeof(cm_un.buffer);
-
-    cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
-    cmsg->cmsg_len = CMSG_LEN(sizeof(int));
-    cmsg->cmsg_level = SOL_SOCKET;
-    cmsg->cmsg_type = SCM_RIGHTS;
-    ((int*)(CMSG_DATA(cmsg)))[0] = -1;
-
-    int rc = TEMP_FAILURE_RETRY(recvmsg(socket_fd, &msg, 0));
-    if (rc <= 0) {
-        *error = perror_str("receiving file descriptor via socket failed");
-        D("receiving file descriptor via socket %d failed: %s", socket_fd, strerror(errno));
-        return false;
-    }
-
-    fd->reset(((int*)(CMSG_DATA(cmsg)))[0]);
-    D("received file descriptor %d to via socket %d", fd->get(), socket_fd);
-
-    return true;
-}
-#endif

@@ -14,7 +14,7 @@ void WorkerThread::SetThreadPriority(int nPriority)
 		::SetThreadPriority(m_hThread, nPriority);
 }
 
-void WorkerThread::StopWork()
+void WorkerThread::StopWork(const int rettryCount)
 {
   if (m_bWorking) {
     m_bWorking = false; // signal end of work
@@ -24,9 +24,9 @@ void WorkerThread::StopWork()
     {
 		SetEvent(m_hTreadEvent);
 		CloseHandle(m_hTreadEvent);
-		int rettryCount = 0;
 		DWORD dwRes = 0;
-		while (rettryCount < 500 && m_hThread != 0 && 
+        int rettry = 0;
+		while (rettry < rettryCount && m_hThread != 0 &&
 			WAIT_TIMEOUT == (dwRes = WaitForSingleObject(m_hThread, 10)))
         {
             //MSG msg;
@@ -35,7 +35,7 @@ void WorkerThread::StopWork()
             //    TranslateMessage(&msg);
             //    DispatchMessage(&msg);
             //}
-			rettryCount++;
+			rettry++;
         }
 		if (dwRes == WAIT_TIMEOUT) {
 			TerminateThread(m_hThread, 0);
