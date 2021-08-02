@@ -75,7 +75,9 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog, bool isError)
 	return (cPsInfoTemp < maxPsInfo) && gLogReceiver.working();
 }
 
-static const char* cmdAdbShell = "cmd_shell ps -t";
+static const char* cmdPs[] = { "cmd_shell ps -t", "cmd_shell ps -A" };
+static bool cmdPsIsOk[] = { true, true };
+static int cmdNom = 0;
 static char cmd[1204];
 
 void LogcatPsCommand::Work(LPVOID pWorkParam)
@@ -88,10 +90,16 @@ void LogcatPsCommand::Work(LPVOID pWorkParam)
 		//stdlog("->adb shell ps\n");
 		char* p = cmd;
 		size_t c = _countof(cmd);
+		size_t cmdCount = _countof(cmdPs);
+
+		if (!cmdPsIsOk[cmdNom])
+			cmdNom++;
+		if (cmdNom >= cmdCount)
+			cmdNom = 0;
 
 		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
 		Helpers::strCpy(p, " ", c);
-		Helpers::strCpy(p, cmdAdbShell, c);
+		Helpers::strCpy(p, cmdPs[cmdNom], c);
 		adb_commandline(cmd, &streamCallback);//do this after LogcatLogSupplier::Work
 		char b[] = { '\r', 0 };
 		streamCallback.OnStdout(b, 1);//end with new line
@@ -99,7 +107,9 @@ void LogcatPsCommand::Work(LPVOID pWorkParam)
 		if (gArchive.setPsInfo(psInfoTemp, cPsInfoTemp) || cPsInfoPrev != cPsInfoTemp)
 			Helpers::RedrawViews();
 		cPsInfoPrev = cPsInfoTemp;
-		for (int i = 0; i < 5 && IsWorking(); i++)
-			SleepThread(1000);
+		
+		cmdPsIsOk[cmdNom] = (cPsInfoPrev > 2);
+		for (int i = 0; i < (cmdPsIsOk[cmdNom] ? 10 : 4) && IsWorking(); i++)
+			SleepThread(500);
 	}
 }
