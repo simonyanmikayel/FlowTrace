@@ -18,8 +18,14 @@ const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 struct PS_INFO {
 	int pid;
 	int ppid;
-	char name[MAX_APP_NAME + 1];
+	int tid;
 	int cName;
+	int cCmd;
+	char name[MAX_APP_NAME + 1];
+	char cmd[MAX_APP_NAME + 1];
+	void reset() { 
+		pid = ppid = tid = cName = cCmd = 0;
+	}
 };
 #define maxPsInfo 32*1024 
 
@@ -218,7 +224,7 @@ public:
 	int appendSerial(LOG_REC_SERIAL_DATA* pLogData);
 	int appendAdb(LOG_REC_ADB_DATA* pLogData, bool fromImport = false);
 	int appendNet(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
-	bool setPsInfo(PS_INFO* p, int c);
+	bool setPsInfo(PS_INFO* p, int c, bool haveTID);
 	//void updateNodes();
 	DWORD m_SkipedLogcat;
 

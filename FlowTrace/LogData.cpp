@@ -276,7 +276,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         }
         if (gSettings.GetColPID() && This->pid > 0)
         {
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), This->pid);
+            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d]"), This->pid);
         }
     }
     else if (isThread())
@@ -288,13 +288,13 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         if (getPid() > 0)
         {
             if (gSettings.GetColPID() && gSettings.GetColTID())
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d-%d-%d]"), getThreadNN(), getPid(), getTid());
             else if (gSettings.GetColPID())
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d-%d]"), getThreadNN(), getPid());
             else if (gSettings.GetColTID())
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getTid());
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d-%d]"), getThreadNN(), getTid());
             else
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d]"), getThreadNN());
         }
         if (gSettings.GetShowChildCount())
                 cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
@@ -333,7 +333,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
             }
             if (gSettings.GetShowChildCount())
             {
-                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" [%d]"), childCount);
             }
         }
         pBuf[cb] = 0;

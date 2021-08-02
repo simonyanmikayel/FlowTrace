@@ -142,7 +142,7 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
     return app;
 }
 
-bool  Archive::setPsInfo(PS_INFO* p, int c)
+bool  Archive::setPsInfo(PS_INFO* p, int c, bool haveTID)
 {
 	gLogReceiver.lock();
 	c = std::min(c, maxPsInfo);
@@ -158,13 +158,23 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 		app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
 		if (app)
 		{
-			setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews); //main thread
+			if (haveTID) {
+				int pid = psInfo[i].pid;
+				while (i < cPsInfo && pid == psInfo[i + 1].pid)
+				{
+					i++;
+					setThreadName(app, psInfo[i].tid, psInfo[i].cmd, psInfo[i].cCmd, updateViews);
+				}
+			}
+			else {
+				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews); //main thread
 
-			int ppid = psInfo[i].pid;
-			while (i < cPsInfo - 1 && ppid == psInfo[i + 1].ppid)
-			{
-				i++;
-				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
+				int ppid = psInfo[i].pid;
+				while (i < cPsInfo - 1 && ppid == psInfo[i + 1].ppid)
+				{
+					i++;
+					setThreadName(app, psInfo[i].pid, psInfo[i].cmd, psInfo[i].cCmd, updateViews);
+				}
 			}
 		}
 			
@@ -205,9 +215,9 @@ APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateVie
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->pid == pid)
+		if (app->pid == pid && app->psNN >= 0)
 		{
-			if (app->isUnknown() || app->isPreInitialized() || cbName != app->cb_app_name)
+			if (app->isUnknown() || app->isPreInitialized())
 			{
 				cbName = std::min(cbName, MAX_APP_NAME);
 				app->cb_app_name = cbName;
@@ -216,8 +226,6 @@ APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateVie
 				app->applyFilter();
 				updateViews = true; //we need refresh views
 			}
-			if (app->psNN < 0)
-				updateViews = true; //we need refresh views
 			app->psNN = m_psNN;
 			break;
 		}
@@ -231,10 +239,10 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 	THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
 	while (thread)
 	{
-		if (thread->tid == tid)
+		if (thread->tid == tid && thread->psNN >= 0)
 		{
 			//stdlog("pid [ %d - %d ] - %d\n", app->pid, thread->tid, thread->psNN);
-			if (thread->threadName[0] == 0 || cbName != thread->cb_thread_name)
+			if (thread->cb_thread_name == 0)
 			{
 				cbName = std::min(cbName, MAX_APP_NAME);
 				thread->cb_thread_name = cbName;
@@ -242,8 +250,6 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 				thread->threadName[cbName] = 0;
 				updateViews = true; //we need refresh views
 			}
-			if (thread->psNN < 0)
-				updateViews = true; //we need refresh views
 			thread->psNN = m_psNN;
 			break;
 		}

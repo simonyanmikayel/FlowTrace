@@ -9,10 +9,18 @@ struct LogParcer {
 	~LogParcer() {
 		delete[] _buf;
 	}
-	char* buf() { return _buf; }
-	int size() { return _size; }
-	void reset() { _size = 0; _buf[0] = 0; riched = false; }
-	bool compleated() { return riched; }
+	char* buf() { 
+		return _buf; 
+	}
+	int size() { 
+		return _size; 
+	}
+	void reset() { 
+		_size = 0; _buf[0] = 0; riched = false;
+	}
+	bool compleated() { 
+		return riched; 
+	}
 	int getLine(const char* sz, size_t cb, bool endWithNewLine) //returns number of bytes paresed in sz
 	{
 		int i = 0;
