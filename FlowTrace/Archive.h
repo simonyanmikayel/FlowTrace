@@ -80,19 +80,20 @@ struct LOG_REC_SERIAL_DATA : public LOG_REC_BASE_DATA
 	const char* fnName() { return p_fn_name; }
 	const char* trace() { return p_trace; }
 	int cbModuleName() { return cb_module_name; }
-	void reset() {
-		ZeroMemory(this, sizeof(*this)); resetFT();
+	void reset(const char* comPortName) {
+		ZeroMemory(this, sizeof(*this));
+		log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_SERIAL;  p_trace = p_app_name = p_module_name = p_fn_name = "";
+		cb_app_name = (WORD)min(sizeof(name) - 1, strlen(comPortName));
+		memcpy(name, comPortName, cb_app_name);
+		name[cb_app_name] = 0;
+		p_app_name = name;
 	}
-	bool ok() {
-		return pid != 0 && tid != 0;
-	}
-	void resetFT() { log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_SERIAL;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
 
 	const char* p_app_name;
 	const char* p_module_name;
 	const char* p_fn_name;
 	const char* p_trace;
-	char tag[MAX_JAVA_TAG_NAME_LEN];
+	char name[MAX_APP_NAME + 1];
 };
 
 struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
@@ -103,12 +104,12 @@ struct LOG_REC_ADB_DATA : public LOG_REC_BASE_DATA
 	const char* trace() { return p_trace; }
 	int cbModuleName() { return cb_module_name; }
 	void reset() { 
-		ZeroMemory(this, sizeof(*this)); resetFT(); 
+		ZeroMemory(this, sizeof(*this));
+		log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_trace = p_app_name = p_module_name = p_fn_name = "";
 	}
 	bool ok() {
 		return pid != 0 && tid != 0;
 	}
-	void resetFT() { log_type = LOG_TYPE_TRACE; log_flags = LOG_FLAG_ADB;  p_trace = p_app_name = p_module_name = p_fn_name = ""; }
 
 	const char* p_app_name;
 	const char* p_module_name;

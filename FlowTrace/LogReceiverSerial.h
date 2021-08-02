@@ -12,7 +12,8 @@ public:
 	SerialThread(ComPort& comPort);
 	virtual void Terminate();
 	virtual void Work(LPVOID pWorkParam); 
-protected:
+
+	void TraceLog(const char* szLog, int cbLog);
 	void serial_close();
 	char* serial_open();
 	char* serial_configure();
@@ -24,6 +25,7 @@ protected:
 	int readerr;		       /* lets us know about read errors */
 	LogParcer logParcer;
 	LOG_REC_SERIAL_DATA logData;
+	int nn;
 };
 
 class LogReceiverSerial

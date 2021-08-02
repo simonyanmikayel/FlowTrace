@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Settings.h"
 #include "LogReceiverSerial.h"
+#include "Helpers.h"
 
 LogReceiverSerial gLogReceiverSerial;
 
@@ -38,6 +39,7 @@ void LogReceiverSerial::add(SerialThread* pThread)
 	if (gLogReceiver.working() && (cThreads < _countof(pThreads)))
 	{
 		pThreads[cThreads++] = pThread;
+		pThread->nn = cThreads;
 		pThread->StartWork();
 	}
 	else
@@ -50,8 +52,9 @@ void SerialThread::serial_close()
 {
 	if (serport != INVALID_HANDLE_VALUE)
 	{
-		CloseHandle(serport);
+		HANDLE h = serport;
 		serport = INVALID_HANDLE_VALUE;
+		CloseHandle(h);
 	}
 }
 
@@ -162,8 +165,22 @@ char* SerialThread::serial_open()
 SerialThread::SerialThread(ComPort& comPort) : m_comPort(comPort), logParcer(4096)
 {
 	serport = INVALID_HANDLE_VALUE;
-	flags = HANDLE_FLAG_OVERLAPPED | HANDLE_FLAG_IGNOREEOF | HANDLE_FLAG_UNITBUFFER;
-	logData.reset();
+	flags = HANDLE_FLAG_OVERLAPPED | HANDLE_FLAG_IGNOREEOF;// | HANDLE_FLAG_UNITBUFFER;
+	logData.reset(m_comPort.GetName());
+}
+
+void SerialThread::TraceLog(const char* szLog, int cbLog)
+{
+	if (cbLog)
+	{
+		gLogReceiver.lock();
+		logData.p_trace = szLog;
+		logData.cb_trace = (WORD)cbLog;
+		logData.len = sizeof(LOG_REC_BASE_DATA) + logData.cbData();
+		logData.color = 0;
+		gArchive.appendSerial(&logData);
+		gLogReceiver.unlock();
+	}
 }
 
 void SerialThread::Work(LPVOID pWorkParam)
@@ -185,7 +202,7 @@ void SerialThread::Work(LPVOID pWorkParam)
 	if (flags & HANDLE_FLAG_UNITBUFFER)
 		readlen = 1;
 	else
-		readlen = sizeof(buffer);
+		readlen = sizeof(buffer) - 1;
 
 	while (IsWorking())
 	{
@@ -240,19 +257,30 @@ void SerialThread::Work(LPVOID pWorkParam)
 			continue;
 		}
 
+		buffer[len] = 0;
 		char* szLog = buffer;
 		int cbLog = len;
-		while (cbLog && IsWorking()) {
-			int skiped = logParcer.getLine(szLog, cbLog, false);
-			if (logParcer.compleated()) {
-				char* sz = logParcer.buf();
-				int c = logParcer.size();
-				//stdlog("\x1size: %d, %s\n", c, sz);
-				logParcer.reset();
-			}
-			szLog += skiped;
-			cbLog -= skiped;
-		}
+
+		logData.pid = -nn;
+		DWORD sec, msec;
+		Helpers::GetTime(sec, msec);
+		logData.sec = sec;
+		logData.msec = msec;
+		//stdlog("sec: %d msec %d size: %d ends: %d %s \n", sec, msec, cbLog, szLog[cbLog - 1], szLog);
+		TraceLog(szLog, cbLog);
+
+		//while (cbLog && IsWorking()) {
+		//	int skiped = logParcer.getLine(szLog, cbLog, false);
+		//	if (logParcer.compleated()) {
+		//		char* sz = logParcer.buf();
+		//		int c = logParcer.size();
+		//		stdlog("\x1size: %d, %s\n", c, sz);
+		//		TraceLog(sz, c);
+		//		logParcer.reset();
+		//	}
+		//	szLog += skiped;
+		//	cbLog -= skiped;
+		//}
 
 	}
 

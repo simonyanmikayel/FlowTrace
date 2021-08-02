@@ -274,7 +274,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         {
             cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT(" (%s)"), This->ip_address);
         }
-        if (gSettings.GetColPID())
+        if (gSettings.GetColPID() && This->pid > 0)
         {
             cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), This->pid);
         }
@@ -285,16 +285,19 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
         cb = This->cb_thread_name;
         memcpy(pBuf, This->threadName, cb);
         pBuf[cb] = 0;
-        if (gSettings.GetColPID() && gSettings.GetColTID())
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
-        else if (gSettings.GetColPID())
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
-        else if (gSettings.GetColTID())
-			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getTid());
-		else
-			cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
+        if (getPid() > 0)
+        {
+            if (gSettings.GetColPID() && gSettings.GetColTID())
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());
+            else if (gSettings.GetColPID())
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getPid());
+            else if (gSettings.GetColTID())
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d-%d]"), getThreadNN(), getTid());
+            else
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), getThreadNN());
+        }
         if (gSettings.GetShowChildCount())
-            cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
+                cb += _sntprintf_s(pBuf + cb, cMaxBuf - cb, cMaxBuf - cb, TEXT("[%d]"), childCount);
 
 	}
     else if (isFlow())
@@ -396,7 +399,7 @@ CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
             pBuf[cb] = 0;
         }
     }
-    else if (col == THREAD_COL)
+    else if (col == THREAD_COL && getPid() > 0)
     {
         if (gSettings.GetColPID() && gSettings.GetColTID())
             cb += _sntprintf_s(pBuf, MAX_BUF_LEN, MAX_BUF_LEN, TEXT("[%d-%d-%d]"), getThreadNN(), getPid(), getTid());

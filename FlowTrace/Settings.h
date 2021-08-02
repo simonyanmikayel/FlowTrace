@@ -206,7 +206,7 @@ public:
 	static DWORD CSettings::InfoTextColor() { return RGB(128, 128, 128); }
 	static DWORD CSettings::InfoTextColorNative() { return RGB(0, 0, 0); }
 	static DWORD CSettings::InfoTextColorAndroid() { return RGB(180, 140, 10); }
-	static DWORD CSettings::InfoTextColorSerial() { return RGB(180, 160, 50); }
+	static DWORD CSettings::InfoTextColorSerial() { return RGB(64, 172, 64); }
 	static DWORD CSettings::SerachColor() { return RGB(0xA0, 0xA9, 0x3d); }
 	static DWORD CSettings::CurSerachColor() { return RGB(64, 128, 64); }
 	static DWORD CSettings::LogListTxtColor() { return RGB(176, 176, 176); }

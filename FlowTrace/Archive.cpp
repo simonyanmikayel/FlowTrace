@@ -133,6 +133,7 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 	app->checked = 1;
 	app->data_type = APP_DATA_TYPE;
 	app->pid = pLogData->pid;
+	app->log_flags = pLogData->log_flags;
 	app->lastRecNN = INFINITE;
 	app->lastPackNN = -1;
 
@@ -172,23 +173,26 @@ bool  Archive::setPsInfo(PS_INFO* p, int c)
 	app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->pid != 0 && app->psNN >= 0 && app->psNN != m_psNN)
+		if (app->pid > 0)
 		{
-			app->psNN = -m_psNN;
-			updateViews = true;
-		}
-		THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
-		while (thread)
-		{
-			if (thread->tid > 0 && thread->psNN >= 0 && thread->psNN != m_psNN)
+			if (app->psNN >= 0 && app->psNN != m_psNN)
 			{
-				//stdlog("~pid [ %d - %d ] - %d != %d\n", app->pid, thread->tid, thread->psNN, m_psNN);
-				thread->psNN = -m_psNN;
+				app->psNN = -m_psNN;
 				updateViews = true;
 			}
-			thread = (THREAD_NODE*)thread->prevSibling;
-		}
+			THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
+			while (thread)
+			{
+				if (thread->tid > 0 && thread->psNN >= 0 && thread->psNN != m_psNN)
+				{
+					//stdlog("~pid [ %d - %d ] - %d != %d\n", app->pid, thread->tid, thread->psNN, m_psNN);
+					thread->psNN = -m_psNN;
+					updateViews = true;
+				}
+				thread = (THREAD_NODE*)thread->prevSibling;
+			}
 
+		}
 		app = (APP_NODE*)app->prevSibling;
 	}
 
@@ -258,7 +262,8 @@ THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
     pNode->threadNN = ++(pAppNode->threadCount);
     pNode->data_type = THREAD_DATA_TYPE;
     pNode->pAppNode = pAppNode;
-    pNode->tid = pLogData->tid;
+	pNode->log_flags = pLogData->log_flags;
+	pNode->tid = pLogData->tid;
     
     pAppNode->add_child(pNode);
     pNode->hasCheckBox = 1;
@@ -417,7 +422,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
 
     bool newChank = false;
     // check if we can append to previous trace
-    if (pThreadNode->latestTrace && !(pLogData->log_flags & LOG_FLAG_SERIAL) && !(pLogData->log_flags & LOG_FLAG_ADB) && !fromImport)
+    if (pThreadNode->latestTrace && !(pLogData->log_flags & LOG_FLAG_ADB) && !fromImport)
     {
         if (pThreadNode->latestTrace->hasNewLine == 0)
         {
