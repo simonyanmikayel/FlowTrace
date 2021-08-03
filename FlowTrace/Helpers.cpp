@@ -501,7 +501,7 @@ namespace Helpers
     void AddCommonMenu(LOG_NODE* pNode, HMENU hMenu, int& cMenu)
 	{
         bool disable;
-        disable = (pNode == NULL || !pNode->isInfo());
+        disable = (pNode == NULL || !(pNode->isInfo() || pNode->isThread()));
         AddMenu(hMenu, cMenu, ID_SYNC_VIEWES, _T("Synchronize views\tTab"), disable, MENU_ICON_SYNC);
 
         disable = (pNode == NULL || !pNode->CanShowInIDE() || !pNode->isInfo());
