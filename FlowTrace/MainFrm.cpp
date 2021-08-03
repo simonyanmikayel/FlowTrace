@@ -749,7 +749,7 @@ LRESULT CMainFrame::OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 
 LRESULT CMainFrame::OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    SearchRefresh(ID_SEARCH_LAST); //ID_SEARCH_LAST
+    SearchRefresh(ID_SEARCH_REFRESH); //ID_SEARCH_LAST
     return 0;
 }
 
@@ -964,12 +964,12 @@ void CMainFrame::SearchNavigate(WORD wID)
     }
 
     LOG_NODE* pNode = gArchive.getListedNodes()->getNode(searchInfo.curLine);
-    if (pNode)
-    {
-        CHAR szText[32];
+    CHAR szText[32];
+    if (pNode && wID != ID_SEARCH_REFRESH)
         _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? pNode->lineSearchPos + searchInfo.posInCur : 0, searchInfo.total);
-        m_searchResult.SetWindowText(szText);
-    }
+    else
+        _stprintf_s(szText, _countof(szText), _T(" % d"), searchInfo.total);
+    m_searchResult.SetWindowText(szText);
 
     m_list.Redraw(-1, -1);
 }
