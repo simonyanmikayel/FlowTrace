@@ -1083,7 +1083,7 @@ protected:
 
 			m_hWnd = m_wndEdit.Create(m_column.m_grid,rcDefault,NULL,WS_CHILD|WS_TABSTOP|BS_AUTOCHECKBOX|dwFlags,WS_EX_TRANSPARENT);
 			m_wndEdit.SetFont(hFont);
-			m_wndEdit.SetWindowText(m_column.m_strTitle);
+			//m_wndEdit.SetWindowText(m_column.m_strTitle);
 		}
 
 		virtual void Draw(CDCHandle dc,CRect& rc,const _variant_t& vtValue) {

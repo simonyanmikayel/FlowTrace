@@ -262,6 +262,7 @@ void SerialThread::Work(LPVOID pWorkParam)
 		int cbLog = len;
 
 		logData.pid = -nn;
+		logData.tid = -nn;
 		DWORD sec, msec;
 		Helpers::GetTime(sec, msec);
 		logData.sec = sec;

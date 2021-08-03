@@ -14,6 +14,8 @@ int  g_retry_nn;
 int  g_buff_nn;
 #endif
 
+NODE_FILTER gNodeFilter;
+
 Archive::Archive()
 {
     ZeroMemory(this, sizeof(*this));
@@ -129,14 +131,14 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 	LOG_REC_BASE_DATA* pLogData = p->getLogData();
 
     gArchive.getRootNode()->add_child(app);
-	app->hasCheckBox = 1;
-	app->checked = 1;
 	app->data_type = APP_DATA_TYPE;
 	app->pid = pLogData->pid;
 	app->log_flags = pLogData->log_flags;
 	app->lastRecNN = INFINITE;
 	app->lastPackNN = -1;
 
+	app->hasCheckBox = 1;
+	app->checked = (gNodeFilter.isUndefined() || gNodeFilter.isPid(app->pid)) ? 1 : 0;
 	resolveAppName(p, app);
 
     return app;
@@ -154,22 +156,26 @@ bool  Archive::setPsInfo(PS_INFO* p, int c, bool haveTID)
 	bool updateViews = false;
 	APP_NODE* app;
 
+	int pid = -1;
 	for (int i = 0; i < cPsInfo; i++) {
+		//stdlog("pid %d tid %d ppid %d %d\n", psInfo[i].pid, psInfo[i].tid, psInfo[i].ppid, haveTID);
+		int pid = psInfo[i].pid;
 		app = setAppName(psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews);
+		//if (pid == 3376)
+		//	pid = pid;
 		if (app)
 		{
 			if (haveTID) {
-				int pid = psInfo[i].pid;
-				while (i < cPsInfo && pid == psInfo[i + 1].pid)
+				while (i < cPsInfo && pid == psInfo[i].pid)
 				{
-					i++;
 					setThreadName(app, psInfo[i].tid, psInfo[i].cmd, psInfo[i].cCmd, updateViews);
+					i++;
 				}
 			}
 			else {
 				setThreadName(app, psInfo[i].pid, psInfo[i].name, psInfo[i].cName, updateViews); //main thread
 
-				int ppid = psInfo[i].pid;
+				int ppid = pid;
 				while (i < cPsInfo - 1 && ppid == psInfo[i + 1].ppid)
 				{
 					i++;
@@ -215,7 +221,7 @@ APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateVie
 	APP_NODE* app = (APP_NODE*)gArchive.getRootNode()->lastChild;
 	while (app)
 	{
-		if (app->pid == pid && app->psNN >= 0)
+		if (app->pid == pid)
 		{
 			if (app->isUnknown() || app->isPreInitialized())
 			{
@@ -226,6 +232,8 @@ APP_NODE* Archive::setAppName(int pid, char* szName, int cbName, bool& updateVie
 				app->applyFilter();
 				updateViews = true; //we need refresh views
 			}
+			if (app->psNN < 0)
+				updateViews = true; //we need refresh views
 			app->psNN = m_psNN;
 			break;
 		}
@@ -239,7 +247,7 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 	THREAD_NODE* thread = (THREAD_NODE*)app->lastChild;
 	while (thread)
 	{
-		if (thread->tid == tid && thread->psNN >= 0)
+		if (thread->tid == tid)
 		{
 			//stdlog("pid [ %d - %d ] - %d\n", app->pid, thread->tid, thread->psNN);
 			if (thread->cb_thread_name == 0)
@@ -250,6 +258,8 @@ THREAD_NODE* Archive::setThreadName(APP_NODE* app, int tid, char* szName, int cb
 				thread->threadName[cbName] = 0;
 				updateViews = true; //we need refresh views
 			}
+			if (thread->psNN < 0)
+				updateViews = true; //we need refresh views
 			thread->psNN = m_psNN;
 			break;
 		}
@@ -272,8 +282,11 @@ THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
 	pNode->tid = pLogData->tid;
     
     pAppNode->add_child(pNode);
+	
     pNode->hasCheckBox = 1;
-    pNode->checked = 1;
+    pNode->checked = (gNodeFilter.isUndefined() || gNodeFilter.isTid(pNode->tid) || gNodeFilter.isPid(pAppNode->pid)) ? 1 : 0;
+	if (pNode->checked)
+		pAppNode->checked = 1;
 
     return pNode;
 }
@@ -856,7 +869,7 @@ void ListedNodes::updateList(BOOL flowTraceHiden)
 	archiveCount = count;
 }
 
-void ListedNodes::applyFilter(BOOL flowTraceHiden)
+void ListedNodes::applyListFilter(BOOL flowTraceHiden)
 {
     Free();
     archiveCount = gArchive.getNodeCount();
@@ -867,3 +880,20 @@ void ListedNodes::applyFilter(BOOL flowTraceHiden)
     }
     //stdlog("%u\n", GetTickCount());
 }
+
+void Archive::setNodeFilter(LOG_NODE* pNode)
+{
+	if (pNode->isRoot())
+	{
+		gNodeFilter.reset();
+	}
+	else if (pNode->isApp())
+	{
+		gNodeFilter.setPid(pNode->getPid());
+	}
+	else if (pNode->isThread())
+	{
+		gNodeFilter.setTid(pNode->getTid());
+	}
+}
+

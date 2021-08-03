@@ -532,7 +532,7 @@ LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
         //m_searchedit.SetWindowText(_T(""));
         m_searchResult.SetWindowText(_T(""));
         searchInfo.ClearSearchResults();
-        gArchive.getListedNodes()->applyFilter(gSettings.GetFlowTracesHiden());
+        gArchive.getListedNodes()->applyListFilter(gSettings.GetFlowTracesHiden());
         m_list.RefreshList(true);
         m_tree.RedrawAll();
     }
@@ -664,6 +664,7 @@ void CMainFrame::FilterNode(WORD wID)
 	bool checkChanged = pNode->ShowOnlyThis();
 	if (checkChanged)
 	{
+        gArchive.setNodeFilter(pNode);
 		::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, 0);
 		m_tree.RedrawAll();
 	}

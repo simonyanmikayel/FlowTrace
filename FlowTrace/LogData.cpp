@@ -512,7 +512,7 @@ LONG LOG_NODE::getTimeMSec()
 }
 int LOG_NODE::getPid()
 {
-    return  isThread() ? ((THREAD_NODE*)this)->pAppNode->pid : (isInfo() ? threadNode->pAppNode->pid : 0);
+    return  isApp() ? ((APP_NODE*)this)->pid : (isThread() ? ((THREAD_NODE*)this)->pAppNode->pid : (isInfo() ? threadNode->pAppNode->pid : 0));
 }
 int LOG_NODE::getTid()
 { 
@@ -652,12 +652,16 @@ bool LOG_NODE::ShowOnlyThis()
 	{
 		checkChanged = CheckAll(true) || checkChanged;
 	}
-	else
+	else if (isThread())
 	{
 		checkChanged = getApp()->CheckAll(false) || checkChanged;
 		checkChanged = getApp()->Check(true) || checkChanged;
 		checkChanged = getTrhread()->Check(true) || checkChanged;
 	}
+    else
+    {
+        ATLASSERT(FALSE);
+    }
 	return checkChanged;
 }
 
@@ -725,17 +729,15 @@ ADDR_INFO * INFO_NODE::getCallInfo(bool resolve)
     return p_call_info;
 }
 
-bool APP_NODE::applyFilter()
+void APP_NODE::applyFilter()
 {
-	if (!checked)
-		return false;
-
-	if (isProcessFiltered())
-	{
-		checked = 0;
-		return true;
-	}
-	return false;
+    if (checked)
+    {
+        if (isProcessFiltered())
+        {
+            checked = 0;
+        }
+    }
 }
 
 bool APP_NODE::isProcessFiltered()

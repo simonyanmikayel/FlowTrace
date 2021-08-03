@@ -15,6 +15,30 @@ const size_t MAX_BUF_SIZE = 12LL * 1024 * 1024 * 1024;
 const size_t MAX_BUF_SIZE = 1024 * 1024 * 1024;
 #endif
 
+struct NODE_FILTER {
+	NODE_FILTER() { 
+		reset(); 
+	}
+	void reset() { 
+		tid = pid = undefined; 
+	}
+	void setTid(int i) { 
+		tid = i; pid = undefined; 
+	}
+	void setPid(int i) { 
+		pid = i; tid = undefined; 
+	}
+	bool isUndefined() { 
+		return pid == undefined && tid == undefined; 
+	}
+	bool isTid(int i) { return tid == i; }
+	bool isPid(int i) { return pid == i; }
+private:
+	int pid;
+	int tid;
+	static constexpr int undefined = -11111;
+};
+
 struct PS_INFO {
 	int pid;
 	int ppid;
@@ -225,6 +249,7 @@ public:
 	int appendAdb(LOG_REC_ADB_DATA* pLogData, bool fromImport = false);
 	int appendNet(LOG_REC_NET_DATA* pLogData, sockaddr_in *p_si_other = NULL, bool fromImport = false, int bookmark = 0, NET_PACK_INFO* pack = 0);
 	bool setPsInfo(PS_INFO* p, int c, bool haveTID);
+	void setNodeFilter(LOG_NODE* pNode);
 	//void updateNodes();
 	DWORD m_SkipedLogcat;
 
@@ -288,7 +313,7 @@ struct ListedNodes
 		}
 	}
     DWORD Count() { return m_pListNodes->Count(); }
-    void applyFilter(BOOL flowTraceHiden);
+    void applyListFilter(BOOL flowTraceHiden);
 	void updateList(BOOL flowTraceHiden);
 private:
     DWORD archiveCount;

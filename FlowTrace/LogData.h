@@ -184,7 +184,7 @@ struct APP_NODE : LOG_NODE
     int cb_app_name;
     int cb_short_app_name_offset;
     char appName[MAX_APP_NAME + 1];
-    bool applyFilter();
+    void applyFilter();
 	bool isProcessFiltered();
     bool isClosed() { return psNN < 0 && pid != 0; }
     bool isUnknown() { return cb_app_name == 1 && appName[0] == UNKNOWNP_APP_NAME[0]; }
