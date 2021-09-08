@@ -80,7 +80,7 @@ struct LOG_NODE
         WORD hasNewLine : 1;
         //WORD hiden : 1;
         WORD hasCheckBox : 1;
-        WORD checked : 1;
+        WORD checked1 : 1;
         WORD selected : 1;
         WORD expanded : 1;
         WORD hasNodeBox : 1;
@@ -98,6 +98,7 @@ struct LOG_NODE
     LOG_DATA_TYPE data_type;
     DWORD lengthCalculated;
     DWORD childCount;
+    bool isChecked() { return checked1; }
     bool isRoot() { return data_type == ROOT_DATA_TYPE; }
     bool isApp() { return data_type == APP_DATA_TYPE; }
     bool isThread() { return data_type == THREAD_DATA_TYPE; }
@@ -116,7 +117,7 @@ struct LOG_NODE
 	void CollapseExpandAll(bool expand);
 	bool CheckAll(bool check, bool recursive = false);
 	bool ShowOnlyThis();
-	bool Check(bool check);
+	bool CheckNode(bool check);
 
     void add_child(LOG_NODE* pNode)
     {
@@ -276,7 +277,7 @@ struct THREAD_NODE : LOG_NODE
         curentFlow = pNode;
     }
     //bool isHiden() { return hiden || pAppNode->hiden; }
-    bool isHiden() { return !checked || !pAppNode->checked; }
+    bool isHiden() { return !isChecked() || !pAppNode->isChecked(); }
 };
 
 struct TRACE_CHANK

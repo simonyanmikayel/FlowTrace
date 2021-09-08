@@ -138,7 +138,7 @@ APP_NODE* Archive::addApp(LOG_REC* p, sockaddr_in *p_si_other)
 	app->lastPackNN = -1;
 
 	app->hasCheckBox = 1;
-	app->checked = (gNodeFilter.isUndefined() || gNodeFilter.isPid(app->pid)) ? 1 : 0;
+	app->checked1 = (gNodeFilter.isUndefined() || gNodeFilter.isPid(app->pid)) ? 1 : 0;
 	resolveAppName(p, app);
 
     return app;
@@ -284,9 +284,9 @@ THREAD_NODE* Archive::addThread(LOG_REC* p, APP_NODE* pAppNode)
     pAppNode->add_child(pNode);
 	
     pNode->hasCheckBox = 1;
-    pNode->checked = (gNodeFilter.isUndefined() || gNodeFilter.isTid(pNode->tid) || gNodeFilter.isPid(pAppNode->pid)) ? 1 : 0;
-	if (pNode->checked)
-		pAppNode->checked = 1;
+    pNode->checked1 = (gNodeFilter.isUndefined() || gNodeFilter.isTid(pNode->tid) || gNodeFilter.isPid(pAppNode->pid)) ? 1 : 0;
+	if (pNode->isChecked())
+		pAppNode->CheckNode(1);
 
     return pNode;
 }

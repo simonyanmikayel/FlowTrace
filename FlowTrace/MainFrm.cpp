@@ -375,10 +375,10 @@ void CMainFrame::SetTitle()
 {
     CHAR pBuf[256];
 
-    if (m_importFile.IsEmpty())
+    if (m_importExportFile.IsEmpty())
         _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%d - %s - %s"), gSettings.GetUdpPort(), gSettings.GetAdbArg(), TEXT("FlowTrace"));
     else
-        _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%s - %s"), m_importFile.GetString(), TEXT("FlowTrace"));
+        _sntprintf_s(pBuf, _countof(pBuf), _countof(pBuf) - 1, TEXT("%s - %s"), m_importExportFile.GetString(), TEXT("FlowTrace"));
 
     SetWindowText(pBuf);
 }
@@ -404,6 +404,8 @@ LRESULT CMainFrame::OnFileSave(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 {
     DlgProgress dlg(wID, NULL);
     dlg.DoModal();
+    m_importExportFile = dlg.getFileName();
+    SetTitle();
     return 0;
 }
 
@@ -411,7 +413,7 @@ LRESULT CMainFrame::OnFileImport(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 {
     DlgProgress dlg(wID, NULL);
     dlg.DoModal();
-    m_importFile = dlg.getFileName();
+    m_importExportFile = dlg.getFileName();
     SetTitle();
     return 0;
 }
@@ -420,7 +422,7 @@ LRESULT CMainFrame::OnFileImportLogcat(WORD /*wNotifyCode*/, WORD wID, HWND /*hW
 {
     DlgProgress dlg(wID, NULL);
     dlg.DoModal();
-    m_importFile = dlg.getFileName();
+    m_importExportFile = dlg.getFileName();
     SetTitle();
     return 0;
 }
@@ -675,7 +677,7 @@ void CMainFrame::FilterNode(WORD wID)
 
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_importFile.Empty();
+    m_importExportFile.Empty();
     SetTitle();
     ClearLog(true, true);
     return 0;

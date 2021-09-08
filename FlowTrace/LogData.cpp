@@ -611,15 +611,14 @@ void LOG_NODE::CollapseExpandAll(bool expand)
     CalcLines();
 }
 
-bool LOG_NODE::Check(bool check)
+bool LOG_NODE::CheckNode(bool check)
 {
 	bool checkChanged = false;
 	if (hasCheckBox)
 	{
-		if (checked != check)
+		if (checked1 != check)
 			checkChanged = true;
-		checked = check;
-		//hiden = !check;
+		checked1 = check ? 1 : 0;
 	}
 	return checkChanged;
 }
@@ -628,11 +627,11 @@ bool LOG_NODE::Check(bool check)
 bool LOG_NODE::CheckAll(bool check, bool recursive)
 {
 	bool checkChanged = false;
-	checkChanged = Check(check) || checkChanged;
+	checkChanged = CheckNode(check) || checkChanged;
 	LOG_NODE* pNode = firstChild;
 	while (pNode && pNode->hasCheckBox)
 	{
-		checkChanged = pNode->Check(check) || checkChanged;
+		checkChanged = pNode->CheckNode(check) || checkChanged;
 		if (recursive)
 			checkChanged = pNode->CheckAll(check, recursive) || checkChanged;
 		pNode = pNode->nextSibling;
@@ -655,8 +654,8 @@ bool LOG_NODE::ShowOnlyThis()
 	else if (isThread())
 	{
 		checkChanged = getApp()->CheckAll(false) || checkChanged;
-		checkChanged = getApp()->Check(true) || checkChanged;
-		checkChanged = getTrhread()->Check(true) || checkChanged;
+		checkChanged = getApp()->CheckNode(true) || checkChanged;
+		checkChanged = getTrhread()->CheckNode(true) || checkChanged;
 	}
     else
     {
@@ -731,11 +730,11 @@ ADDR_INFO * INFO_NODE::getCallInfo(bool resolve)
 
 void APP_NODE::applyFilter()
 {
-    if (checked)
+    if (isChecked())
     {
         if (isProcessFiltered())
         {
-            checked = 0;
+            CheckNode(0);
         }
     }
 }

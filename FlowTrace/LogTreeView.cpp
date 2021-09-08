@@ -714,7 +714,7 @@ LRESULT CLogTreeView::OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
         }
         else if (hitTest(pNode, xPos, offset) == TVHT_ONITEMSTATEICON)
         {
-            pNode->checked = !pNode->checked;
+            pNode->CheckNode(!pNode->isChecked());
             ::PostMessage(hwndMain, WM_UPDATE_FILTER, 0, (LPARAM)pNode);
         }
 
@@ -837,7 +837,7 @@ void CLogTreeView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
     if (pNode->hasCheckBox)
     {
-        ImageList_Draw(m_hStateImageList, pNode->checked ? STATE_IMAGE_CHECKED : STATE_IMAGE_UNCHECKE, hdc, left, yIconTop, ILD_NORMAL);
+        ImageList_Draw(m_hStateImageList, pNode->isChecked() ? STATE_IMAGE_CHECKED : STATE_IMAGE_UNCHECKE, hdc, left, yIconTop, ILD_NORMAL);
         //next to checkox
         left += ICON_OFFSET;
     }
