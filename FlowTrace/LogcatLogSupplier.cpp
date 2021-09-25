@@ -31,7 +31,7 @@ adb logcat -g
 //adb logcat -v long -f d:\temp\log.txt
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:*", "*:S" }; //show only FLOW_TRACE tag
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:S" }; //hide FLOW_TRACE tag
-static const char* cmdLogcatLog = "logcat -v long"; // adb logcat -v long
+//static const char* cmdLogcatLog = "logcat -v long"; // adb logcat -v long
 static char cmd[1204];
 void LogcatLogSupplier::Work(LPVOID pWorkParam)
 {
