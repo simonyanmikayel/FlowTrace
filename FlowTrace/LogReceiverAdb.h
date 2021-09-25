@@ -9,6 +9,9 @@
 struct MetaDataInfo {
 	int pid, tid, size;
 	long long totMsec;
+	MetaDataInfo() {
+		reset();
+	}
 	boolean operator== (const MetaDataInfo& other) {
 		return totMsec == other.totMsec && pid == other.pid && tid == other.tid && size == other.size;
 	}

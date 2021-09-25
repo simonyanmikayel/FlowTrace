@@ -10,6 +10,7 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_lblFont.Attach(GetDlgItem(IDC_FONT_NAME));
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
   m_AdbArg.Attach(GetDlgItem(IDC_EDIT_ADB_ARG));
+  m_LogcatArg.Attach(GetDlgItem(IDC_EDIT_LOGCAT_ARG));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
   m_btnReset.Attach(GetDlgItem(IDC_BUTTON_RESET));
   m_UseAdb.Attach(GetDlgItem(IDC_CHECK_USE_ADB));
@@ -35,6 +36,7 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
   m_AdbArg.SetWindowText(gSettings.GetAdbArg());
+  m_LogcatArg.SetWindowText(gSettings.GetLogcatArg());
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
   m_UseAdb.SetCheck(gSettings.GetUseAdb() ? BST_CHECKED : BST_UNCHECKED);
   m_RestartAdb.SetCheck(gSettings.GetRestartAdb() ? BST_CHECKED : BST_UNCHECKED);
@@ -123,9 +125,13 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
     gSettings.SetUseAdb(m_UseAdb.GetCheck());
     gSettings.SetRestartAdb(m_RestartAdb.GetCheck());
 
-    CString strAdbrg;
-    m_AdbArg.GetWindowText(strAdbrg);
-    gSettings.SetAdbArg(strAdbrg.GetString());
+    CString strAdbArg;
+    m_AdbArg.GetWindowText(strAdbArg);
+    gSettings.SetAdbArg(strAdbArg.GetString());
+
+    CString strLogcatArg;
+    m_LogcatArg.GetWindowText(strLogcatArg);
+    gSettings.SetLogcatArg(strLogcatArg.GetString());
 
     CString strEclipsePath;
     m_edtEclipsePath.GetWindowText(strEclipsePath);

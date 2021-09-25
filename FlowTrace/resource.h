@@ -78,7 +78,6 @@
 #define IDC_LINE_NN                     1028
 #define IDC_LIST2                       1029
 #define IDC_COMBO1                      1041
-#define IDC_COMBO_PARITY                1041
 #define IDC_COMBO_PORT_PARITY           1041
 #define IDC_COMBO_FONTS                 1042
 #define IDC_COMBO_PORT_FLOW_CONTROL     1042
@@ -110,6 +109,8 @@
 #define IDC_STATIC_PORT_1               1210
 #define IDC_STATIC_PORT_2               1211
 #define IDC_EDIT_PORT_SPEED             1212
+#define IDC_EDIT_ADB_ARG2               1212
+#define IDC_EDIT_LOGCAT_ARG             1212
 #define IDC_EDIT_PORT_DATA_BITS         1213
 #define IDC_EDIT_PORT_STOP_BITS         1214
 #define ID_VIEW_SHOW_HIDE_STACK         32774

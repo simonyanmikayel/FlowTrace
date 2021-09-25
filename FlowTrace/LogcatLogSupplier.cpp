@@ -22,6 +22,7 @@ adb logcat -g
 /dev/log/system: ring buffer is 256Kb (92Kb consumed), max entry is 5120b, max payload is 4076b
 */
 //adb logcat -G 512K or adb logcat -G 4M
+static const char* cmdLogcat = "logcat";
 static const char* cmdLogcatClear = "logcat -c";
 //static const char* cmdLogcatClear[]{ "logcat", "-b", "all", "-c" }; //adb logcat -b all -c
 //static const char* cmdStartServer[]{ "start-server" };
@@ -37,20 +38,47 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 {
 	resetAtStart = *((bool*)pWorkParam);
 
+	const CHAR* szAdbAtrg = gSettings.GetAdbArg();
+	const CHAR* szLogcatAtrg = gSettings.GetLogcatArg();
+
 	if (resetAtStart)
 	{
 		char* p = cmd;
 		size_t c = _countof(cmd);
-		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
-		Helpers::strCpy(p, " ", c);
+		if (szAdbAtrg[0]) 
+		{
+			Helpers::strCpy(p, szAdbAtrg, c);
+			Helpers::strCpy(p, " ", c);
+		}
 		Helpers::strCpy(p, cmdLogcatClear, c);
 		adb_commandline(cmd, &streamCallback);
 	}
+
+	if (szLogcatAtrg[0])
+	{
+		char* p = cmd;
+		size_t c = _countof(cmd);
+		if (szAdbAtrg[0])
+		{
+			Helpers::strCpy(p, szAdbAtrg, c);
+			Helpers::strCpy(p, " ", c);
+		}
+		Helpers::strCpy(p, cmdLogcatClear, c);
+		Helpers::strCpy(p, " ", c);
+		Helpers::strCpy(p, szLogcatAtrg, c);
+		adb_commandline(cmd, &streamCallback);
+	}
+
 	while (IsWorking()) {
 		char* p = cmd;
 		size_t c = _countof(cmd);
-		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
-		Helpers::strCpy(p, " ", c);
+
+		if (szAdbAtrg[0]) 
+		{
+			Helpers::strCpy(p, szAdbAtrg, c);
+			Helpers::strCpy(p, " ", c);
+		}
+
 		if (gSettings.GetApplyLogcutFilter())
 		{
 			Helpers::strCpy(p, cmdLogcatLog, c);
@@ -65,6 +93,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 		{
 			Helpers::strCpy(p, cmdLogcatLog, c);
 		}
+
 		adb_commandline(cmd, &streamCallback);
 		SleepThread(1000);
 	}

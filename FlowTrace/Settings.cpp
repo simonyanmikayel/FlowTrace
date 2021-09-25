@@ -54,6 +54,7 @@ CSettings::CSettings() :
 	, m_ApplyPorcessFilter(this, _T("ApplyPorcessFilter"), 1)
 	, m_UdpPort(this, _T("UdpPort"), DefUdpPort)
 	, m_AdbArg(this, _T("AdbArg"), MAX_PATH)
+	, m_LogcatArg(this, _T("LogcatArg"), MAX_PATH)
 	, m_EclipsePath(this, _T("EclipsePath"), MAX_PATH)
 	, m_ExternalCmd_1(this, _T("ExternalCmd_1"), MAX_PATH)
 	, m_ExternalCmd_2(this, _T("ExternalCmd_2"), MAX_PATH)

@@ -35,6 +35,7 @@ public:
   CStatic m_lblFont;
   CEdit m_UdpPort;
   CEdit m_AdbArg;
+  CEdit m_LogcatArg;
   CButton m_btnFont;
   CButton m_btnReset;
   CButton m_FullSrcPath;

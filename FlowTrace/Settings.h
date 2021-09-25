@@ -252,6 +252,7 @@ public:
 
 	PROP_NUM(DWORD, UdpPort);
 	PROP_STR(AdbArg);
+	PROP_STR(LogcatArg);
 
 	PROP_GET(CHAR*, FontName);
 	PROP_GET(DWORD, FontWeight);
