@@ -22,8 +22,7 @@ adb logcat -g
 /dev/log/system: ring buffer is 256Kb (92Kb consumed), max entry is 5120b, max payload is 4076b
 */
 //adb logcat -G 512K or adb logcat -G 4M
-static const char* cmdLogcat = "logcat";
-static const char* cmdLogcatClear = "logcat -c";
+//static const char* cmdLogcatClear = "logcat -c";
 //static const char* cmdLogcatClear[]{ "logcat", "-b", "all", "-c" }; //adb logcat -b all -c
 //static const char* cmdStartServer[]{ "start-server" };
 //-v long: Display all metadata fields and separate messages with blank lines.
@@ -50,7 +49,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 			Helpers::strCpy(p, szAdbAtrg, c);
 			Helpers::strCpy(p, " ", c);
 		}
-		Helpers::strCpy(p, cmdLogcatClear, c);
+		Helpers::strCpy(p, "logcat -c", c);
 		adb_commandline(cmd, &streamCallback);
 	}
 
@@ -63,8 +62,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 			Helpers::strCpy(p, szAdbAtrg, c);
 			Helpers::strCpy(p, " ", c);
 		}
-		Helpers::strCpy(p, cmdLogcat, c);
-		Helpers::strCpy(p, " ", c);
+		Helpers::strCpy(p, "logcat ", c);
 		Helpers::strCpy(p, szLogcatAtrg, c);
 		adb_commandline(cmd, &streamCallback);
 	}
@@ -72,26 +70,20 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 	while (IsWorking()) {
 		char* p = cmd;
 		size_t c = _countof(cmd);
-
 		if (szAdbAtrg[0]) 
 		{
 			Helpers::strCpy(p, szAdbAtrg, c);
 			Helpers::strCpy(p, " ", c);
 		}
+		Helpers::strCpy(p, "logcat -v long", c);
 
 		if (gSettings.GetApplyLogcutFilter())
 		{
-			Helpers::strCpy(p, cmdLogcatLog, c);
-
 			StringList& stringList = gSettings.getAdbFilterList();
 			for (int i = 0; i < stringList.getItemCount(); i++) {
 				Helpers::strCpy(p, " ", c); 
 				Helpers::strCpy(p, stringList.getItem(i), c);
 			}
-		}
-		else
-		{
-			Helpers::strCpy(p, cmdLogcatLog, c);
 		}
 
 		adb_commandline(cmd, &streamCallback);
