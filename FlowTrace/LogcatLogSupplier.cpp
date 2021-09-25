@@ -63,7 +63,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 			Helpers::strCpy(p, szAdbAtrg, c);
 			Helpers::strCpy(p, " ", c);
 		}
-		Helpers::strCpy(p, cmdLogcatClear, c);
+		Helpers::strCpy(p, cmdLogcat, c);
 		Helpers::strCpy(p, " ", c);
 		Helpers::strCpy(p, szLogcatAtrg, c);
 		adb_commandline(cmd, &streamCallback);
