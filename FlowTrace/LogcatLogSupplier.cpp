@@ -53,21 +53,22 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 		adb_commandline(cmd, &streamCallback);
 	}
 
-	if (szLogcatAtrg[0])
-	{
-		char* p = cmd;
-		size_t c = _countof(cmd);
-		if (szAdbAtrg[0])
-		{
-			Helpers::strCpy(p, szAdbAtrg, c);
-			Helpers::strCpy(p, " ", c);
-		}
-		Helpers::strCpy(p, "logcat ", c);
-		Helpers::strCpy(p, szLogcatAtrg, c);
-		adb_commandline(cmd, &streamCallback);
-	}
-
 	while (IsWorking()) {
+
+		if (szLogcatAtrg[0])
+		{
+			char* p = cmd;
+			size_t c = _countof(cmd);
+			if (szAdbAtrg[0])
+			{
+				Helpers::strCpy(p, szAdbAtrg, c);
+				Helpers::strCpy(p, " ", c);
+			}
+			Helpers::strCpy(p, "logcat ", c);
+			Helpers::strCpy(p, szLogcatAtrg, c);
+			adb_commandline(cmd, &streamCallback);
+		}
+
 		char* p = cmd;
 		size_t c = _countof(cmd);
 		if (szAdbAtrg[0]) 
