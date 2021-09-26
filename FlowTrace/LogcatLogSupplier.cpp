@@ -50,7 +50,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 			Helpers::strCpy(p, " ", c);
 		}
 		Helpers::strCpy(p, "logcat -c", c);
-		adb_commandline(cmd, &streamCallback);
+		adb_commandline(cmd, &dummyStreamCallback);
 	}
 
 	while (IsWorking()) {
@@ -66,7 +66,7 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 			}
 			Helpers::strCpy(p, "logcat ", c);
 			Helpers::strCpy(p, szLogcatAtrg, c);
-			adb_commandline(cmd, &streamCallback);
+			adb_commandline(cmd, &dummyStreamCallback);
 		}
 
 		char* p = cmd;

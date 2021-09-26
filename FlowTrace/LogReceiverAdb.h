@@ -43,6 +43,13 @@ protected:
 	bool HundleStream(char* buffer, int length, bool isError);
 };
 
+class LogcatDummyStreamCallback : public AdbStreamCallback {
+protected:
+	bool HundleStream(char* buffer, int length, bool isError) {
+		return true;
+	}
+};
+
 class LogcatStreamCallback : public AdbStreamCallback {
 protected:
 	bool HundleStream(char* buffer, int length, bool isError);
@@ -56,6 +63,7 @@ public:
 protected:
 	bool resetAtStart;
 	LogcatStreamCallback streamCallback;
+	LogcatDummyStreamCallback dummyStreamCallback;
 };
 
 class LogcatLogConsumer : public WorkerThread
