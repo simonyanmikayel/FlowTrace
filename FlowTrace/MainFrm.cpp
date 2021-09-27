@@ -677,8 +677,6 @@ void CMainFrame::FilterNode(WORD wID)
 
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    m_importExportFile.Empty();
-    SetTitle();
     ClearLog(true, true);
     return 0;
 }
@@ -691,6 +689,8 @@ LRESULT CMainFrame::OnResetLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 
 void CMainFrame::ClearLog(bool bRestart, bool reset)
 {
+    m_importExportFile.Empty();
+    SetTitle();
     StopLogging(true, false);
     m_view.ClearLog();
     searchInfo.ClearSearchResults();
