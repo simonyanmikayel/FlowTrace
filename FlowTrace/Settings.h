@@ -212,8 +212,9 @@ public:
 	static DWORD CSettings::LogListTxtColor() { return RGB(176, 176, 176); }
 	static DWORD CSettings::LogListBkColor() { return RGB(0, 0, 0); }
 	static DWORD CSettings::LogListInfoBkColor() { return RGB(240, 240, 240); }
-	static DWORD CSettings::SelectionTxtColor() { return RGB(255, 255, 255); }
-	static DWORD CSettings::SelectionBkColor() { return RGB(64, 122, 255); }
+	static DWORD CSettings::CurSelectionTxtColor() { return RGB(255, 255, 255); }
+	static DWORD CSettings::SelectionBkColor() { return RGB(64, 64, 64); }
+	static DWORD CSettings::CurSelectionBkColor() { return RGB(64, 122, 255); }
 	bool CanShowInEclipse() { return *GetEclipsePath() != 0 && GetResolveAddr(); }
 	bool CanShowInAndroidStudio() { return *GetAndroidStudio() != 0 && *GetAndroidProject() != 0; }
 

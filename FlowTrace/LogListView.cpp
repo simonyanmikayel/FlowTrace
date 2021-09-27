@@ -32,6 +32,7 @@ void CLogListView::ClearColumnInfo()
 {
 	ZeroMemory(m_DetailType, sizeof(m_DetailType));
 	m_ColLen = 0;
+	m_selText.cb = 0;
 	m_lengthCalculated++;
 }
 
@@ -281,18 +282,56 @@ void CLogListView::MoveSelectionEx(int iItem, int iChar, bool extend, bool ensur
 
 	iChar = max(0, min(iChar, logLen));
 	//bool prevEmpty = m_ListSelection.IsEmpty();
-	int preStart = m_ListSelection.StartItem();
+	int prevStart = m_ListSelection.StartItem();
 	int prevEnd = m_ListSelection.EndItem();
 
-	//stdlog("iItem1 %d %d\n", iItem, iChar);
+	//stdlog("iItem %d, iChar %d\n", iItem, iChar);
 	if (m_ListSelection.Move(iItem, iChar, extend))
 	{
 		//bool curEmpty = m_ListSelection.IsEmpty();
-		int curStart = m_ListSelection.StartItem();
-		int curEnd = m_ListSelection.EndItem();
+		int newStart = m_ListSelection.StartItem();
+		int newEnd = m_ListSelection.EndItem();
 		//if (!prevEmpty || !curEmpty) 
 		{
-			Redraw(min(preStart, curStart), max(prevEnd, curEnd));
+			int prev_selText_cb = m_selText.cb;
+			m_selText.p[0] = 0;
+			m_selText.cb = 0;
+			if (!m_ListSelection.IsEmpty())
+			{
+				int selStart = 0;
+				int selEnd = 0;
+				if (iItem == m_ListSelection.StartItem() && iItem == m_ListSelection.EndItem())
+				{
+					selStart = m_ListSelection.StartChar();
+					selEnd = m_ListSelection.EndChar();
+				}
+				else if (iItem == m_ListSelection.StartItem())
+				{
+					selStart = m_ListSelection.StartChar();
+					selEnd = logLen;
+				}
+				else if (iItem == m_ListSelection.EndItem())
+				{
+					selStart = 0;
+					selEnd = m_ListSelection.EndChar();
+				}
+				ATLASSERT(selStart <= logLen && selEnd <= logLen && selStart <= selEnd);
+				if (selStart < selEnd)
+				{
+					memcpy(m_selText.p, log + selStart, selEnd - selStart);
+					m_selText.cb = selEnd - selStart;
+					m_selText.p[selEnd - selStart] = 0;
+					//stdlog("selItem %d, selStart %d, selEnd %d: %s\n", iItem, selStart, selEnd, m_selText.p);
+				}
+			}
+			if (prev_selText_cb || m_selText.cb)
+			{
+				Invalidate(FALSE);
+			}
+			else
+			{
+				Redraw(min(prevStart, newStart), max(prevEnd, newEnd));
+			}
 		}
 	}
 
@@ -1078,37 +1117,17 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	itemMemDC.EraseBackground();
 	itemMemDC.SetBkMode(OPAQUE);
 
-
 	int cbText, cbInfo;
 	char* szText = getText(iItem, &cbText, false, &cbInfo);
-
 	int  textPoint = rcItem.left + TEXT_MARGIN;
 	int startChar = 0;
 
-	//if (rcItem.left < 0)
-	//{
-	//	int x = -rcItem.left;
-	//	// startChar is number of characters which fit in x
-	//	SIZE  textSizeUnused;
-	//	GetTextExtentExPoint(itemMemDC, szText, cbText, x, &startChar, NULL, &textSizeUnused);
-	//	if (startChar > 0)
-	//	{
-	//		SIZE  size;
-	//		GetTextExtentPoint32(itemMemDC, szText, startChar, &size);
-	//		if (size.cx < x)
-	//			textPoint -= (x - size.cx);
-	//	}
-	//	else
-	//	{
-	//		textPoint -= x;
-	//	}
-	//}
-
 	//stdlog("iItem %d textPoint %d startChar %d left %d\n", iItem, textPoint, startChar, rcItem.left);
 
-	DWORD textColor, bkColor, selBkColor, selColor, serachColor, curSerachColor, infoBkColor, infoTextColor, curBkColor;
-	selColor = gSettings.SelectionTxtColor();
+	DWORD textColor, bkColor, curSelBkColor, selBkColor, curSelColor, serachColor, curSerachColor, infoBkColor, infoTextColor, curBkColor;
 	selBkColor = gSettings.SelectionBkColor();
+	curSelColor = gSettings.CurSelectionTxtColor();
+	curSelBkColor = gSettings.CurSelectionBkColor();
 	DWORD textColor_0 = gSettings.LogListTxtColor();
 	DWORD bkColor_0 = gSettings.LogListBkColor();
 	textColor = textColor_0;
@@ -1128,43 +1147,61 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		}
 
 #define bSearched  1
-#define bSelected  2
-#define bcurSearch 4
+#define bCurSelected  2
+#define bCurSearch 4
 #define bNotTrace 8
+#define bSelected 16
 		int curChar = startChar;
 		int prevChar = startChar;
 		BYTE oldFlag = 0;
-		char* curSearch = szText;
-		char* nextSearch = curSearch;
+		char* curSearch = nullptr;
+		char* nextSearch = nullptr;
 		int searchPos = 0;
+		char* curSel = nullptr;
+		char* nextSel = nullptr;
+		if (pNode->isInfo())
+		{
+			if (pNode->lineSearchPos && searchInfo.total && searchInfo.cbText)
+			{
+				curSearch = searchInfo.find(szText);
+				nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
+			}
+			if (m_selText.cb)
+			{
+				curSel = strstr(szText, m_selText.p);
+				nextSel = curSel ? curSel + m_selText.cb : NULL;
+			}
+
+		}
 		while (curChar < cbText)
 		{
 			BYTE curFlag = 0;
-			if (curSearch && pNode->isInfo())
+			if (curSearch)
 			{
-				char* p = szText;
-				if (pNode->lineSearchPos && searchInfo.total)
+				if (szText + curChar == nextSearch)
 				{
-					if (curChar == startChar)
-					{
-						curSearch = searchInfo.find(nextSearch);
-						nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
-					}
-					if (curSearch)
-					{
-						while (curSearch && (p + curChar) > (curSearch + searchInfo.cbText))
-						{
-							curSearch = searchInfo.find(nextSearch);
-							nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
-							searchPos++;
-						}
-						if (curSearch && curSearch <= (p + curChar) && (curSearch + searchInfo.cbText) > (p + curChar))
-						{
-							curFlag |= bSearched;
-							if (iItem == searchInfo.curLine && searchPos == searchInfo.posInCur)
-								curFlag |= bcurSearch;
-						}
-					}
+					curSearch = searchInfo.find(nextSearch);
+					nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
+					searchPos++;
+				}
+				if (curSearch && curSearch <= (szText + curChar) && (curSearch + searchInfo.cbText) > (szText + curChar))
+				{
+					curFlag |= bSearched;
+					if (iItem == searchInfo.curLine && searchPos == searchInfo.posInCur)
+						curFlag |= bCurSearch;
+				}
+			}
+
+			if (curSel)
+			{
+				if (szText + curChar == nextSel)
+				{
+					curSel = strstr(nextSel, m_selText.p);
+					nextSel = curSel ? curSel + m_selText.cb : NULL;
+				}
+				if (curSel && curSel <= (szText + curChar) && (curSel + m_selText.cb) > (szText + curChar))
+				{
+					curFlag |= bSelected;
 				}
 			}
 
@@ -1173,7 +1210,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 				if (iItem > m_ListSelection.StartItem() && iItem < m_ListSelection.EndItem())
 				{
 					//if (iItem == 3)stdlog("0 %d\n", iItem);
-					curFlag |= bSelected;
+					curFlag |= bCurSelected;
 				}
 				else
 				{
@@ -1182,7 +1219,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 						if (curChar >= m_ListSelection.StartChar() && curChar < m_ListSelection.EndChar())
 						{
 							//if (iItem == 3)stdlog("1 %d\n", iItem);
-							curFlag |= bSelected;
+							curFlag |= bCurSelected;
 						}
 					}
 					else if (iItem == m_ListSelection.StartItem())
@@ -1190,7 +1227,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 						if (curChar >= m_ListSelection.StartChar())
 						{
 							//if (iItem == 3)stdlog("2 %d\n", iItem);
-							curFlag |= bSelected;
+							curFlag |= bCurSelected;
 						}
 					}
 					else if (iItem == m_ListSelection.EndItem())
@@ -1198,7 +1235,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 						if (curChar < m_ListSelection.EndChar())
 						{
 							//if (iItem == 3)stdlog("3 %d\n", iItem);
-							curFlag |= bSelected;
+							curFlag |= bCurSelected;
 						}
 					}
 				}
@@ -1218,31 +1255,33 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 				if (startChar != curChar)
 				{
 				again:
-					if (oldFlag & bcurSearch)
+					if (oldFlag & bCurSearch)
 						curBkColor = curSerachColor;
 					else if (oldFlag & bSearched)
 						curBkColor = serachColor;
+					else if (oldFlag & bSelected)
+						curBkColor = selBkColor;
 					else if (pNode->isFlow() || (oldFlag  & bNotTrace))
 						curBkColor = infoBkColor;
 					else
 						curBkColor = bkColor;
 
-					if (oldFlag & bSelected)
+					if (oldFlag & bCurSelected)
 					{
-						curBkColor = selBkColor;
+						curBkColor = curSelBkColor;
 					}
 					::SetBkColor(itemMemDC, curBkColor);
 
 					if (curBkColor != infoBkColor)
-						::SetTextColor(itemMemDC, selColor);
+						::SetTextColor(itemMemDC, curSelColor);
 					else if (pNode->isFlow() || (oldFlag  & bNotTrace))
 						::SetTextColor(itemMemDC, infoTextColor);
 					else
 						::SetTextColor(itemMemDC, textColor);
 
-					if ((oldFlag & bSelected) || (oldFlag & bcurSearch) || (oldFlag & bSearched))
+					if ((oldFlag & bCurSelected) || (oldFlag & bCurSearch) || (oldFlag & bSearched))
 					{
-						::SetTextColor(itemMemDC, selColor);
+						::SetTextColor(itemMemDC, curSelColor);
 					}
 
 					//if (iItem == 3)stdlog("prevChar %d, curChar %d cbText %d\n", prevChar, curChar, cbText);
@@ -1281,44 +1320,41 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
 	const int MAX_BUF_LEN = 2 * MAX_LOG_LEN - 10;
-	static CHAR pBuf[MAX_BUF_LEN + 10];
+	static LINE_BUF buf;
 	int c_Buf, c_Info;
 	int& cb = cBuf ? *cBuf : c_Buf;
 	int& ci = cInfo ? *cInfo : c_Info;
-	CHAR* ret = pBuf;
 	cb = 0;
-	pBuf[0] = 0;
+	buf.p[0] = 0;
 	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
-	if (!pNode)
+	if (pNode)
 	{
-		//ATLASSERT(0); 
-		return ret;
-	}
-
-	cb = 0;
-	bool funcColFound = false;
-	for (int i = 0; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
-	{
-		if (onlyTraces && LOG_COL != m_DetailType[i])
-			continue;
-		if (FUNC_COL == m_DetailType[i])
-			funcColFound = true;
-		if (funcColFound && pNode->isFlow() && LOG_COL == m_DetailType[i])
-			break;
-		int c;
-		CHAR* p = pNode->getListText(&c, m_DetailType[i], iItem);
-		if (c + cb >= MAX_BUF_LEN)
-			c = MAX_BUF_LEN - cb;
-		memcpy(pBuf + cb, p, c);
-		cb += c;
-		if (i < m_cActualColumns - 1)
+		bool funcColFound = false;
+		for (int i = 0; i < m_cActualColumns && cb < MAX_BUF_LEN; i++)
 		{
-			memcpy(pBuf + cb, " ", 1);
-			cb += 1;
-			ci = cb;
+			if (onlyTraces && LOG_COL != m_DetailType[i])
+				continue;
+			if (FUNC_COL == m_DetailType[i])
+				funcColFound = true;
+			if (funcColFound && pNode->isFlow() && LOG_COL == m_DetailType[i])
+				break;
+			int c;
+			CHAR* p = pNode->getListText(&c, m_DetailType[i], iItem);
+			if (c + cb >= MAX_BUF_LEN)
+				c = MAX_BUF_LEN - cb;
+			memcpy(buf.p + cb, p, c);
+			cb += c;
+			if (i < m_cActualColumns - 1)
+			{
+				memcpy(buf.p + cb, " ", 1);
+				cb += 1;
+				ci = cb;
+			}
 		}
 	}
-	pBuf[cb] = 0;
 
-	return ret;
+	buf.cb = cb;
+	buf.p[cb] = 0;
+
+	return buf.p;
 }

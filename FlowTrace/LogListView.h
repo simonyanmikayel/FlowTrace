@@ -8,6 +8,13 @@ class CFlowTraceView;
 class CLogListInfo;
 class CLogListFrame;
 
+struct LINE_BUF
+{
+	static const int cbMax = 2 * MAX_LOG_LEN - 10;
+	CHAR p[cbMax + 10];
+	int cb;
+};
+
 struct SEL_POINT
 {
 	SEL_POINT() { iItem = iChar = 0; }
@@ -123,6 +130,7 @@ private:
 	LOG_SELECTION m_ListSelection;
 	MemDC wndMemDC;
 	MemDC itemMemDC;
+	LINE_BUF m_selText;
 };
 
 
