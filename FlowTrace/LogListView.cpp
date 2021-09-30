@@ -397,6 +397,7 @@ void CLogListView::ShowFirstSyncronised(bool scrollToMiddle)
 		if (gArchive.getListedNodes()->getNode(i)->isSynchronized(gSyncronizedNode))
 		{
 			ShowItem(i, scrollToMiddle, true);
+			MoveSelectionEx(i, 0, false, true);
 			break;
 		}
 	}

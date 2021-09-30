@@ -165,6 +165,11 @@ LOG_NODE* CFlowTraceView::SyncViews()
 	if (hwnd == m_wndTreeView)
 	{
 		pNode = m_wndTreeView.GetSelectedNode();
+		if (pNode && pNode->isApp())
+		{
+			pNode = pNode->firstChild;
+			m_wndTreeView.EnsureNodeVisible(pNode, TRUE, FALSE);
+		}
 	}
 	else if (hwnd == m_wndListView.m_hWnd)
 	{
