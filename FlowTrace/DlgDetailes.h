@@ -14,8 +14,8 @@ public:
   CButton m_chkNN;
   CButton m_chkApp;
   CButton m_chkPID;
-  CButton m_chkTID;
-  CButton m_chkThreadNN;
+  //CButton m_chkTID;
+  //CButton m_chkThreadNN;
   CButton m_chkTime;
   CButton m_chkCallAddr;
   CButton m_chkFnCallLine;

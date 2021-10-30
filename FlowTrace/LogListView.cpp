@@ -1035,8 +1035,8 @@ void CLogListView::SetColumns()
 		m_DetailType[m_cActualColumns++] = NN_COL;
 	if (gSettings.GetColApp())
 		m_DetailType[m_cActualColumns++] = APP_COLL;
-	if (gSettings.GetColPID() || gSettings.GetColTID() || gSettings.GetColThreadNN())
-		m_DetailType[m_cActualColumns++] = THREAD_COL;
+	if (gSettings.GetColPID())
+		m_DetailType[m_cActualColumns++] = PID_COL;
 	if (gSettings.GetColTime())
 		m_DetailType[m_cActualColumns++] = TIME_COL;
 	if (gSettings.GetColFunc())

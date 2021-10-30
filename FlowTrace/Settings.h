@@ -238,8 +238,8 @@ public:
 	PROP_NUM(int, ColNN);
 	PROP_NUM(int, ColApp);
 	PROP_NUM(int, ColPID);
-	PROP_NUM(int, ColTID);
-	PROP_NUM(int, ColThreadNN);
+	//PROP_NUM(int, ColTID);
+	//PROP_NUM(int, ColThreadNN);
 	PROP_NUM(int, ShowChildCount);
 	PROP_NUM(int, ColFunc);
 	PROP_NUM(int, ColLine);
