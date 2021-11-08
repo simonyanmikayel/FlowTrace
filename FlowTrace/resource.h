@@ -46,6 +46,8 @@
 #define IDC_EDIT_PORT                   1006
 #define IDC_PID                         1006
 #define IDC_CALL_ADDR                   1007
+#define IDC_EDIT_PORT2                  1007
+#define IDC_EDIT_RAW_TCP_PORT           1007
 #define IDC_CHECK1                      1008
 #define IDC_CALL_ADDR2                  1008
 #define IDC_CHECK_SHOW_APP_TIME         1008
@@ -109,7 +111,6 @@
 #define IDC_STATIC_PORT_1               1210
 #define IDC_STATIC_PORT_2               1211
 #define IDC_EDIT_PORT_SPEED             1212
-#define IDC_EDIT_ADB_ARG2               1212
 #define IDC_EDIT_LOGCAT_ARG             1212
 #define IDC_EDIT_PORT_DATA_BITS         1213
 #define IDC_EDIT_PORT_STOP_BITS         1214

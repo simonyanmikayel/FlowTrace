@@ -9,6 +9,7 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
 {
   m_lblFont.Attach(GetDlgItem(IDC_FONT_NAME));
   m_UdpPort.Attach(GetDlgItem(IDC_EDIT_PORT));
+  m_RawTcpPort.Attach(GetDlgItem(IDC_EDIT_RAW_TCP_PORT));
   m_AdbArg.Attach(GetDlgItem(IDC_EDIT_ADB_ARG));
   m_LogcatArg.Attach(GetDlgItem(IDC_EDIT_LOGCAT_ARG));
   m_btnFont.Attach(GetDlgItem(IDC_BTN_FONT));
@@ -35,6 +36,7 @@ LRESULT DlgSettings::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPa
   m_lfWeight = gSettings.GetFontWeight();
 
   SetDlgItemInt(IDC_EDIT_PORT, gSettings.GetUdpPort(), FALSE);
+  SetDlgItemInt(IDC_EDIT_RAW_TCP_PORT, gSettings.GetRawTcpPort(), FALSE);
   m_AdbArg.SetWindowText(gSettings.GetAdbArg());
   m_LogcatArg.SetWindowText(gSettings.GetLogcatArg());
   m_FullSrcPath.SetCheck(gSettings.GetFullSrcPath() ? BST_CHECKED : BST_UNCHECKED);
@@ -121,6 +123,7 @@ LRESULT DlgSettings::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
   {
     gSettings.SetUIFont(m_FaceName, m_lfWeight, m_FontSize);
     gSettings.SetUdpPort(GetDlgItemInt(IDC_EDIT_PORT));
+    gSettings.SetRawTcpPort(GetDlgItemInt(IDC_EDIT_RAW_TCP_PORT));
     gSettings.SetFullSrcPath(m_FullSrcPath.GetCheck());
     gSettings.SetUseAdb(m_UseAdb.GetCheck());
     gSettings.SetRestartAdb(m_RestartAdb.GetCheck());

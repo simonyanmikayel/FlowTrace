@@ -252,6 +252,7 @@ public:
 	PROP_NUM(int, ApplyPorcessFilter);
 
 	PROP_NUM(DWORD, UdpPort);
+	PROP_NUM(DWORD, RawTcpPort);
 	PROP_STR(AdbArg);
 	PROP_STR(LogcatArg);
 

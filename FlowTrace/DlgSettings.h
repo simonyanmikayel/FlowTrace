@@ -34,6 +34,7 @@ public:
   void SetPort(CStatic& lbl, ComPort& port);
   CStatic m_lblFont;
   CEdit m_UdpPort;
+  CEdit m_RawTcpPort;
   CEdit m_AdbArg;
   CEdit m_LogcatArg;
   CButton m_btnFont;

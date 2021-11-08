@@ -15,6 +15,10 @@ void LogReceiverNet::start()
 #ifdef USE_TCP
 	add(new TcpListenThread());
 #endif
+#ifdef USE_RAW_TCP
+	if (gSettings.GetRawTcpPort())
+		add(new RawTcpListenThread());
+#endif
 }
 
 void LogReceiverNet::stop()
@@ -88,7 +92,7 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
 		cb = pack->data_len + sizeof(NET_PACK_INFO);
 		cb_read = sizeof(NET_PACK_INFO);
 		ROW_LOG_REC* rec = rec = (ROW_LOG_REC*)(buf + cb_read);
-		gLogReceiverNet.lock();
+		gLogReceiver.lock();
 		while (cb_read < cb)
 		{
 			ATLASSERT(rec->isValid());
@@ -100,13 +104,13 @@ void TcpReceiveThread::Work(LPVOID pWorkParam)
 			if (!gArchive.appendNet(rec, NULL))//&si_other
 			{
 				packError = true;
-				gLogReceiverNet.unlock();
+				gLogReceiver.unlock();
 				break;
 			}
 			cb_read += rec->len;
 			rec = (ROW_LOG_REC*)(buf + cb_read);
 		}
-		gLogReceiverNet.unlock();
+		gLogReceiver.unlock();
 		if (cb_read != pack->data_len + sizeof(NET_PACK_INFO)) {
 			packError = true;
 			break;
@@ -180,7 +184,7 @@ void TcpListenThread::Work(LPVOID pWorkParam)
 		SOCKET clientSocket = accept(s, NULL, NULL);
 		if (clientSocket == INVALID_SOCKET) {
 			int err = WSAGetLastError();
-			if (gLogReceiverNet.working())
+			if (gLogReceiver.working())
 				Helpers::ErrMessageBox(TEXT("accept failed with error: %d\nClear log to restart"), WSAGetLastError());
 			Terminate();
 			return;
@@ -190,6 +194,120 @@ void TcpListenThread::Work(LPVOID pWorkParam)
 	}
 }
 #endif //USE_TCP
+
+#ifdef USE_RAW_TCP
+RawTcpReceiveThread::RawTcpReceiveThread(SOCKET clientSocket)
+{
+	s = clientSocket;
+	logData.reset("<???>");
+}
+
+void RawTcpReceiveThread::Work(LPVOID pWorkParam)
+{
+	int len;
+	SetThreadPriority(THREAD_PRIORITY_HIGHEST);
+	//keep listening for data
+	while (true)
+	{
+		//try to receive data, this is a blocking call
+		if ((len = recv(s, buffer, sizeof(buffer) - 1, 0)) <= 0)
+		{
+			break;
+		}
+		buffer[len] = 0;
+		char* szLog = buffer;
+		int cbLog = len;
+		logData.pid = -(gLogReceiverNet.threadCount() + 100);
+		logData.tid = logData.pid;
+		DWORD sec, msec;
+		Helpers::GetTime(sec, msec);
+		logData.sec = sec;
+		logData.msec = msec;
+
+		gLogReceiver.lock();
+		logData.p_trace = szLog;
+		logData.cb_trace = (WORD)cbLog;
+		logData.len = sizeof(LOG_REC_BASE_DATA) + logData.cbData();
+		logData.color = 0;
+		gArchive.appendSerial(&logData);
+		gLogReceiver.unlock();
+	}
+
+	Terminate();
+}
+
+RawTcpListenThread::RawTcpListenThread()
+{
+	int iResult;
+	s = INVALID_SOCKET;
+
+	struct addrinfo* result = NULL;
+	struct addrinfo hints;
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
+
+	char listenPort[32];
+	_itoa_s(gSettings.GetRawTcpPort(), listenPort, 10);
+	// Resolve the server address and port
+	iResult = getaddrinfo(NULL, listenPort, &hints, &result);
+	if (iResult != 0) {
+		Helpers::ErrMessageBox(TEXT("getaddrinfo failed with error: %d"), iResult);
+		goto err;
+	}
+
+	// Create a SOCKET for connecting to server
+	s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (s == INVALID_SOCKET) {
+		Helpers::ErrMessageBox(TEXT("socket failed with error: %ld"), WSAGetLastError());
+		goto err;
+	}
+
+	// Setup the TCP listening socket
+	iResult = bind(s, result->ai_addr, (int)result->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		Helpers::ErrMessageBox(TEXT("TCT socket bind failed with error: %ld"), WSAGetLastError());
+		goto err;
+	}
+
+	freeaddrinfo(result);
+	return;
+
+err:
+	if (result)
+		freeaddrinfo(result);
+	Terminate();
+}
+
+void RawTcpListenThread::Work(LPVOID pWorkParam)
+{
+	if (s == INVALID_SOCKET)
+		return;
+	if (listen(s, SOMAXCONN) == SOCKET_ERROR) {
+		Helpers::ErrMessageBox(TEXT("listen failed with error: %d\nClear log to restart"), WSAGetLastError());
+		Terminate();
+		return;
+	}
+	//keep listening for connection
+	while (gLogReceiver.working())
+	{
+		// Accept a client socket
+		SOCKET clientSocket = accept(s, NULL, NULL);
+		if (clientSocket == INVALID_SOCKET) {
+			int err = WSAGetLastError();
+			if (gLogReceiver.working())
+				Helpers::ErrMessageBox(TEXT("accept failed with error: %d\nClear log to restart"), WSAGetLastError());
+			Terminate();
+			return;
+		}
+		RawTcpReceiveThread* pRawTcpReceiveThread = new RawTcpReceiveThread(clientSocket);
+		gLogReceiverNet.add(pRawTcpReceiveThread);
+	}
+}
+#endif //USE_RAW_TCP
 
 UdpThread::UdpThread()
 {

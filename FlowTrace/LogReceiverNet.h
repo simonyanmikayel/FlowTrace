@@ -46,13 +46,34 @@ public:
 
 #endif //USE_TCP
 
+#ifdef USE_RAW_TCP
+
+class RawTcpListenThread : public NetThread
+{
+    virtual void Work(LPVOID pWorkParam);
+public:
+    RawTcpListenThread();
+};
+
+class RawTcpReceiveThread : public NetThread
+{
+    virtual void Work(LPVOID pWorkParam);
+public:
+    char buffer[4096];
+    LOG_REC_SERIAL_DATA logData;
+    RawTcpReceiveThread(SOCKET sclientSocket);
+};
+
+#endif //USE_RAW_TCP
+
 class LogReceiverNet
 {
 public:
 	void start();
 	void stop();
+    void add(NetThread* pNetThread);
+    int threadCount() { return cThreads; }
 protected:
-	void add(NetThread* pNetThread);
 	NetThread* pThreads[32];
 	int cThreads = 0;
 };

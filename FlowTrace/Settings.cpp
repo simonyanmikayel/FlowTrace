@@ -53,6 +53,7 @@ CSettings::CSettings() :
 	, m_ApplyLogcutFilter(this, _T("ApplyLogcutFilter"), 1)
 	, m_ApplyPorcessFilter(this, _T("ApplyPorcessFilter"), 1)
 	, m_UdpPort(this, _T("UdpPort"), DefUdpPort)
+	, m_RawTcpPort(this, _T("RawTcpPort"), 0)
 	, m_AdbArg(this, _T("AdbArg"), MAX_PATH)
 	, m_LogcatArg(this, _T("LogcatArg"), MAX_PATH)
 	, m_EclipsePath(this, _T("EclipsePath"), MAX_PATH)
