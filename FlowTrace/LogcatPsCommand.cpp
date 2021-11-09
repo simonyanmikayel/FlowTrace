@@ -141,7 +141,6 @@ bool PsStreamCallback::HundleStream(char* szLog, int cbLog, bool isError)
 static const char* cmdPs[] = { "cmd_shell ps -t", "cmd_shell ps -A -o PID,TID,NAME,CMD" };
 static bool cmdPsIsOk[] = { true, true };
 static int cmdNom = 0;
-static char cmd[1204];
 
 void LogcatPsCommand::Work(LPVOID pWorkParam)
 {
@@ -161,7 +160,8 @@ void LogcatPsCommand::Work(LPVOID pWorkParam)
 		if (cmdNom >= cmdCount)
 			cmdNom = 0;
 
-		Helpers::strCpy(p, gSettings.GetAdbArg(), c);
+		if (szDeviceID[0])
+			Helpers::strCpy(p, szDeviceID, c);
 		Helpers::strCpy(p, " ", c);
 		Helpers::strCpy(p, cmdPs[cmdNom], c);
 		adb_commandline(cmd, &streamCallback);//do this after LogcatLogSupplier::Work

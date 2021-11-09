@@ -32,21 +32,23 @@ adb logcat -g
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:*", "*:S" }; //show only FLOW_TRACE tag
 //static const char* cmdLogcatLog[]{ "logcat", "-v", "long", "FLOW_TRACE:S" }; //hide FLOW_TRACE tag
 //static const char* cmdLogcatLog = "logcat -v long"; // adb logcat -v long
-static char cmd[1204];
 void LogcatLogSupplier::Work(LPVOID pWorkParam)
 {
 	resetAtStart = *((bool*)pWorkParam);
 
-	const CHAR* szAdbAtrg = gSettings.GetAdbArg();
-	const CHAR* szLogcatAtrg = gSettings.GetLogcatArg();
+	intDevice();
+
+	const CHAR* szLogcatArg = gSettings.GetLogcatArg();
+
+	connectDevice();
 
 	if (resetAtStart)
 	{
 		char* p = cmd;
 		size_t c = _countof(cmd);
-		if (szAdbAtrg[0]) 
+		if (szDeviceID[0])
 		{
-			Helpers::strCpy(p, szAdbAtrg, c);
+			Helpers::strCpy(p, szDeviceID, c);
 			Helpers::strCpy(p, " ", c);
 		}
 		Helpers::strCpy(p, "logcat -c", c);
@@ -55,25 +57,27 @@ void LogcatLogSupplier::Work(LPVOID pWorkParam)
 
 	while (IsWorking()) {
 
-		if (szLogcatAtrg[0])
+		connectDevice();
+
+		if (szLogcatArg[0])
 		{
 			char* p = cmd;
 			size_t c = _countof(cmd);
-			if (szAdbAtrg[0])
+			if (szDeviceID[0])
 			{
-				Helpers::strCpy(p, szAdbAtrg, c);
+				Helpers::strCpy(p, szDeviceID, c);
 				Helpers::strCpy(p, " ", c);
 			}
 			Helpers::strCpy(p, "logcat ", c);
-			Helpers::strCpy(p, szLogcatAtrg, c);
+			Helpers::strCpy(p, szLogcatArg, c);
 			adb_commandline(cmd, &dummyStreamCallback);
 		}
 
 		char* p = cmd;
 		size_t c = _countof(cmd);
-		if (szAdbAtrg[0]) 
+		if (szDeviceID[0])
 		{
-			Helpers::strCpy(p, szAdbAtrg, c);
+			Helpers::strCpy(p, szDeviceID, c);
 			Helpers::strCpy(p, " ", c);
 		}
 		Helpers::strCpy(p, "logcat -v long", c);

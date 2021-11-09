@@ -368,6 +368,7 @@
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="LogcatLogSupplier.cpp" />
     <ClCompile Include="LogcatPsCommand.cpp" />
+    <ClCompile Include="LogCommand.cpp" />
     <ClCompile Include="LogData.cpp" />
     <ClCompile Include="LogListFrame.cpp" />
     <ClCompile Include="LogListInfo.cpp" />

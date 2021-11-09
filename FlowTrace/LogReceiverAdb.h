@@ -55,7 +55,28 @@ protected:
 	bool HundleStream(char* buffer, int length, bool isError);
 };
 
-class LogcatLogSupplier : public WorkerThread
+class LogCommand
+{
+protected:
+	char cmd[1204];
+	char szDeviceID[64];
+	char szDeviceIpPort[64];
+	void intDevice();
+	void connectDevice();
+	LogcatDummyStreamCallback dummyStreamCallback;
+};
+
+class LogcatPsCommand : public WorkerThread, LogCommand
+{
+public:
+	virtual void Work(LPVOID pWorkParam);
+	virtual void Terminate();
+protected:
+	PsStreamCallback streamCallback;
+	char cmd[1204];
+};
+
+class LogcatLogSupplier : public WorkerThread, LogCommand
 {
 public:
 	virtual void Work(LPVOID pWorkParam);
@@ -63,7 +84,6 @@ public:
 protected:
 	bool resetAtStart;
 	LogcatStreamCallback streamCallback;
-	LogcatDummyStreamCallback dummyStreamCallback;
 };
 
 class LogcatLogConsumer : public WorkerThread
@@ -73,15 +93,6 @@ public:
 	virtual void Terminate();
 private:
 	char local_buffer[4 * 512]; //4*512
-};
-
-class LogcatPsCommand : public WorkerThread
-{
-public:
-	virtual void Work(LPVOID pWorkParam);
-	virtual void Terminate();
-protected:
-	PsStreamCallback streamCallback;
 };
 
 class LogReceiverAdb
