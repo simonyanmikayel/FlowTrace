@@ -62,6 +62,8 @@ public:
     char buffer[4096];
     LOG_REC_SERIAL_DATA logData;
     RawTcpReceiveThread(SOCKET sclientSocket);
+private:
+    int dummyPid;
 };
 
 #endif //USE_RAW_TCP

@@ -16,9 +16,11 @@ public:
 	void lock() { EnterCriticalSection(&cs); }
 	void unlock() {  LeaveCriticalSection(&cs); }
 	bool working() { return m_working; }
+	int getDummyPid() { return --dummy_pid; }
 private:
 	bool m_working;
 	CRITICAL_SECTION cs;
+	static int dummy_pid;
 };
 
 extern LogReceiver gLogReceiver;

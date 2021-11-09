@@ -10,6 +10,8 @@ extern LogReceiverAdb gLogReceiverAdb;
 extern LogReceiverNet gLogReceiverNet;
 extern LogReceiverSerial gLogReceiverSerial;
 
+int LogReceiver::dummy_pid;
+
 void LogReceiver::start(bool reset)
 {
 	m_working = true;

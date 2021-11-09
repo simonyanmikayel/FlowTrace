@@ -200,6 +200,7 @@ RawTcpReceiveThread::RawTcpReceiveThread(SOCKET clientSocket)
 {
 	s = clientSocket;
 	logData.reset("<???>");
+	dummyPid = gLogReceiver.getDummyPid();
 }
 
 void RawTcpReceiveThread::Work(LPVOID pWorkParam)
@@ -217,8 +218,8 @@ void RawTcpReceiveThread::Work(LPVOID pWorkParam)
 		buffer[len] = 0;
 		char* szLog = buffer;
 		int cbLog = len;
-		logData.pid = -(gLogReceiverNet.threadCount() + 100);
-		logData.tid = logData.pid;
+		logData.pid = dummyPid;
+		logData.tid = dummyPid;
 		DWORD sec, msec;
 		Helpers::GetTime(sec, msec);
 		logData.sec = sec;

@@ -39,7 +39,7 @@ void LogReceiverSerial::add(SerialThread* pThread)
 	if (gLogReceiver.working() && (cThreads < _countof(pThreads)))
 	{
 		pThreads[cThreads++] = pThread;
-		pThread->nn = cThreads;
+		pThread->dummyPid = gLogReceiver.getDummyPid();
 		pThread->StartWork();
 	}
 	else
@@ -261,8 +261,8 @@ void SerialThread::Work(LPVOID pWorkParam)
 		char* szLog = buffer;
 		int cbLog = len;
 
-		logData.pid = -nn;
-		logData.tid = -nn;
+		logData.pid = dummyPid;
+		logData.tid = dummyPid;
 		DWORD sec, msec;
 		Helpers::GetTime(sec, msec);
 		logData.sec = sec;

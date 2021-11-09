@@ -25,7 +25,7 @@ public:
 	int readerr;		       /* lets us know about read errors */
 	LogParcer logParcer;
 	LOG_REC_SERIAL_DATA logData;
-	int nn;
+	int dummyPid;
 };
 
 class LogReceiverSerial
