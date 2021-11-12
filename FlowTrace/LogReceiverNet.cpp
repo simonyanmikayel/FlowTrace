@@ -293,6 +293,7 @@ void RawTcpListenThread::Work(LPVOID pWorkParam)
 		return;
 	}
 	//keep listening for connection
+	//stdlog("RawTcpListenThread::Work start\n");
 	while (gLogReceiver.working())
 	{
 		// Accept a client socket
@@ -302,11 +303,14 @@ void RawTcpListenThread::Work(LPVOID pWorkParam)
 			if (gLogReceiver.working())
 				Helpers::ErrMessageBox(TEXT("accept failed with error: %d\nClear log to restart"), WSAGetLastError());
 			Terminate();
+			//stdlog("RawTcpListenThread::Work end 2 \n");
 			return;
 		}
 		RawTcpReceiveThread* pRawTcpReceiveThread = new RawTcpReceiveThread(clientSocket);
 		gLogReceiverNet.add(pRawTcpReceiveThread);
+		//stdlog("new RawTcpReceiveThread\n");
 	}
+	//stdlog("RawTcpListenThread::Work end\n");
 }
 #endif //USE_RAW_TCP
 

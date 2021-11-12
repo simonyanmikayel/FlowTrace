@@ -153,7 +153,7 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
             {
                 m_isOK = true;
             }
-            else if (0 == fopen_s(&m_fp, m_strFilePath, "r")) {
+            else if (0 == fopen_s(&m_fp, m_strFilePath, "rb")) {
                 m_isOK = true;
 			}
             else
@@ -164,7 +164,7 @@ TaskThread::TaskThread(WORD cmd, LPSTR lpstrFile, bool isAotu)
 		}
 		else
 		{
-			if (0 == fopen_s(&m_fp, m_strFilePath, "w")) {
+			if (0 == fopen_s(&m_fp, m_strFilePath, "wb")) {
                 m_isOK = true;
             }
             else
