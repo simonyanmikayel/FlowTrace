@@ -295,27 +295,28 @@ struct ListedNodes
     LOG_NODE* getNode(DWORD i) {
         return m_pListNodes->Get(i);
     }
-    void Free()
-    {
-        m_pListBuf->Free();
-        delete m_pListNodes;
-        archiveCount = 0;
-        m_pListNodes = new PtrArray<LOG_NODE>(m_pListBuf);
-    }
-    size_t AllocMemory() {
-        return m_pListBuf->AllocMemory();
-    }
+	void Free()
+	{
+		m_pListBuf->Free();
+		delete m_pListNodes;
+		archiveCount = 0;
+		m_pListNodes = new PtrArray<LOG_NODE>(m_pListBuf);
+	}
+	size_t AllocMemory() {
+		return m_pListBuf->AllocMemory();
+	}
+	DWORD Count() { return m_pListNodes->Count(); }
+	void applyListFilter(BOOL flowTraceHiden);
+	void updateList(BOOL flowTraceHiden);
+
+private:
     void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
-        DWORD64 ndx = gArchive.index(pNode);
+        //DWORD64 ndx = gArchive.index(pNode);
 		if (pNode->threadNode && pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
 		{
 		    m_pListNodes->AddPtr(pNode);
 		}
 	}
-    DWORD Count() { return m_pListNodes->Count(); }
-    void applyListFilter(BOOL flowTraceHiden);
-	void updateList(BOOL flowTraceHiden);
-private:
     DWORD archiveCount;
     PtrArray<LOG_NODE>* m_pListNodes;
     MemBuf* m_pListBuf;

@@ -186,11 +186,12 @@ private:
     HICON            m_lostIcon;
     CString          m_importExportFile;
 
+    void UpdateSearchResult();
     void StartLogging(bool reset);
     void ClearLog(bool bRestart, bool reset);
     void StopLogging(bool bClearArcive, bool closing = false);
-    void SearchRefresh(WORD wID);
-    void RefreshLog(bool showAll);
+    void SearchRefresh(bool reset);
+    void RefreshLog(bool resetSearch);
 
 };
 

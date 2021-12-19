@@ -264,13 +264,12 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
     return 1;
 }
 
-
-void CMainFrame::RefreshLog(bool showAll)
+void CMainFrame::RefreshLog(bool resetSearch)
 {
-	//gArchive.updateNodes();
     gArchive.getListedNodes()->updateList(gSettings.GetFlowTracesHiden());
-    m_tree.RefreshTree(showAll);
-    m_list.RefreshList(false);
+    m_tree.RefreshTree();
+    m_list.RefreshList();
+    SearchRefresh(resetSearch);
 }
 
 LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -311,7 +310,7 @@ void CMainFrame::StopLogging(bool bClearArcive, bool closing)
     else
     {
 		gArchive.onPaused();
-        RefreshLog(true);
+        RefreshLog(false);
     }
 }
 
@@ -512,32 +511,9 @@ LRESULT CMainFrame::onUpdateTree(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BO
     return 0;
 }
 
-LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+LRESULT CMainFrame::onUpdateFilter(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-    //bool filterChanged = false;
-    //LOG_NODE* pNode = (LOG_NODE*)lParam;
-    //if (pNode && (pNode->isApp() || pNode->isThread()))
-    //{
-    //    int cheked = pNode->checked;
-    //    if (pNode->hiden != !cheked)
-    //    {
-    //        pNode->hiden = !cheked;
-    //        filterChanged = true;
-    //    }
-    //}
-    //else
-    //{
-    //    filterChanged = true;
-    //}
-    //if (filterChanged)
-    {
-        //m_searchedit.SetWindowText(_T(""));
-        m_searchResult.SetWindowText(_T(""));
-        searchInfo.ClearSearchResults();
-        gArchive.getListedNodes()->applyListFilter(gSettings.GetFlowTracesHiden());
-        m_list.RefreshList(true);
-        m_tree.RedrawAll();
-    }
+    RefreshLog(true);
     return 0;
 }
 
@@ -672,9 +648,6 @@ void CMainFrame::FilterNode(WORD wID)
 	}
 }
 
-
-
-
 LRESULT CMainFrame::OnClearLog(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
     ClearLog(true, true);
@@ -693,6 +666,7 @@ void CMainFrame::ClearLog(bool bRestart, bool reset)
     SetTitle();
     StopLogging(true, false);
     m_view.ClearLog();
+    m_searchResult.SetWindowText(_T(""));
     searchInfo.ClearSearchResults();
     if (bRestart)
         StartLogging(reset);
@@ -749,48 +723,52 @@ LRESULT CMainFrame::OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
     return 0;
 }
 
-LRESULT CMainFrame::OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD /*wID*/ , HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    SearchRefresh(ID_SEARCH_REFRESH); //ID_SEARCH_LAST
+    SearchRefresh(true);
+    m_list.SetFocus();
     return 0;
 }
 
 LRESULT CMainFrame::OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-    SearchRefresh(ID_SEARCH_REFRESH);
+    SearchRefresh(true);
+    m_list.SetFocus();
     return 0;
 }
 
-void CMainFrame::SearchRefresh(WORD wID)
+void CMainFrame::SearchRefresh(bool reset)
 {
-    //Update Serch
-    CHAR szText[256];
-    ::GetWindowText(searchInfo.hwndEdit, szText, _countof(szText) - 1);
-    szText[_countof(szText) - 1] = 0;
-    searchInfo.setSerachText(szText);
+    if (reset) {
+        //Update Serch
+        CHAR szText[256];
+        ::GetWindowText(searchInfo.hwndEdit, szText, _countof(szText) - 1);
+        szText[_countof(szText) - 1] = 0;
+        searchInfo.setSerachText(szText);
+        searchInfo.ClearSearchResults();
 
-    searchInfo.ClearSearchResults();
+        if (searchInfo.cbText()) {
+            int i = m_cb.FindStringExact(0, szText);
+            if (i >= 0)
+                m_cb.DeleteString(i);
+            COMBOBOXEXITEM item = { 0 };
+            item.mask = CBEIF_TEXT;
+            item.pszText = szText;
+            item.iItem = 0;
+            m_cb.InsertItem(&item);
+            m_cb.SetCurSel(0);
+            SaveSearchList();
+        }
 
-    if (szText[0])
+        searchInfo.curLine = -1;
+        searchInfo.posInCur = 0;
+    }
+
+    DWORD lineCount = gArchive.getListedNodes()->Count();
+    if (searchInfo.cbText())
     {
-        int i = m_cb.FindStringExact(0, szText);
-        if (i >= 0)
-            m_cb.DeleteString(i);
-        COMBOBOXEXITEM item = { 0 };
-        item.mask = CBEIF_TEXT;
-        item.pszText = szText;
-        item.iItem = 0;
-        m_cb.InsertItem(&item);
-        m_cb.SetCurSel(0);
-        SaveSearchList();
-
-        ::SetWindowText(searchInfo.hwndEdit, szText);
-
-
         //do search
-        DWORD lineCount = gArchive.getListedNodes()->Count();
-        int countInLast = 0;
-        for (DWORD i = 0; i < lineCount; i++)
+        for (DWORD i = searchInfo.listCount; i < lineCount; i++)
         {
             LOG_NODE* pNode = gArchive.getListedNodes()->getNode(i);
             CHAR* p = m_list.getText(i);
@@ -803,25 +781,21 @@ void CMainFrame::SearchRefresh(WORD wID)
                     {
                         searchInfo.firstLine = i;
                     }
-                    if (pNode->lineSearchPos == 0)
-                    {
-                        countInLast = 0;
-                    }
                     searchInfo.lastLine = i;
                     searchInfo.total++;
                     if (pNode->lineSearchPos == 0)
                         pNode->lineSearchPos = searchInfo.total;
-                    countInLast++;
-                    p += searchInfo.cbText;
+                    p += searchInfo.cbText();
                 }
             }
         }
-        searchInfo.curLine = searchInfo.lastLine;
-        searchInfo.posInCur = countInLast - 1;
     }
 
-    SearchNavigate(wID);
-    m_list.SetFocus();
+    if (searchInfo.listCount != lineCount) {
+        UpdateSearchResult();
+        m_list.Redraw(searchInfo.listCount - 1, -1);
+        searchInfo.listCount = lineCount;
+    }
 }
 
 void CMainFrame::SearchNavigate(WORD wID)
@@ -864,9 +838,9 @@ void CMainFrame::SearchNavigate(WORD wID)
                                     if (column > 0 && column <= logLen)
                                     {
                                         char* p = log;
-                                        while (NULL != (p = searchInfo.find(p)) && (p - log) < column - (int)searchInfo.cbText)
+                                        while (NULL != (p = searchInfo.find(p)) && (p - log) < column - (int)searchInfo.cbText())
                                         {
-                                            p += searchInfo.cbText;
+                                            p += searchInfo.cbText();
                                             searchInfo.posInCur++;
                                         }
                                         if (searchInfo.posInCur < 0)
@@ -912,7 +886,7 @@ void CMainFrame::SearchNavigate(WORD wID)
                                     char* p = log;
                                     while (NULL != (p = searchInfo.find(p)) && (p - log) < column)
                                     {
-                                        p += searchInfo.cbText;
+                                        p += searchInfo.cbText();
                                         searchInfo.posInCur++;
                                     }
                                     if (searchInfo.posInCur >= curCount)
@@ -933,12 +907,12 @@ void CMainFrame::SearchNavigate(WORD wID)
         {
             searchInfo.posInCur = 0;
         }
-        if (wID == ID_SEARCH_FIRST || (!found && wID == ID_SEARCH_PREV) || (searchInfo.curLine < searchInfo.firstLine))
+        if (wID == ID_SEARCH_FIRST || (!found && wID == ID_SEARCH_PREV))
         {
             searchInfo.curLine = searchInfo.firstLine;
             searchInfo.posInCur = 0;
         }
-        else if (wID == ID_SEARCH_LAST || (!found && wID == ID_SEARCH_NEXT) || (searchInfo.curLine > searchInfo.lastLine))
+        else if (wID == ID_SEARCH_LAST || (!found && wID == ID_SEARCH_NEXT))
         {
             searchInfo.curLine = searchInfo.lastLine;
             CHAR* p = m_list.getText(searchInfo.lastLine);
@@ -946,34 +920,40 @@ void CMainFrame::SearchNavigate(WORD wID)
             searchInfo.posInCur = curCount - 1;
         }
 
-        if (wID != ID_SEARCH_REFRESH)
+        if (searchInfo.curLine >= 0)
         {
             char* log = m_list.getText(searchInfo.curLine, &logLen);
             char* p = log;
             int searchPos = 0;
             while (NULL != (p = searchInfo.find(p)) && searchInfo.posInCur > searchPos)
             {
-                p += searchInfo.cbText;
+                p += searchInfo.cbText();
                 searchPos++;
             }
 
             if (p)
             {
-              m_list.MoveSelectionEx(searchInfo.curLine, int((p - log) + searchInfo.cbText), false);
-              m_list.EnsureTextVisible(searchInfo.curLine, int(p - log), int(p - log + searchInfo.cbText));
+              m_list.MoveSelectionEx(searchInfo.curLine, int((p - log) + searchInfo.cbText()), false);
+              m_list.EnsureTextVisible(searchInfo.curLine, int(p - log), int(p - log + searchInfo.cbText()));
             }
         }
     }
 
-    LOG_NODE* pNode = gArchive.getListedNodes()->getNode(searchInfo.curLine);
+    UpdateSearchResult();
+    m_list.Redraw(- 1, -1);
+}
+
+void CMainFrame::UpdateSearchResult()
+{
+    LOG_NODE* pNode = searchInfo.curLine >= 0 ? gArchive.getListedNodes()->getNode(searchInfo.curLine) : nullptr;
     CHAR szText[32];
-    if (pNode && wID != ID_SEARCH_REFRESH)
+    if (!searchInfo.total)
+        szText[0] = 0;
+    else if (pNode && searchInfo.curLine >= 0)
         _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? pNode->lineSearchPos + searchInfo.posInCur : 0, searchInfo.total);
     else
         _stprintf_s(szText, _countof(szText), _T(" % d"), searchInfo.total);
     m_searchResult.SetWindowText(szText);
-
-    m_list.Redraw(-1, -1);
 }
 
 void CMainFrame::UpdateStatusBar()

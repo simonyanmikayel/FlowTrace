@@ -46,7 +46,6 @@
 #define IDC_EDIT_PORT                   1006
 #define IDC_PID                         1006
 #define IDC_CALL_ADDR                   1007
-#define IDC_EDIT_PORT2                  1007
 #define IDC_EDIT_RAW_TCP_PORT           1007
 #define IDC_CHECK1                      1008
 #define IDC_CALL_ADDR2                  1008
@@ -179,8 +178,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        542
-#define _APS_NEXT_COMMAND_VALUE         32843
+#define _APS_NEXT_RESOURCE_VALUE        543
+#define _APS_NEXT_COMMAND_VALUE         32844
 #define _APS_NEXT_CONTROL_VALUE         1213
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

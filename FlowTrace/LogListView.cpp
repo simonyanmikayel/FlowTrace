@@ -995,14 +995,14 @@ void CLogListView::OnSize(UINT nType, CSize size)
 	}
 }
 
-void CLogListView::RefreshList(bool redraw)
+void CLogListView::RefreshList()
 {
 	int newCount = (int)gArchive.getListedNodes()->Count();
 	if (newCount > 0)
 	{
-		if (newCount == m_recCount && (!redraw))
+		if (newCount == m_recCount)
 			return;
-		if (newCount < m_recCount || redraw)
+		if (newCount < m_recCount)
 			Clear();
 		int oldRecCount = m_recCount;
 		m_recCount = newCount;
@@ -1011,7 +1011,7 @@ void CLogListView::RefreshList(bool redraw)
 		Update(newCount - 1);
 		int curItem = m_ListSelection.CurItem();
 		//stdlog("~~~%d %d\n", curItem, (int)m_recCount - 1);
-		if (redraw || oldRecCount == 0 || curItem >= ((int)oldRecCount - 1))
+		if (oldRecCount == 0 || curItem >= ((int)oldRecCount - 1))
 			MoveSelectionEx(m_recCount - 1, 0, false, true);
 	}
 	else
@@ -1133,7 +1133,7 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 	DWORD bkColor_0 = gSettings.LogListBkColor();
 	textColor = textColor_0;
 	bkColor = bkColor_0;
-	serachColor = bkColor_0;
+	serachColor = selBkColor; //bkColor_0;
 	curSerachColor = gSettings.CurSerachColor();
 	infoTextColor = gSettings.InfoTextColor();
 	infoBkColor = gSettings.LogListBkColor();
@@ -1162,10 +1162,10 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		char* nextSel = nullptr;
 		if (pNode->isInfo())
 		{
-			if (pNode->lineSearchPos && searchInfo.total && searchInfo.cbText)
+			if (pNode->lineSearchPos && searchInfo.total && searchInfo.cbText())
 			{
 				curSearch = searchInfo.find(szText);
-				nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
+				nextSearch = curSearch ? curSearch + searchInfo.cbText() : NULL;
 			}
 			if (m_selText.cb)
 			{
@@ -1182,10 +1182,10 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 				if (szText + curChar == nextSearch)
 				{
 					curSearch = searchInfo.find(nextSearch);
-					nextSearch = curSearch ? curSearch + searchInfo.cbText : NULL;
+					nextSearch = curSearch ? curSearch + searchInfo.cbText() : NULL;
 					searchPos++;
 				}
-				if (curSearch && curSearch <= (szText + curChar) && (curSearch + searchInfo.cbText) > (szText + curChar))
+				if (curSearch && curSearch <= (szText + curChar) && (curSearch + searchInfo.cbText()) > (szText + curChar))
 				{
 					curFlag |= bSearched;
 					if (iItem == searchInfo.curLine && searchPos == searchInfo.posInCur)

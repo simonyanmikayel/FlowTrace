@@ -84,7 +84,7 @@ public:
 
 	void ApplySettings(bool fontChanged);
 	void Clear();
-	void RefreshList(bool redraw);
+	void RefreshList();
 	void DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rc);
 	void ItemPrePaint(int iItem, HDC hdc, RECT rc);
 	void UpdateCaret();

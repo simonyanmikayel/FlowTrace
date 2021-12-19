@@ -21,7 +21,7 @@ int SEARCH_INFO::calcCountIn(CHAR* p)
   while (p = searchInfo.find(p))
   {
     ret++;
-    p += searchInfo.cbText;
+    p += searchInfo.cbText();
   }
   return ret;
 }

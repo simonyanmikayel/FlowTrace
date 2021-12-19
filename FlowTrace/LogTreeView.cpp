@@ -239,7 +239,7 @@ void CLogTreeView::RedrawAll()
 	RedrawItems(0, gArchive.getRootNode()->GetExpandCount());
 }
 
-void CLogTreeView::RefreshTree(bool showAll)
+void CLogTreeView::RefreshTree()
 {
     DWORD newCount = gArchive.getNodeCount();
     if (newCount <= 1)
@@ -250,13 +250,6 @@ void CLogTreeView::RefreshTree(bool showAll)
         ATLASSERT(newCount == m_recCount);
         return;
     }
-
-    //  if (!showAll)
-    //  {
-    //#define TREE_UPDATE_CHUNK 10000
-    //    if ((newCount - m_recCount) > TREE_UPDATE_CHUNK)
-    //      newCount = m_recCount + TREE_UPDATE_CHUNK;
-    //  }
 
     if (!m_Initialised)
         return;
