@@ -100,6 +100,7 @@ public:
         COMMAND_ID_HANDLER(ID_SEARCH_CLEAR, OnSearchClear)
         COMMAND_ID_HANDLER(ID_SEARCH_MATCH_CASE, OnSearchSettings)
         COMMAND_ID_HANDLER(ID_SEARCH_MATCH_WHOLE_WORD, OnSearchSettings)
+        COMMAND_ID_HANDLER(ID_SEARCH_FILTER, OnSearchFilter)
         COMMAND_ID_HANDLER(ID_SYNC_VIEWES, OnSyncViews)
         COMMAND_ID_HANDLER(ID_EDIT_FIND32798, OnEditFind)
 		COMMAND_ID_HANDLER(ID_TREE_SHOW_THIS_APP, OnShowOnlyThisApp)
@@ -162,6 +163,7 @@ public:
 
     LRESULT OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchSettings(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+    LRESULT OnSearchFilter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchClear(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -186,12 +188,12 @@ private:
     HICON            m_lostIcon;
     CString          m_importExportFile;
 
-    void UpdateSearchResult();
+    void ShowSearchResult();
     void StartLogging(bool reset);
     void ClearLog(bool bRestart, bool reset);
     void StopLogging(bool bClearArcive, bool closing = false);
     void SearchRefresh(bool reset);
-    void RefreshLog(bool resetSearch);
+    void RefreshLog(bool reset);
 
 };
 

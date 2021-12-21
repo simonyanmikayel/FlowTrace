@@ -92,6 +92,7 @@ public:
 	LOG_NODE* GetSynkNode();
 	void CopySelection(bool onlyTraces = false, bool copySpecial = false);
 	CHAR* getText(int iItem, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
+	CHAR* getText(LOG_NODE* pNode, int* cBuf = NULL, bool onlyTraces = false, int* cInfo = NULL);
 	void SelectAll();
     int getSelectionItem() { return m_ListSelection.CurItem(); }
     int getSelectionColumn() { return m_ListSelection.CurChar(); }

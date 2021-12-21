@@ -273,7 +273,6 @@ public:
 	ComPort comPort_1;
 	ComPort comPort_2;
 
-
 private:
     LOGFONT   m_logFont;
     HANDLE m_resourceFonthandle;

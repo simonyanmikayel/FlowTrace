@@ -60,7 +60,7 @@ void Archive::clearArchive(bool closing)
     m_rootNode = nullptr;
     m_pTraceBuf->Free();
 	//m_pRecBuf->Free();
-    m_listedNodes->Free();
+    m_listedNodes->FreeListedNodes();
     AddrInfo::Reset();
     if (!closing)
     {
@@ -859,26 +859,24 @@ void Archive::appendRec(LOG_REC* rec, sockaddr_in *p_si_other, bool fromImport, 
 	//}
 }
 
-void ListedNodes::updateList(BOOL flowTraceHiden)
+void ListedNodes::updateList(bool reset, bool flowTraceHiden, bool searchFilterOn)
 {
-	DWORD count = gArchive.getNodeCount();
-	for (DWORD i = archiveCount; i < count; i++)
-	{
-		addNode(gArchive.getNode(i), flowTraceHiden);
+	if (reset) {
+		FreeListedNodes();
+		archiveCount = gArchive.getNodeCount();
+		for (DWORD i = 0; i < archiveCount; i++)
+		{
+			addNode(gArchive.getNode(i), flowTraceHiden, searchFilterOn);
+		}
 	}
-	archiveCount = count;
-}
-
-void ListedNodes::applyListFilter(BOOL flowTraceHiden)
-{
-    Free();
-    archiveCount = gArchive.getNodeCount();
-    //stdlog("%u\n", GetTickCount());
-    for (DWORD i = 0; i < archiveCount; i++)
-    {
-        addNode(gArchive.getNode(i), flowTraceHiden);
-    }
-    //stdlog("%u\n", GetTickCount());
+	else {
+		DWORD count = gArchive.getNodeCount();
+		for (DWORD i = archiveCount; i < count; i++)
+		{
+			addNode(gArchive.getNode(i), flowTraceHiden, searchFilterOn);
+		}
+		archiveCount = count;
+	}
 }
 
 void Archive::setNodeFilter(LOG_NODE* pNode)

@@ -344,7 +344,7 @@ CHAR* LOG_NODE::getTreeText(int* cBuf, bool extened)
 }
 
 
-CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col, int iItem)
+CHAR* LOG_NODE::getListText(int *cBuf, LIST_COL col)
 {
     const int MAX_BUF_LEN = 2 * MAX_LOG_LEN - 1;
     static CHAR pBuf[MAX_BUF_LEN + 1];

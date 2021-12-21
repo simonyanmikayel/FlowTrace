@@ -157,7 +157,7 @@ struct LOG_NODE
     int   getTid();
     int   getThreadNN();
     CHAR* getTreeText(int* cBuf = NULL, bool extened = true);
-    CHAR* getListText(int* cBuf, LIST_COL col, int iItem = 0);
+    CHAR* getListText(int* cBuf, LIST_COL col);
     int getTreeImage();
     FLOW_NODE* getSyncNode();
 	THREAD_NODE* getTrhread() { LOG_NODE* p = this; while (p && !p->isThread()) p = p->parent; return (THREAD_NODE*)p; }

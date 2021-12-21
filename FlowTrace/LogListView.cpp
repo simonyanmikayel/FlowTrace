@@ -1162,10 +1162,10 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 		char* nextSel = nullptr;
 		if (pNode->isInfo())
 		{
-			if (pNode->lineSearchPos && searchInfo.total && searchInfo.cbText())
+			if (pNode->lineSearchPos && searchInfo.total && searchInfo.SearchTextSize())
 			{
 				curSearch = searchInfo.find(szText);
-				nextSearch = curSearch ? curSearch + searchInfo.cbText() : NULL;
+				nextSearch = curSearch ? curSearch + searchInfo.SearchTextSize() : NULL;
 			}
 			if (m_selText.cb)
 			{
@@ -1182,10 +1182,10 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 				if (szText + curChar == nextSearch)
 				{
 					curSearch = searchInfo.find(nextSearch);
-					nextSearch = curSearch ? curSearch + searchInfo.cbText() : NULL;
+					nextSearch = curSearch ? curSearch + searchInfo.SearchTextSize() : NULL;
 					searchPos++;
 				}
-				if (curSearch && curSearch <= (szText + curChar) && (curSearch + searchInfo.cbText()) > (szText + curChar))
+				if (curSearch && curSearch <= (szText + curChar) && (curSearch + searchInfo.SearchTextSize()) > (szText + curChar))
 				{
 					curFlag |= bSearched;
 					if (iItem == searchInfo.curLine && searchPos == searchInfo.posInCur)
@@ -1320,6 +1320,12 @@ void CLogListView::DrawSubItem(int iItem, int iSubItem, HDC hdc, RECT rcItem)
 
 CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 {
+	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
+	return getText(pNode, cBuf, onlyTraces, cInfo);
+}
+
+CHAR* CLogListView::getText(LOG_NODE* pNode, int* cBuf, bool onlyTraces, int* cInfo)
+{
 	const int MAX_BUF_LEN = 2 * MAX_LOG_LEN - 10;
 	static LINE_BUF buf;
 	int c_Buf, c_Info;
@@ -1327,7 +1333,6 @@ CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 	int& ci = cInfo ? *cInfo : c_Info;
 	cb = 0;
 	buf.p[0] = 0;
-	LOG_NODE* pNode = gArchive.getListedNodes()->getNode(iItem);
 	if (pNode)
 	{
 		bool funcColFound = false;
@@ -1340,7 +1345,7 @@ CHAR* CLogListView::getText(int iItem, int* cBuf, bool onlyTraces, int* cInfo)
 			if (funcColFound && pNode->isFlow() && LOG_COL == m_DetailType[i])
 				break;
 			int c;
-			CHAR* p = pNode->getListText(&c, m_DetailType[i], iItem);
+			CHAR* p = pNode->getListText(&c, m_DetailType[i]);
 			if (c + cb >= MAX_BUF_LEN)
 				c = MAX_BUF_LEN - cb;
 			memcpy(buf.p + cb, p, c);

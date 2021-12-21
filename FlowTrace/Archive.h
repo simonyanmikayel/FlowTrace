@@ -295,7 +295,7 @@ struct ListedNodes
     LOG_NODE* getNode(DWORD i) {
         return m_pListNodes->Get(i);
     }
-	void Free()
+	void FreeListedNodes()
 	{
 		m_pListBuf->Free();
 		delete m_pListNodes;
@@ -306,13 +306,15 @@ struct ListedNodes
 		return m_pListBuf->AllocMemory();
 	}
 	DWORD Count() { return m_pListNodes->Count(); }
-	void applyListFilter(BOOL flowTraceHiden);
-	void updateList(BOOL flowTraceHiden);
-
+	void updateList(bool reset, bool flowTraceHiden, bool searchFilterOn);
+	static bool isVisibleLog(LOG_NODE* pNode, bool flowTraceHiden) {
+		return pNode->threadNode&& pNode->isInfo() && !pNode->threadNode->isHiden() 
+			&& (pNode->isTrace() || !flowTraceHiden);
+	}
 private:
-    void addNode(LOG_NODE* pNode, BOOL flowTraceHiden) {
+    void addNode(LOG_NODE* pNode, bool flowTraceHiden, bool searchFilterOn) {
         //DWORD64 ndx = gArchive.index(pNode);
-		if (pNode->threadNode && pNode->isInfo() && !pNode->threadNode->isHiden() && (pNode->isTrace() || !flowTraceHiden))
+		if (isVisibleLog(pNode, flowTraceHiden) && (pNode->lineSearchPos || !searchFilterOn))
 		{
 		    m_pListNodes->AddPtr(pNode);
 		}
