@@ -270,6 +270,9 @@ void CMainFrame::RefreshLog(bool reset)
     gArchive.getListedNodes()->updateList(reset, gSettings.GetFlowTracesHiden(), searchInfo.applySearchFilter());
     m_tree.RefreshTree();
     m_list.RefreshList();
+    if (reset) {
+        PostMessage(WM_NAVIGATE_TO_SEARCH, 0, 0);
+    }
 }
 
 LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -752,7 +755,12 @@ void CMainFrame::SearchRefresh(bool reset)
 {
     CHAR szText[256];
     szText[0] = 0;
-    int curLine = searchInfo.curLine;
+    LOG_NODE* pSelectedNode = nullptr;
+    int posInCur = 0;
+    if (searchInfo.curLine >= 0) {
+        pSelectedNode = gArchive.getListedNodes()->getNode(searchInfo.curLine);
+        posInCur = searchInfo.posInCur;
+    }
     if (reset) {
         //Update Serch
         ::GetWindowText(searchInfo.hwndEdit, szText, _countof(szText) - 1);
@@ -797,8 +805,15 @@ void CMainFrame::SearchRefresh(bool reset)
                     }
                     searchInfo.lastLine = j;
                     searchInfo.total++;
-                    if (pNode->lineSearchPos == 0)
+                    if (pNode->lineSearchPos == 0) {
+                        if (reset && pNode == pSelectedNode) {
+                            if (searchInfo.archiveNumber == gArchive.getArchiveNumber() && 0 == strcmp(szText, searchInfo.SearchText())) {
+                                searchInfo.posInCur = posInCur;
+                                searchInfo.curLine = j;
+                            }
+                        }
                         pNode->lineSearchPos = searchInfo.total;
+                    }
                     p += searchInfo.SearchTextSize();
                 }
             }
@@ -808,13 +823,11 @@ void CMainFrame::SearchRefresh(bool reset)
     }
 
     if (searchInfo.archiveCount != count) {
-        //if (0 == strcmp(szText, searchInfo.SearchText()) && curLine < searchInfo.total) {
-        //    searchInfo.curLine = curLine;
-        //}
         ShowSearchResult();
         m_list.Redraw(listCount, -1);
         searchInfo.archiveCount = count;
     }
+    searchInfo.archiveNumber = gArchive.getArchiveNumber();
 }
 
 void CMainFrame::SearchNavigate(WORD wID)
@@ -939,34 +952,47 @@ void CMainFrame::SearchNavigate(WORD wID)
             searchInfo.posInCur = curCount - 1;
         }
 
-        if (searchInfo.curLine >= 0)
-        {
-            char* log = m_list.getText(searchInfo.curLine, &logLen);
-            char* p = log;
-            int searchPos = 0;
-            while (NULL != (p = searchInfo.find(p)) && searchInfo.posInCur > searchPos)
-            {
-                p += searchInfo.SearchTextSize();
-                searchPos++;
-            }
-
-            if (p)
-            {
-              m_list.MoveSelectionEx(searchInfo.curLine, int((p - log) + searchInfo.SearchTextSize()), false);
-              m_list.EnsureTextVisible(searchInfo.curLine, int(p - log), int(p - log + searchInfo.SearchTextSize()));
-            }
-        }
+        NavigateToSearch();
     }
 
     ShowSearchResult();
     m_list.Redraw(- 1, -1);
 }
 
+LRESULT CMainFrame::onNavigateToSearch(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+{
+    NavigateToSearch();
+    ShowSearchResult();
+    return 0;
+}
+
+void CMainFrame::NavigateToSearch()
+{
+    int logLen;
+    if (searchInfo.curLine >= 0)
+    {
+        char* log = m_list.getText(searchInfo.curLine, &logLen);
+        char* p = log;
+        int searchPos = 0;
+        while (NULL != (p = searchInfo.find(p)) && searchInfo.posInCur > searchPos)
+        {
+            p += searchInfo.SearchTextSize();
+            searchPos++;
+        }
+
+        if (p)
+        {
+            m_list.MoveSelectionEx(searchInfo.curLine, int((p - log) + searchInfo.SearchTextSize()), false);
+            m_list.EnsureTextVisible(searchInfo.curLine, int(p - log), int(p - log + searchInfo.SearchTextSize()));
+        }
+    }
+}
+
 void CMainFrame::ShowSearchResult()
 {
     LOG_NODE* pNode = searchInfo.curLine >= 0 ? gArchive.getListedNodes()->getNode(searchInfo.curLine) : nullptr;
     CHAR szText[32];
-    if (!searchInfo.total)
+    if (*(searchInfo.SearchText()) == 0)
         szText[0] = 0;
     else if (pNode && searchInfo.curLine >= 0)
         _stprintf_s(szText, _countof(szText), _T("%d of %d"), searchInfo.total ? pNode->lineSearchPos + searchInfo.posInCur : 0, searchInfo.total);

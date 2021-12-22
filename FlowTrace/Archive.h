@@ -233,10 +233,10 @@ public:
     void onPaused();
 	DWORD getNodeCount() { return m_pNodes ? m_pNodes->Count() : 0; }
 	//DWORD getRecCount() { return m_pRecords ? m_pRecords->Count() : 0; }
-	LOG_NODE* getNode(DWORD i) { return (m_pNodes && i < m_pNodes->Count()) ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
+	LOG_NODE* getNode(DWORD i) { return m_pNodes ? (LOG_NODE*)m_pNodes->Get(i) : 0; }
     char* Alloc(DWORD cb, bool zero = false) { return (char*)m_pTraceBuf->Alloc(cb, zero); }
     bool IsEmpty() { return m_pNodes == nullptr || m_pNodes->Count() == 0; }
-    DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
+    //DWORD64 index(LOG_NODE* pNode) { return pNode - getNode(0); }
     ListedNodes* getListedNodes() { return m_listedNodes; }
     ROOT_NODE* getRootNode() { return m_rootNode; }
     static DWORD getArchiveNumber() { return archiveNumber; }

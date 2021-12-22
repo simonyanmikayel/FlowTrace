@@ -2,12 +2,13 @@
 
 struct SEARCH_INFO
 {
-	SEARCH_INFO() { bSearchFilterOn = false;  bMatchCase = bMatchWholeWord = false; ClearSearchResults(); }
+	SEARCH_INFO() { szSearchText[0] = 0; archiveNumber = -1;  bSearchFilterOn = false;  bMatchCase = bMatchWholeWord = false; ClearSearchResults(); }
   HWND hwndEdit;
   bool bMatchCase;
   bool bMatchWholeWord;
   bool bSearchFilterOn;
   DWORD archiveCount;
+  DWORD archiveNumber;
   int curLine, firstLine, lastLine, total, posInCur;
   char* find(CHAR* p);
   int calcCountIn(CHAR* p);

@@ -83,6 +83,7 @@ public:
         MESSAGE_HANDLER(WM_INPORT_TASK, OnImportTask);
         MESSAGE_HANDLER(WM_UPDATE_FILTER, onUpdateFilter)
         MESSAGE_HANDLER(WM_UPDATE_TREE, onUpdateTree)
+        MESSAGE_HANDLER(WM_NAVIGATE_TO_SEARCH, onNavigateToSearch)
         MESSAGE_HANDLER(WM_SHOW_NGS, onShowMsg)
         MESSAGE_HANDLER(WM_UPDATE_BACK_TRACE, onUpdateBackTrace)
 
@@ -148,6 +149,7 @@ public:
     LRESULT OnImportTask(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT onUpdateFilter(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT onUpdateTree(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+    LRESULT onNavigateToSearch(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT onShowMsg(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT onUpdateBackTrace(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
     LRESULT OnSyncViews(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -189,6 +191,7 @@ private:
     CString          m_importExportFile;
 
     void ShowSearchResult();
+    void NavigateToSearch();
     void StartLogging(bool reset);
     void ClearLog(bool bRestart, bool reset);
     void StopLogging(bool bClearArcive, bool closing = false);

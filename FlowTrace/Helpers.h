@@ -12,6 +12,7 @@ extern FLOW_NODE*  gSyncronizedNode;
 #define WM_UPDATE_BACK_TRACE           WM_USER + 1004
 #define WM_UPDATE_NC                   WM_USER + 1005
 #define WM_UPDATE_TREE                 WM_USER + 1006
+#define WM_NAVIGATE_TO_SEARCH          WM_USER + 1007
 static const int ICON_LEN = 16;
 static const int TEXT_MARGIN = 8;
 static const int INFO_TEXT_MARGIN = 4;
