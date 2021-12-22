@@ -126,8 +126,8 @@ BEGIN
         MENUITEM "Find First\tSift_Ctrl+F3",    ID_SEARCH_FIRST
         MENUITEM "Clear Search",                ID_SEARCH_CLEAR
         MENUITEM "Match case",                  ID_SEARCH_MATCH_CASE
-        MENUITEM "nMatch whole word",           ID_SEARCH_MATCH_WHOLE_WORD
-        MENUITEM "nFilter by search expression", ID_SEARCH_FILTER
+        MENUITEM "Match whole word",            ID_SEARCH_MATCH_WHOLE_WORD
+        MENUITEM "Filter by search expression", ID_SEARCH_FILTER
         MENUITEM SEPARATOR
         POPUP "Bookmarks"
         BEGIN
@@ -569,7 +569,6 @@ BEGIN
     ID_SEARCH_FIRST         "Find First\nFind First  (Sift_Ctrl+F3)"
     ID_SEARCH_MATCH_CASE    "Match case\nMatch case"
     ID_SEARCH_MATCH_WHOLE_WORD "Match whole word\nMatch whole word"
-    ID_SEARCH_FILTER        "Filter by search expression"
     ID_FILE_EXPORT_TRACES   "Export File\nExport File"
     ID_FILE_IMPORT_TRACES   "Import File\nImport File"
     ID_VIEW_DETAILES        "Set view detailes\nSet view detailes"
@@ -582,6 +581,7 @@ END
 STRINGTABLE
 BEGIN
     ID_VIEW_RESETLOG        "Reset Log\nReset Log  (Ctrl+R)"
+    ID_SEARCH_FILTER        "Filter by search expression\nFilter by search expression"
 END
 
 STRINGTABLE
