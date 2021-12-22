@@ -267,12 +267,24 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 void CMainFrame::RefreshLog(bool reset)
 {
     SearchRefresh(reset);
-    gArchive.getListedNodes()->updateList(reset, gSettings.GetFlowTracesHiden(), searchInfo.applySearchFilter());
+    gArchive.getListedNodes()->updateList(reset, gSettings.GetFlowTracesHiden(), searchInfo.bSearchFilterOn);
     m_tree.RefreshTree();
     m_list.RefreshList();
     if (reset) {
         PostMessage(WM_NAVIGATE_TO_SEARCH, 0, 0);
     }
+}
+
+LRESULT CMainFrame::OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+    if (searchInfo.bSearchFilterOn) {
+        RefreshLog(true);
+    }
+    else {
+        SearchRefresh(true);
+    }
+    m_list.SetFocus();
+    return 0;
 }
 
 LRESULT CMainFrame::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -737,20 +749,6 @@ LRESULT CMainFrame::OnSearchNavigate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
     return 0;
 }
 
-LRESULT CMainFrame::OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD /*wID*/ , HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    SearchRefresh(true);
-    m_list.SetFocus();
-    return 0;
-}
-
-LRESULT CMainFrame::OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-    SearchRefresh(true);
-    m_list.SetFocus();
-    return 0;
-}
-
 void CMainFrame::SearchRefresh(bool reset)
 {
     CHAR szText[256];
@@ -793,8 +791,8 @@ void CMainFrame::SearchRefresh(bool reset)
             if (!ListedNodes::isVisibleLog(pNode, gSettings.GetFlowTracesHiden()))
                 continue;
 
-            CHAR* p = m_list.getText(pNode);
             pNode->lineSearchPos = 0;
+            CHAR* p = m_list.getText(pNode);
             if (p[0])
             {
                 while (p = searchInfo.find(p))

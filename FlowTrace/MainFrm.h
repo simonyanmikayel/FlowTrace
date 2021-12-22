@@ -97,7 +97,7 @@ public:
         COMMAND_ID_HANDLER(ID_SEARCH_FIRST, OnSearchNavigate)
         COMMAND_ID_HANDLER(ID_SEARCH_LAST, OnSearchNavigate)
         COMMAND_ID_HANDLER(ID_SEARCH_REFRESH, OnSearchRefresh)
-        COMMAND_ID_HANDLER(ID_SEARCH_REFRESH_ON_EMTER, OnSearchRefreshOnEnter)
+        COMMAND_ID_HANDLER(ID_SEARCH_REFRESH_ON_EMTER, OnSearchRefresh)
         COMMAND_ID_HANDLER(ID_SEARCH_CLEAR, OnSearchClear)
         COMMAND_ID_HANDLER(ID_SEARCH_MATCH_CASE, OnSearchSettings)
         COMMAND_ID_HANDLER(ID_SEARCH_MATCH_WHOLE_WORD, OnSearchSettings)
@@ -168,7 +168,6 @@ public:
     LRESULT OnSearchFilter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchClear(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
     LRESULT OnSearchRefresh(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-    LRESULT OnSearchRefreshOnEnter(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 
     HWND getSearchEdotBox() { return m_searchedit.m_hWnd; }

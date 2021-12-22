@@ -20,7 +20,6 @@ struct SEARCH_INFO
   }
   size_t SearchTextSize() { return m_cbText; }
   const CHAR* SearchText() { return szSearchText; }
-  bool applySearchFilter() { return bSearchFilterOn && total > 0; }
 private:
   CHAR szSearchText[256];
   size_t m_cbText;
