@@ -159,28 +159,30 @@ void CSettings::RestoreWindPos(HWND hWnd)
 		MONITORINFO monInfo;
 		HMONITOR hMonitor = ::MonitorFromPoint(CPoint(x, y), MONITOR_DEFAULTTONEAREST);
 		monInfo.cbSize = sizeof(MONITORINFO);
+		RECT rcWork;
 		if (::GetMonitorInfo(hMonitor, &monInfo))
 		{
 			// Adjust for work area
 			x += monInfo.rcWork.left - monInfo.rcMonitor.left;
 			y += monInfo.rcWork.top - monInfo.rcMonitor.top;
-			// Ensure top left point is on screen
-			if (CRect(monInfo.rcWork).PtInRect(CPoint(x, y)) == FALSE)
-			{
-				x = monInfo.rcWork.left;
-				y = monInfo.rcWork.top;
-			}
+			rcWork = monInfo.rcWork;
 		}
 		else
 		{
-			RECT rcScreen;
-			SystemParametersInfo(SPI_GETWORKAREA, 0, &rcScreen, 0);
-
-			cx = min(rcScreen.right, (LONG)cx);
-			cy = min(rcScreen.bottom, (LONG)cy);
-			x = max(0L, min((LONG)x, rcScreen.right - cx));
-			y = max(0L, min((LONG)y, rcScreen.bottom - cy));
+			RECT rcScreenWork;
+			SystemParametersInfo(SPI_GETWORKAREA, 0, &rcScreenWork, 0);
+			rcWork = rcScreenWork;
 		}
+		// Ensure top left point is on screen
+		if (CRect(rcWork).PtInRect(CPoint(x, y)) == FALSE)
+		{
+			x = rcWork.left;
+			y = rcWork.top;
+		}
+		cx = min(rcWork.right, (LONG)cx);
+		cy = min(rcWork.bottom, (LONG)cy);
+		x = max(0L, min((LONG)x, rcWork.right - cx));
+		y = max(0L, min((LONG)y, rcWork.bottom - cy));
 
 		::SetWindowPos(hWnd, 0, x, y, cx, cy, SWP_NOZORDER);
 
