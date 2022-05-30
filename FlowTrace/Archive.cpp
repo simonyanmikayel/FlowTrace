@@ -568,7 +568,7 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC_BASE_DATA* pLogDat
     return pThreadNode->latestTrace;
 }
 
-int parceCollor(char** c)
+int parceCollor(unsigned char** c)
 {
 	int color = 0;
 	if (isdigit(**c))
@@ -616,8 +616,8 @@ LOG_NODE* Archive::addTrace(THREAD_NODE* pThreadNode, LOG_REC *pLogRec, int book
 	}
 	else
 	{
-		char last_char = trace[cb_trace];
-		trace[cb_trace] = 0;
+		//char last_char = trace[cb_trace];
+		//trace[cb_trace] = 0;
 
 #define ADD_TRACE(cb_trace, trace) \
 { \
@@ -628,20 +628,21 @@ else \
 } 
 		int old_color = pLogData->color;
 		char *start = trace;
-		char *end = trace;
-		while (*end) {
+		unsigned char *end = (unsigned char*)trace;
+		unsigned char* trace_end = (unsigned char*)trace + cb_trace;
+		while (end < trace_end) {
 			while (*(end) >= ' ')
 				end++;
 			if (*end == '\n' || *end == '\r') {
 				old_color = pLogData->color;
-				ADD_TRACE(end - start + 1, start);
+				ADD_TRACE((char*)end - start + 1, start);
 				while (*end == '\n' || *end == '\r')
 					end++;
-				start = end;
+				start = (char*)end;
 			}
 			else if (*end == '\033' && *(end + 1) == '[') {
 				int c1 = 0, c2 = 0, c3 = 0;
-				char* colorPos = end;
+				unsigned char* colorPos = end;
 				end += 2;
 				c1 = parceCollor(&end);
 				if (*end == ';') {
@@ -659,33 +660,36 @@ else \
 					if (!pLogData->color) pLogData->color = c2;
 					if (!pLogData->color) pLogData->color = c3;
 				}
-				if (colorPos > start) {
-					ADD_TRACE(colorPos - start, start);
+				if ((char*)colorPos > start) {
+					ADD_TRACE((char*)colorPos - start, start);
 				}
 				old_color = pLogData->color;
-				start = end;
+				start = (char*)end;
 			}
-			else if (*end) {
-				if (*end < ' ') {
-					if (*end == '\t') {
-						*end = ' ';
-					}
-					else {
-						*end = '?';
-					}
+			else {
+				if (*end == '\t') {
+					*end = ' ';
+				}
+				else {
+					if ((char*)end > start)
+						ADD_TRACE((char*)end - start, start);
+					char buf[32];
+					int n = sprintf_s(buf, "[%02X]", *end);
+					ADD_TRACE(n, buf);
+					start = (char*)end + 1;
 				}
 				end++;
 			}
 		}
-		if (end > start)
+		if ((char*)end > start)
 		{
-			ADD_TRACE(end - start, start);
+			ADD_TRACE((char*)end - start, start);
 		}
 		else if (old_color != pLogData->color) {
-			ADD_TRACE(0, end);
+			ADD_TRACE(0, (char*)end);
 		}
 
-		trace[cb_trace] = last_char;
+		//trace[cb_trace] = last_char;
 	}
 	return pNode;
 
