@@ -153,7 +153,6 @@ private:
 #define PROP_STR(name) RegExString m_##name; const CHAR* Get##name() {return m_##name.get();} void Set##name(const CHAR* val){m_##name.set(val);}
 #define PROP_NUM(type, name) RegExNum<type> m_##name; type Get##name(){return m_##name.get();} void Set##name( type val){m_##name.set(val);}
 #define PROP_GET(type, name) ReadOnly<type> m_##name; type Get##name(){return m_##name.get();}
-#define PROP_GET_SET(type, name) ReadWrite<type> m_##name; type Get##name(){return m_##name.get();} void Set##name( type val){m_##name.set(val);}
 
 //#define DECL_PROP(type, name) public: type Get##name () { return m_##name ;} void Set##name ( type ); private: type m_##name
 //#define DECL_STR_PROP(type, name, cb) public: const type* Get##name () { return m_##name ;} void Set##name ( const type* ); private: type m_##name[cb];

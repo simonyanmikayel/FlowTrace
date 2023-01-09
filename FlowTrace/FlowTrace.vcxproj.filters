@@ -218,16 +218,16 @@
     <ClCompile Include="DlgFilters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogcatPsCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LogcatLogSupplier.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DlgComPort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LogReceiverSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogcatPsCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogcatLogSupplier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LogCommand.cpp">
